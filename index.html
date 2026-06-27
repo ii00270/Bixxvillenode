@@ -1641,26 +1641,26 @@ async function doLogin() {
   initSupabase();
   try {
     // Verify password with Supabase Auth.
-    const { error: pwErr } = await sb.auth.signInWithPassword({ email, password });
-    if (pwErr) {
+    const { data: signInData, error: pwErr } = await sb.auth.signInWithPassword({ email, password });
+    if (pwErr || !signInData?.user) {
       err.textContent = 'Email or password not recognised.';
       err.classList.add('show'); return;
     }
-    // Password correct — sign out the session; the OTP is the real key.
-    await sb.auth.signOut();
 
-    // Send the 6-digit code.
-    const { error: otpErr } = await sb.auth.signInWithOtp({
-      email,
-      options: { shouldCreateUser: false },
-    });
-    if (otpErr) {
-      err.textContent = 'Could not send the code. Try again in a moment.';
-      err.classList.add('show'); return;
+    // Password confirmed — look up operator record from the database.
+    const { data: opRows, error: opErr } = await sb.rpc('get_operator_by_email', { p_email: email });
+    const op = Array.isArray(opRows) ? opRows[0] : opRows;
+
+    if (opErr || !op) {
+      err.textContent = 'Account verified but not found in the operator registry.';
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
     }
 
-    authEmail = email;
-    showOtpPanel();
+    ACCESS[op.access_key] = { peer: op.peer_name, role: op.role, lane: op.lane, region: op.region };
+    const resolvedRole = ROLES[op.role] || ROLES['exec'];
+    completeLogin({ peer: op.peer_name, role: op.role }, op.access_key, resolvedRole);
   } catch(e) {
     err.textContent = 'Connection error. Check your internet and try again.';
     err.classList.add('show');

@@ -1689,11 +1689,11 @@ async function exportRecord(memberId) {
       lw(0.2); dc(30,30,34); doc.rect(M, y, CW, 7, 'S');
       bg(...c.dot); doc.rect(M+6, y+2, 4, 4, 'F');
       tc(242,240,236); fw('normal'); fs(8); doc.text(s.title || 'Untitled', M+13, y+4.5);
-      tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+80, y+4.5);
-      tc(...c.dot); fw('bold'); fs(8); doc.text(`${s.log_size||0} LOG`, W-M-28, y+4.5);
-      bg(...c.bg); doc.rect(W-M-22, y+1.5, 18, 4, 'F');
-      dc(...c.bd); lw(0.3); doc.rect(W-M-22, y+1.5, 18, 4, 'S');
-      tc(...c.val); fw('bold'); fs(6); doc.text(label, W-M-13, y+4.5, { align:'center' });
+      tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+75, y+4.5);
+      tc(...c.dot); fw('bold'); fs(8); doc.text(`${s.log_size||0}L`, W-M-32, y+4.5);
+      bg(...c.bg); doc.rect(W-M-26, y+1.5, 22, 4, 'F');
+      dc(...c.bd); lw(0.3); doc.rect(W-M-26, y+1.5, 22, 4, 'S');
+      tc(...c.val); fw('bold'); fs(6); doc.text(label, W-M-15, y+4.5, { align:'center' });
       y += 7;
 
       // Expanded card

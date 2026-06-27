@@ -9,6 +9,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1366,8 +1367,7 @@ async function loadRecord() {
 
 function openMemberRecord(memberId) {
   openOverlay('Work Record', async (body) => {
-    const { data: opRows } = await sb.rpc('get_operator_by_id', { p_id: memberId });
-const op = Array.isArray(opRows) ? opRows[0] : opRows;
+    const { data: op } = await sb.from('operators').select('*').eq('id', memberId).single();
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
     body.innerHTML = `
@@ -1450,227 +1450,199 @@ function openSettledProject(id) {
 }
 
 async function exportRecord(memberId) {
-  const { data: op } = await sb.from('operators').select('*').eq('id', memberId).single();
+  const { data: opRows } = await sb.rpc('get_operator_by_id', { p_id: memberId });
+  const op = Array.isArray(opRows) ? opRows[0] : opRows;
   if (!op) { toast('Could not load record.'); return; }
 
-  // Fetch all settled projects and their scopes
+  if (!window.jspdf) { toast('PDF library not loaded. Try again.'); return; }
+  toast('Generating PDF…');
+
   const { data: projects } = await sb
     .from('relation_submissions')
     .select('*, bids(*)')
     .eq('status', 'settled')
     .order('settled_at', { ascending: false });
 
-  const settled = projects || [];
-  const cycle   = getActiveCycle();
-  const now     = new Date();
-
-  const dateStr  = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+  const settled   = projects || [];
+  const cycle     = getActiveCycle();
+  const now       = new Date();
+  const dateStr   = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
   const totalLogs = op.total_logs || 0;
   const repScore  = op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—';
   const opTier    = tier(totalLogs);
+  const RATES     = { Operator:100, Architect:85, Wrangler:65, Apprentice:39 };
+  const rate      = RATES[opTier] || 39;
 
-  // Tier rate mapping
-  const RATES = { Operator: 100, Architect: 85, Wrangler: 65, Apprentice: 39 };
-  const rate  = RATES[opTier] || 65;
-  const hours = totalLogs;
-  const value = (totalLogs * rate).toLocaleString('en-US', { style:'currency', currency:'USD', minimumFractionDigits:0 });
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const W = 210, H = 297, M = 20, CW = W - M * 2;
+  let y = 0;
 
-  // Build scope breakdown HTML
-  const scopeBreakdown = settled.length ? settled.map(p => {
-    const scopes    = p.bids || [];
-    const projLogs  = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
-    const projDate  = p.settled_at
-      ? new Date(p.settled_at).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' })
+  const bg  = (r,g,b) => doc.setFillColor(r,g,b);
+  const tc  = (r,g,b) => doc.setTextColor(r,g,b);
+  const dc  = (r,g,b) => doc.setDrawColor(r,g,b);
+  const fw  = (f)     => doc.setFont('helvetica', f);
+  const fs  = (s)     => doc.setFontSize(s);
+  const lw  = (w)     => doc.setLineWidth(w);
+
+  // Background
+  bg(9,9,11); doc.rect(0,0,W,H,'F');
+
+  // ── HEADER ──
+  y = 22;
+  tc(140,240,96); fw('bold'); fs(7);
+  doc.text('@BIXXVILLE', M, y);
+  tc(82,80,78); fw('normal'); fs(6.5);
+  doc.text('Land of Geb, LLC  ·  St. Croix  ·  USVI', W-M, y, { align:'right' });
+
+  y = 36;
+  tc(82,80,78); fw('normal'); fs(7);
+  doc.text('VERIFIED WORK RECORD', M, y);
+
+  y = 44;
+  tc(242,240,236); fw('bold'); fs(20);
+  doc.text(op.peer_name || '—', M, y);
+
+  y = 51;
+  tc(82,80,78); fw('normal'); fs(6.5);
+  doc.text(`Generated ${dateStr}  ·  Cycle ${cycle.num}  ·  Day ${cycle.day}  ·  ${cycle.left} days remaining`, M, y);
+
+  // Orange rule
+  y = 56; dc(232,136,74); lw(0.8);
+  doc.line(M, y, M+14, y);
+
+  // ── STAT GRID ──
+  y = 62;
+  const statW = CW / 4, statH = 20;
+  const stats = [
+    { val: String(totalLogs), lbl:'TOTAL LOGs', green:true },
+    { val: repScore,           lbl:'REP SCORE',  green:false },
+    { val: opTier,             lbl:'TIER',        green:false },
+    { val: String(op.streak||0), lbl:'STREAK',   green:false },
+  ];
+  dc(30,30,34); lw(0.2);
+  doc.rect(M, y, CW, statH, 'S');
+  stats.forEach((s,i) => {
+    const x = M + i * statW;
+    if (i > 0) doc.line(x, y, x, y+statH);
+    s.green ? tc(140,240,96) : tc(242,240,236);
+    fw('bold'); fs(13);
+    doc.text(s.val, x+statW/2, y+10, { align:'center' });
+    tc(82,80,78); fw('normal'); fs(5.5);
+    doc.text(s.lbl, x+statW/2, y+16, { align:'center' });
+  });
+
+  // ── TIME CALC ──
+  y += statH + 8;
+  dc(30,30,34); lw(0.2);
+  doc.rect(M, y, CW, 24, 'S');
+  dc(140,240,96); lw(1);
+  doc.line(M, y, M, y+24);
+  lw(0.2); dc(30,30,34);
+
+  tc(82,80,78); fw('normal'); fs(5.5);
+  doc.text('TIME & VALUE CALCULATION', M+4, y+5);
+
+  tc(168,166,162); fw('normal'); fs(8);
+  doc.text(`${totalLogs} LOG  ×  1 hour`, M+4, y+11);
+  tc(140,240,96); fw('bold');
+  doc.text(`${totalLogs} hours confirmed`, W-M-2, y+11, { align:'right' });
+
+  tc(168,166,162); fw('normal');
+  doc.text(`At $${rate}/LOG — ${opTier} rate`, M+4, y+17);
+  tc(242,240,236); fw('bold');
+  doc.text(`$${(totalLogs*rate).toLocaleString()} value delivered`, W-M-2, y+17, { align:'right' });
+
+  tc(168,166,162); fw('normal');
+  doc.text('Structural reserve (25%)', M+4, y+23);
+  tc(82,80,78);
+  doc.text(`$${(totalLogs*rate*0.25).toLocaleString()} reserved`, W-M-2, y+23, { align:'right' });
+
+  // ── SCOPE BREAKDOWN ──
+  y += 32;
+  tc(82,80,78); fw('normal'); fs(5.5);
+  doc.text('SCOPE BREAKDOWN', M, y);
+  y += 5;
+
+  for (const p of settled) {
+    const scopes   = p.bids || [];
+    const projLogs = scopes.reduce((n,s) => n+(s.log_size||0), 0);
+    const projDate = p.settled_at
+      ? new Date(p.settled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
       : '—';
-    return `
-    <div class="project-block">
-      <div class="project-head">
-        <span class="project-name">${esc(p.relation_name || p.relation_code || '—')}</span>
-        <span class="project-meta">C${p.cycle_number || '—'} · ${projDate} · ${projLogs} LOG</span>
-      </div>
-      ${scopes.map(s => `
-      <div class="scope-line">
-        <span class="scope-dot">●</span>
-        <span class="scope-title">${esc(s.title || 'Untitled')}</span>
-        <span class="scope-assignee">${esc(s.assignee || '—')}</span>
-        <span class="scope-logs">${s.log_size || 0} LOG</span>
-        <span class="scope-status">confirmed</span>
-      </div>`).join('')}
-    </div>`;
-  }).join('') : '<div style="color:#52504E;font-size:11px">No settled projects on record.</div>';
+    const blockH = 7 + scopes.length * 6;
 
-  const win = window.open('', '_blank');
-  win.document.write(`<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Verified Work Record · ${esc(op.peer_name)}</title>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-  *{box-sizing:border-box;margin:0;padding:0;}
-  body{
-    background:#09090B;color:#F2F0EC;
-    font-family:'IBM Plex Mono',monospace;
-    padding:48px 40px;max-width:680px;margin:0 auto;
-    -webkit-print-color-adjust:exact;print-color-adjust:exact;
+    // Auto page break
+    if (y + blockH > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+
+    bg(17,17,19); doc.rect(M, y, CW, 7, 'F');
+    dc(30,30,34); lw(0.2); doc.rect(M, y, CW, 7, 'S');
+    tc(242,240,236); fw('bold'); fs(8);
+    doc.text(p.relation_name || p.relation_code || '—', M+3, y+4.5);
+    tc(82,80,78); fw('normal'); fs(6.5);
+    doc.text(`C${p.cycle_number||'—'}  ·  ${projDate}  ·  ${projLogs} LOG`, W-M-2, y+4.5, { align:'right' });
+    y += 7;
+
+    for (const s of scopes) {
+      dc(17,17,19); lw(0.1); doc.rect(M, y, CW, 6, 'S');
+      tc(140,240,96); fw('bold'); fs(7);
+      doc.text('●', M+3, y+4);
+      tc(242,240,236); fw('normal'); fs(8);
+      doc.text(s.title || 'Untitled', M+8, y+4);
+      tc(82,80,78); fs(7);
+      doc.text(s.assignee || '—', M+70, y+4);
+      tc(140,240,96); fw('bold'); fs(8);
+      doc.text(`${s.log_size||0} LOG`, W-M-22, y+4);
+      tc(82,80,78); fw('normal'); fs(6);
+      doc.text('confirmed', W-M-2, y+4, { align:'right' });
+      y += 6;
+    }
+    y += 4;
   }
 
-  /* Header */
-  .doc-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:32px;}
-  .doc-mark{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:#8CF060;}
-  .doc-org{font-size:9px;color:#52504E;letter-spacing:.14em;text-transform:uppercase;text-align:right;line-height:1.8;}
-
-  .peer-name{font-family:'Inter',sans-serif;font-size:28px;font-weight:700;color:#F2F0EC;margin-bottom:4px;}
-  .record-title{font-size:9px;letter-spacing:.22em;text-transform:uppercase;color:#52504E;margin-bottom:6px;}
-  .generated{font-size:9px;color:#52504E;letter-spacing:.1em;margin-bottom:24px;}
-  .generated span{color:#A8A6A2;}
-
-  .rule{width:100%;height:1px;background:#1E1E22;margin-bottom:28px;}
-  .orange-rule{width:32px;height:2px;background:#E8884A;margin-bottom:28px;}
-
-  /* Stat grid */
-  .stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;border:1px solid #1E1E22;margin-bottom:28px;}
-  .stat{padding:16px;border-right:1px solid #1E1E22;}
-  .stat:last-child{border-right:none;}
-  .stat-val{font-size:20px;font-weight:600;color:#F2F0EC;}
-  .stat-val.g{color:#8CF060;}
-  .stat-lbl{font-size:7px;letter-spacing:.18em;text-transform:uppercase;color:#52504E;margin-top:5px;}
-
-  /* Time calc */
-  .calc-block{
-    border:1px solid #1E1E22;border-left:2px solid #8CF060;
-    padding:18px 20px;margin-bottom:28px;
+  if (!settled.length) {
+    tc(82,80,78); fw('normal'); fs(8);
+    doc.text('No settled projects on record.', M, y+5);
+    y += 12;
   }
-  .calc-title{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#52504E;margin-bottom:12px;}
-  .calc-line{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:6px 0;border-bottom:1px solid #111113;
+
+  // ── INFO ROWS ──
+  y += 3;
+  const infoRows = [
+    ['LANE',         op.lane        || '—'],
+    ['REGION',       op.region      || '—'],
+    ['ACCESS KEY',   op.access_key  || '—'],
+    ['ACTIVE SINCE', 'Cycle 1 · Genesis Feb 27 2025'],
+  ];
+  dc(30,30,34); lw(0.2);
+  for (const [lbl, val] of infoRows) {
+    if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+    doc.line(M, y, W-M, y);
+    tc(82,80,78); fw('normal'); fs(6.5);
+    doc.text(lbl, M, y+5);
+    tc(168,166,162); fs(8);
+    doc.text(val, W-M, y+5, { align:'right' });
+    y += 9;
   }
-  .calc-line:last-child{border-bottom:none;}
-  .calc-label{font-size:10px;color:#A8A6A2;letter-spacing:.06em;}
-  .calc-value{font-size:13px;font-weight:600;color:#F2F0EC;}
-  .calc-value.g{color:#8CF060;}
 
-  /* Scope breakdown */
-  .breakdown-title{font-size:8px;letter-spacing:.2em;text-transform:uppercase;color:#52504E;margin-bottom:16px;}
-  .project-block{margin-bottom:20px;border:1px solid #1E1E22;}
-  .project-head{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:10px 14px;background:#111113;border-bottom:1px solid #1E1E22;
-  }
-  .project-name{font-size:12px;font-weight:600;color:#F2F0EC;}
-  .project-meta{font-size:9px;color:#52504E;letter-spacing:.08em;}
-  .scope-line{
-    display:grid;
-    grid-template-columns:16px 1fr auto auto auto;
-    gap:8px;align-items:center;
-    padding:10px 14px;border-bottom:1px solid #111113;
-  }
-  .scope-line:last-child{border-bottom:none;}
-  .scope-dot{color:#8CF060;font-size:8px;}
-  .scope-title{font-size:11px;color:#F2F0EC;}
-  .scope-assignee{font-size:10px;color:#52504E;}
-  .scope-logs{font-size:11px;font-weight:600;color:#8CF060;white-space:nowrap;}
-  .scope-status{font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:#52504E;}
+  // ── FOOTER ──
+  y = H - 20;
+  dc(30,30,34); lw(0.2); doc.line(M, y, W-M, y);
+  y += 5;
+  tc(140,240,96); fw('bold'); fs(6);
+  doc.text('BIXXVILLE OS v1.1  ·  CANONICAL', M, y);
+  tc(82,80,78); fw('normal'); fs(5.5);
+  doc.text('This record is generated by the Bixxville operating system and is not self-reported.', M, y+4);
+  doc.text('Produced from confirmed settlements on the ledger. Each LOG = 1 confirmed hour of qualified work.', M, y+8);
+  doc.text('Christiansted, St. Croix, USVI  ·  Genesis Feb 27 2025', M, y+12);
+  tc(140,240,96); fw('bold');
+  doc.text('Scoped  ·  Verified  ·  Settled', W-M, y+12, { align:'right' });
 
-  /* Info rows */
-  .info-row{
-    display:flex;justify-content:space-between;align-items:center;
-    padding:10px 0;border-bottom:1px solid #1E1E22;
-  }
-  .info-lbl{font-size:8px;letter-spacing:.16em;text-transform:uppercase;color:#52504E;}
-  .info-val{font-size:11px;color:#A8A6A2;}
-
-  /* Footer */
-  .footer{
-    margin-top:36px;padding-top:20px;border-top:1px solid #1E1E22;
-    font-size:8px;color:#52504E;letter-spacing:.1em;line-height:2.2;
-    text-transform:uppercase;
-  }
-  .footer-mark{color:#8CF060;font-weight:600;}
-
-  @media print{
-    body{padding:32px;}
-    .stat-grid{page-break-inside:avoid;}
-    .project-block{page-break-inside:avoid;}
-  }
-</style>
-</head>
-<body>
-
-<div class="doc-head">
-  <div class="doc-mark">@Bixxville</div>
-  <div class="doc-org">Land of Geb, LLC<br>Christiansted · St. Croix · USVI</div>
-</div>
-
-<div class="record-title">Verified Work Record</div>
-<div class="peer-name">${esc(op.peer_name)}</div>
-<div class="generated">
-  Generated <span>${dateStr}</span>
-  &nbsp;·&nbsp; Cycle <span>${cycle.num}</span>
-  &nbsp;·&nbsp; Day <span>${cycle.day}</span>
-  &nbsp;·&nbsp; <span>${cycle.left} days remaining</span>
-</div>
-<div class="orange-rule"></div>
-
-<div class="stat-grid">
-  <div class="stat">
-    <div class="stat-val g">${totalLogs}</div>
-    <div class="stat-lbl">Total LOGs</div>
-  </div>
-  <div class="stat">
-    <div class="stat-val">${repScore}</div>
-    <div class="stat-lbl">Rep Score</div>
-  </div>
-  <div class="stat">
-    <div class="stat-val">${opTier}</div>
-    <div class="stat-lbl">Tier</div>
-  </div>
-  <div class="stat">
-    <div class="stat-val">${op.streak || 0}</div>
-    <div class="stat-lbl">Streak</div>
-  </div>
-</div>
-
-<div class="calc-block">
-  <div class="calc-title">Time &amp; Value Calculation</div>
-  <div class="calc-line">
-    <span class="calc-label">${totalLogs} LOG &times; 1 hour</span>
-    <span class="calc-value g">${hours} hours confirmed</span>
-  </div>
-  <div class="calc-line">
-    <span class="calc-label">At $${rate}/LOG &mdash; ${opTier} rate</span>
-    <span class="calc-value">${value} value delivered</span>
-  </div>
-  <div class="calc-line">
-    <span class="calc-label">Reserve (25% off-the-top)</span>
-    <span class="calc-value">${(totalLogs * rate * 0.25).toLocaleString('en-US',{style:'currency',currency:'USD',minimumFractionDigits:0})} structural reserve</span>
-  </div>
-</div>
-
-<div class="breakdown-title">Scope Breakdown</div>
-${scopeBreakdown}
-
-<div style="margin-top:24px">
-  <div class="info-row"><span class="info-lbl">Lane</span><span class="info-val">${esc(op.lane || '—')}</span></div>
-  <div class="info-row"><span class="info-lbl">Region</span><span class="info-val">${esc(op.region || '—')}</span></div>
-  <div class="info-row"><span class="info-lbl">Access key</span><span class="info-val">${esc(op.access_key || '—')}</span></div>
-  <div class="info-row"><span class="info-lbl">Active since</span><span class="info-val">Cycle 1 · Genesis Feb 27 2025</span></div>
-</div>
-
-<div class="footer">
-  <span class="footer-mark">Bixxville OS v1.1 · Canonical</span><br>
-  This record is generated by the Bixxville operating system and is not self-reported.<br>
-  It is produced from confirmed settlements on the ledger. Each LOG represents one confirmed hour<br>
-  of qualified work verified by the four-stamp settlement protocol.<br>
-  Christiansted, St. Croix, USVI &nbsp;·&nbsp; Genesis Feb 27 2025 &nbsp;·&nbsp; <span class="footer-mark">Scoped · Verified · Settled</span>
-</div>
-
-</body>
-</html>`);
-  win.document.close();
+  const filename = `BixxvilleWorkRecord_${(op.peer_name||'record').replace(/\s+/g,'_')}_C${cycle.num}.pdf`;
+  doc.save(filename);
+  toast('Work Record downloaded.');
 }
+
 
 // ── UTILITIES ──
 function tier(logs) {

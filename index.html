@@ -583,6 +583,26 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 .surface::-webkit-scrollbar-track,.ov-body::-webkit-scrollbar-track{background:transparent;}
 .surface::-webkit-scrollbar-thumb,.ov-body::-webkit-scrollbar-thumb{background:var(--line2);}
 
+/* ── WORK RECORD SCOPE BREAKDOWN ── */
+.wr-project-head{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
+.wr-project-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream);}
+.wr-project-meta{font-family:var(--mono);font-size:9px;color:var(--grey);letter-spacing:.08em;}
+.wr-scope-row{padding:10px 14px 10px 24px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;}
+.wr-scope-row:active{background:var(--surface);}
+.wr-scope-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.wr-scope-title{font-family:var(--sans);font-size:12px;color:var(--cream);flex:1;}
+.wr-scope-assignee{font-family:var(--mono);font-size:10px;color:var(--grey);}
+.wr-scope-logs{font-family:var(--mono);font-size:12px;font-weight:600;white-space:nowrap;}
+.wr-scope-badge{font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:2px 7px;border-radius:2px;white-space:nowrap;}
+.wr-scope-card{margin:0 14px 10px 24px;display:none;}
+.wr-scope-card.open{display:block;}
+.wr-scope-card-inner{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px;border-radius:4px;}
+.wr-card-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;margin-bottom:3px;}
+.wr-card-val{font-family:var(--mono);font-size:13px;font-weight:600;}
+.wr-green-row{border-left:3px solid #3B6D11;} .wr-green-dot{background:#639922;} .wr-green-logs{color:#639922;} .wr-green-badge{color:#27500A;background:#C0DD97;} .wr-green-card{border:1px solid #C0DD97;} .wr-green-inner{background:#EAF3DE;} .wr-green-lbl{color:#3B6D11;} .wr-green-val{color:#27500A;}
+.wr-orange-row{border-left:3px solid #854F0B;} .wr-orange-dot{background:#BA7517;} .wr-orange-logs{color:#BA7517;} .wr-orange-badge{color:#633806;background:#FAC775;} .wr-orange-card{border:1px solid #FAC775;} .wr-orange-inner{background:#FAEEDA;} .wr-orange-lbl{color:#854F0B;} .wr-orange-val{color:#633806;}
+.wr-red-row{border-left:3px solid #A32D2D;} .wr-red-dot{background:#E24B4A;} .wr-red-logs{color:#E24B4A;} .wr-red-badge{color:#791F1F;background:#F7C1C1;} .wr-red-card{border:1px solid #F7C1C1;} .wr-red-inner{background:#FCEBEB;} .wr-red-lbl{color:#A32D2D;} .wr-red-val{color:#791F1F;}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 </style>
@@ -1365,39 +1385,95 @@ async function loadRecord() {
   }
 }
 
+// ── SCOPE COLOR HELPER ──
+function scopeColor(status) {
+  if (status === 'disputed') return 'red';
+  if (status === 'confirmed') return 'green';
+  return 'orange'; // assigned, delivered, in-progress
+}
+
+function scopeStatusLabel(status) {
+  if (status === 'confirmed') return 'confirmed';
+  if (status === 'delivered') return 'delivered';
+  if (status === 'disputed')  return 'disputed';
+  return 'in progress';
+}
+
+function toggleScope(id) {
+  const card = document.getElementById('sc-card-' + id);
+  if (card) card.classList.toggle('open');
+}
+
+function buildScopeRow(s, idx) {
+  const color  = scopeColor(s.status);
+  const label  = scopeStatusLabel(s.status);
+  const sid    = 'scope-' + idx;
+  return `
+    <div class="wr-scope-row wr-${color}-row" onclick="toggleScope('${sid}')">
+      <div class="wr-scope-dot wr-${color}-dot"></div>
+      <div class="wr-scope-title">${esc(s.title || 'Untitled')}</div>
+      <div class="wr-scope-assignee">${esc(s.assignee || '—')}</div>
+      <div class="wr-scope-logs wr-${color}-logs">${s.log_size || 0} LOG</div>
+      <div class="wr-scope-badge wr-${color}-badge">${label}</div>
+    </div>
+    <div class="wr-scope-card wr-${color}-card" id="sc-card-${sid}">
+      <div class="wr-scope-card-inner wr-${color}-inner">
+        <div><div class="wr-card-lbl wr-${color}-lbl">Assignee</div><div class="wr-card-val wr-${color}-val">${esc(s.assignee || '—')}</div></div>
+        <div><div class="wr-card-lbl wr-${color}-lbl">LOGs</div><div class="wr-card-val wr-${color}-val">${s.log_size || 0} confirmed</div></div>
+        <div><div class="wr-card-lbl wr-${color}-lbl">Status</div><div class="wr-card-val wr-${color}-val">${label}</div></div>
+        <div><div class="wr-card-lbl wr-${color}-lbl">Settled</div><div class="wr-card-val wr-${color}-val">C${s.cycle_number || '—'}</div></div>
+      </div>
+    </div>`;
+}
+
 function openMemberRecord(memberId) {
   openOverlay('Work Record', async (body) => {
     const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
     const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
+    // Fetch settled projects and scopes
+    const { data: projects } = await sb
+      .from('relation_submissions')
+      .select('*, bids(*)')
+      .eq('status', 'settled')
+      .order('settled_at', { ascending: false });
+
+    const settled = projects || [];
+    let scopeIdx  = 0;
+
+    const breakdown = settled.length ? settled.map(p => {
+      const scopes   = p.bids || [];
+      const projLogs = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
+      const projDate = fmtDate(p.settled_at);
+      const rows = scopes.map(s => buildScopeRow(s, scopeIdx++)).join('');
+      return `
+        <div style="border:1px solid var(--line);margin-bottom:12px;">
+          <div class="wr-project-head">
+            <div class="wr-project-name">${esc(p.relation_name || p.relation_code || '—')}</div>
+            <div class="wr-project-meta">C${p.cycle_number||'—'} · ${projDate} · ${projLogs} LOG</div>
+          </div>
+          ${rows}
+        </div>`;
+    }).join('') : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No settled projects yet.</div></div>';
+
     body.innerHTML = `
       <div class="stat-grid">
-        <div class="stat-cell">
-          <div class="stat-val green">${op.total_logs || 0}</div>
-          <div class="stat-lbl">Total LOGs</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div>
-          <div class="stat-lbl">Rep Score</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-val">${tier(op.total_logs)}</div>
-          <div class="stat-lbl">Tier</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-val">${op.streak || 0}</div>
-          <div class="stat-lbl">Streak</div>
-        </div>
+        <div class="stat-cell"><div class="stat-val green">${op.total_logs || 0}</div><div class="stat-lbl">Total LOGs</div></div>
+        <div class="stat-cell"><div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div><div class="stat-lbl">Rep Score</div></div>
+        <div class="stat-cell"><div class="stat-val">${tier(op.total_logs)}</div><div class="stat-lbl">Tier</div></div>
+        <div class="stat-cell"><div class="stat-val">${op.streak || 0}</div><div class="stat-lbl">Streak</div></div>
       </div>
       <div class="form-block">
         <div class="form-lbl">Peer</div>
         <div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream)">${esc(op.peer_name)}</div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:4px">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
       </div>
+      <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
+      <div style="padding:12px 18px">${breakdown}</div>
       <div class="export-row">
         <div class="export-lbl">Verified Work Record</div>
-        <button class="export-btn" onclick="exportRecord('${memberId}')">Export</button>
+        <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
       </div>`;
   });
 }
@@ -1571,9 +1647,7 @@ async function exportRecord(memberId) {
     const projDate = p.settled_at
       ? new Date(p.settled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
       : '—';
-    const blockH = 7 + scopes.length * 6;
-
-    // Auto page break
+    const blockH = 7 + scopes.length * (7 + 22) + 6;
     if (y + blockH > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
 
     bg(17,17,19); doc.rect(M, y, CW, 7, 'F');
@@ -1584,21 +1658,40 @@ async function exportRecord(memberId) {
     doc.text(`C${p.cycle_number||'—'}  ·  ${projDate}  ·  ${projLogs} LOG`, W-M-2, y+4.5, { align:'right' });
     y += 7;
 
+    const PDF_COLORS = {
+      green:  { dot:[99,153,34],  lb:[59,109,17],  bg:[234,243,222], bd:[192,221,151], lbl:[59,109,17],  val:[39,80,10]  },
+      orange: { dot:[186,117,23], lb:[133,79,11],  bg:[250,238,218], bd:[250,199,117], lbl:[133,79,11], val:[99,56,6]   },
+      red:    { dot:[226,75,74],  lb:[163,45,45],  bg:[252,235,235], bd:[247,193,193], lbl:[163,45,45], val:[121,31,31] },
+    };
+
     for (const s of scopes) {
-      dc(17,17,19); lw(0.1); doc.rect(M, y, CW, 6, 'S');
-      tc(140,240,96); fw('bold'); fs(7);
-      doc.text('-', M+3, y+4);
-      tc(242,240,236); fw('normal'); fs(8);
-      doc.text(s.title || 'Untitled', M+8, y+4);
-      tc(82,80,78); fs(7);
-      doc.text(s.assignee || '—', M+70, y+4);
-      tc(140,240,96); fw('bold'); fs(8);
-      doc.text(`${s.log_size||0} LOG`, W-M-22, y+4);
-      tc(82,80,78); fw('normal'); fs(6);
-      doc.text('confirmed', W-M-2, y+4, { align:'right' });
-      y += 6;
+      const c     = PDF_COLORS[scopeColor(s.status)];
+      const label = scopeStatusLabel(s.status);
+
+      // Scope row
+      dc(...c.lb); lw(1); doc.line(M, y, M, y+7);
+      lw(0.2); dc(30,30,34); doc.rect(M, y, CW, 7, 'S');
+      bg(...c.dot); doc.circle(M+8, y+3.5, 2, 'F');
+      tc(242,240,236); fw('normal'); fs(8); doc.text(s.title || 'Untitled', M+13, y+4.5);
+      tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+80, y+4.5);
+      tc(...c.dot); fw('bold'); fs(8); doc.text(`${s.log_size||0} LOG`, W-M-28, y+4.5);
+      bg(...c.bg); doc.roundedRect(W-M-22, y+1.5, 18, 4, 1, 1, 'F');
+      tc(...c.val); fw('bold'); fs(6); doc.text(label, W-M-13, y+4.5, { align:'center' });
+      y += 7;
+
+      // Expanded card
+      bg(...c.bg); doc.rect(M, y, CW, 22, 'F');
+      dc(...c.bd); lw(0.5); doc.rect(M, y, CW, 22, 'S');
+      const half = CW / 2;
+      [['Assignee', s.assignee||'—'], ['LOGs', `${s.log_size||0} confirmed`], ['Status', label], ['Cycle', `C${p.cycle_number||'—'}`]].forEach(([l,v],i) => {
+        const cx = M + (i%2)*half + 4;
+        const cy = y + (i < 2 ? 6 : 15);
+        tc(...c.lbl); fw('normal'); fs(6); doc.text(l.toUpperCase(), cx, cy);
+        tc(...c.val); fw('bold'); fs(9); doc.text(v, cx, cy+5);
+      });
+      y += 25;
     }
-    y += 4;
+    y += 5;
   }
 
   if (!settled.length) {

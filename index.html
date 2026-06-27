@@ -1366,7 +1366,8 @@ async function loadRecord() {
 
 function openMemberRecord(memberId) {
   openOverlay('Work Record', async (body) => {
-    const { data: op } = await sb.from('operators').select('*').eq('id', memberId).single();
+    const { data: opRows } = await sb.rpc('get_operator_by_id', { p_id: memberId });
+const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
     body.innerHTML = `

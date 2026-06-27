@@ -1113,14 +1113,12 @@ async function saveScope(projectId) {
 
   if (!name || !logs || logs < 1) { toast('Name and LOG estimate are required.'); return; }
 
-  const { error } = await sb.from('add_scope').insert({
-    project_id:  projectId,
-    title:       name,
-    log_size:    logs,
-    assignee:    assignee || null,
-    status:      'assigned',
+  const { error } = await sb.rpc('add_scope', {
+    p_project_id: projectId,
+    p_title:      name,
+    p_log_size:   logs,
+    p_assignee:   assignee || null,
   });
-
   if (error) { toast('Could not add scope.'); console.error(error); return; }
   toast('Scope added.');
   closeOverlay();

@@ -1450,10 +1450,9 @@ function openSettledProject(id) {
 }
 
 async function exportRecord(memberId) {
-  const { data: opRows } = await sb.rpc('get_operator_by_id', { p_id: memberId });
-  const op = Array.isArray(opRows) ? opRows[0] : opRows;
-  if (!op) { toast('Could not load record.'); return; }
-
+  const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
+const op = Array.isArray(opRows) ? opRows[0] : opRows;
+if (!op) { toast('Could not load record.'); return; }
   if (!window.jspdf) { toast('PDF library not loaded. Try again.'); return; }
   toast('Generating PDF…');
 

@@ -1587,7 +1587,7 @@ async function exportRecord(memberId) {
     for (const s of scopes) {
       dc(17,17,19); lw(0.1); doc.rect(M, y, CW, 6, 'S');
       tc(140,240,96); fw('bold'); fs(7);
-      doc.text('●', M+3, y+4);
+      doc.text('-', M+3, y+4);
       tc(242,240,236); fw('normal'); fs(8);
       doc.text(s.title || 'Untitled', M+8, y+4);
       tc(82,80,78); fs(7);

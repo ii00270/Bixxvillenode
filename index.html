@@ -100,6 +100,54 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
   letter-spacing:.12em;text-transform:uppercase;
   line-height:2;margin-top:40px;
 }
+.gate-switch{
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey);
+  margin-top:24px;cursor:pointer;transition:color .15s;display:block;
+}
+.gate-switch:hover{color:var(--soft);}
+
+/* ── RELATION SHELL ── */
+#rel-shell{
+  position:fixed;inset:0;z-index:90;
+  display:flex;flex-direction:column;background:var(--black);
+  opacity:0;pointer-events:none;transition:opacity .3s;
+}
+#rel-shell.in{opacity:1;pointer-events:all;}
+#rel-topbar{
+  height:var(--top-h);flex-shrink:0;
+  background:var(--black);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
+}
+.rel-peer{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cream);letter-spacing:.08em;}
+.rel-exit{background:none;border:none;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);cursor:pointer;}
+.rel-exit:hover{color:var(--soft);}
+#rel-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+.rel-section{padding:20px 18px;border-bottom:1px solid var(--line);}
+.rel-q-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:10px;}
+.rel-q-input,.rel-q-textarea{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--line2);
+  color:var(--cream);font-family:var(--sans);font-size:14px;
+  padding:10px 0;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0;
+}
+.rel-q-input:focus,.rel-q-textarea:focus{border-bottom-color:var(--green);}
+.rel-q-input::placeholder,.rel-q-textarea::placeholder{color:var(--grey);}
+.rel-q-textarea{resize:none;line-height:1.65;min-height:72px;}
+.rel-status-badge{display:inline-flex;align-items:center;gap:8px;padding:10px 14px;border:1px solid var(--line2);margin:18px;}
+.rel-status-dot{width:8px;height:8px;border-radius:50%;}
+.rel-status-text{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;}
+.rel-msg-item{padding:14px 18px;border-bottom:1px solid var(--line);}
+.rel-msg-sender{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px;}
+.rel-msg-sender.mine{color:var(--green);}
+.rel-msg-text{font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.6;}
+.rel-msg-compose{
+  position:fixed;bottom:0;left:0;right:0;
+  background:var(--black);border-top:1px solid var(--line);
+  display:flex;align-items:center;padding:10px 18px calc(10px + var(--safe-b));
+}
+.rel-msg-inp{flex:1;background:transparent;border:none;border-bottom:1px solid var(--line2);color:var(--cream);font-family:var(--sans);font-size:14px;padding:10px 0;outline:none;}
+.rel-msg-inp::placeholder{color:var(--grey);}
+.rel-msg-send{background:none;border:none;color:var(--green);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;cursor:pointer;padding:10px 0 10px 16px;white-space:nowrap;}
 
 /* ── SHELL ── */
 #shell{
@@ -511,18 +559,31 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
     <div class="gate-sub">Christiansted · St. Croix · USVI</div>
     <div class="gate-rule"></div>
 
-    <label class="gate-label" for="g-email">Email</label>
-    <input class="gate-input" id="g-email" type="email"
-      placeholder="operator@email.com" autocomplete="email"
-      onkeydown="if(event.key==='Enter')doLogin()"/>
+    <!-- Relation mode — default -->
+    <div id="gate-rel">
+      <label class="gate-label" for="g-code">Access code</label>
+      <input class="gate-input" id="g-code" type="text"
+        placeholder="Your code" autocomplete="off" autocapitalize="none"
+        onkeydown="if(event.key==='Enter')doRelationLogin()"/>
+      <button class="gate-btn" id="g-rel-btn" onclick="doRelationLogin()">Enter</button>
+      <div class="gate-err" id="g-rel-err"></div>
+      <span class="gate-switch" onclick="switchGate('operator')">Operator login →</span>
+    </div>
 
-    <label class="gate-label gate-label-gap" for="g-pw">Password</label>
-    <input class="gate-input" id="g-pw" type="password"
-      placeholder="Password" autocomplete="current-password"
-      onkeydown="if(event.key==='Enter')doLogin()"/>
-
-    <button class="gate-btn" id="g-btn" onclick="doLogin()">Enter</button>
-    <div class="gate-err" id="g-err"></div>
+    <!-- Operator mode — hidden until switched -->
+    <div id="gate-op" style="display:none">
+      <label class="gate-label" for="g-email">Email</label>
+      <input class="gate-input" id="g-email" type="email"
+        placeholder="operator@email.com" autocomplete="email"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <label class="gate-label gate-label-gap" for="g-pw">Password</label>
+      <input class="gate-input" id="g-pw" type="password"
+        placeholder="Password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="gate-btn" id="g-btn" onclick="doLogin()">Enter</button>
+      <div class="gate-err" id="g-err"></div>
+      <span class="gate-switch" onclick="switchGate('relation')">← Back</span>
+    </div>
 
     <div class="gate-footer">
       OS v1.1 · Canonical<br>
@@ -530,6 +591,15 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
       Genesis Feb 27 2025
     </div>
   </div>
+</div>
+
+<!-- ═══ RELATION SHELL ═══ -->
+<div id="rel-shell">
+  <div id="rel-topbar">
+    <div class="rel-peer" id="rel-peer-name">—</div>
+    <button class="rel-exit" onclick="doRelLogout()">Exit</button>
+  </div>
+  <div id="rel-body"></div>
 </div>
 
 <!-- ═══ SHELL ═══ -->
@@ -1382,14 +1452,305 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
+// ── GATE MODE SWITCH ──
+function switchGate(mode) {
+  const relMode = document.getElementById('gate-rel');
+  const opMode  = document.getElementById('gate-op');
+  if (mode === 'operator') {
+    relMode.style.display = 'none';
+    opMode.style.display  = 'block';
+    setTimeout(() => document.getElementById('g-email')?.focus(), 50);
+  } else {
+    opMode.style.display  = 'none';
+    relMode.style.display = 'block';
+    setTimeout(() => document.getElementById('g-code')?.focus(), 50);
+  }
+}
+
+// ── RELATION STATE ──
+let relation = null; // { code, name, projectId }
+let relMsgPoll = null;
+
+// ── RELATION LOGIN ──
+let relLogging = false;
+async function doRelationLogin() {
+  if (relLogging) return;
+  const code = (document.getElementById('g-code')?.value || '').trim();
+  const err  = document.getElementById('g-rel-err');
+  const btn  = document.getElementById('g-rel-btn');
+  err.classList.remove('show');
+
+  if (!code) {
+    err.textContent = 'Enter your access code.';
+    err.classList.add('show'); return;
+  }
+
+  relLogging = true;
+  btn.disabled = true;
+  btn.textContent = 'Checking…';
+  initSB();
+
+  try {
+    const { data, error } = await sb.rpc('validate_relation_code', { p_code: code });
+    if (error || !data) {
+      err.textContent = 'Code not recognised. Check with your operator.';
+      err.classList.add('show'); return;
+    }
+
+    // Look up existing project for this relation
+    const { data: projects } = await sb
+      .from('relation_submissions')
+      .select('id, status')
+      .eq('relation_code', code)
+      .order('created_at', { ascending: false })
+      .limit(1);
+
+    relation = {
+      code,
+      name: data,
+      projectId: projects?.[0]?.id || null,
+      projectStatus: projects?.[0]?.status || null,
+    };
+
+    enterRelationShell();
+  } catch(e) {
+    err.textContent = 'Connection error. Try again.';
+    err.classList.add('show');
+  } finally {
+    relLogging = false;
+    btn.disabled = false;
+    btn.textContent = 'Enter';
+  }
+}
+
+function enterRelationShell() {
+  document.getElementById('rel-peer-name').textContent = relation.name;
+  document.getElementById('gate').classList.add('out');
+  document.getElementById('rel-shell').classList.add('in');
+  renderRelationBody();
+}
+
+function doRelLogout() {
+  if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
+  relation = null;
+  document.getElementById('rel-shell').classList.remove('in');
+  document.getElementById('gate').classList.remove('out');
+  document.getElementById('g-code').value = '';
+  document.getElementById('g-rel-err').classList.remove('show');
+}
+
+// ── RELATION BODY ROUTER ──
+async function renderRelationBody() {
+  const body = document.getElementById('rel-body');
+  if (!relation) return;
+
+  // Refresh project state
+  if (relation.code) {
+    const { data: projects } = await sb
+      .from('relation_submissions')
+      .select('id, status')
+      .eq('relation_code', relation.code)
+      .order('created_at', { ascending: false })
+      .limit(1);
+    if (projects?.[0]) {
+      relation.projectId     = projects[0].id;
+      relation.projectStatus = projects[0].status;
+    }
+  }
+
+  if (!relation.projectId) {
+    renderRelIntake(body);
+  } else {
+    renderRelStatus(body);
+  }
+}
+
+// ── RELATION INTAKE FORM ──
+function renderRelIntake(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">New Project</div>
+      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">Tell us what you need. Answer as many questions as you can.</div>
+    </div>
+
+    <div class="rel-section">
+      <label class="rel-q-lbl">What do you need done?</label>
+      <textarea class="rel-q-textarea" id="ri-goal" placeholder="Describe the project or task"></textarea>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">What does done look like?</label>
+      <textarea class="rel-q-textarea" id="ri-done" placeholder="The outcome you're expecting"></textarea>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">When does it need to be done?</label>
+      <input class="rel-q-input" id="ri-timeline" placeholder="Timeline or deadline"/>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">What is the obstacle right now?</label>
+      <textarea class="rel-q-textarea" id="ri-obstacle" placeholder="What is blocking progress"></textarea>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">Has this been attempted before?</label>
+      <input class="rel-q-input" id="ri-attempted" placeholder="Yes / No — and what happened"/>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">Who else is involved?</label>
+      <input class="rel-q-input" id="ri-others" placeholder="Other people or parties"/>
+    </div>
+    <div class="rel-section">
+      <label class="rel-q-lbl">Where are you located?</label>
+      <input class="rel-q-input" id="ri-location" placeholder="City, region"/>
+    </div>
+
+    <div style="padding:8px 0 16px">
+      <button class="act-btn" onclick="submitRelIntake()">Submit Project</button>
+      <div class="gate-err" id="ri-err" style="margin:0 18px"></div>
+    </div>`;
+}
+
+async function submitRelIntake() {
+  const goal     = document.getElementById('ri-goal')?.value.trim();
+  const done     = document.getElementById('ri-done')?.value.trim();
+  const timeline = document.getElementById('ri-timeline')?.value.trim();
+  const obstacle = document.getElementById('ri-obstacle')?.value.trim();
+  const err      = document.getElementById('ri-err');
+  err.classList.remove('show');
+
+  if (!goal) {
+    err.textContent = 'Describe what you need done before submitting.';
+    err.classList.add('show'); return;
+  }
+
+  const intake = {
+    goal,
+    done:      done      || null,
+    timeline:  timeline  || null,
+    obstacle:  obstacle  || null,
+    attempted: document.getElementById('ri-attempted')?.value.trim() || null,
+    others:    document.getElementById('ri-others')?.value.trim()    || null,
+    location:  document.getElementById('ri-location')?.value.trim()  || null,
+  };
+
+  try {
+    const { error } = await sb.rpc('submit_intake', {
+      p_code:         relation.code,
+      p_title:        goal.substring(0, 120),
+      p_scope:        goal,
+      p_deliverables: done ? [{ text: done }] : [],
+      p_intake:       intake,
+    });
+    if (error) throw error;
+
+    toast('Project submitted.');
+    await renderRelationBody();
+  } catch(e) {
+    console.error(e);
+    err.textContent = 'Could not submit. Check your connection and try again.';
+    err.classList.add('show');
+  }
+}
+
+// ── RELATION STATUS VIEW ──
+async function renderRelStatus(body) {
+  const { data: project } = await sb
+    .from('relation_submissions')
+    .select('*, bids(*)')
+    .eq('id', relation.projectId)
+    .single();
+
+  if (!project) { body.innerHTML = '<div class="empty"><div class="empty-msg">Project not found.</div></div>'; return; }
+
+  const scopes     = project.bids || [];
+  const delivered  = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
+  const statusColor= project.status === 'settled' ? 'var(--green)' : project.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
+
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px">Your Project</div>
+      <div style="font-family:var(--sans);font-size:15px;font-weight:600;color:var(--cream);line-height:1.4">${esc(project.title || project.scope || '—')}</div>
+    </div>
+    <div class="rel-status-badge">
+      <div class="rel-status-dot" style="background:${statusColor}"></div>
+      <div class="rel-status-text" style="color:${statusColor}">${project.status}</div>
+    </div>
+    ${scopes.length ? `
+    <div class="section-lbl" style="position:relative;top:0">Progress</div>
+    <div class="stat-grid" style="border-top:none">
+      <div class="stat-cell">
+        <div class="stat-val">${scopes.length}</div>
+        <div class="stat-lbl">Scopes</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-val green">${delivered}</div>
+        <div class="stat-lbl">Delivered</div>
+      </div>
+    </div>
+    ${scopes.map(s => `
+      <div class="scope-row">
+        <div class="scope-dot ${s.status === 'confirmed' || s.status === 'delivered' ? 'delivered' : 'assigned'}"></div>
+        <div class="scope-info">
+          <div class="scope-name">${esc(s.title || 'Scope')}</div>
+          <div class="scope-meta">${s.log_size || 0} LOG · ${s.status}</div>
+        </div>
+      </div>`).join('')}` : ''}
+
+    <div class="section-lbl" style="position:relative;top:0">Messages</div>
+    <div id="rel-msgs"></div>
+    <div class="rel-msg-compose">
+      <input class="rel-msg-inp" id="rel-msg-inp" placeholder="Message your operator…"
+        onkeydown="if(event.key==='Enter')sendRelMessage()"/>
+      <button class="rel-msg-send" onclick="sendRelMessage()">Send</button>
+    </div>`;
+
+  loadRelMessages();
+  if (relMsgPoll) clearInterval(relMsgPoll);
+  relMsgPoll = setInterval(loadRelMessages, 8000);
+}
+
+async function loadRelMessages() {
+  const el = document.getElementById('rel-msgs');
+  if (!el) return;
+
+  try {
+    const { data } = await sb.rpc('get_messages', { p_code: relation.code });
+    const msgs = data || [];
+
+    if (!msgs.length) {
+      el.innerHTML = `<div class="empty" style="padding:20px 18px"><div class="empty-msg">No messages yet. Send one below.</div></div>`;
+      return;
+    }
+
+    el.innerHTML = msgs.map(m => `
+      <div class="rel-msg-item">
+        <div class="rel-msg-sender ${m.sender !== 'OPERATORS' ? 'mine' : ''}">${m.sender === 'OPERATORS' ? 'Operator' : relation.name}</div>
+        <div class="rel-msg-text">${esc(m.ciphertext)}</div>
+      </div>`).join('');
+  } catch(e) { console.error(e); }
+}
+
+async function sendRelMessage() {
+  const inp  = document.getElementById('rel-msg-inp');
+  const text = inp?.value.trim();
+  if (!text) return;
+
+  try {
+    await sb.rpc('send_message', { p_code: relation.code, p_ciphertext: text });
+    inp.value = '';
+    await loadRelMessages();
+  } catch(e) {
+    toast('Could not send message.');
+  }
+}
+
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {
   if (e.key !== 'Enter') return;
-  if (!document.getElementById('gate').classList.contains('out')) doLogin();
+  if (document.getElementById('gate').classList.contains('out')) return;
+  const opMode = document.getElementById('gate-op');
+  if (opMode && opMode.style.display !== 'none') { doLogin(); } else { doRelationLogin(); }
 });
 
 // ── ENTRY POINT ──
-// Check for existing session on load
 window.addEventListener('load', async () => {
   initSB();
   const { data: { session } } = await sb.auth.getSession();
@@ -1402,8 +1763,8 @@ window.addEventListener('load', async () => {
       return;
     }
   }
-  // No session — gate stays up
-  document.getElementById('g-email').focus();
+  // No session — gate stays up, focus access code
+  document.getElementById('g-code')?.focus();
 });
 </script>
 </body>

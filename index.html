@@ -1432,17 +1432,26 @@ function openMemberRecord(memberId) {
     const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-    // Fetch settled projects and scopes
-    const { data: projects } = await sb
-      .from('relation_submissions')
-      .select('*, bids(*)')
-      .eq('status', 'settled')
-      .order('settled_at', { ascending: false });
+    // Fetch settled projects via RPC, then scopes per project
+    const { data: projData } = await sb.rpc('get_settled_projects');
+    const settled = projData || [];
 
-    const settled = projects || [];
+    // Fetch all bids for settled projects
+    const settledIds = settled.map(p => p.id);
+    let allScopes = [];
+    if (settledIds.length) {
+      const { data: scopeData } = await sb.rpc('get_scopes_for_projects', { p_ids: settledIds });
+      allScopes = scopeData || [];
+    }
+
+    // Attach scopes to projects
+    const settledWithScopes = settled.map(p => ({
+      ...p,
+      bids: allScopes.filter(s => s.project_id === p.id)
+    }));
     let scopeIdx  = 0;
 
-    const breakdown = settled.length ? settled.map(p => {
+    const breakdown = settledWithScopes.length ? settledWithScopes.map(p => {
       const scopes   = p.bids || [];
       const projLogs = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
       const projDate = fmtDate(p.settled_at);
@@ -1534,13 +1543,20 @@ async function exportRecord(memberId) {
   if (!window.jspdf) { toast('PDF library not loaded. Try again.'); return; }
   toast('Generating PDF…');
 
-  const { data: projects } = await sb
-    .from('relation_submissions')
-    .select('*, bids(*)')
-    .eq('status', 'settled')
-    .order('settled_at', { ascending: false });
+  const { data: projData } = await sb.rpc('get_settled_projects');
+  const settled = projData || [];
 
-  const settled   = projects || [];
+  // Fetch scopes for settled projects
+  const settledIds = settled.map(p => p.id);
+  let allScopes = [];
+  if (settledIds.length) {
+    const { data: scopeData } = await sb.rpc('get_scopes_for_projects', { p_ids: settledIds });
+    allScopes = scopeData || [];
+  }
+  const settledWithScopes = settled.map(p => ({
+    ...p,
+    bids: allScopes.filter(s => s.project_id === p.id)
+  }));
   const cycle     = getActiveCycle();
   const now       = new Date();
   const dateStr   = now.toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
@@ -1641,7 +1657,7 @@ async function exportRecord(memberId) {
   doc.text('SCOPE BREAKDOWN', M, y);
   y += 5;
 
-  for (const p of settled) {
+  for (const p of settledWithScopes) {
     const scopes   = p.bids || [];
     const projLogs = scopes.reduce((n,s) => n+(s.log_size||0), 0);
     const projDate = p.settled_at
@@ -1694,7 +1710,7 @@ async function exportRecord(memberId) {
     y += 5;
   }
 
-  if (!settled.length) {
+  if (!settledWithScopes.length) {
     tc(82,80,78); fw('normal'); fs(8);
     doc.text('No settled projects on record.', M, y+5);
     y += 12;

@@ -1113,7 +1113,7 @@ async function saveScope(projectId) {
 
   if (!name || !logs || logs < 1) { toast('Name and LOG estimate are required.'); return; }
 
-  const { error } = await sb.from('bids').insert({
+  const { error } = await sb.from('add_scope').insert({
     project_id:  projectId,
     title:       name,
     log_size:    logs,

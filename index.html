@@ -356,18 +356,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 
 /* ── SURFACE HEADER ── */
 .s-head{
-  padding:24px 18px 16px;
+  padding:20px 18px 16px;
   border-bottom:1px solid var(--line);
   display:flex;align-items:flex-end;justify-content:space-between;
-  position:sticky;top:0;background:var(--black);z-index:10;
+  position:sticky;top:0;z-index:10;
+  background:linear-gradient(135deg, rgba(140,240,96,.06) 0%, rgba(9,10,11,.98) 60%);
+  border-left:3px solid var(--green);
+  box-shadow:inset 0 -1px 0 var(--line), 0 0 24px rgba(140,240,96,.04);
 }
 .s-title{
-  font-family:var(--mono);font-size:18px;font-weight:600;
-  color:var(--cream);letter-spacing:.04em;
+  font-family:var(--mono);font-size:16px;font-weight:600;
+  color:var(--cream);letter-spacing:.06em;
+  text-shadow:0 0 20px rgba(140,240,96,.2);
 }
 .s-count{
-  font-family:var(--mono);font-size:11px;
-  color:var(--grey);letter-spacing:.1em;
+  font-family:var(--mono);font-size:10px;
+  color:var(--green);letter-spacing:.1em;
+  opacity:.7;
 }
 
 /* ── EMPTY STATE ── */
@@ -489,11 +494,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 }
 .member-row:active{background:var(--surface);}
 .member-avatar{
-  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  width:42px;height:42px;border-radius:50%;flex-shrink:0;
   background:var(--surface2);border:1px solid var(--line2);
   display:flex;align-items:center;justify-content:center;
-  font-family:var(--mono);font-size:12px;font-weight:600;
-  color:var(--soft);
+  font-family:var(--mono);font-size:8px;font-weight:600;
+  color:var(--green);letter-spacing:.05em;
+  text-align:center;overflow:hidden;padding:2px;
+  line-height:1.2;
 }
 .member-info{flex:1;}
 .member-name{
@@ -698,7 +705,94 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 .surface::-webkit-scrollbar-track,.ov-body::-webkit-scrollbar-track{background:transparent;}
 .surface::-webkit-scrollbar-thumb,.ov-body::-webkit-scrollbar-thumb{background:var(--line2);}
 
-/* ── WORK RECORD SCOPE BREAKDOWN ── */
+/* ── PROFILE OVERLAY ── */
+.prof-avatar{
+  width:64px;height:64px;border-radius:50%;
+  background:var(--surface2);border:2px solid var(--green);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--mono);font-size:10px;font-weight:600;
+  color:var(--green);letter-spacing:.05em;text-align:center;
+  margin:20px 18px 0;flex-shrink:0;
+  box-shadow:0 0 16px rgba(140,240,96,.2);
+}
+.prof-head{
+  display:flex;align-items:center;gap:14px;
+  padding:0 18px 18px;border-bottom:1px solid var(--line);
+}
+.prof-head-info{flex:1;}
+.prof-peer{
+  font-family:var(--sans);font-size:18px;font-weight:700;
+  color:var(--cream);margin-bottom:2px;
+}
+.prof-handle{
+  font-family:var(--mono);font-size:10px;
+  color:var(--green);letter-spacing:.1em;
+}
+.prof-lane{
+  font-family:var(--mono);font-size:9px;
+  color:var(--grey);letter-spacing:.08em;margin-top:2px;
+}
+.prof-section{
+  padding:14px 18px 6px;
+  font-family:var(--mono);font-size:8px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--grey);
+  border-bottom:1px solid var(--line);
+}
+.prof-field{
+  padding:12px 18px;border-bottom:1px solid var(--line);
+}
+.prof-field-lbl{
+  font-family:var(--mono);font-size:8px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--grey);margin-bottom:6px;
+}
+.prof-field-input{
+  width:100%;background:transparent;border:none;
+  border-bottom:1px solid var(--line2);
+  color:var(--cream);font-family:var(--mono);font-size:13px;
+  padding:6px 0;outline:none;transition:border-color .2s;
+  -webkit-appearance:none;
+}
+.prof-field-input:focus{border-bottom-color:var(--green);}
+.prof-field-input::placeholder{color:var(--grey);}
+.prof-field-textarea{
+  width:100%;background:transparent;border:none;
+  border-bottom:1px solid var(--line2);
+  color:var(--cream);font-family:var(--sans);font-size:13px;
+  padding:6px 0;outline:none;resize:none;min-height:60px;
+  line-height:1.6;transition:border-color .2s;
+}
+.prof-field-textarea:focus{border-bottom-color:var(--green);}
+.prof-field-textarea::placeholder{color:var(--grey);}
+.prof-tag-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px;}
+.prof-tag{
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 10px;border:1px solid var(--line2);color:var(--soft);
+  display:flex;align-items:center;gap:6px;
+}
+.prof-tag-remove{
+  color:var(--grey);cursor:pointer;font-size:11px;line-height:1;
+}
+.prof-tag-remove:hover{color:var(--red);}
+.prof-add-row{
+  display:flex;gap:8px;align-items:center;margin-top:10px;
+}
+.prof-add-input{
+  flex:1;background:transparent;border:none;
+  border-bottom:1px solid var(--line2);
+  color:var(--cream);font-family:var(--mono);font-size:12px;
+  padding:6px 0;outline:none;
+}
+.prof-add-input:focus{border-bottom-color:var(--green);}
+.prof-add-input::placeholder{color:var(--grey);}
+.prof-add-btn{
+  background:none;border:1px solid var(--line2);
+  color:var(--soft);font-family:var(--mono);font-size:9px;
+  letter-spacing:.12em;text-transform:uppercase;
+  padding:5px 10px;cursor:pointer;
+  transition:border-color .15s,color .15s;white-space:nowrap;
+}
+.prof-add-btn:hover{border-color:var(--green);color:var(--green);}
 .wr-project-head{padding:10px 14px;background:var(--surface2);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;}
 .wr-project-name{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream);}
 .wr-project-meta{font-family:var(--mono);font-size:9px;color:var(--grey);letter-spacing:.08em;}
@@ -1479,10 +1573,10 @@ async function loadRecord() {
       <div class="section-lbl" style="position:relative;top:0">Network</div>
       ${m.length ? m.map(op => `
         <div class="member-row" onclick="openMemberRecord('${op.id}')">
-          <div class="member-avatar">${(op.peer_name||'?').charAt(0)}</div>
+          <div class="member-avatar">${op.handle ? esc(op.handle) : (op.peer_name||'?').charAt(0)}</div>
           <div class="member-info">
             <div class="member-name">${esc(op.peer_name)}</div>
-            <div class="member-meta">${op.total_logs || 0} LOG · ${esc(op.lane || '—')}</div>
+            <div class="member-meta">${op.total_logs || 0} LOG · ${esc(op.lane || '—')}${op.bio ? ' · ' + esc(op.bio.substring(0,40)) : ''}</div>
           </div>
           <div class="member-right">
             <div class="member-score">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div>
@@ -1551,64 +1645,196 @@ function buildScopeRow(s, idx, projectCycle) {
 }
 
 function openMemberRecord(memberId) {
-  openOverlay('Work Record', async (body) => {
+  openOverlay('Profile', async (body) => {
     const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
     const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-    // Fetch settled projects via RPC, then scopes per project
-    const { data: projData } = await sb.rpc('get_settled_projects');
-    const settled = projData || [];
+    const handle = op.handle || '@' + (op.peer_name || '').replace(/\s/g,'').toUpperCase();
+    const creds  = Array.isArray(op.credentials) ? op.credentials : (op.credentials ? JSON.parse(op.credentials) : []);
+    const skills = Array.isArray(op.skills) ? op.skills : (op.skills ? JSON.parse(op.skills) : []);
 
-    // Fetch all bids for settled projects
+    const { data: projects } = await sb.rpc('get_settled_projects');
+    const settled = projects || [];
     const settledIds = settled.map(p => p.id);
     let allScopes = [];
     if (settledIds.length) {
       const { data: scopeData } = await sb.rpc('get_scopes_for_projects', { p_ids: settledIds });
       allScopes = scopeData || [];
     }
+    const settledWithScopes = settled.map(p => ({ ...p, bids: allScopes.filter(s => s.project_id === p.id) }));
 
-    // Attach scopes to projects
-    const settledWithScopes = settled.map(p => ({
-      ...p,
-      bids: allScopes.filter(s => s.project_id === p.id)
-    }));
-    let scopeIdx  = 0;
-
-    const breakdown = settledWithScopes.length ? settledWithScopes.map(p => {
-      const scopes   = p.bids || [];
-      const projLogs = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
-      const projDate = fmtDate(p.settled_at);
-      const rows = scopes.map(s => buildScopeRow(s, scopeIdx++, p.cycle_number)).join('');
-      return `
-        <div style="border:1px solid var(--line);margin-bottom:12px;">
-          <div class="wr-project-head">
-            <div class="wr-project-name">${esc(p.relation_name || p.relation_code || '—')}</div>
-            <div class="wr-project-meta">C${p.cycle_number||'—'} · ${projDate} · ${projLogs} LOG</div>
-          </div>
-          ${rows}
-        </div>`;
-    }).join('') : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No settled projects yet.</div></div>';
+    let scopeIdx = 0;
+    const breakdown = settledWithScopes.length
+      ? settledWithScopes.map(p => {
+          const scopes   = p.bids || [];
+          const projLogs = scopes.reduce((n,s) => n+(s.log_size||0), 0);
+          const rows = scopes.map(s => buildScopeRow(s, scopeIdx++, p.cycle_number)).join('');
+          return `
+            <div style="border:1px solid var(--line);margin-bottom:12px;">
+              <div class="wr-project-head">
+                <div class="wr-project-name">${esc(p.relation_name || p.relation_code || '—')}</div>
+                <div class="wr-project-meta">C${p.cycle_number||'—'} · ${fmtDate(p.settled_at)} · ${projLogs} LOG</div>
+              </div>
+              ${rows}
+            </div>`;
+        }).join('')
+      : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No settled projects yet.</div></div>';
 
     body.innerHTML = `
+      <!-- Avatar + name -->
+      <div style="display:flex;align-items:center;gap:0">
+        <div class="prof-avatar">${esc(handle)}</div>
+      </div>
+      <div class="prof-head">
+        <div style="width:64px;flex-shrink:0"></div>
+        <div class="prof-head-info">
+          <div class="prof-peer">${esc(op.peer_name)}</div>
+          <div class="prof-handle">${esc(handle)}</div>
+          <div class="prof-lane">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
+        </div>
+      </div>
+
+      <!-- Stats -->
       <div class="stat-grid">
-        <div class="stat-cell"><div class="stat-val green">${op.total_logs || 0}</div><div class="stat-lbl">Total LOGs</div></div>
-        <div class="stat-cell"><div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div><div class="stat-lbl">Rep Score</div></div>
+        <div class="stat-cell"><div class="stat-val green">${op.total_logs || 0}</div><div class="stat-lbl">LOGs</div></div>
+        <div class="stat-cell"><div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div><div class="stat-lbl">Rep</div></div>
         <div class="stat-cell"><div class="stat-val">${tier(op.total_logs)}</div><div class="stat-lbl">Tier</div></div>
         <div class="stat-cell"><div class="stat-val">${op.streak || 0}</div><div class="stat-lbl">Streak</div></div>
       </div>
-      <div class="form-block">
-        <div class="form-lbl">Peer</div>
-        <div style="font-family:var(--mono);font-size:15px;font-weight:600;color:var(--cream)">${esc(op.peer_name)}</div>
-        <div style="font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:4px">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
+
+      <!-- Editable profile -->
+      <div class="prof-section">Profile</div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Handle</div>
+        <input class="prof-field-input" id="prof-handle" value="${esc(handle)}" placeholder="@handle"/>
       </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">What you do</div>
+        <textarea class="prof-field-textarea" id="prof-bio" placeholder="Brief description of your work and expertise">${esc(op.bio || '')}</textarea>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Contact email</div>
+        <input class="prof-field-input" id="prof-contact-email" type="email" value="${esc(op.contact_email || '')}" placeholder="Public contact email"/>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Phone</div>
+        <input class="prof-field-input" id="prof-phone" type="tel" value="${esc(op.phone || '')}" placeholder="Contact number"/>
+      </div>
+
+      <!-- Credentials -->
+      <div class="prof-section">Credentials</div>
+      <div class="prof-field">
+        <div class="prof-tag-list" id="creds-list">
+          ${creds.map((c,i) => `<div class="prof-tag">${esc(c)}<span class="prof-tag-remove" onclick="removeCred(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
+        </div>
+        <div class="prof-add-row">
+          <input class="prof-add-input" id="cred-input" placeholder="e.g. RSO, TWIC, PMP, AWS Cloud Practitioner" onkeydown="if(event.key==='Enter')addCred()"/>
+          <button class="prof-add-btn" onclick="addCred()">Add</button>
+        </div>
+      </div>
+
+      <!-- Skills -->
+      <div class="prof-section">Skills</div>
+      <div class="prof-field">
+        <div class="prof-tag-list" id="skills-list">
+          ${skills.map((s,i) => `<div class="prof-tag">${esc(s)}<span class="prof-tag-remove" onclick="removeSkill(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
+        </div>
+        <div class="prof-add-row">
+          <input class="prof-add-input" id="skill-input" placeholder="e.g. Systems Analysis, Project Decomposition, Real Estate" onkeydown="if(event.key==='Enter')addSkill()"/>
+          <button class="prof-add-btn" onclick="addSkill()">Add</button>
+        </div>
+      </div>
+
+      <button class="act-btn" onclick="saveProfile()">Save Profile</button>
+
+      <!-- Scope breakdown -->
       <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
       <div style="padding:12px 18px">${breakdown}</div>
+
+      <!-- Export -->
       <div class="export-row">
         <div class="export-lbl">Verified Work Record</div>
         <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
       </div>`;
+
+    // Store working copies of creds/skills in closure
+    window._profCreds  = [...creds];
+    window._profSkills = [...skills];
   });
+}
+
+function renderTagList(listId, arr, removeFn) {
+  const el = document.getElementById(listId);
+  if (!el) return;
+  el.innerHTML = arr.length
+    ? arr.map((v,i) => `<div class="prof-tag">${esc(v)}<span class="prof-tag-remove" onclick="${removeFn}(${i})">×</span></div>`).join('')
+    : '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>';
+}
+
+function addCred() {
+  const inp = document.getElementById('cred-input');
+  const val = inp?.value.trim();
+  if (!val) return;
+  window._profCreds = window._profCreds || [];
+  window._profCreds.push(val);
+  inp.value = '';
+  renderTagList('creds-list', window._profCreds, 'removeCred');
+}
+
+function removeCred(i) {
+  window._profCreds.splice(i, 1);
+  renderTagList('creds-list', window._profCreds, 'removeCred');
+}
+
+function addSkill() {
+  const inp = document.getElementById('skill-input');
+  const val = inp?.value.trim();
+  if (!val) return;
+  window._profSkills = window._profSkills || [];
+  window._profSkills.push(val);
+  inp.value = '';
+  renderTagList('skills-list', window._profSkills, 'removeSkill');
+}
+
+function removeSkill(i) {
+  window._profSkills.splice(i, 1);
+  renderTagList('skills-list', window._profSkills, 'removeSkill');
+}
+
+async function saveProfile() {
+  const handle       = document.getElementById('prof-handle')?.value.trim();
+  const bio          = document.getElementById('prof-bio')?.value.trim();
+  const contactEmail = document.getElementById('prof-contact-email')?.value.trim();
+  const phone        = document.getElementById('prof-phone')?.value.trim();
+
+  try {
+    const { error } = await sb.rpc('update_operator_profile', {
+      p_email:         operator.email,
+      p_handle:        handle || null,
+      p_contact_email: contactEmail || null,
+      p_phone:         phone || null,
+      p_bio:           bio || null,
+      p_credentials:   JSON.stringify(window._profCreds || []),
+      p_skills:        JSON.stringify(window._profSkills || []),
+    });
+    if (error) throw error;
+
+    // Update local operator state
+    operator.handle        = handle;
+    operator.bio           = bio;
+    operator.contact_email = contactEmail;
+    operator.phone         = phone;
+    operator.credentials   = window._profCreds;
+    operator.skills        = window._profSkills;
+
+    toast('Profile saved.');
+    // Refresh topbar peer name if handle changed
+    document.getElementById('tb-peer').textContent = operator.peer_name;
+  } catch(e) {
+    toast('Could not save profile.');
+    console.error(e);
+  }
 }
 
 function openSettledProject(id) {
@@ -1915,20 +2141,54 @@ async function exportRecord(memberId) {
   // ── INFO ROWS ──
   y += 3;
   const infoRows = [
-    ['LANE',         op.lane        || '—'],
-    ['REGION',       op.region      || '—'],
-    ['ACCESS KEY',   op.access_key  || '—'],
-    ['ACTIVE SINCE', 'Cycle 1 · Genesis Feb 27 2025'],
+    ['Lane',         op.lane        || '—'],
+    ['Region',       op.region      || '—'],
+    ['Access key',   op.access_key  || '—'],
+    ['Contact',      op.contact_email || op.phone || '—'],
+    ['Active since', 'Cycle 1 · Genesis Feb 27 2025'],
   ];
   dc(30,30,34); lw(0.2);
   for (const [lbl, val] of infoRows) {
     if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
     doc.line(M, y, W-M, y);
     tc(82,80,78); fw('normal'); fs(6.5);
-    doc.text(lbl, M, y+5);
+    doc.text(lbl.toUpperCase(), M, y+5);
     tc(168,166,162); fs(8);
     doc.text(val, W-M, y+5, { align:'right' });
     y += 9;
+  }
+
+  // Skills
+  const skills = Array.isArray(op.skills) ? op.skills : (op.skills ? JSON.parse(op.skills) : []);
+  if (skills.length) {
+    if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+    doc.line(M, y, W-M, y);
+    tc(82,80,78); fw('normal'); fs(6.5); doc.text('SKILLS', M, y+5);
+    tc(168,166,162); fs(8);
+    doc.text(skills.join('  ·  '), W-M, y+5, { align:'right', maxWidth: CW*0.65 });
+    y += 9;
+  }
+
+  // Credentials
+  const creds = Array.isArray(op.credentials) ? op.credentials : (op.credentials ? JSON.parse(op.credentials) : []);
+  if (creds.length) {
+    if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+    doc.line(M, y, W-M, y);
+    tc(82,80,78); fw('normal'); fs(6.5); doc.text('CREDENTIALS', M, y+5);
+    tc(140,240,96); fw('bold'); fs(8);
+    doc.text(creds.join('  ·  '), W-M, y+5, { align:'right', maxWidth: CW*0.65 });
+    y += 9;
+  }
+
+  // Bio
+  if (op.bio) {
+    if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+    doc.line(M, y, W-M, y);
+    tc(82,80,78); fw('normal'); fs(6.5); doc.text('ABOUT', M, y+5);
+    tc(168,166,162); fs(8);
+    const bioLines = doc.splitTextToSize(op.bio, CW * 0.65);
+    doc.text(bioLines, W-M, y+5, { align:'right' });
+    y += Math.max(9, bioLines.length * 4.5 + 4);
   }
 
   // ── FOOTER ──

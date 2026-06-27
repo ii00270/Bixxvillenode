@@ -95,6 +95,16 @@ body::before{
   font-size:9px; color:rgba(242,240,236,.2); margin-top:24px;
   letter-spacing:.1em; line-height:1.9; text-transform:uppercase;
 }
+.login-otp-notice{
+  font-size:12px; color:var(--soft); line-height:1.65; margin-bottom:20px;
+  padding:12px 14px; background:rgba(140,240,96,.04); border:1px solid var(--line);
+}
+.login-otp-notice strong{color:var(--cream);}
+.login-resend{
+  font-size:10px; color:var(--grey); margin-top:14px; letter-spacing:.06em;
+}
+.login-resend span{color:var(--green); cursor:pointer; text-decoration:underline;}
+.login-label-gap{margin-top:14px;}
 
 /* ══════════════════════════════════════
    SHELL
@@ -770,10 +780,40 @@ body::before{
     <div class="login-mark">@<span>Bixxville</span></div>
     <div class="login-sub">Runtime v2.0 · OS v1.1 · Christiansted, St. Croix</div>
     <div class="login-rule"></div>
-    <label class="login-label" for="login-code">Access code</label>
-    <input class="login-input" id="login-code" type="password" placeholder="Enter your access code" autocomplete="off"/>
-    <button class="login-btn" onclick="doLogin()">Enter the network</button>
-    <div class="login-err" id="login-err">Access code not recognised.</div>
+
+    <!-- Panel 1: Email + password -->
+    <div id="login-panel-pw">
+      <label class="login-label" for="login-email">Email</label>
+      <input class="login-input" id="login-email" type="email"
+        placeholder="operator@email.com" autocomplete="email"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <label class="login-label login-label-gap" for="login-password">Password</label>
+      <input class="login-input" id="login-password" type="password"
+        placeholder="Password" autocomplete="current-password"
+        onkeydown="if(event.key==='Enter')doLogin()"/>
+      <button class="login-btn" onclick="doLogin()">Continue →</button>
+      <div class="login-err" id="login-err"></div>
+    </div>
+
+    <!-- Panel 2: OTP code -->
+    <div id="login-panel-otp" style="display:none">
+      <div class="login-otp-notice">
+        Code sent to <strong id="login-otp-email"></strong>.<br>
+        Check your inbox and enter the 6-digit code below.
+      </div>
+      <label class="login-label" for="login-otp-code">6-digit code</label>
+      <input class="login-input" id="login-otp-code" type="text"
+        inputmode="numeric" pattern="[0-9]*" maxlength="6"
+        placeholder="000000" autocomplete="one-time-code"
+        onkeydown="if(event.key==='Enter')doVerifyOtp()"/>
+      <button class="login-btn" onclick="doVerifyOtp()">Verify →</button>
+      <div class="login-err" id="login-err-otp"></div>
+      <div class="login-resend">
+        Didn't get it? <span onclick="doResendOtp()">Send again</span>
+        &nbsp;·&nbsp; <span onclick="resetLoginPanels()">Use a different email</span>
+      </div>
+    </div>
+
     <div class="login-note">
       BIXXVILLE OS v1.1 · CANONICAL<br>
       TWO-PEER NODE · EACH PEER HAS ITS OWN ACCESS<br>
@@ -1570,28 +1610,162 @@ const ROLES = {
 };
 let currentUser = null;
 
-// ── LOGIN ──
-// ── ACCESS CREDENTIALS — each peer has their own front-door code ──
-// Code → which peer they are on the node, and their Runtime role.
-const ACCESS = {
-  'Benjobixx': { peer: 'Benjo',     role: 'exec' },
-  'loyal340':  { peer: 'LOYAL 340', role: 'exec' },
-};
+// ── AUTH ──
+// Operator identity is stored in the "operators" Supabase table.
+// No hardcoded email map — adding a new operator is a database row
+// sent from the Invite panel in Settings. No file edit, no redeploy.
+// Edge function URL — matches the Supabase project above.
+const INVITE_FN_URL = SB_URL + '/functions/v1/invite-operator';
 
-function doLogin() {
-  const code = document.getElementById('login-code').value;
-  const err = document.getElementById('login-err');
-  const access = ACCESS[code];
-  if (!access) { err.classList.add('show'); return; }
-  const role = ROLES[access.role];
-  if (!role) { err.classList.add('show'); return; }
-  currentUser = { ...role, key: access.role };
-  nodePeer = access.peer; // auto-assigned from the access code — no separate peer sign-in
+// ACCESS is populated dynamically from the DB after OTP verification.
+// Kept as a module-level cache so post-login helpers can read it.
+let ACCESS = {};
+
+let authEmail = null; // preserved between password step and OTP step
+let loginBusy = false;
+
+// Step 1: Verify email + password, then send OTP to the inbox.
+async function doLogin() {
+  if (loginBusy) return;
+  const email    = (document.getElementById('login-email')?.value || '').trim().toLowerCase();
+  const password = document.getElementById('login-password')?.value || '';
+  const err      = document.getElementById('login-err');
   err.classList.remove('show');
+
+  if (!email || !password) {
+    err.textContent = 'Enter your email and password.';
+    err.classList.add('show'); return;
+  }
+
+  loginBusy = true;
+  initSupabase();
+  try {
+    // Verify password with Supabase Auth.
+    const { error: pwErr } = await sb.auth.signInWithPassword({ email, password });
+    if (pwErr) {
+      err.textContent = 'Email or password not recognised.';
+      err.classList.add('show'); return;
+    }
+    // Password correct — sign out the session; the OTP is the real key.
+    await sb.auth.signOut();
+
+    // Send the 6-digit code.
+    const { error: otpErr } = await sb.auth.signInWithOtp({
+      email,
+      options: { shouldCreateUser: false },
+    });
+    if (otpErr) {
+      err.textContent = 'Could not send the code. Try again in a moment.';
+      err.classList.add('show'); return;
+    }
+
+    authEmail = email;
+    showOtpPanel();
+  } catch(e) {
+    err.textContent = 'Connection error. Check your internet and try again.';
+    err.classList.add('show');
+  } finally {
+    loginBusy = false;
+  }
+}
+
+// Step 2: Verify the 6-digit code from the inbox.
+async function doVerifyOtp() {
+  if (loginBusy) return;
+  const token = (document.getElementById('login-otp-code')?.value || '').trim();
+  const err   = document.getElementById('login-err-otp');
+  err.classList.remove('show');
+
+  if (!token || token.length < 6) {
+    err.textContent = 'Enter the 6-digit code from your email.';
+    err.classList.add('show'); return;
+  }
+
+  loginBusy = true;
+  try {
+    const { data, error } = await sb.auth.verifyOtp({
+      email: authEmail,
+      token,
+      type: 'email',
+    });
+    if (error || !data?.user) {
+      err.textContent = 'Code incorrect or expired. Request a new one below.';
+      err.classList.add('show'); return;
+    }
+
+    // OTP confirmed — look up operator record from the database.
+    const { data: opRows, error: opErr } = await sb.rpc('get_operator_by_email', {
+      p_email: authEmail,
+    });
+    const op = Array.isArray(opRows) ? opRows[0] : opRows;
+
+    if (opErr || !op) {
+      err.textContent = 'Account verified but not found in the operator registry. Contact your administrator.';
+      err.classList.add('show');
+      await sb.auth.signOut();
+      return;
+    }
+
+    // Cache in the module-level ACCESS map.
+    ACCESS[op.access_key] = { peer: op.peer_name, role: op.role, lane: op.lane, region: op.region };
+
+    const resolvedRole = ROLES[op.role] || ROLES['exec'];
+    completeLogin(
+      { peer: op.peer_name, role: op.role },
+      op.access_key,
+      resolvedRole
+    );
+  } catch(e) {
+    err.textContent = 'Verification failed. Check your connection.';
+    err.classList.add('show');
+  } finally {
+    loginBusy = false;
+  }
+}
+
+// Resend the OTP without going back to the password screen.
+async function doResendOtp() {
+  if (!authEmail) return;
+  const err = document.getElementById('login-err-otp');
+  err.classList.remove('show');
+  const { error } = await sb.auth.signInWithOtp({
+    email: authEmail,
+    options: { shouldCreateUser: false },
+  });
+  if (error) {
+    err.textContent = 'Could not resend. Wait a moment and try again.';
+    err.classList.add('show');
+  } else {
+    toast('New code sent to ' + authEmail);
+    document.getElementById('login-otp-code').value = '';
+    document.getElementById('login-otp-code').focus();
+  }
+}
+
+function showOtpPanel() {
+  document.getElementById('login-panel-pw').style.display  = 'none';
+  document.getElementById('login-panel-otp').style.display = 'block';
+  document.getElementById('login-otp-email').textContent   = authEmail;
+  setTimeout(() => document.getElementById('login-otp-code').focus(), 80);
+}
+
+function resetLoginPanels() {
+  authEmail = null;
+  document.getElementById('login-panel-otp').style.display = 'none';
+  document.getElementById('login-panel-pw').style.display  = 'block';
+  document.getElementById('login-otp-code').value = '';
+  document.getElementById('login-err-otp').classList.remove('show');
+  document.getElementById('login-email').focus();
+}
+
+// Called after OTP verified — runs all the same post-login bootstrapping.
+function completeLogin(access, accessKey, resolvedRole) {
+  const role = resolvedRole || ROLES[access.role] || ROLES['exec'];
+  currentUser = { ...role, key: accessKey };
+  nodePeer = access.peer;
   document.getElementById('login-screen').classList.add('hidden');
   document.getElementById('shell').classList.add('visible');
   loadAll(); seedIfEmpty(); initShell();
-  // bring up the shared node
   initSupabase();
   setLogView('shared');
   refreshNode();
@@ -1624,15 +1798,24 @@ function nodePeerSignOut() {
   renderNodeLedger();
   toast('Signed out of node');
 }
-function doLogout() {
+async function doLogout() {
+  if (sb) await sb.auth.signOut().catch(() => {});
   currentUser = null;
-  nodePeer = null;
+  nodePeer    = null;
+  authEmail   = null;
   document.getElementById('login-screen').classList.remove('hidden');
   document.getElementById('shell').classList.remove('visible');
-  document.getElementById('login-code').value = '';
+  resetLoginPanels();
 }
 document.addEventListener('keydown', e => {
-  if (e.key === 'Enter' && !document.getElementById('login-screen').classList.contains('hidden')) doLogin();
+  if (e.key !== 'Enter') return;
+  const screen = document.getElementById('login-screen');
+  if (!screen || screen.classList.contains('hidden')) return;
+  if (document.getElementById('login-panel-otp').style.display !== 'none') {
+    doVerifyOtp();
+  } else {
+    doLogin();
+  }
 });
 
 // ── SEED DATA — TRUE LEDGER ──
@@ -5869,35 +6052,6 @@ function getSetting(k){ try { const v = localStorage.getItem('bx-setting-'+k); r
 function setSetting(k,v){ try { localStorage.setItem('bx-setting-'+k, v); } catch(e){} }
 function bixxFrom(){ return getSetting('fromEmail'); }
 
-function renderSettings() {
-  const el = document.getElementById('settings-body'); if (!el) return;
-  el.innerHTML = `
-    <div style="max-width:620px">
-      <div style="background:var(--navy2);border:1px solid var(--borderg);border-radius:6px;padding:22px;margin-bottom:16px">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--gold);margin-bottom:14px">EMAIL</div>
-        <div class="fg"><label class="fl">SENDING ADDRESS (FROM)</label>
-          <input class="fi" id="set-from" value="${getSetting('fromEmail').replace(/"/g,'&quot;')}"/>
-          <div style="font-size:9px;color:var(--cream3);margin-top:5px">Prepared receipts and emails use this address. You still send from your mail app.</div>
-        </div>
-        <div class="fg" style="margin-top:14px"><label class="fl">SIGNATURE / FOOTER</label>
-          <textarea class="fi" id="set-sig" rows="3" style="font-size:12px">${getSetting('signature').replace(/</g,'&lt;')}</textarea>
-          <div style="font-size:9px;color:var(--cream3);margin-top:5px">Added to the bottom of prepared emails.</div>
-        </div>
-        <button class="btn sm primary" style="margin-top:14px" onclick="saveSettings()">SAVE</button>
-      </div>
-      <div style="background:var(--navy2);border:1px solid var(--border);border-radius:6px;padding:18px;opacity:.6">
-        <div style="font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;color:var(--cream3);margin-bottom:8px">MORE — COMING</div>
-        <div style="font-size:11px;color:var(--cream3);line-height:1.6">This is where node configuration will grow: notification preferences, default LOG class, cycle reminders, and more. Settings are saved on this device.</div>
-      </div>
-    </div>`;
-}
-function saveSettings() {
-  const from = document.getElementById('set-from')?.value?.trim();
-  const sig = document.getElementById('set-sig')?.value;
-  if (from) setSetting('fromEmail', from);
-  if (sig!=null) setSetting('signature', sig);
-  toast('Settings saved');
-}
 async function emailReceipt(bidId) {
   const b = bidsCache.find(x=>x.id===bidId); if (!b) return;
   // pull the settlement record for this BID
@@ -6411,6 +6565,49 @@ function renderSettings(){
       </div>
     </div>
     <div class="settings-section">
+      <div class="settings-section-title">Network Access</div>
+      <div style="font-size:12px;color:var(--grey);line-height:1.7;margin-bottom:16px">
+        Invite a new operator to the Runtime. They receive an email, set their own password,
+        and appear in the operator registry automatically. No file edit, no redeploy.
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <input class="form-input" id="inv-email" type="email" placeholder="operator@email.com"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Peer name</label>
+        <input class="form-input" id="inv-peer" placeholder="e.g. LOYAL 305"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Access key</label>
+        <input class="form-input" id="inv-key" placeholder="e.g. loyal305 (what they type to sign in)"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Lane</label>
+        <input class="form-input" id="inv-lane" placeholder="e.g. Real Estate, Build, Legal"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Region</label>
+        <input class="form-input" id="inv-region" placeholder="e.g. Florida, USA"/>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Role</label>
+        <select class="form-input" id="inv-role">
+          <option value="exec">Exec Operator</option>
+          <option value="operator">Operator</option>
+          <option value="architect">Architect</option>
+          <option value="wrangler">Wrangler</option>
+          <option value="apprentice">Apprentice</option>
+        </select>
+      </div>
+      <button class="btn primary" onclick="sendInvite()">Send invite →</button>
+      <div id="inv-status" style="font-size:11px;margin-top:10px;display:none"></div>
+      <div style="margin-top:20px">
+        <div style="font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:10px">Active operators</div>
+        <div id="inv-roster">Loading…</div>
+      </div>
+    </div>
+    <div class="settings-section">
       <div class="settings-section-title">Runtime</div>
       <div style="font-size:12px;color:var(--grey)">
         Bixxville Runtime v2.0 · OS v1.1<br>
@@ -6418,12 +6615,85 @@ function renderSettings(){
         Genesis Feb 27 2025 · Cycle anchored to lunar calendar
       </div>
     </div>`;
+  loadOperatorRoster();
 }
 
 function saveSettings(){
-  setSetting('emailFrom',document.getElementById('set-from')?.value||'bixxville@proton.me');
-  setSetting('emailSig',document.getElementById('set-sig')?.value||'');
+  setSetting('emailFrom', document.getElementById('set-from')?.value || 'bixxville@proton.me');
+  setSetting('emailSig',  document.getElementById('set-sig')?.value  || '');
   toast('Settings saved');
+}
+
+async function loadOperatorRoster() {
+  const el = document.getElementById('inv-roster');
+  if (!el || !initSupabase()) return;
+  try {
+    const { data, error } = await sb.rpc('list_operators');
+    if (error || !data?.length) {
+      el.innerHTML = '<span style="font-size:11px;color:var(--grey)">None found.</span>';
+      return;
+    }
+    el.innerHTML = data.map(op => `
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)">
+        <div>
+          <div style="font-size:12px;font-weight:700;color:var(--cream)">${op.peer_name}</div>
+          <div style="font-size:10px;color:var(--grey)">${op.email} · ${op.lane}</div>
+        </div>
+        <span style="font-size:9px;letter-spacing:.1em;color:var(--green);text-transform:uppercase">${op.role}</span>
+      </div>`).join('');
+  } catch(e) {
+    el.innerHTML = '<span style="font-size:11px;color:var(--grey)">Could not load roster.</span>';
+  }
+}
+
+async function sendInvite() {
+  const email     = (document.getElementById('inv-email')?.value || '').trim().toLowerCase();
+  const peer_name = (document.getElementById('inv-peer')?.value || '').trim();
+  const access_key= (document.getElementById('inv-key')?.value || '').trim();
+  const lane      = (document.getElementById('inv-lane')?.value || '').trim();
+  const region    = (document.getElementById('inv-region')?.value || '').trim();
+  const role      = document.getElementById('inv-role')?.value || 'exec';
+  const status    = document.getElementById('inv-status');
+
+  status.style.display = 'none';
+  if (!email || !peer_name || !access_key || !lane) {
+    status.textContent = 'Email, peer name, access key, and lane are required.';
+    status.style.color = 'var(--red)';
+    status.style.display = 'block';
+    return;
+  }
+
+  status.textContent = 'Sending invite…';
+  status.style.color = 'var(--soft)';
+  status.style.display = 'block';
+
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    const res = await fetch(INVITE_FN_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${session?.access_token}`,
+      },
+      body: JSON.stringify({ email, peer_name, access_key, lane, region, role }),
+    });
+    const json = await res.json();
+    if (!res.ok || json.error) {
+      status.textContent = 'Invite failed: ' + (json.error || res.statusText);
+      status.style.color = 'var(--red)';
+    } else {
+      status.textContent = `Invite sent to ${email}. They'll receive an email to set their password.`;
+      status.style.color = 'var(--active)';
+      ['inv-email','inv-peer','inv-key','inv-lane','inv-region'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = '';
+      });
+      loadOperatorRoster();
+    }
+  } catch(e) {
+    status.textContent = 'Connection error. Check your internet and try again.';
+    status.style.color = 'var(--red)';
+  }
 }
 
 // ── VIEW MANAGEMENT (v2) ──

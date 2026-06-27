@@ -1404,7 +1404,7 @@ function toggleScope(id) {
   if (card) card.classList.toggle('open');
 }
 
-function buildScopeRow(s, idx) {
+function buildScopeRow(s, idx, projectCycle) {
   const color  = scopeColor(s.status);
   const label  = scopeStatusLabel(s.status);
   const sid    = 'scope-' + idx;
@@ -1421,7 +1421,7 @@ function buildScopeRow(s, idx) {
         <div><div class="wr-card-lbl wr-${color}-lbl">Assignee</div><div class="wr-card-val wr-${color}-val">${esc(s.assignee || '—')}</div></div>
         <div><div class="wr-card-lbl wr-${color}-lbl">LOGs</div><div class="wr-card-val wr-${color}-val">${s.log_size || 0} confirmed</div></div>
         <div><div class="wr-card-lbl wr-${color}-lbl">Status</div><div class="wr-card-val wr-${color}-val">${label}</div></div>
-        <div><div class="wr-card-lbl wr-${color}-lbl">Settled</div><div class="wr-card-val wr-${color}-val">C${s.cycle_number || '—'}</div></div>
+        <div><div class="wr-card-lbl wr-${color}-lbl">Settled</div><div class="wr-card-val wr-${color}-val">C${projectCycle || '—'}</div></div>
       </div>
     </div>`;
 }
@@ -1455,7 +1455,7 @@ function openMemberRecord(memberId) {
       const scopes   = p.bids || [];
       const projLogs = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
       const projDate = fmtDate(p.settled_at);
-      const rows = scopes.map(s => buildScopeRow(s, scopeIdx++)).join('');
+      const rows = scopes.map(s => buildScopeRow(s, scopeIdx++, p.cycle_number)).join('');
       return `
         <div style="border:1px solid var(--line);margin-bottom:12px;">
           <div class="wr-project-head">
@@ -1687,11 +1687,12 @@ async function exportRecord(memberId) {
       // Scope row
       dc(...c.lb); lw(1); doc.line(M, y, M, y+7);
       lw(0.2); dc(30,30,34); doc.rect(M, y, CW, 7, 'S');
-      bg(...c.dot); doc.circle(M+8, y+3.5, 2, 'F');
+      bg(...c.dot); doc.rect(M+6, y+2, 4, 4, 'F');
       tc(242,240,236); fw('normal'); fs(8); doc.text(s.title || 'Untitled', M+13, y+4.5);
       tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+80, y+4.5);
       tc(...c.dot); fw('bold'); fs(8); doc.text(`${s.log_size||0} LOG`, W-M-28, y+4.5);
-      bg(...c.bg); doc.roundedRect(W-M-22, y+1.5, 18, 4, 1, 1, 'F');
+      bg(...c.bg); doc.rect(W-M-22, y+1.5, 18, 4, 'F');
+      dc(...c.bd); lw(0.3); doc.rect(W-M-22, y+1.5, 18, 4, 'S');
       tc(...c.val); fw('bold'); fs(6); doc.text(label, W-M-13, y+4.5, { align:'center' });
       y += 7;
 

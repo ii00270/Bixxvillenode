@@ -823,9 +823,7 @@ function enterShell() {
   document.getElementById('tb-cycle').textContent = `C${cycle.num} · D${cycle.day}`;
   document.getElementById('tb-day').style.color   = dayColor;
   document.getElementById('tb-day').textContent   = `${cycle.left}d left`;
-  document.getElementById('tb-score').textContent = operator.reputation_score
-    ? Number(operator.reputation_score).toFixed(3)
-    : '—';
+  document.getElementById('tb-score').textContent = sb.from('operators').select('*').eq('email','benjobixx@proton.me').single().then(r => console.log(r.data))
 
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');

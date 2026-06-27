@@ -193,6 +193,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
   font-family:var(--mono);font-size:7px;
   color:var(--grey);letter-spacing:.14em;text-transform:uppercase;
 }
+.tb-exit{
+  background:none;border:none;
+  font-family:var(--mono);font-size:8px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey);
+  cursor:pointer;padding:4px 0 0;display:block;
+  transition:color .15s;
+}
+.tb-exit:hover{color:var(--soft);}
 
 /* ── SURFACES ── */
 #surfaces{
@@ -540,7 +548,36 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 }
 .export-btn:hover{border-color:var(--green);color:var(--green);}
 
-/* ── SCROLLBAR ── */
+/* ── CUSTOM CONFIRM DIALOG ── */
+#confirm-dialog{
+  position:fixed;inset:0;z-index:300;
+  display:flex;align-items:center;justify-content:center;
+  background:rgba(9,9,11,.85);
+  opacity:0;pointer-events:none;transition:opacity .2s;
+}
+#confirm-dialog.open{opacity:1;pointer-events:all;}
+.confirm-box{
+  width:calc(100% - 48px);max-width:320px;
+  background:var(--surface);border:1px solid var(--line2);
+  border-top:2px solid var(--green);padding:24px;
+}
+.confirm-msg{
+  font-family:var(--sans);font-size:14px;color:var(--soft);
+  line-height:1.65;margin-bottom:24px;
+}
+.confirm-actions{display:flex;gap:12px;}
+.confirm-ok{
+  flex:1;background:transparent;border:1px solid var(--green);
+  color:var(--green);font-family:var(--mono);font-size:10px;
+  font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  padding:12px;cursor:pointer;
+}
+.confirm-cancel{
+  flex:1;background:transparent;border:1px solid var(--line2);
+  color:var(--grey);font-family:var(--mono);font-size:10px;
+  font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  padding:12px;cursor:pointer;
+}
 .surface::-webkit-scrollbar,.ov-body::-webkit-scrollbar{width:2px;}
 .surface::-webkit-scrollbar-track,.ov-body::-webkit-scrollbar-track{background:transparent;}
 .surface::-webkit-scrollbar-thumb,.ov-body::-webkit-scrollbar-thumb{background:var(--line2);}
@@ -615,6 +652,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
     <div class="tb-right">
       <div class="tb-score" id="tb-score">—</div>
       <div class="tb-score-lbl">REP</div>
+      <button class="tb-exit" onclick="doLogout()">Exit</button>
     </div>
   </div>
 
@@ -705,6 +743,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
   <div class="ov-body" id="ov-body"></div>
 </div>
 
+<!-- Custom confirm dialog -->
+<div id="confirm-dialog">
+  <div class="confirm-box">
+    <div class="confirm-msg" id="confirm-msg"></div>
+    <div class="confirm-actions">
+      <button class="confirm-cancel" onclick="resolveConfirm(false)">Cancel</button>
+      <button class="confirm-ok" onclick="resolveConfirm(true)">Confirm</button>
+    </div>
+  </div>
+</div>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -754,6 +803,20 @@ let overlayStack = [];  // track what's in the overlay for back navigation
 function initSB() {
   if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY);
   return sb;
+}
+
+// ── CUSTOM CONFIRM ──
+let confirmResolve = null;
+function osConfirm(msg) {
+  return new Promise(resolve => {
+    confirmResolve = resolve;
+    document.getElementById('confirm-msg').textContent = msg;
+    document.getElementById('confirm-dialog').classList.add('open');
+  });
+}
+function resolveConfirm(val) {
+  document.getElementById('confirm-dialog').classList.remove('open');
+  if (confirmResolve) { confirmResolve(val); confirmResolve = null; }
 }
 
 // ── AUTH ──
@@ -815,7 +878,13 @@ async function doLogout() {
 }
 
 // ── SHELL ENTRY ──
-function enterShell() {
+async function enterShell() {
+  // Always fetch fresh operator data so score and LOGs are current
+  if (sb && operator?.email) {
+    const { data: fresh } = await sb.from('operators').select('*').eq('email', operator.email).single();
+    if (fresh) operator = { ...operator, ...fresh };
+  }
+
   const cycle = getActiveCycle();
   const dayColor = cycle.left <= 3 ? 'var(--red)' : cycle.left <= 7 ? 'var(--orange)' : 'var(--cream)';
 
@@ -823,7 +892,9 @@ function enterShell() {
   document.getElementById('tb-cycle').textContent = `C${cycle.num} · D${cycle.day}`;
   document.getElementById('tb-day').style.color   = dayColor;
   document.getElementById('tb-day').textContent   = `${cycle.left}d left`;
-  document.getElementById('tb-score').textContent = sb.from('operators').select('*').eq('email','benjobixx@proton.me').single().then(r => console.log(r.data))
+  document.getElementById('tb-score').textContent = operator.reputation_score
+    ? Number(operator.reputation_score).toFixed(3)
+    : '—';
 
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');
@@ -1117,6 +1188,7 @@ async function saveScope(projectId) {
     p_log_size:   logs,
     p_assignee:   assignee || null,
   });
+
   if (error) { toast('Could not add scope.'); console.error(error); return; }
   toast('Scope added.');
   closeOverlay();
@@ -1181,18 +1253,24 @@ async function confirmScope(scopeId, projectId) {
 }
 
 async function settleProject(projectId) {
-  if (!confirm('Confirm settlement? This action is permanent and will lock the ledger entry.')) return;
+  const ok = await osConfirm('Confirm settlement? This action is permanent and will lock the ledger entry.');
+  if (!ok) return;
 
   const cycle = getActiveCycle();
+
+  // Calculate total logs for this project
+  const { data: scopes } = await sb.from('bids').select('log_size').eq('project_id', projectId);
+  const totalLogs = (scopes || []).reduce((n, s) => n + (s.log_size || 0), 0);
+
   const { error } = await sb.from('relation_submissions').update({
-    status: 'settled',
-    settled_at: new Date().toISOString(),
-    cycle_number: cycle.num,
+    status:               'settled',
+    settled_at:           new Date().toISOString(),
+    cycle_number:         cycle.num,
+    total_logs_confirmed: totalLogs,
   }).eq('id', projectId);
 
   if (error) { toast('Settlement failed.'); console.error(error); return; }
 
-  // Update operator reputation and LOG count
   await updateReputation(projectId);
 
   toast('Project settled and locked on the ledger.');
@@ -1243,7 +1321,7 @@ async function loadRecord() {
   try {
     const [{ data: settled }, { data: members }] = await Promise.all([
       sb.from('relation_submissions').select('*').eq('status', 'settled').order('settled_at', { ascending: false }),
-      sb.from('operators').select('*').eq('active', true).order('total_logs', { ascending: false }),
+      sb.rpc('list_operators'),
     ]);
 
     const s = settled || [];

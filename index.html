@@ -1651,11 +1651,18 @@ async function exportRecord(memberId) {
   tc(82,80,78);
   doc.text(`$${(totalLogs*rate*0.25).toLocaleString()} reserved`, W-M-2, y+23, { align:'right' });
 
-  // ── SCOPE BREAKDOWN ──
+  // ── SCOPE DAG ──
   y += 32;
   tc(82,80,78); fw('normal'); fs(5.5);
-  doc.text('SCOPE BREAKDOWN', M, y);
-  y += 5;
+  doc.text('PROJECT DECOMPOSITION', M, y);
+  y += 7;
+
+  const PDF_COLORS = {
+    green:  { fill:[59,109,17],   border:[99,153,34],   bg:[234,243,222], text:[39,80,10]   },
+    orange: { fill:[133,79,11],   border:[186,117,23],  bg:[250,238,218], text:[99,56,6]    },
+    red:    { fill:[163,45,45],   border:[226,75,74],   bg:[252,235,235], text:[121,31,31]  },
+    grey:   { fill:[52,50,48],    border:[82,80,78],    bg:[17,17,19],    text:[168,166,162]},
+  };
 
   for (const p of settledWithScopes) {
     const scopes   = p.bids || [];
@@ -1663,52 +1670,116 @@ async function exportRecord(memberId) {
     const projDate = p.settled_at
       ? new Date(p.settled_at).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})
       : '—';
-    const blockH = 7 + scopes.length * (7 + 22) + 6;
-    if (y + blockH > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
 
-    bg(17,17,19); doc.rect(M, y, CW, 7, 'F');
-    dc(30,30,34); lw(0.2); doc.rect(M, y, CW, 7, 'S');
-    tc(242,240,236); fw('bold'); fs(8);
-    doc.text(p.relation_name || p.relation_code || '—', M+3, y+4.5);
+    // Project label
+    if (y + 60 > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+    tc(242,240,236); fw('bold'); fs(9);
+    doc.text(p.relation_name || p.relation_code || '—', M, y);
     tc(82,80,78); fw('normal'); fs(6.5);
-    doc.text(`C${p.cycle_number||'—'}  ·  ${projDate}  ·  ${projLogs} LOG`, W-M-2, y+4.5, { align:'right' });
-    y += 7;
-
-    const PDF_COLORS = {
-      green:  { dot:[99,153,34],  lb:[59,109,17],  bg:[234,243,222], bd:[192,221,151], lbl:[59,109,17],  val:[39,80,10]  },
-      orange: { dot:[186,117,23], lb:[133,79,11],  bg:[250,238,218], bd:[250,199,117], lbl:[133,79,11], val:[99,56,6]   },
-      red:    { dot:[226,75,74],  lb:[163,45,45],  bg:[252,235,235], bd:[247,193,193], lbl:[163,45,45], val:[121,31,31] },
-    };
-
-    for (const s of scopes) {
-      const c     = PDF_COLORS[scopeColor(s.status)];
-      const label = scopeStatusLabel(s.status);
-
-      // Scope row
-      dc(...c.lb); lw(1); doc.line(M, y, M, y+7);
-      lw(0.2); dc(30,30,34); doc.rect(M, y, CW, 7, 'S');
-      bg(...c.dot); doc.rect(M+6, y+2, 4, 4, 'F');
-      tc(242,240,236); fw('normal'); fs(8); doc.text(s.title || 'Untitled', M+13, y+4.5);
-      tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+75, y+4.5);
-      tc(...c.dot); fw('bold'); fs(8); doc.text(`${s.log_size||0}L`, W-M-32, y+4.5);
-      bg(...c.bg); doc.rect(W-M-26, y+1.5, 22, 4, 'F');
-      dc(...c.bd); lw(0.3); doc.rect(W-M-26, y+1.5, 22, 4, 'S');
-      tc(...c.val); fw('bold'); fs(6); doc.text(label, W-M-15, y+4.5, { align:'center' });
-      y += 7;
-
-      // Expanded card
-      bg(...c.bg); doc.rect(M, y, CW, 22, 'F');
-      dc(...c.bd); lw(0.5); doc.rect(M, y, CW, 22, 'S');
-      const half = CW / 2;
-      [['Assignee', s.assignee||'—'], ['LOGs', `${s.log_size||0} confirmed`], ['Status', label], ['Cycle', `C${p.cycle_number||'—'}`]].forEach(([l,v],i) => {
-        const cx = M + (i%2)*half + 4;
-        const cy = y + (i < 2 ? 6 : 15);
-        tc(...c.lbl); fw('normal'); fs(6); doc.text(l.toUpperCase(), cx, cy);
-        tc(...c.val); fw('bold'); fs(9); doc.text(v, cx, cy+5);
-      });
-      y += 25;
-    }
+    doc.text(`C${p.cycle_number||'—'}  ·  ${projDate}  ·  ${projLogs} LOG`, W-M, y, { align:'right' });
     y += 5;
+
+    // DAG layout — nodes in a row, arrows between them
+    // Node dimensions
+    const nW = 36;   // node width
+    const nH = 22;   // node height
+    const gap = 10;  // arrow gap between nodes
+    const totalNodes = scopes.length + 2; // START + scopes + OUTCOME
+    const totalW = totalNodes * nW + (totalNodes - 1) * gap;
+    const startX = M + (CW - Math.min(totalW, CW)) / 2;
+    const nodeY  = y;
+
+    // Clamp to page width — wrap to rows if too many scopes
+    const maxPerRow = Math.floor((CW + gap) / (nW + gap));
+    const rows = [];
+    let current = [];
+    scopes.forEach((s, i) => { current.push(s); if (current.length === maxPerRow - (rows.length === 0 ? 2 : 0)) { rows.push(current); current = []; } });
+    if (current.length) rows.push(current);
+
+    // Single row layout for small scope counts
+    if (scopes.length <= maxPerRow - 2) {
+      // All nodes in one row: START → scope1 → scope2 → ... → OUTCOME
+      let nx = startX;
+
+      // START node
+      const startC = PDF_COLORS.grey;
+      bg(...startC.bg); doc.rect(nx, nodeY, nW, nH, 'F');
+      dc(...startC.border); lw(1); doc.rect(nx, nodeY, nW, nH, 'S');
+      tc(...startC.text); fw('bold'); fs(6);
+      doc.text('START', nx + nW/2, nodeY + nH/2 + 2, { align:'center' });
+      nx += nW;
+
+      scopes.forEach((s, i) => {
+        // Arrow
+        const color = scopeColor(s.status);
+        const arrowC = PDF_COLORS[color];
+        dc(...arrowC.border); lw(0.8);
+        doc.line(nx, nodeY + nH/2, nx + gap, nodeY + nH/2);
+        doc.line(nx + gap - 2, nodeY + nH/2 - 1.5, nx + gap, nodeY + nH/2);
+        doc.line(nx + gap - 2, nodeY + nH/2 + 1.5, nx + gap, nodeY + nH/2);
+        nx += gap;
+
+        // Scope node
+        bg(...arrowC.bg); doc.rect(nx, nodeY, nW, nH, 'F');
+        dc(...arrowC.border); lw(1.5); doc.rect(nx, nodeY, nW, nH, 'S');
+
+        // Status label top
+        tc(...arrowC.fill); fw('bold'); fs(5);
+        const statusTag = scopeColor(s.status) === 'red' ? 'BLOCKED' : scopeColor(s.status) === 'orange' ? 'IN PROGRESS' : 'CONFIRMED';
+        doc.text(statusTag, nx + nW/2, nodeY + 5, { align:'center' });
+
+        // Scope title
+        tc(...arrowC.text); fw('bold'); fs(7);
+        const title = (s.title || 'Untitled').length > 10 ? (s.title || 'Untitled').substring(0, 10) + '…' : (s.title || 'Untitled');
+        doc.text(title, nx + nW/2, nodeY + 12, { align:'center' });
+
+        // LOG count
+        tc(...arrowC.fill); fw('normal'); fs(6);
+        doc.text(`${s.log_size||0} LOG`, nx + nW/2, nodeY + 18, { align:'center' });
+
+        nx += nW;
+      });
+
+      // Final arrow to OUTCOME
+      dc(140,240,96); lw(0.8);
+      doc.line(nx, nodeY + nH/2, nx + gap, nodeY + nH/2);
+      doc.line(nx + gap - 2, nodeY + nH/2 - 1.5, nx + gap, nodeY + nH/2);
+      doc.line(nx + gap - 2, nodeY + nH/2 + 1.5, nx + gap, nodeY + nH/2);
+      nx += gap;
+
+      // OUTCOME node
+      bg(17,17,19); doc.rect(nx, nodeY, nW, nH, 'F');
+      dc(140,240,96); lw(2); doc.rect(nx, nodeY, nW, nH, 'S');
+      tc(82,80,78); fw('bold'); fs(5);
+      doc.text('OUTCOME', nx + nW/2, nodeY + 6, { align:'center' });
+      tc(140,240,96); fw('bold'); fs(7);
+      doc.text('Project', nx + nW/2, nodeY + 13, { align:'center' });
+      doc.text('closed', nx + nW/2, nodeY + 19, { align:'center' });
+
+      y = nodeY + nH + 10;
+
+    } else {
+      // Many scopes — fall back to the color-coded list
+      for (const s of scopes) {
+        const c     = PDF_COLORS[scopeColor(s.status)];
+        const label = scopeStatusLabel(s.status);
+        dc(...c.border); lw(1); doc.line(M, y, M, y+7);
+        lw(0.2); dc(30,30,34); doc.rect(M, y, CW, 7, 'S');
+        bg(...c.fill); doc.rect(M+6, y+2, 4, 4, 'F');
+        tc(242,240,236); fw('normal'); fs(8); doc.text(s.title || 'Untitled', M+13, y+4.5);
+        tc(82,80,78); fs(7); doc.text(s.assignee || '—', M+75, y+4.5);
+        tc(...c.border); fw('bold'); fs(8); doc.text(`${s.log_size||0}L`, W-M-32, y+4.5);
+        bg(...c.bg); doc.rect(W-M-26, y+1.5, 22, 4, 'F');
+        dc(...c.border); lw(0.3); doc.rect(W-M-26, y+1.5, 22, 4, 'S');
+        tc(...c.text); fw('bold'); fs(6); doc.text(label, W-M-15, y+4.5, { align:'center' });
+        y += 8;
+      }
+      y += 4;
+    }
+
+    // Separator
+    dc(30,30,34); lw(0.2); doc.line(M, y, W-M, y);
+    y += 8;
   }
 
   if (!settledWithScopes.length) {

@@ -828,8 +828,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 <!-- ═══ AUTH GATE ═══ -->
 <div id="gate">
   <div class="gate-box">
-    <div class="gate-mark">Bixxville</div>
-    <div class="gate-name">OS v1.1</div>
+    <div style="display:flex;flex-direction:column;align-items:center;margin-bottom:32px;">
+      <img src="./lordbixx-02.svg"
+           style="width:120px;height:auto;filter:invert(1) sepia(1) saturate(3) hue-rotate(65deg) brightness(1.2);"
+           alt="Bixxville"/>
+      <div style="font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--grey);margin-top:10px;">OS v1.1</div>
+    </div>
     <div class="gate-rule"></div>
 
     <!-- Relation mode — default -->
@@ -1573,7 +1577,11 @@ async function loadRecord() {
       <div class="section-lbl" style="position:relative;top:0">Network</div>
       ${m.length ? m.map(op => `
         <div class="member-row" onclick="openMemberRecord('${op.id}')">
-          <div class="member-avatar">${op.handle ? esc(op.handle) : (op.peer_name||'?').charAt(0)}</div>
+          <div class="member-avatar">
+            ${op.handle
+              ? `<img src="./lordbixx-03.svg" style="width:28px;height:28px;filter:invert(1) sepia(1) saturate(3) hue-rotate(65deg) brightness(1.2);" alt="mark"/>`
+              : `<span style="font-size:12px;font-weight:600;color:var(--green)">${(op.peer_name||'?').charAt(0)}</span>`}
+          </div>
           <div class="member-info">
             <div class="member-name">${esc(op.peer_name)}</div>
             <div class="member-meta">${op.total_logs || 0} LOG · ${esc(op.lane || '—')}${op.bio ? ' · ' + esc(op.bio.substring(0,40)) : ''}</div>
@@ -1650,10 +1658,6 @@ function openMemberRecord(memberId) {
     const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-    const handle = op.handle || '@' + (op.peer_name || '').replace(/\s/g,'').toUpperCase();
-    const creds  = Array.isArray(op.credentials) ? op.credentials : (op.credentials ? JSON.parse(op.credentials) : []);
-    const skills = Array.isArray(op.skills) ? op.skills : (op.skills ? JSON.parse(op.skills) : []);
-
     const { data: projects } = await sb.rpc('get_settled_projects');
     const settled = projects || [];
     const settledIds = settled.map(p => p.id);
@@ -1663,105 +1667,153 @@ function openMemberRecord(memberId) {
       allScopes = scopeData || [];
     }
     const settledWithScopes = settled.map(p => ({ ...p, bids: allScopes.filter(s => s.project_id === p.id) }));
-
     let scopeIdx = 0;
     const breakdown = settledWithScopes.length
       ? settledWithScopes.map(p => {
           const scopes   = p.bids || [];
           const projLogs = scopes.reduce((n,s) => n+(s.log_size||0), 0);
           const rows = scopes.map(s => buildScopeRow(s, scopeIdx++, p.cycle_number)).join('');
-          return `
-            <div style="border:1px solid var(--line);margin-bottom:12px;">
-              <div class="wr-project-head">
-                <div class="wr-project-name">${esc(p.relation_name || p.relation_code || '—')}</div>
-                <div class="wr-project-meta">C${p.cycle_number||'—'} · ${fmtDate(p.settled_at)} · ${projLogs} LOG</div>
-              </div>
-              ${rows}
-            </div>`;
+          return `<div style="border:1px solid var(--line);margin-bottom:12px;">
+            <div class="wr-project-head">
+              <div class="wr-project-name">${esc(p.relation_name || p.relation_code || '—')}</div>
+              <div class="wr-project-meta">C${p.cycle_number||'—'} · ${fmtDate(p.settled_at)} · ${projLogs} LOG</div>
+            </div>${rows}</div>`;
         }).join('')
       : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No settled projects yet.</div></div>';
 
-    body.innerHTML = `
-      <!-- Avatar + name -->
-      <div style="display:flex;align-items:center;gap:0">
-        <div class="prof-avatar">${esc(handle)}</div>
-      </div>
-      <div class="prof-head">
-        <div style="width:64px;flex-shrink:0"></div>
-        <div class="prof-head-info">
-          <div class="prof-peer">${esc(op.peer_name)}</div>
-          <div class="prof-handle">${esc(handle)}</div>
-          <div class="prof-lane">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
-        </div>
-      </div>
+    window._profCreds  = Array.isArray(op.credentials) ? [...op.credentials] : [];
+    window._profSkills = Array.isArray(op.skills) ? [...op.skills] : [];
+    window._profOp     = op;
+    window._profMember = memberId;
 
-      <!-- Stats -->
-      <div class="stat-grid">
-        <div class="stat-cell"><div class="stat-val green">${op.total_logs || 0}</div><div class="stat-lbl">LOGs</div></div>
-        <div class="stat-cell"><div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div><div class="stat-lbl">Rep</div></div>
-        <div class="stat-cell"><div class="stat-val">${tier(op.total_logs)}</div><div class="stat-lbl">Tier</div></div>
-        <div class="stat-cell"><div class="stat-val">${op.streak || 0}</div><div class="stat-lbl">Streak</div></div>
-      </div>
-
-      <!-- Editable profile -->
-      <div class="prof-section">Profile</div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">Handle</div>
-        <input class="prof-field-input" id="prof-handle" value="${esc(handle)}" placeholder="@handle"/>
-      </div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">What you do</div>
-        <textarea class="prof-field-textarea" id="prof-bio" placeholder="Brief description of your work and expertise">${esc(op.bio || '')}</textarea>
-      </div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">Contact email</div>
-        <input class="prof-field-input" id="prof-contact-email" type="email" value="${esc(op.contact_email || '')}" placeholder="Public contact email"/>
-      </div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">Phone</div>
-        <input class="prof-field-input" id="prof-phone" type="tel" value="${esc(op.phone || '')}" placeholder="Contact number"/>
-      </div>
-
-      <!-- Credentials -->
-      <div class="prof-section">Credentials</div>
-      <div class="prof-field">
-        <div class="prof-tag-list" id="creds-list">
-          ${creds.map((c,i) => `<div class="prof-tag">${esc(c)}<span class="prof-tag-remove" onclick="removeCred(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
-        </div>
-        <div class="prof-add-row">
-          <input class="prof-add-input" id="cred-input" placeholder="e.g. RSO, TWIC, PMP, AWS Cloud Practitioner" onkeydown="if(event.key==='Enter')addCred()"/>
-          <button class="prof-add-btn" onclick="addCred()">Add</button>
-        </div>
-      </div>
-
-      <!-- Skills -->
-      <div class="prof-section">Skills</div>
-      <div class="prof-field">
-        <div class="prof-tag-list" id="skills-list">
-          ${skills.map((s,i) => `<div class="prof-tag">${esc(s)}<span class="prof-tag-remove" onclick="removeSkill(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
-        </div>
-        <div class="prof-add-row">
-          <input class="prof-add-input" id="skill-input" placeholder="e.g. Systems Analysis, Project Decomposition, Real Estate" onkeydown="if(event.key==='Enter')addSkill()"/>
-          <button class="prof-add-btn" onclick="addSkill()">Add</button>
-        </div>
-      </div>
-
-      <button class="act-btn" onclick="saveProfile()">Save Profile</button>
-
-      <!-- Scope breakdown -->
-      <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
-      <div style="padding:12px 18px">${breakdown}</div>
-
-      <!-- Export -->
-      <div class="export-row">
-        <div class="export-lbl">Verified Work Record</div>
-        <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
-      </div>`;
-
-    // Store working copies of creds/skills in closure
-    window._profCreds  = [...creds];
-    window._profSkills = [...skills];
+    renderProfileView(body, op, breakdown, memberId);
   });
+}
+
+function renderProfileView(body, op, breakdown, memberId) {
+  const handle  = op.handle || '@' + (op.peer_name||'').replace(/\s/g,'').toUpperCase();
+  const creds   = window._profCreds;
+  const skills  = window._profSkills;
+
+  body.innerHTML = `
+    <!-- Avatar + header -->
+    <div style="padding:20px 18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px">
+      <div class="prof-avatar"><img src="./lordbixx-03.svg" style="width:40px;height:40px;filter:invert(1) sepia(1) saturate(3) hue-rotate(65deg) brightness(1.2);" alt="OWAV"/></div>
+      <div style="flex:1">
+        <div class="prof-peer">${esc(op.peer_name)}</div>
+        <div class="prof-handle">${esc(handle)}</div>
+        <div class="prof-lane">${esc(op.lane||'—')} · ${esc(op.region||'—')}</div>
+      </div>
+      <button class="export-btn" onclick="renderProfileEdit()" style="white-space:nowrap">Edit</button>
+    </div>
+
+    <!-- Stats -->
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="stat-val green">${op.total_logs||0}</div><div class="stat-lbl">LOGs</div></div>
+      <div class="stat-cell"><div class="stat-val">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div><div class="stat-lbl">Rep</div></div>
+      <div class="stat-cell"><div class="stat-val">${tier(op.total_logs)}</div><div class="stat-lbl">Tier</div></div>
+      <div class="stat-cell"><div class="stat-val">${op.streak||0}</div><div class="stat-lbl">Streak</div></div>
+    </div>
+
+    <!-- Bio -->
+    ${op.bio ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:6px">About</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.65">${esc(op.bio)}</div>
+    </div>` : ''}
+
+    <!-- Contact -->
+    ${op.contact_email || op.phone ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line);display:flex;gap:24px">
+      ${op.contact_email ? `<div><div class="prof-field-lbl">Email</div><div style="font-family:var(--mono);font-size:12px;color:var(--soft);margin-top:3px">${esc(op.contact_email)}</div></div>` : ''}
+      ${op.phone ? `<div><div class="prof-field-lbl">Phone</div><div style="font-family:var(--mono);font-size:12px;color:var(--soft);margin-top:3px">${esc(op.phone)}</div></div>` : ''}
+    </div>` : ''}
+
+    <!-- Credentials -->
+    ${creds.length ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:8px">Credentials</div>
+      <div class="prof-tag-list">${creds.map(c => `<div class="prof-tag" style="cursor:default">${esc(c)}</div>`).join('')}</div>
+    </div>` : ''}
+
+    <!-- Skills -->
+    ${skills.length ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:8px">Skills</div>
+      <div class="prof-tag-list">${skills.map(s => `<div class="prof-tag" style="cursor:default">${esc(s)}</div>`).join('')}</div>
+    </div>` : ''}
+
+    <!-- Scope breakdown -->
+    <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
+    <div style="padding:12px 18px">${breakdown}</div>
+
+    <!-- Export -->
+    <div class="export-row">
+      <div class="export-lbl">Verified Work Record</div>
+      <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
+    </div>`;
+}
+
+function renderProfileEdit() {
+  const op     = window._profOp;
+  const handle = op.handle || '@' + (op.peer_name||'').replace(/\s/g,'').toUpperCase();
+  const body   = document.getElementById('ov-body');
+  if (!body) return;
+
+  body.innerHTML = `
+    <div style="padding:20px 18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px">
+      <div class="prof-avatar"><img src="./lordbixx-03.svg" style="width:40px;height:40px;filter:invert(1) sepia(1) saturate(3) hue-rotate(65deg) brightness(1.2);" alt="OWAV"/></div>
+      <div style="flex:1">
+        <div class="prof-peer">${esc(op.peer_name)}</div>
+        <div class="prof-lane">${esc(op.lane||'—')} · ${esc(op.region||'—')}</div>
+      </div>
+      <button class="export-btn" onclick="cancelProfileEdit()">Cancel</button>
+    </div>
+
+    <div class="prof-field">
+      <div class="prof-field-lbl">Handle</div>
+      <input class="prof-field-input" id="prof-handle" value="${esc(handle)}" placeholder="@handle"/>
+    </div>
+    <div class="prof-field">
+      <div class="prof-field-lbl">What you do</div>
+      <textarea class="prof-field-textarea" id="prof-bio" placeholder="Brief description of your work and expertise">${esc(op.bio||'')}</textarea>
+    </div>
+    <div class="prof-field">
+      <div class="prof-field-lbl">Contact email</div>
+      <input class="prof-field-input" id="prof-contact-email" type="email" value="${esc(op.contact_email||'')}" placeholder="Public contact email"/>
+    </div>
+    <div class="prof-field">
+      <div class="prof-field-lbl">Phone</div>
+      <input class="prof-field-input" id="prof-phone" type="tel" value="${esc(op.phone||'')}" placeholder="Contact number"/>
+    </div>
+
+    <div class="prof-section">Credentials</div>
+    <div class="prof-field">
+      <div class="prof-tag-list" id="creds-list">
+        ${window._profCreds.map((c,i) => `<div class="prof-tag">${esc(c)}<span class="prof-tag-remove" onclick="removeCred(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
+      </div>
+      <div class="prof-add-row">
+        <input class="prof-add-input" id="cred-input" placeholder="e.g. RSO, TWIC, PMP" onkeydown="if(event.key==='Enter')addCred()"/>
+        <button class="prof-add-btn" onclick="addCred()">Add</button>
+      </div>
+    </div>
+
+    <div class="prof-section">Skills</div>
+    <div class="prof-field">
+      <div class="prof-tag-list" id="skills-list">
+        ${window._profSkills.map((s,i) => `<div class="prof-tag">${esc(s)}<span class="prof-tag-remove" onclick="removeSkill(${i})">×</span></div>`).join('') || '<span style="font-family:var(--mono);font-size:10px;color:var(--grey)">None added</span>'}
+      </div>
+      <div class="prof-add-row">
+        <input class="prof-add-input" id="skill-input" placeholder="e.g. Systems Analysis, Real Estate" onkeydown="if(event.key==='Enter')addSkill()"/>
+        <button class="prof-add-btn" onclick="addSkill()">Add</button>
+      </div>
+    </div>
+
+    <button class="act-btn" onclick="saveProfile()">Save Profile</button>`;
+}
+
+function cancelProfileEdit() {
+  const body = document.getElementById('ov-body');
+  if (!body) return;
+  renderProfileView(body, window._profOp,
+    '<div class="empty" style="padding:16px 0"><div class="empty-msg">Reload to see breakdown.</div></div>',
+    window._profMember);
 }
 
 function renderTagList(listId, arr, removeFn) {
@@ -1820,17 +1872,24 @@ async function saveProfile() {
     });
     if (error) throw error;
 
-    // Update local operator state
+    // Update local state
     operator.handle        = handle;
     operator.bio           = bio;
     operator.contact_email = contactEmail;
     operator.phone         = phone;
     operator.credentials   = window._profCreds;
     operator.skills        = window._profSkills;
+    window._profOp = { ...window._profOp, handle, bio, contact_email: contactEmail, phone,
+      credentials: window._profCreds, skills: window._profSkills };
 
     toast('Profile saved.');
-    // Refresh topbar peer name if handle changed
-    document.getElementById('tb-peer').textContent = operator.peer_name;
+
+    // Snap back to view mode
+    const body = document.getElementById('ov-body');
+    if (body) renderProfileView(body, window._profOp,
+      '<div class="empty" style="padding:16px 0"><div class="empty-msg">Reload to refresh breakdown.</div></div>',
+      window._profMember);
+
   } catch(e) {
     toast('Could not save profile.');
     console.error(e);

@@ -844,8 +844,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
   #topbar{display:none!important;}
   #bottom-nav{display:none!important;}
 }
-.ds-logo{padding:18px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);flex-shrink:0;}
-.ds-wordmark{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);letter-spacing:.04em;}
+.ds-logo{padding:20px 18px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.ds-wordmark{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green);letter-spacing:.04em;}
 .ds-nav{flex:1;padding:8px 0;overflow-y:auto;}
 .ds-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;transition:background .1s;position:relative;border:none;background:none;width:100%;text-align:left;-webkit-tap-highlight-color:transparent;}
 .ds-item:hover{background:rgba(140,240,96,.04);}
@@ -874,7 +874,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 .tb-exit-sm{background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);cursor:pointer;padding:0;}
 
 /* ── NETWORK FEED ── */
-.feed-row{display:grid;grid-template-columns:50px 72px 1fr 50px;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid #111113;}
+.feed-row{display:grid;grid-template-columns:16px 72px 1fr 1fr 56px;gap:10px;align-items:center;padding:11px 16px;border-bottom:1px solid #1E1E1E;}
 .feed-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin:0 auto;}
 .feed-time{font-family:var(--mono);font-size:8px;color:var(--grey);letter-spacing:.04em;}
 .feed-node{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -977,7 +977,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
   <!-- Desktop left sidebar -->
   <aside id="d-sidebar">
     <div class="ds-logo">
-      <svg width="28" height="28" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
+      <svg width="36" height="36" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
         <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
       </svg>
       <div class="ds-wordmark">Bixxville</div>
@@ -1298,30 +1298,39 @@ async function enterShell() {
     if (fresh) operator = { ...operator, ...fresh };
   }
 
-  const cycle  = getActiveCycle();
-  const now    = new Date();
+  const cycle   = getActiveCycle();
+  const now     = new Date();
   const dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-  const repStr  = operator.reputation_score ? Number(operator.reputation_score).toFixed(3) : '—';
+  const repNum  = operator.reputation_score != null ? Number(operator.reputation_score) : null;
+  const repStr  = repNum != null ? repNum.toFixed(3) : '—';
   const handle  = operator.handle || ('@' + (operator.peer_name||'').replace(/\s/g,'').toUpperCase());
+  const tierStr = tier(operator.total_logs);
 
   // Mobile topbar
-  document.getElementById('tb-score').textContent = repStr;
+  const tbScore = document.getElementById('tb-score');
+  if (tbScore) tbScore.textContent = repStr;
 
   // Desktop sidebar peer info
-  document.getElementById('ds-peer-name').textContent   = operator.peer_name || '—';
-  document.getElementById('ds-peer-handle').textContent  = handle;
+  const dsPeerName   = document.getElementById('ds-peer-name');
+  const dsPeerHandle = document.getElementById('ds-peer-handle');
+  if (dsPeerName)   dsPeerName.textContent   = operator.peer_name || '—';
+  if (dsPeerHandle) dsPeerHandle.textContent  = handle;
 
-  // Desktop right sidebar
-  document.getElementById('dr-logs').textContent    = operator.total_logs || 0;
-  document.getElementById('dr-rep').textContent     = repStr;
-  document.getElementById('dr-tier').textContent    = tier(operator.total_logs);
-  document.getElementById('dr-streak').textContent  = operator.streak || 0;
-  document.getElementById('dr-cycle').textContent   = `C${cycle.num}`;
-  document.getElementById('dr-day').textContent     = `D${cycle.day} of 28`;
-  document.getElementById('dr-closes').textContent  = `${cycle.left}d left`;
+  // Desktop right sidebar — use safe setter
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+  set('dr-logs',       operator.total_logs || 0);
+  set('dr-rep',        repStr);
+  set('dr-tier',       tierStr);
+  set('dr-streak',     operator.streak || 0);
+  set('dr-cycle',      `C${cycle.num}`);
+  set('dr-day',        `D${cycle.day} of 28`);
+  set('dr-closes',     `${cycle.left}d left`);
+  set('dr-nodes',      '—');
+  set('dr-cycle-logs', '—');
 
   // Home surface cycle label
-  document.getElementById('home-cycle').textContent = `C${cycle.num} · ${dateStr}`;
+  const homeCycle = document.getElementById('home-cycle');
+  if (homeCycle) homeCycle.textContent = `C${cycle.num} · ${dateStr}`;
 
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');

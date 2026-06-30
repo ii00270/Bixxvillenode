@@ -824,6 +824,79 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 .wr-orange-row{border-left:3px solid #854F0B;} .wr-orange-dot{background:#BA7517;} .wr-orange-logs{color:#BA7517;} .wr-orange-badge{color:#633806;background:#FAC775;} .wr-orange-card{border:1px solid #FAC775;} .wr-orange-inner{background:#FAEEDA;} .wr-orange-lbl{color:#854F0B;} .wr-orange-val{color:#633806;}
 .wr-red-row{border-left:3px solid #A32D2D;} .wr-red-dot{background:#E24B4A;} .wr-red-logs{color:#E24B4A;} .wr-red-badge{color:#791F1F;background:#F7C1C1;} .wr-red-card{border:1px solid #F7C1C1;} .wr-red-inner{background:#FCEBEB;} .wr-red-lbl{color:#A32D2D;} .wr-red-val{color:#791F1F;}
 
+/* ── DESKTOP LAYOUT ── */
+#d-sidebar{
+  display:none;width:220px;flex-shrink:0;
+  border-right:1px solid var(--line);
+  flex-direction:column;
+  background:rgba(9,10,11,.97);
+}
+#d-right{
+  display:none;width:240px;flex-shrink:0;
+  border-left:1px solid var(--line);
+  flex-direction:column;overflow-y:auto;
+}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+@media(min-width:768px){
+  #shell{flex-direction:row!important;}
+  #d-sidebar{display:flex;}
+  #d-right{display:flex;}
+  #topbar{display:none!important;}
+  #bottom-nav{display:none!important;}
+}
+.ds-logo{padding:18px 18px 16px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--line);flex-shrink:0;}
+.ds-wordmark{font-family:var(--mono);font-size:14px;font-weight:700;color:var(--green);letter-spacing:.04em;}
+.ds-nav{flex:1;padding:8px 0;overflow-y:auto;}
+.ds-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;transition:background .1s;position:relative;border:none;background:none;width:100%;text-align:left;-webkit-tap-highlight-color:transparent;}
+.ds-item:hover{background:rgba(140,240,96,.04);}
+.ds-item.active{background:rgba(140,240,96,.07);}
+.ds-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--green);border-radius:0 2px 2px 0;}
+.ds-icon{width:18px;height:18px;flex-shrink:0;}
+.ds-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .15s;}
+.ds-item.active .ds-label{color:var(--cream);}
+.ds-badge{margin-left:auto;background:var(--orange);color:var(--black);font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px;}
+.ds-peer{margin-top:auto;padding:14px 16px;border-top:1px solid var(--line);flex-shrink:0;display:flex;align-items:center;gap:10px;}
+.ds-peer-mark{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.ds-peer-name{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--cream);}
+.ds-peer-handle{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:2px;}
+.dr-widget{padding:14px 16px;border-bottom:1px solid var(--line);}
+.dr-title{font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;}
+.dr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111113;}
+.dr-row:last-child{border-bottom:none;}
+.dr-label{font-family:var(--mono);font-size:9px;color:var(--grey);}
+.dr-val{font-family:var(--mono);font-size:11px;font-weight:600;}
+
+/* ── MOBILE TOPBAR (updated) ── */
+.tb-mark{display:flex;align-items:center;gap:8px;}
+.tb-wordmark{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--green);letter-spacing:.04em;}
+.tb-right-mobile{margin-left:auto;display:flex;align-items:center;gap:10px;}
+.tb-rep-pill{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green);letter-spacing:.04em;}
+.tb-exit-sm{background:none;border:none;font-family:var(--mono);font-size:8px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);cursor:pointer;padding:0;}
+
+/* ── NETWORK FEED ── */
+.feed-row{display:grid;grid-template-columns:50px 72px 1fr 50px;gap:8px;align-items:center;padding:11px 16px;border-bottom:1px solid #111113;}
+.feed-dot{width:6px;height:6px;border-radius:50%;flex-shrink:0;margin:0 auto;}
+.feed-time{font-family:var(--mono);font-size:8px;color:var(--grey);letter-spacing:.04em;}
+.feed-node{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cream);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-event{font-family:var(--mono);font-size:10px;color:var(--soft);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.feed-log{font-family:var(--mono);font-size:10px;font-weight:600;text-align:right;white-space:nowrap;}
+.feed-log.g{color:var(--green);} .feed-log.o{color:var(--orange);} .feed-log.gr{color:var(--grey);}
+@media(min-width:768px){
+  .feed-row{grid-template-columns:90px 110px 1fr 70px;gap:12px;padding:11px 20px;}
+  .feed-time,.feed-node,.feed-event,.feed-log{font-size:11px;}
+  .feed-time{font-size:9px;}
+}
+
+/* ── UPDATED BOTTOM NAV (5 tabs) ── */
+#bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(56px + var(--safe-b));padding-bottom:var(--safe-b);
+  background:rgba(9,10,11,.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);z-index:50;
+}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 </style>
@@ -901,97 +974,174 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 <!-- ═══ SHELL ═══ -->
 <div id="shell">
 
-  <!-- Top bar -->
-  <div id="topbar">
-    <div class="tb-peer" id="tb-peer">—</div>
-    <div class="tb-center">
-      <div class="tb-cycle" id="tb-cycle">C— · D—</div>
-      <div class="tb-day" id="tb-day">— · —d left</div>
+  <!-- Desktop left sidebar -->
+  <aside id="d-sidebar">
+    <div class="ds-logo">
+      <svg width="28" height="28" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
+        <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
+      </svg>
+      <div class="ds-wordmark">Bixxville</div>
     </div>
-    <div class="tb-right">
-      <div class="tb-score" id="tb-score">—</div>
-      <div class="tb-score-lbl">REP</div>
-      <button class="tb-exit" onclick="doLogout()">Exit</button>
+    <div class="ds-nav">
+      <button class="ds-item active" id="ds-home" onclick="showSurface('home')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        <span class="ds-label">Home</span>
+      </button>
+      <button class="ds-item" id="ds-ops" onclick="showSurface('ops')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
+        <span class="ds-label">Ops</span>
+      </button>
+      <button class="ds-item" id="ds-messages" onclick="showSurface('messages')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span class="ds-label">Messages</span>
+      </button>
+      <button class="ds-item" id="ds-notifications" onclick="showSurface('notifications')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="ds-label">Notifications</span>
+        <div class="ds-badge hidden" id="ds-notif-badge">0</div>
+      </button>
+      <button class="ds-item" id="ds-profile" onclick="showSurface('profile')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="ds-label">Profile</span>
+      </button>
     </div>
-  </div>
-
-  <!-- Surfaces -->
-  <div id="surfaces">
-
-    <!-- INTAKE -->
-    <div class="surface active" id="surface-intake">
-      <div class="s-head">
-        <div class="s-title">Intake</div>
-        <div class="s-count" id="intake-count"></div>
+    <div class="ds-peer">
+      <div class="ds-peer-mark" id="ds-peer-mark">
+        <svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
+        </svg>
       </div>
-      <div id="intake-body">
-        <div class="empty">
-          <div class="empty-line"></div>
-          <div class="empty-label">Pending</div>
-          <div class="empty-msg">No pending intakes. When a relation submits through the portal, their project appears here.</div>
+      <div>
+        <div class="ds-peer-name" id="ds-peer-name">—</div>
+        <div class="ds-peer-handle" id="ds-peer-handle">—</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <div id="main-area">
+
+    <!-- Mobile top bar -->
+    <div id="topbar">
+      <div class="tb-mark">
+        <svg width="22" height="22" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
+        </svg>
+        <span class="tb-wordmark">Bixxville</span>
+      </div>
+      <div class="tb-right-mobile">
+        <span class="tb-rep-pill" id="tb-score">—</span>
+        <button class="tb-exit-sm" onclick="doLogout()">Exit</button>
+      </div>
+    </div>
+
+    <!-- Surfaces -->
+    <div id="surfaces">
+
+      <!-- HOME -->
+      <div class="surface active" id="surface-home">
+        <div class="s-head">
+          <div class="s-title">Home</div>
+          <div class="s-count" id="home-cycle"></div>
+        </div>
+        <div id="home-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Network</div><div class="empty-msg">No network activity yet. Work will appear here as it happens.</div></div>
         </div>
       </div>
-    </div>
 
-    <!-- OPERATIONS -->
-    <div class="surface" id="surface-ops">
-      <div class="s-head">
-        <div class="s-title">Operations</div>
-        <div class="s-count" id="ops-count"></div>
-      </div>
-      <div id="ops-body">
-        <div class="empty">
-          <div class="empty-line"></div>
-          <div class="empty-label">Active</div>
-          <div class="empty-msg">No active projects. Accept an intake to begin decomposition.</div>
+      <!-- OPS -->
+      <div class="surface" id="surface-ops">
+        <div class="s-head">
+          <div class="s-title">Ops</div>
+          <div class="s-count" id="ops-count"></div>
+        </div>
+        <div id="ops-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Active</div><div class="empty-msg">No active projects. Accept an intake to begin decomposition.</div></div>
         </div>
       </div>
-    </div>
 
-    <!-- RECORD -->
-    <div class="surface" id="surface-record">
-      <div class="s-head">
-        <div class="s-title">Record</div>
-        <div class="s-count" id="record-count"></div>
-      </div>
-      <div id="record-body">
-        <div class="empty">
-          <div class="empty-line"></div>
-          <div class="empty-label">Ledger</div>
-          <div class="empty-msg">No settled projects yet. The ledger builds with every confirmed settlement.</div>
+      <!-- MESSAGES -->
+      <div class="surface" id="surface-messages">
+        <div class="s-head">
+          <div class="s-title">Messages</div>
+          <div class="s-count" id="messages-count"></div>
+        </div>
+        <div id="messages-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Threads</div><div class="empty-msg">No active message threads. Messages appear here when a relation has an open project.</div></div>
         </div>
       </div>
+
+      <!-- NOTIFICATIONS -->
+      <div class="surface" id="surface-notifications">
+        <div class="s-head">
+          <div class="s-title">Notifications</div>
+          <div class="s-count" id="notif-count"></div>
+        </div>
+        <div id="notif-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Alerts</div><div class="empty-msg">No notifications yet. Settlements, scope confirmations, and cycle alerts will appear here.</div></div>
+        </div>
+      </div>
+
+      <!-- PROFILE (was Record) -->
+      <div class="surface" id="surface-profile">
+        <div class="s-head">
+          <div class="s-title">Profile</div>
+          <div class="s-count" id="profile-count"></div>
+        </div>
+        <div id="profile-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Network</div><div class="empty-msg">Loading network...</div></div>
+        </div>
+      </div>
+
     </div>
 
-  </div>
+    <!-- Mobile bottom nav (5 tabs) -->
+    <nav id="bottom-nav">
+      <button class="nav-btn active" id="nav-home" onclick="showSurface('home')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-ops" onclick="showSurface('ops')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-messages" onclick="showSurface('messages')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-notifications" onclick="showSurface('notifications')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-profile" onclick="showSurface('profile')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+    </nav>
 
-  <!-- Bottom nav -->
-  <nav id="bottom-nav">
-    <button class="nav-btn active" id="nav-intake" onclick="showSurface('intake')">
-      <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-        <path d="M10 3v10M10 13l-4-4M10 13l4-4" stroke="#52504E" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-        <path d="M3 16h14" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span class="nav-label">Intake</span>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="nav-ops" onclick="showSurface('ops')">
-      <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="7" stroke="#52504E" stroke-width="1.5"/>
-        <circle cx="10" cy="10" r="2.5" stroke="#52504E" stroke-width="1.5"/>
-        <path d="M10 3v2M10 15v2M3 10h2M15 10h2" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span class="nav-label">Ops</span>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="nav-record" onclick="showSurface('record')">
-      <svg class="nav-icon" viewBox="0 0 20 20" fill="none">
-        <path d="M4 5h12M4 9h12M4 13h8" stroke="#52504E" stroke-width="1.5" stroke-linecap="round"/>
-      </svg>
-      <span class="nav-label">Record</span>
-      <div class="nav-dot"></div>
-    </button>
-  </nav>
+  </div><!-- /main-area -->
+
+  <!-- Desktop right sidebar -->
+  <aside id="d-right">
+    <div class="dr-widget">
+      <div class="dr-title">Your node</div>
+      <div class="dr-row"><span class="dr-label">LOGs</span><span class="dr-val" id="dr-logs" style="color:var(--green)">—</span></div>
+      <div class="dr-row"><span class="dr-label">Rep score</span><span class="dr-val" id="dr-rep">—</span></div>
+      <div class="dr-row"><span class="dr-label">Tier</span><span class="dr-val" id="dr-tier">—</span></div>
+      <div class="dr-row"><span class="dr-label">Streak</span><span class="dr-val" id="dr-streak">—</span></div>
+    </div>
+    <div class="dr-widget">
+      <div class="dr-title">Cycle</div>
+      <div class="dr-row"><span class="dr-label">Active</span><span class="dr-val" id="dr-cycle" style="color:var(--orange)">—</span></div>
+      <div class="dr-row"><span class="dr-label">Day</span><span class="dr-val" id="dr-day">—</span></div>
+      <div class="dr-row"><span class="dr-label">Closes</span><span class="dr-val" id="dr-closes">—</span></div>
+    </div>
+    <div class="dr-widget">
+      <div class="dr-title">Network</div>
+      <div class="dr-row"><span class="dr-label">Active nodes</span><span class="dr-val" id="dr-nodes">—</span></div>
+      <div class="dr-row"><span class="dr-label">This cycle</span><span class="dr-val" id="dr-cycle-logs" style="color:var(--green)">—</span></div>
+    </div>
+  </aside>
 
 </div>
 
@@ -1142,39 +1292,75 @@ async function doLogout() {
 
 // ── SHELL ENTRY ──
 async function enterShell() {
-  // Always fetch fresh operator data so score and LOGs are current
   if (sb && operator?.email) {
-    const { data: fresh } = await sb.from('operators').select('*').eq('email', operator.email).single();
+    const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
+    const fresh = Array.isArray(opRows) ? opRows[0] : opRows;
     if (fresh) operator = { ...operator, ...fresh };
   }
 
-  const cycle = getActiveCycle();
-  const now = new Date();
+  const cycle  = getActiveCycle();
+  const now    = new Date();
   const dateStr = now.toLocaleDateString('en-US', { month:'short', day:'numeric' });
-  const dayColor = cycle.left <= 3 ? 'var(--red)' : cycle.left <= 7 ? 'var(--orange)' : 'var(--cream)';
+  const repStr  = operator.reputation_score ? Number(operator.reputation_score).toFixed(3) : '—';
+  const handle  = operator.handle || ('@' + (operator.peer_name||'').replace(/\s/g,'').toUpperCase());
 
-  document.getElementById('tb-peer').textContent  = operator.peer_name;
-  document.getElementById('tb-cycle').textContent = `C${cycle.num} · D${cycle.day}`;
-  document.getElementById('tb-day').style.color   = dayColor;
-  document.getElementById('tb-day').textContent   = `${dateStr} · ${cycle.left}d left`;
-  document.getElementById('tb-score').textContent = operator.reputation_score
-    ? Number(operator.reputation_score).toFixed(3)
-    : '—';
+  // Mobile topbar
+  document.getElementById('tb-score').textContent = repStr;
+
+  // Desktop sidebar peer info
+  document.getElementById('ds-peer-name').textContent   = operator.peer_name || '—';
+  document.getElementById('ds-peer-handle').textContent  = handle;
+
+  // Desktop right sidebar
+  document.getElementById('dr-logs').textContent    = operator.total_logs || 0;
+  document.getElementById('dr-rep').textContent     = repStr;
+  document.getElementById('dr-tier').textContent    = tier(operator.total_logs);
+  document.getElementById('dr-streak').textContent  = operator.streak || 0;
+  document.getElementById('dr-cycle').textContent   = `C${cycle.num}`;
+  document.getElementById('dr-day').textContent     = `D${cycle.day} of 28`;
+  document.getElementById('dr-closes').textContent  = `${cycle.left}d left`;
+
+  // Home surface cycle label
+  document.getElementById('home-cycle').textContent = `C${cycle.num} · ${dateStr}`;
 
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');
 
-  showSurface('intake');
+  showSurface('home');
   loadAll();
 }
 
 // ── NAVIGATION ──
 function showSurface(name) {
   document.querySelectorAll('.surface').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('surface-' + name)?.classList.add('active');
-  document.getElementById('nav-' + name)?.classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b => {
+    b.classList.remove('active');
+    const icon = b.querySelector('svg');
+    if (icon) icon.setAttribute('stroke', '#52504E');
+  });
+  document.querySelectorAll('.ds-item').forEach(b => b.classList.remove('active'));
+
+  const surf = document.getElementById('surface-' + name);
+  if (surf) surf.classList.add('active');
+
+  const navBtn = document.getElementById('nav-' + name);
+  if (navBtn) {
+    navBtn.classList.add('active');
+    const icon = navBtn.querySelector('svg');
+    if (icon) icon.setAttribute('stroke', '#8CF060');
+  }
+
+  const dsBtn = document.getElementById('ds-' + name);
+  if (dsBtn) dsBtn.classList.add('active');
+
   currentSurface = name;
+
+  // Load surface content on first visit
+  if (name === 'home')          loadHome();
+  if (name === 'ops')           loadOps();
+  if (name === 'profile')       loadProfile();
+  if (name === 'messages')      loadMessages();
+  if (name === 'notifications') loadNotifications();
 }
 
 // ── OVERLAY ──
@@ -1207,11 +1393,175 @@ function closeOverlay() {
 // ── LOAD ALL ──
 async function loadAll() {
   if (!sb) return;
-  await Promise.all([
-    loadIntake(),
-    loadOps(),
-    loadRecord(),
+  await Promise.all([loadHome(), loadOps(), loadProfile()]);
+}
+
+// ── HOME FEED ──
+async function loadHome() {
+  const body = document.getElementById('home-body');
+  if (!body) return;
+  body.innerHTML = '<div class="empty"><div class="empty-msg" style="color:var(--grey)">Loading feed…</div></div>';
+
+  const [settledRes, opsRes] = await Promise.all([
+    sb.rpc('get_settled_projects'),
+    sb.rpc('list_operators'),
   ]);
+
+  const settled   = settledRes.data || [];
+  const operators = opsRes.data || [];
+
+  const events = [];
+
+  // Settlements → green
+  settled.forEach(p => {
+    if (p.settled_at) events.push({
+      color: '#8CF060', time: p.settled_at,
+      node: p.relation_name || p.relation_code || '—',
+      event: `settled ${p.title || p.relation_name || 'project'}`,
+      logs: p.total_logs_confirmed, logClass: 'g',
+    });
+  });
+
+  // Operators joining → cream
+  operators.forEach(op => {
+    if (op.invited_at) events.push({
+      color: '#F2F0EC', time: op.invited_at,
+      node: op.peer_name || '—',
+      event: 'joined the network',
+      logs: null, logClass: 'gr',
+    });
+  });
+
+  // Sort newest first
+  events.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  if (!events.length) {
+    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Network</div><div class="empty-msg">No network activity yet. Work will appear here as it happens.</div></div>';
+    return;
+  }
+
+  body.innerHTML = events.map(e => `
+    <div class="feed-row">
+      <div class="feed-dot" style="background:${e.color}"></div>
+      <div class="feed-time">${fmtDate(e.time)}</div>
+      <div class="feed-node">${esc(e.node)}</div>
+      <div class="feed-event">${esc(e.event)}</div>
+      <div class="feed-log ${e.logClass}">${e.logs ? e.logs + ' LOG' : '—'}</div>
+    </div>`).join('');
+}
+
+// ── MESSAGES SURFACE ──
+async function loadMessages() {
+  const body = document.getElementById('messages-body');
+  if (!body) return;
+
+  // Pull all active projects with message threads
+  const { data: projects } = await sb
+    .from('relation_submissions')
+    .select('id, relation_name, relation_code, status')
+    .in('status', ['accepted', 'active', 'pending'])
+    .order('created_at', { ascending: false });
+
+  if (!projects?.length) {
+    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Threads</div><div class="empty-msg">No active message threads. Messages appear when a relation has an open project.</div></div>';
+    return;
+  }
+
+  body.innerHTML = projects.map(p => `
+    <div class="member-row" onclick="openMessages('${p.id}', '${esc(p.relation_name || p.relation_code)}')">
+      <div class="member-avatar">
+        <svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
+          <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
+        </svg>
+      </div>
+      <div class="member-info">
+        <div class="member-name">${esc(p.relation_name || p.relation_code || '—')}</div>
+        <div class="member-meta">${p.status}</div>
+      </div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--grey)">→</div>
+    </div>`).join('');
+}
+
+// ── NOTIFICATIONS SURFACE ──
+async function loadNotifications() {
+  const body = document.getElementById('notif-body');
+  if (!body) return;
+
+  const cycle = getActiveCycle();
+  const notifications = [];
+
+  // Cycle alert
+  if (cycle.left <= 7) {
+    notifications.push({
+      color: cycle.left <= 3 ? 'var(--red)' : 'var(--orange)',
+      text: `Cycle ${cycle.num} closes in ${cycle.left} days. Settle any open projects before the cycle ends.`,
+      time: 'Cycle alert',
+    });
+  }
+
+  // Recent settlements
+  const { data: settled } = await sb.rpc('get_settled_projects');
+  (settled || []).slice(0, 3).forEach(p => {
+    notifications.push({
+      color: 'var(--green)',
+      text: `${p.relation_name || p.relation_code} settled — ${p.total_logs_confirmed} LOGs confirmed on the ledger.`,
+      time: fmtDate(p.settled_at),
+    });
+  });
+
+  if (!notifications.length) {
+    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Alerts</div><div class="empty-msg">No notifications yet. Settlements, scope confirmations, and cycle alerts will appear here.</div></div>';
+    return;
+  }
+
+  body.innerHTML = notifications.map(n => `
+    <div class="notif-row">
+      <div class="notif-dot" style="background:${n.color}"></div>
+      <div class="notif-body">
+        <div class="notif-text">${esc(n.text)}</div>
+        <div class="notif-time">${esc(n.time)}</div>
+      </div>
+    </div>`).join('');
+}
+
+// ── OPEN MESSAGES THREAD ──
+function openMessages(projectId, projectName) {
+  openOverlay(projectName, async (body) => {
+    body.innerHTML = '<div style="padding:16px;font-family:var(--mono);font-size:10px;color:var(--grey)">Loading messages…</div>';
+    const { data: msgs } = await sb.rpc('get_messages', { p_code: projectId });
+    const messages = msgs || [];
+
+    const renderMsgs = () => messages.map(m => `
+      <div style="padding:10px 18px;border-bottom:1px solid var(--line);">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:4px;">${m.sender}</div>
+        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;">${esc(m.ciphertext)}</div>
+      </div>`).join('');
+
+    body.innerHTML = `
+      <div style="flex:1;overflow-y:auto" id="msg-list">${messages.length ? renderMsgs() : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No messages yet.</div></div>'}</div>
+      <div style="padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-shrink:0;">
+        <input class="form-input" id="msg-input" placeholder="Send a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg('${projectId}')"/>
+        <button class="act-btn" style="white-space:nowrap;margin:0;padding:0 16px;" onclick="sendMsg('${projectId}')">Send</button>
+      </div>`;
+  });
+}
+
+async function sendMsg(projectId) {
+  const inp = document.getElementById('msg-input');
+  const text = inp?.value.trim();
+  if (!text) return;
+  inp.value = '';
+  await sb.rpc('send_message', { p_code: projectId, p_ciphertext: text });
+  const { data: msgs } = await sb.rpc('get_messages', { p_code: projectId });
+  const list = document.getElementById('msg-list');
+  if (list && msgs) {
+    list.innerHTML = msgs.map(m => `
+      <div style="padding:10px 18px;border-bottom:1px solid var(--line);">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:4px;">${m.sender}</div>
+        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;">${esc(m.ciphertext)}</div>
+      </div>`).join('');
+    list.scrollTop = list.scrollHeight;
+  }
 }
 
 // ── INTAKE SURFACE ──
@@ -1578,39 +1928,28 @@ async function updateReputation(projectId) {
 }
 
 // ── RECORD SURFACE ──
-async function loadRecord() {
-  const body = document.getElementById('record-body');
-  const count = document.getElementById('record-count');
+async function loadProfile() {
+  const body = document.getElementById('profile-body');
+  const count = document.getElementById('profile-count');
   if (!body) return;
 
   try {
-    const [{ data: settled }, { data: members }] = await Promise.all([
-      sb.from('relation_submissions').select('*').eq('status', 'settled').order('settled_at', { ascending: false }),
+    const [settledRes, membersRes] = await Promise.all([
+      sb.rpc('get_settled_projects'),
       sb.rpc('list_operators'),
     ]);
 
-    const s = settled || [];
-    const m = members || [];
-    count.textContent = s.length ? `${s.length} settled` : '';
+    const s = settledRes.data || [];
+    const m = membersRes.data || [];
+    if (count) count.textContent = s.length ? `${s.length} settled` : '';
+
+    const owavSm = `<svg width="28" height="28" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
 
     body.innerHTML = `
       <div class="section-lbl" style="position:relative;top:0">Network</div>
       ${m.length ? m.map(op => `
         <div class="member-row" onclick="openMemberRecord('${op.id}')">
-          <div class="member-avatar">
-            ${op.handle
-              ? `<svg id="owav-sm" width="28" height="28" style="display:block"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 775.27 789.54">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #8CF060;
-      }
-    </style>
-  </defs>
-  <path class="cls-1" d="M534.49,377.3l-41.02,192.07c-2.05,11.06-3.69,17.41-5.73,26.42-2.12-9.01-3.69-14.27-6.35-26.42l-33.04-144.02c77.88-23.55,127.09-92.15,127.09-174.19,0-100.68-75.7-181.7-188.05-181.7s-187.57,81.02-187.57,181.7c0,82.11,48.94,150.78,126.96,174.26l-33.45,143.95c-2.66,12.15-4.23,17.41-6.28,26.42-1.64-9.01-3.69-16.93-5.26-26.42l-36.79-192.07h-102.45l86.14,342.79h317.87l86.14-342.79h-98.22ZM306.85,251.16c0-51.12,36.18-88.12,80.54-88.12,47.51,0,81.02,37,81.02,88.12s-33.51,89.28-81.02,89.28-80.54-37-80.54-89.28ZM368.29,579.27l11.19-44.84c3.14-12.15,5.26-22.73,7.92-34.4,2.59,11.67,4.71,22.25,7.85,34.4l11.19,44.84h-38.16Z"/>
-</svg>`
-              : `<span style="font-size:12px;font-weight:600;color:var(--green)">${(op.peer_name||'?').charAt(0)}</span>`}
-          </div>
+          <div class="member-avatar">${op.handle ? owavSm : `<span style="font-size:12px;font-weight:600;color:var(--green)">${(op.peer_name||'?').charAt(0)}</span>`}</div>
           <div class="member-info">
             <div class="member-name">${esc(op.peer_name)}</div>
             <div class="member-meta">${op.total_logs || 0} LOG · ${esc(op.lane || '—')}${op.bio ? ' · ' + esc(op.bio.substring(0,40)) : ''}</div>
@@ -1619,11 +1958,7 @@ async function loadRecord() {
             <div class="member-score">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div>
             <div class="member-tier">${tier(op.total_logs)}</div>
           </div>
-        </div>`).join('') : `
-        <div class="empty" style="padding:20px 18px">
-          <div class="empty-msg">No network members yet.</div>
-        </div>`}
-
+        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No network members yet.</div></div>'}
       <div class="section-lbl">Ledger</div>
       ${s.length ? s.map(r => `
         <div class="ledger-row" onclick="openSettledProject('${r.id}')">
@@ -1631,14 +1966,13 @@ async function loadRecord() {
           <div class="ledger-logs">${r.total_logs_confirmed || 0} LOG</div>
           <div class="ledger-meta">${esc(r.title || '—')}</div>
           <div class="ledger-cycle">C${r.cycle_number || '—'}</div>
-        </div>`).join('') : `
-        <div class="empty" style="padding:20px 18px">
-          <div class="empty-msg">No settled projects yet. The ledger builds with every confirmed settlement.</div>
-        </div>`}`;
+        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No settled projects yet.</div></div>'}`;
   } catch(e) {
-    body.innerHTML = `<div class="empty"><div class="empty-msg">Could not load record.</div></div>`;
+    body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load profile.</div></div>';
   }
 }
+
+
 
 // ── SCOPE COLOR HELPER ──
 function scopeColor(status) {

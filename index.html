@@ -826,23 +826,25 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 
 /* ── DESKTOP LAYOUT ── */
 #d-sidebar{
-  display:none;width:220px;flex-shrink:0;
+  display:none;width:200px;flex-shrink:0;
   border-right:1px solid var(--line);
   flex-direction:column;
-  background:rgba(9,10,11,.97);
+  background:#000;
 }
 #d-right{
-  display:none;width:240px;flex-shrink:0;
+  display:none;width:200px;flex-shrink:0;
   border-left:1px solid var(--line);
   flex-direction:column;overflow-y:auto;
 }
-#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;}
+#main-area{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
 @media(min-width:768px){
   #shell{flex-direction:row!important;}
   #d-sidebar{display:flex;}
-  #d-right{display:flex;}
   #topbar{display:none!important;}
   #bottom-nav{display:none!important;}
+}
+@media(min-width:1100px){
+  #d-right{display:flex;}
 }
 .ds-logo{padding:20px 18px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid var(--line);flex-shrink:0;}
 .ds-wordmark{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green);letter-spacing:.04em;}
@@ -861,10 +863,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#09090B;}
 .ds-peer-handle{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:2px;}
 .dr-widget{padding:14px 16px;border-bottom:1px solid var(--line);}
 .dr-title{font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;}
-.dr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #111113;}
+.dr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1E1E1E;}
 .dr-row:last-child{border-bottom:none;}
 .dr-label{font-family:var(--mono);font-size:9px;color:var(--grey);}
-.dr-val{font-family:var(--mono);font-size:11px;font-weight:600;}
+.dr-val{font-family:var(--mono);font-size:11px;font-weight:600;text-align:right;max-width:100px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 /* ── MOBILE TOPBAR (updated) ── */
 .tb-mark{display:flex;align-items:center;gap:8px;}

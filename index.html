@@ -853,7 +853,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .ds-item:hover{background:rgba(255,255,255,.03);}
 .ds-item.active{background:transparent;}
 .ds-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--green);border-radius:0 2px 2px 0;}
-.ds-icon{width:18px;height:18px;flex-shrink:0;}
+.ds-icon{width:18px;height:18px;flex-shrink:0;color:#888888;}
+.ds-item.active .ds-icon{color:#8CF060;}
 .ds-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .15s;}
 .ds-item.active .ds-label{color:var(--cream);}
 .ds-badge{margin-left:auto;background:var(--orange);color:var(--black);font-family:var(--mono);font-size:8px;font-weight:700;padding:2px 6px;border-radius:8px;}
@@ -1322,23 +1323,7 @@ async function enterShell() {
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');
 
-  // Populate sidebar as soon as shell is visible in DOM
-  const populateSidebar = () => {
-    const set = (id, val) => { const el = document.getElementById(id); if (el && el.textContent === '—') el.textContent = val; };
-    set('dr-logs',       String(operator.total_logs || 0));
-    set('dr-rep',        repStr);
-    set('dr-tier',       tierStr);
-    set('dr-streak',     String(operator.streak || 0));
-    set('dr-cycle',      `C${cycle.num}`);
-    set('dr-day',        `D${cycle.day} of 28`);
-    set('dr-closes',     `${cycle.left}d left`);
-    set('ds-peer-name',  operator.peer_name || '—');
-    set('ds-peer-handle', handle);
-  };
-
-  // Try immediately, then at 100ms, 300ms, 600ms intervals
-  populateSidebar();
-  [100, 300, 600].forEach(ms => setTimeout(populateSidebar, ms));
+  // sidebar populated by loadAll()
 
   showSurface('home');
   loadAll();
@@ -1405,9 +1390,32 @@ function closeOverlay() {
 }
 
 // ── LOAD ALL ──
+function populateSidebar() {
+  if (!operator) return;
+  const cycle  = getActiveCycle();
+  const repNum = operator.reputation_score != null ? Number(operator.reputation_score) : null;
+  const repStr = repNum != null ? repNum.toFixed(3) : '—';
+  const handle = operator.handle || ('@' + (operator.peer_name||'').replace(/\s/g,'').toUpperCase());
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = String(val);
+  };
+  set('dr-logs',        operator.total_logs || 0);
+  set('dr-rep',         repStr);
+  set('dr-tier',        tier(operator.total_logs));
+  set('dr-streak',      operator.streak || 0);
+  set('dr-cycle',       'C' + cycle.num);
+  set('dr-day',         'D' + cycle.day + ' of 28');
+  set('dr-closes',      cycle.left + 'd left');
+  set('ds-peer-name',   operator.peer_name || '—');
+  set('ds-peer-handle', handle);
+}
+
 async function loadAll() {
   if (!sb) return;
+  populateSidebar();
   await Promise.all([loadHome(), loadOps(), loadProfile()]);
+  populateSidebar();
 }
 
 // ── HOME FEED ──

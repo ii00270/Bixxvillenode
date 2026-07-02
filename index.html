@@ -850,8 +850,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .ds-wordmark{font-family:var(--mono);font-size:16px;font-weight:700;color:var(--green);letter-spacing:.04em;}
 .ds-nav{flex:1;padding:8px 0;overflow-y:auto;}
 .ds-item{display:flex;align-items:center;gap:12px;padding:12px 18px;cursor:pointer;transition:background .1s;position:relative;border:none;background:none;width:100%;text-align:left;-webkit-tap-highlight-color:transparent;}
-.ds-item:hover{background:rgba(140,240,96,.04);}
-.ds-item.active{background:rgba(140,240,96,.07);}
+.ds-item:hover{background:rgba(255,255,255,.03);}
+.ds-item.active{background:transparent;}
 .ds-item.active::before{content:'';position:absolute;left:0;top:6px;bottom:6px;width:2px;background:var(--green);border-radius:0 2px 2px 0;}
 .ds-icon{width:18px;height:18px;flex-shrink:0;}
 .ds-label{font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);transition:color .15s;}
@@ -898,6 +898,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   border-top:1px solid var(--line);
   display:grid;grid-template-columns:repeat(5,1fr);z-index:50;
 }
+
+/* ── NOTIFICATIONS ── */
+.notif-row{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;gap:12px;align-items:flex-start;}
+.notif-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:4px;}
+.notif-body{flex:1;}
+.notif-text{font-family:var(--mono);font-size:12px;color:#FFFFFF;line-height:1.7;}
+.notif-time{font-family:var(--mono);font-size:9px;color:#888888;margin-top:5px;letter-spacing:.06em;}
 
 /* ── UTIL ── */
 .hidden{display:none!important;}
@@ -1104,19 +1111,19 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-ops" onclick="showSurface('ops')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-messages" onclick="showSurface('messages')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-notifications" onclick="showSurface('notifications')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-profile" onclick="showSurface('profile')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#707070" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <div class="nav-dot"></div>
       </button>
     </nav>
@@ -1294,11 +1301,7 @@ async function doLogout() {
 
 // ── SHELL ENTRY ──
 async function enterShell() {
-  if (sb && operator?.email) {
-    const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
-    const fresh = Array.isArray(opRows) ? opRows[0] : opRows;
-    if (fresh) operator = { ...operator, ...fresh };
-  }
+  // operator data already loaded at login
 
   const cycle   = getActiveCycle();
   const now     = new Date();
@@ -1333,7 +1336,7 @@ async function enterShell() {
     set('dr-cycle-logs', '—');
     set('ds-peer-name',   operator.peer_name || '—');
     set('ds-peer-handle', handle);
-  }, 100);
+  }, 300);
 
   showSurface('home');
   loadAll();
@@ -1345,7 +1348,7 @@ function showSurface(name) {
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.remove('active');
     const icon = b.querySelector('svg');
-    if (icon) icon.setAttribute('stroke', '#707070');
+    if (icon) icon.setAttribute('stroke', '#888888');
   });
   document.querySelectorAll('.ds-item').forEach(b => b.classList.remove('active'));
 
@@ -1527,7 +1530,7 @@ async function loadNotifications() {
     <div class="notif-row">
       <div class="notif-dot" style="background:${n.color}"></div>
       <div class="notif-body">
-        <div class="notif-text">${esc(n.text)}</div>
+        <div class="notif-text" style="color:#FFFFFF">${esc(n.text)}</div>
         <div class="notif-time">${esc(n.time)}</div>
       </div>
     </div>`).join('');

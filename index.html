@@ -907,6 +907,30 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .notif-text{font-family:var(--mono);font-size:12px;color:#FFFFFF;line-height:1.7;}
 .notif-time{font-family:var(--mono);font-size:9px;color:#888888;margin-top:5px;letter-spacing:.06em;}
 
+.act-btn-sm{
+  background:none;border:1px solid var(--green);color:var(--green);
+  font-family:var(--mono);font-size:9px;font-weight:600;
+  letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 12px;cursor:pointer;transition:background .15s;
+  white-space:nowrap;
+}
+.act-btn-sm:hover{background:rgba(140,240,96,.08);}
+
+.planning-card{
+  margin:14px 18px;border:1px solid var(--orange);border-left:3px solid var(--orange);
+  background:rgba(232,136,74,.04);cursor:pointer;
+}
+.planning-head{
+  padding:10px 14px;display:flex;justify-content:space-between;align-items:center;
+  border-bottom:1px solid var(--line);
+}
+.planning-title{font-family:var(--sans);font-size:13px;font-weight:600;color:#FFFFFF;}
+.planning-market{font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.08em;text-transform:uppercase;}
+.planning-tag{
+  font-family:var(--mono);font-size:8px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  color:var(--orange);padding:9px 14px;
+}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 </style>
@@ -1063,8 +1087,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       <div class="surface" id="surface-ops">
         <div class="s-head">
           <div class="s-title">Ops</div>
-          <div class="s-count" id="ops-count"></div>
+          <button class="act-btn-sm" onclick="openStartProject()">+ Start a project</button>
         </div>
+        <div id="planning-body"></div>
         <div id="ops-body">
           <div class="empty"><div class="empty-line"></div><div class="empty-label">Active</div><div class="empty-msg">No active projects. Accept an intake to begin decomposition.</div></div>
         </div>
@@ -1683,10 +1708,96 @@ async function declineIntake(id) {
 }
 
 // ── OPS SURFACE ──
+// ── SPRINT 1: OPERATOR-INITIATED PROJECTS ──
+async function loadPlanning() {
+  const body = document.getElementById('planning-body');
+  if (!body) return;
+
+  const { data } = await sb.rpc('get_planning_projects');
+  const items = data || [];
+
+  if (!items.length) { body.innerHTML = ''; return; }
+
+  body.innerHTML = items.map(p => `
+    <div class="planning-card" onclick="openPlanningProject('${p.id}')">
+      <div class="planning-head">
+        <div class="planning-title">${esc(p.title)}</div>
+        <div class="planning-market">${esc(p.market || '—')}</div>
+      </div>
+      <div class="planning-tag">Planning · Awaiting DAG</div>
+    </div>`).join('');
+}
+
+function openStartProject() {
+  openOverlay('Start a Project', (body) => {
+    body.innerHTML = `
+      <div class="prof-field">
+        <div class="prof-field-lbl">Project name</div>
+        <input class="prof-field-input" id="sp-title" placeholder="e.g. Portable Toilet & Vacuum Truck Business"/>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Market</div>
+        <input class="prof-field-input" id="sp-market" placeholder="e.g. Portable Sanitation"/>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Source document — paste full text</div>
+        <textarea class="prof-field-textarea" id="sp-doc" style="min-height:200px" placeholder="Paste the business plan, scope, or brief here…"></textarea>
+      </div>
+      <button class="act-btn" onclick="submitProject()">Create Project</button>`;
+  });
+}
+
+async function submitProject() {
+  const title  = document.getElementById('sp-title')?.value.trim();
+  const market = document.getElementById('sp-market')?.value.trim();
+  const doc    = document.getElementById('sp-doc')?.value.trim();
+
+  if (!title || !market || !doc) { toast('Fill in all fields.'); return; }
+
+  try {
+    const { data: id, error } = await sb.rpc('create_operator_project', {
+      p_email: operator.email,
+      p_title: title,
+      p_market: market,
+      p_source_doc: doc,
+    });
+    if (error) throw error;
+    toast('Project created — planning stage.');
+    closeOverlay();
+    await loadOps();
+    showSurface('ops');
+  } catch(e) {
+    toast('Could not create project.');
+    console.error(e);
+  }
+}
+
+function openPlanningProject(id) {
+  openOverlay('Planning', async (body) => {
+    const { data } = await sb.rpc('get_planning_projects');
+    const p = (data || []).find(x => x.id === id);
+    if (!p) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+
+    body.innerHTML = `
+      <div class="prof-field">
+        <div class="prof-field-lbl">Project</div>
+        <div style="font-family:var(--sans);font-size:16px;font-weight:700;color:#FFFFFF">${esc(p.title)}</div>
+        <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:4px">${esc(p.market)}</div>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Source document</div>
+        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.7;max-height:320px;overflow-y:auto;white-space:pre-wrap">${esc(p.source_doc || '')}</div>
+      </div>
+      <div class="empty" style="padding:20px 18px">
+        <div class="empty-msg">DAG generation is the next sprint. This project is saved and waiting.</div>
+      </div>`;
+  });
+}
+
 async function loadOps() {
   const body = document.getElementById('ops-body');
-  const count = document.getElementById('ops-count');
   if (!body) return;
+  await loadPlanning();
 
   try {
     const { data, error } = await sb
@@ -1698,7 +1809,6 @@ async function loadOps() {
     const items = data || [];
     const active = items.filter(r => r.status === 'open');
     const settling = items.filter(r => r.status === 'settling');
-    count.textContent = items.length ? `${items.length} active` : '';
 
     if (!items.length) {
       body.innerHTML = `

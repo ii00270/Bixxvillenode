@@ -1312,30 +1312,28 @@ async function enterShell() {
   const tbScore = document.getElementById('tb-score');
   if (tbScore) tbScore.textContent = repStr;
 
-  // Desktop sidebar peer info
-  const dsPeerName   = document.getElementById('ds-peer-name');
-  const dsPeerHandle = document.getElementById('ds-peer-handle');
-  if (dsPeerName)   dsPeerName.textContent   = operator.peer_name || '—';
-  if (dsPeerHandle) dsPeerHandle.textContent  = handle;
-
-  // Desktop right sidebar — use safe setter
-  const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-  set('dr-logs',       operator.total_logs || 0);
-  set('dr-rep',        repStr);
-  set('dr-tier',       tierStr);
-  set('dr-streak',     operator.streak || 0);
-  set('dr-cycle',      `C${cycle.num}`);
-  set('dr-day',        `D${cycle.day} of 28`);
-  set('dr-closes',     `${cycle.left}d left`);
-  set('dr-nodes',      '—');
-  set('dr-cycle-logs', '—');
-
   // Home surface cycle label
   const homeCycle = document.getElementById('home-cycle');
   if (homeCycle) homeCycle.textContent = `C${cycle.num} · ${dateStr}`;
 
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');
+
+  // Wait for transition to complete before populating sidebar elements
+  setTimeout(() => {
+    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    set('dr-logs',       operator.total_logs || 0);
+    set('dr-rep',        repStr);
+    set('dr-tier',       tierStr);
+    set('dr-streak',     operator.streak || 0);
+    set('dr-cycle',      `C${cycle.num}`);
+    set('dr-day',        `D${cycle.day} of 28`);
+    set('dr-closes',     `${cycle.left}d left`);
+    set('dr-nodes',      '—');
+    set('dr-cycle-logs', '—');
+    set('ds-peer-name',   operator.peer_name || '—');
+    set('ds-peer-handle', handle);
+  }, 100);
 
   showSurface('home');
   loadAll();

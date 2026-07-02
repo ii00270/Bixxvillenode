@@ -1979,8 +1979,28 @@ function renderDagApproval(body, p, dag) {
 
 async function approveDAG(id) {
   try {
+    // Fetch project + dag before approving, so we can save it to the library
+    const { data: projRow } = await sb
+      .from('relation_submissions')
+      .select('title, market, dag')
+      .eq('id', id)
+      .single();
+
     const { error } = await sb.rpc('approve_project_dag', { p_id: id });
     if (error) throw error;
+
+    // Save this approved DAG as a wisdom key for this market
+    if (projRow?.dag && projRow?.market) {
+      await sb.rpc('add_library_entry', {
+        p_email:     operator.email,
+        p_type:      'dag_example',
+        p_market:    projRow.market,
+        p_title:     projRow.title + ' — approved decomposition',
+        p_content:   projRow.dag,
+        p_source_id: id,
+      });
+    }
+
     toast('DAG approved — project moved to Ops.');
     closeOverlay();
     await loadAll();
@@ -2274,16 +2294,20 @@ async function loadProfile() {
   if (!body) return;
 
   try {
-    const [settledRes, membersRes] = await Promise.all([
+    const [settledRes, membersRes, libraryRes] = await Promise.all([
       sb.rpc('get_settled_projects'),
       sb.rpc('list_operators'),
+      sb.from('bixxville_library').select('*').order('created_at', { ascending: false }).limit(20),
     ]);
 
     const s = settledRes.data || [];
     const m = membersRes.data || [];
+    const lib = libraryRes.data || [];
     if (count) count.textContent = s.length ? `${s.length} settled` : '';
 
     const owavSm = `<svg width="28" height="28" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
+
+    const libIcon = { canon:'CANON', dag_example:'DAG', override_note:'OVERRIDE', market_framework:'FRAMEWORK' };
 
     body.innerHTML = `
       <div class="section-lbl" style="position:relative;top:0">Network</div>
@@ -2299,6 +2323,17 @@ async function loadProfile() {
             <div class="member-tier">${tier(op.total_logs)}</div>
           </div>
         </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No network members yet.</div></div>'}
+      <div class="section-lbl">Library — wisdom keys</div>
+      ${lib.length ? lib.map(e => `
+        <div class="member-row" style="cursor:default">
+          <div class="member-avatar" style="background:rgba(140,240,96,.08);border-color:var(--green)">
+            <span style="font-size:8px;font-weight:700;color:var(--green);letter-spacing:.05em">${libIcon[e.entry_type] || 'KEY'}</span>
+          </div>
+          <div class="member-info">
+            <div class="member-name">${esc(e.title)}</div>
+            <div class="member-meta">${esc(e.market || 'Universal')} · ${new Date(e.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
+          </div>
+        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No wisdom keys yet. They accumulate as you approve DAGs.</div></div>'}
       <div class="section-lbl">Ledger</div>
       ${s.length ? s.map(r => `
         <div class="ledger-row" onclick="openSettledProject('${r.id}')">

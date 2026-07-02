@@ -931,6 +931,53 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   color:var(--orange);padding:9px 14px;
 }
 
+/* ── DAG VISUAL ── */
+.dag-meta{
+  font-family:var(--mono);font-size:9px;letter-spacing:.12em;
+  text-transform:uppercase;color:var(--grey);margin-bottom:18px;
+}
+.dag-tier{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;}
+.dag-tier-lbl{
+  font-family:var(--mono);font-size:9px;font-weight:600;color:var(--grey);
+  width:36px;flex-shrink:0;padding-top:12px;
+}
+.dag-nodes{display:flex;flex-direction:column;gap:8px;flex:1;}
+.dag-node{
+  border-radius:8px;padding:12px 14px;border:1.5px solid var(--line2);
+  background:var(--surface);
+}
+.dag-node-tag{
+  font-family:var(--mono);font-size:8px;font-weight:700;
+  letter-spacing:.14em;text-transform:uppercase;margin-bottom:4px;
+}
+.dag-node-label{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;}
+.dag-node-log{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px;}
+.dag-node.start{border-color:var(--orange);background:rgba(232,136,74,.06);}
+.dag-node.start .dag-node-tag{color:var(--orange);}
+.dag-node.key{border-color:#D4AF37;background:rgba(212,175,55,.06);}
+.dag-node.key .dag-node-tag{color:#D4AF37;}
+.dag-node.standard{border-color:var(--line2);}
+.dag-node.standard .dag-node-tag{color:var(--grey);}
+.dag-node.outcome{border-color:var(--green);background:rgba(140,240,96,.06);}
+.dag-node.outcome .dag-node-tag{color:var(--green);}
+.dag-arrow{
+  font-family:var(--mono);color:var(--grey);font-size:14px;
+  text-align:center;padding:2px 0;margin-left:44px;
+}
+.dag-actions{display:flex;gap:10px;margin-top:20px;}
+.dag-approve{
+  flex:1;background:none;border:1.5px solid var(--green);color:var(--green);
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:14px;cursor:pointer;transition:background .15s;
+}
+.dag-approve:hover{background:rgba(140,240,96,.08);}
+.dag-reject{
+  flex:1;background:none;border:1.5px solid var(--line2);color:var(--grey);
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.12em;
+  text-transform:uppercase;padding:14px;cursor:pointer;transition:border-color .15s,color .15s;
+}
+.dag-reject:hover{border-color:var(--red);color:var(--red);}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 </style>
@@ -1772,11 +1819,116 @@ async function submitProject() {
   }
 }
 
+// ── SPRINT 2: RULE-BASED DAG GENERATION ──
+function generateDAG(title, market, doc) {
+  const nodes = [];
+  const lines = doc.split('\n').map(l => l.trim()).filter(Boolean);
+
+  // Pattern 1: look for phase/month/year headers like "Month 1-2:", "Year 1-2:", "Years 3-5:"
+  const phasePattern = /^(Month|Months|Year|Years)\s+[\d\-–toand]+\s*[:.]?\s*(.+)$/i;
+  // Pattern 2: numbered list items "1. Something"
+  const numberedPattern = /^\d+\.\s*(.+)$/;
+
+  let matches = [];
+
+  lines.forEach(line => {
+    const phaseMatch = line.match(phasePattern);
+    if (phaseMatch) {
+      // Split on periods to catch multiple actions per phase line
+      const actions = phaseMatch[2].split(/\.\s+/).filter(a => a.trim().length > 3);
+      actions.forEach(a => matches.push(a.trim().replace(/\.$/, '')));
+    }
+  });
+
+  // Fallback: numbered "Keys to Success" or roadmap items if no phase lines found
+  if (matches.length < 3) {
+    lines.forEach(line => {
+      const numMatch = line.match(numberedPattern);
+      if (numMatch && numMatch[1].length > 5 && numMatch[1].length < 90) {
+        matches.push(numMatch[1].trim());
+      }
+    });
+  }
+
+  // Cap and dedupe
+  matches = [...new Set(matches)].slice(0, 10);
+
+  if (!matches.length) {
+    matches = ['Define scope', 'Assign resources', 'Execute plan', 'Review outcome'];
+  }
+
+  // Build node structure: START, tiers of 1-2 nodes, OUTCOME
+  nodes.push({ id: 'start', type: 'start', label: 'Genesis · ' + title, tier: 0 });
+
+  let tierIdx = 1;
+  for (let i = 0; i < matches.length; i += 2) {
+    const pair = matches.slice(i, i + 2);
+    pair.forEach((label, j) => {
+      const isKey = j === 0 && i < 4; // first item in early tiers marked key
+      nodes.push({
+        id: 'n' + (i + j),
+        type: isKey ? 'key' : 'standard',
+        label: label.length > 60 ? label.substring(0, 57) + '…' : label,
+        log_estimate: 4,
+        tier: tierIdx,
+      });
+    });
+    tierIdx++;
+  }
+
+  nodes.push({ id: 'outcome', type: 'outcome', label: title + ' — launched', tier: tierIdx });
+
+  return { nodes, generated_at: new Date().toISOString(), method: 'rule-based' };
+}
+
+async function runDAGGeneration(projectId, title, market, doc) {
+  const dag = generateDAG(title, market, doc);
+  const { error } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
+  if (error) { toast('Could not save DAG.'); console.error(error); return null; }
+  return dag;
+}
+
+function renderDAG(dag) {
+  const tiers = {};
+  dag.nodes.forEach(n => {
+    if (!tiers[n.tier]) tiers[n.tier] = [];
+    tiers[n.tier].push(n);
+  });
+  const tierKeys = Object.keys(tiers).map(Number).sort((a,b) => a-b);
+
+  return tierKeys.map((t, idx) => {
+    const nodesHTML = tiers[t].map(n => `
+      <div class="dag-node ${n.type}">
+        <div class="dag-node-tag">${n.type === 'start' ? 'GENESIS' : n.type === 'key' ? 'KEY' : n.type === 'outcome' ? 'OUTCOME' : 'STEP'}</div>
+        <div class="dag-node-label">${esc(n.label)}</div>
+        ${n.log_estimate ? `<div class="dag-node-log">${n.log_estimate} LOG est.</div>` : ''}
+      </div>`).join('');
+
+    const tierLabel = t == 0 ? 'START' : (idx === tierKeys.length - 1 ? 'DONE' : 'T' + t);
+
+    return `
+      <div class="dag-tier">
+        <div class="dag-tier-lbl">${tierLabel}</div>
+        <div class="dag-nodes">${nodesHTML}</div>
+      </div>
+      ${idx < tierKeys.length - 1 ? '<div class="dag-arrow">↓</div>' : ''}`;
+  }).join('');
+}
+
 function openPlanningProject(id) {
   openOverlay('Planning', async (body) => {
     const { data } = await sb.rpc('get_planning_projects');
     const p = (data || []).find(x => x.id === id);
     if (!p) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+
+    // Check if DAG already exists
+    const { data: projRow } = await sb.from('relation_submissions').select('dag').eq('id', id).single();
+    const existingDag = projRow?.dag;
+
+    if (existingDag) {
+      renderDagApproval(body, p, existingDag);
+      return;
+    }
 
     body.innerHTML = `
       <div class="prof-field">
@@ -1786,12 +1938,68 @@ function openPlanningProject(id) {
       </div>
       <div class="prof-field">
         <div class="prof-field-lbl">Source document</div>
-        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.7;max-height:320px;overflow-y:auto;white-space:pre-wrap">${esc(p.source_doc || '')}</div>
+        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.7;max-height:280px;overflow-y:auto;white-space:pre-wrap">${esc(p.source_doc || '')}</div>
       </div>
-      <div class="empty" style="padding:20px 18px">
-        <div class="empty-msg">DAG generation is the next sprint. This project is saved and waiting.</div>
-      </div>`;
+      <button class="act-btn" id="gen-dag-btn" onclick="handleGenerateDAG('${id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Generate DAG</button>`;
   });
+}
+
+async function handleGenerateDAG(id, title, market) {
+  const btn = document.getElementById('gen-dag-btn');
+  if (btn) { btn.textContent = 'Reading document…'; btn.disabled = true; }
+
+  const { data: projRow } = await sb.from('relation_submissions').select('source_doc').eq('id', id).single();
+  const doc = projRow?.source_doc || '';
+
+  const dag = await runDAGGeneration(id, title, market, doc);
+  if (!dag) { if (btn) { btn.textContent = 'Generate DAG'; btn.disabled = false; } return; }
+
+  const { data } = await sb.rpc('get_planning_projects');
+  const p = (data || []).find(x => x.id === id);
+  const body = document.getElementById('ov-body');
+  if (body && p) renderDagApproval(body, p, dag);
+}
+
+function renderDagApproval(body, p, dag) {
+  body.innerHTML = `
+    <div class="prof-field">
+      <div class="prof-field-lbl">Project</div>
+      <div style="font-family:var(--sans);font-size:16px;font-weight:700;color:#FFFFFF">${esc(p.title)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:4px">${esc(p.market)}</div>
+    </div>
+    <div style="padding:18px">
+      <div class="dag-meta">Goal solved · dependency-ordered · ${dag.nodes.length} nodes</div>
+      ${renderDAG(dag)}
+      <div class="dag-actions">
+        <button class="dag-approve" onclick="approveDAG('${p.id}')">Approve</button>
+        <button class="dag-reject" onclick="rejectDAG('${p.id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Regenerate</button>
+      </div>
+    </div>`;
+}
+
+async function approveDAG(id) {
+  try {
+    const { error } = await sb.rpc('approve_project_dag', { p_id: id });
+    if (error) throw error;
+    toast('DAG approved — project moved to Ops.');
+    closeOverlay();
+    await loadAll();
+    showSurface('ops');
+  } catch(e) {
+    toast('Could not approve DAG.');
+    console.error(e);
+  }
+}
+
+async function rejectDAG(id, title, market) {
+  const { data: projRow } = await sb.from('relation_submissions').select('source_doc').eq('id', id).single();
+  const doc = projRow?.source_doc || '';
+  const dag = await runDAGGeneration(id, title, market, doc);
+  if (!dag) return;
+  const { data } = await sb.rpc('get_planning_projects');
+  const p = (data || []).find(x => x.id === id);
+  const body = document.getElementById('ov-body');
+  if (body && p) renderDagApproval(body, p, dag);
 }
 
 async function loadOps() {

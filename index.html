@@ -1322,21 +1322,23 @@ async function enterShell() {
   document.getElementById('gate').classList.add('out');
   document.getElementById('shell').classList.add('in');
 
-  // Wait for transition to complete before populating sidebar elements
-  setTimeout(() => {
-    const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
-    set('dr-logs',       operator.total_logs || 0);
+  // Populate sidebar as soon as shell is visible in DOM
+  const populateSidebar = () => {
+    const set = (id, val) => { const el = document.getElementById(id); if (el && el.textContent === '—') el.textContent = val; };
+    set('dr-logs',       String(operator.total_logs || 0));
     set('dr-rep',        repStr);
     set('dr-tier',       tierStr);
-    set('dr-streak',     operator.streak || 0);
+    set('dr-streak',     String(operator.streak || 0));
     set('dr-cycle',      `C${cycle.num}`);
     set('dr-day',        `D${cycle.day} of 28`);
     set('dr-closes',     `${cycle.left}d left`);
-    set('dr-nodes',      '—');
-    set('dr-cycle-logs', '—');
-    set('ds-peer-name',   operator.peer_name || '—');
+    set('ds-peer-name',  operator.peer_name || '—');
     set('ds-peer-handle', handle);
-  }, 300);
+  };
+
+  // Try immediately, then at 100ms, 300ms, 600ms intervals
+  populateSidebar();
+  [100, 300, 600].forEach(ms => setTimeout(populateSidebar, ms));
 
   showSurface('home');
   loadAll();

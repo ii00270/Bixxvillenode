@@ -764,6 +764,26 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .evt-ack-btn:hover{border-color:var(--green);color:var(--green);}
 
+/* ── PAYMENT LEDGER ── */
+.ledger-pay-row{display:flex;justify-content:space-between;gap:14px;padding:12px 0;border-bottom:1px solid var(--line);}
+.ledger-pay-row:last-child{border-bottom:none;}
+.ledger-pay-title{font-family:var(--sans);font-size:13px;font-weight:600;color:#FFFFFF;}
+.ledger-pay-meta{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:3px;line-height:1.5;}
+.ledger-pay-tx{font-family:var(--mono);font-size:9px;color:var(--green);text-decoration:none;margin-top:4px;display:inline-block;}
+.ledger-pay-tx:hover{text-decoration:underline;}
+.ledger-pay-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.pay-badge{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;}
+.pay-badge.paid{background:rgba(140,240,96,.14);color:var(--green);}
+.pay-badge.pending{background:rgba(232,136,74,.14);color:var(--orange);}
+.pay-badge.deferred{background:rgba(200,198,194,.12);color:var(--soft);}
+.pay-btn{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  border:1px solid var(--green);color:var(--green);background:none;padding:6px 11px;cursor:pointer;
+  transition:background .15s;white-space:nowrap;
+}
+.pay-btn:hover{background:rgba(140,240,96,.08);}
+
+
 
 /* ── LEDGER ROW ── */
 .ledger-row{
@@ -3936,12 +3956,159 @@ function renderProfileView(body, op, breakdown, memberId) {
     <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
     <div style="padding:12px 18px">${breakdown}</div>
 
+    <!-- Ledger / Payments -->
+    <div class="section-lbl" style="position:relative;top:0">Ledger</div>
+    <div style="padding:0 18px 6px;font-family:var(--mono);font-size:10px;color:var(--grey)">
+      Wallet: ${op.wallet_address ? esc(op.wallet_address) : 'Not on file'}
+    </div>
+    <div id="ledger-body" style="padding:6px 18px 8px"><div class="empty" style="padding:16px 0"><div class="empty-msg">Loading ledger…</div></div></div>
+    <div style="padding:0 18px 18px">
+      <button class="act-btn-sm" onclick="openRecordPayment('${op.id}','${esc(op.peer_name).replace(/'/g,"\\'")}')">+ Record Payment</button>
+    </div>
+
     <!-- Export -->
     <div class="export-row">
       <div class="export-lbl">Verified Work Record</div>
       <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
     </div>`;
+
+  loadMemberLedger(op.id, op.wallet_address, isSelf);
 }
+
+// ── PAYMENT LEDGER ──
+const USDC_BASE_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // real USDC on Base — same contract already used for the wallet balance check
+
+async function loadMemberLedger(operatorId, walletAddress, isSelf) {
+  const el = document.getElementById('ledger-body');
+  if (!el) return;
+
+  try {
+    const { data, error } = await sb.rpc('get_member_payments', { p_operator_id: operatorId });
+    if (error) throw error;
+    const payments = data || [];
+
+    if (!payments.length) {
+      el.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">No payment records yet.</div></div>';
+      return;
+    }
+
+    el.innerHTML = payments.map(p => {
+      const canPay = p.status !== 'paid' && !isSelf;
+      return `
+        <div class="ledger-pay-row">
+          <div>
+            <div class="ledger-pay-title">$${Number(p.amount_usd).toLocaleString()}${p.logs ? ` · ${p.logs} LOG` : ''}</div>
+            <div class="ledger-pay-meta">${esc(p.source || 'manual')} · ${fmtDate(p.created_at)}${p.notes ? ' · ' + esc(p.notes) : ''}</div>
+            ${p.tx_hash ? `<a class="ledger-pay-tx" href="https://basescan.org/tx/${esc(p.tx_hash)}" target="_blank" rel="noopener">View on Basescan →</a>` : ''}
+          </div>
+          <div class="ledger-pay-right">
+            <div class="pay-badge ${esc(p.status)}">${esc(p.status)}</div>
+            ${canPay ? `<button class="pay-btn" onclick="payMemberWithWallet('${p.id}','${esc(walletAddress||'')}',${p.amount_usd},'${esc(p.status)}')">Pay with wallet</button>` : ''}
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">Could not load ledger. Run the payments migration if this is the first time.</div></div>';
+  }
+}
+
+function openRecordPayment(operatorId, peerName) {
+  openOverlay('Record Payment', (body) => {
+    body.innerHTML = `
+      <div class="form-block">
+        <div class="form-lbl">For</div>
+        <div style="font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF">${esc(peerName)}</div>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Amount (USD)</label>
+        <input class="form-input" id="pay-amount" type="number" min="0" step="0.01" placeholder="e.g. 140000"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">LOGs (optional)</label>
+        <input class="form-input" id="pay-logs" type="number" min="0" placeholder="LOGs this covers"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Status</label>
+        <select class="form-input" id="pay-status">
+          <option value="pending">Pending</option>
+          <option value="deferred">Deferred</option>
+          <option value="paid">Already paid</option>
+        </select>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Notes</label>
+        <textarea class="form-input" id="pay-notes" style="min-height:60px" placeholder="What this payment is for"></textarea>
+      </div>
+      <button class="act-btn" onclick="submitRecordPayment('${operatorId}')">Record Payment</button>`;
+  }, null, null, true);
+}
+
+async function submitRecordPayment(operatorId) {
+  const amount = parseFloat(document.getElementById('pay-amount')?.value);
+  const logs   = parseFloat(document.getElementById('pay-logs')?.value) || null;
+  const status = document.getElementById('pay-status')?.value || 'pending';
+  const notes  = document.getElementById('pay-notes')?.value.trim() || null;
+
+  if (!amount || amount <= 0) { toast('Enter a valid amount.'); return; }
+
+  const { error } = await sb.rpc('record_payment', {
+    p_operator_id: operatorId, p_amount_usd: amount, p_logs: logs,
+    p_status: status, p_source: 'manual', p_source_id: null, p_notes: notes,
+  });
+  if (error) { toast('Could not record payment.'); console.error(error); return; }
+
+  toast('Payment recorded.');
+  overlayBack();
+}
+
+// Encode an ERC-20 transfer(address,uint256) call for USDC (6 decimals)
+function encodeUSDCTransfer(toAddress, amountUsd) {
+  const selector = 'a9059cbb';
+  const addr = toAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
+  const units = BigInt(Math.round(amountUsd * 1e6));
+  const amountHex = units.toString(16).padStart(64, '0');
+  return '0x' + selector + addr + amountHex;
+}
+
+async function payMemberWithWallet(paymentId, toAddress, amountUsd, currentStatus) {
+  if (!toAddress) { toast('This member has no wallet address on file yet.'); return; }
+  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
+
+  const ok = await osConfirm(`Send $${Number(amountUsd).toLocaleString()} USDC on Base to ${toAddress}? This is a real on-chain transaction you'll confirm in your own wallet.`);
+  if (!ok) return;
+
+  try {
+    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const from = accts[0];
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
+    } catch(se) {
+      if (se.code === 4902) {
+        await window.ethereum.request({
+          method: 'wallet_addEthereumChain',
+          params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name:'Ether', symbol:'ETH', decimals:18 }, rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org'] }],
+        });
+      }
+    }
+
+    const data = encodeUSDCTransfer(toAddress, amountUsd);
+    const txHash = await window.ethereum.request({
+      method: 'eth_sendTransaction',
+      params: [{ from, to: USDC_BASE_CONTRACT, data }],
+    });
+
+    await sb.rpc('mark_payment_paid', { p_payment_id: paymentId, p_tx_hash: txHash, p_paid_by: from });
+    toast('Payment submitted — check Basescan to confirm it lands.');
+
+    const opId = window._profOp?.id;
+    if (opId) loadMemberLedger(opId, toAddress, false);
+  } catch(e) {
+    console.error(e);
+    toast('Payment cancelled or failed.');
+  }
+}
+
 
 function renderProfileEdit() {
   const op     = window._profOp;
@@ -3983,6 +4150,10 @@ function renderProfileEdit() {
     <div class="prof-field">
       <div class="prof-field-lbl">Phone</div>
       <input class="prof-field-input" id="prof-phone" type="tel" value="${esc(op.phone||'')}" placeholder="Contact number"/>
+    </div>
+    <div class="prof-field">
+      <div class="prof-field-lbl">Wallet address (USDC on Base)</div>
+      <input class="prof-field-input" id="prof-wallet" value="${esc(op.wallet_address||'')}" placeholder="0x… — where payments to you are sent"/>
     </div>
 
     <div class="prof-section">Credentials</div>
@@ -4061,6 +4232,7 @@ async function saveProfile() {
   const bio          = document.getElementById('prof-bio')?.value.trim();
   const contactEmail = document.getElementById('prof-contact-email')?.value.trim();
   const phone        = document.getElementById('prof-phone')?.value.trim();
+  const wallet       = document.getElementById('prof-wallet')?.value.trim();
 
   try {
     const { error } = await sb.rpc('update_operator_profile', {
@@ -4074,6 +4246,10 @@ async function saveProfile() {
     });
     if (error) throw error;
 
+    if (window._profOp?.id) {
+      await sb.rpc('update_wallet_address', { p_operator_id: window._profOp.id, p_wallet_address: wallet || null });
+    }
+
     // Update local state
     operator.handle        = handle;
     operator.bio           = bio;
@@ -4081,7 +4257,7 @@ async function saveProfile() {
     operator.phone         = phone;
     operator.credentials   = window._profCreds;
     operator.skills        = window._profSkills;
-    window._profOp = { ...window._profOp, handle, bio, contact_email: contactEmail, phone,
+    window._profOp = { ...window._profOp, handle, bio, contact_email: contactEmail, phone, wallet_address: wallet,
       credentials: window._profCreds, skills: window._profSkills };
 
     toast('Profile saved.');

@@ -2113,11 +2113,12 @@ const INTAKE_GROUPS = [
 const FRICTION_UNIT = 0.0375;
 let siState = { answers: {}, step: 0 };
 
-function computeFrictionScore() {
+function computeFrictionScore(answersOverride) {
+  const answers = answersOverride || siState.answers;
   let score = 0;
   INTAKE_GROUPS.forEach(g => g.questions.forEach(q => {
     if (!q.weight) return;
-    const val = siState.answers[q.id];
+    const val = answers[q.id];
     if (val === undefined) return;
     const isYes = val === true;
     const effective = q.invert ? !isYes : isYes;
@@ -4136,79 +4137,112 @@ async function renderRelationBody() {
   }
 }
 
-// ── RELATION INTAKE FORM ──
+// ── RELATION INTAKE FORM (structured, 20-question — mirrors operator intake) ──
+let relSiState = { answers: {}, step: 0 };
+
 function renderRelIntake(body) {
+  relSiState = { answers: {}, step: 0 };
+  renderRelIntakeStep(body);
+}
+
+function renderRelIntakeStep(bodyEl) {
+  const body = bodyEl || document.getElementById('rel-body');
+  if (!body) return;
+
+  const group = INTAKE_GROUPS[relSiState.step];
+  const dots  = INTAKE_GROUPS.map((g, i) => `<div class="si-step-dot ${i < relSiState.step ? 'done' : i === relSiState.step ? 'current' : ''}"></div>`).join('');
+
+  const questionsHTML = group.questions.map(q => {
+    const val = relSiState.answers[q.id];
+    if (q.type === 'yn') {
+      const yesLabel = q.yes || 'Yes';
+      const noLabel  = q.no  || 'No';
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <div class="si-yn">
+            <button class="si-yn-btn ${val === true ? 'selected' : ''}" onclick="setRelIntakeAnswer('${q.id}', true)">${esc(yesLabel)}</button>
+            <button class="si-yn-btn ${val === false ? 'selected' : ''}" onclick="setRelIntakeAnswer('${q.id}', false)">${esc(noLabel)}</button>
+          </div>
+        </div>`;
+    }
+    if (q.type === 'date') {
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <input class="rel-q-input" type="datetime-local" value="${val || ''}" onchange="setRelIntakeAnswer('${q.id}', this.value)"/>
+        </div>`;
+    }
+    if (q.type === 'number') {
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <input class="rel-q-input" type="number" min="1" value="${val || ''}" onchange="setRelIntakeAnswer('${q.id}', this.value)"/>
+        </div>`;
+    }
+    return `
+      <div class="si-q">
+        <div class="si-q-text">${esc(q.text)}</div>
+        <input class="rel-q-input" value="${esc(val || '')}" onchange="setRelIntakeAnswer('${q.id}', this.value)"/>
+      </div>`;
+  }).join('');
+
+  const isFirst = relSiState.step === 0;
+  const isLast  = relSiState.step === INTAKE_GROUPS.length - 1;
+
   body.innerHTML = `
+    ${isFirst ? `
     <div class="rel-section" style="padding-top:24px">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">New Project</div>
-      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">Tell us what you need. Answer as many questions as you can.</div>
+      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">Tell us what you need. A few short questions, then we'll map the order of work.</div>
+    </div>` : ''}
+    <div class="si-progress" style="margin:${isFirst ? '4' : '20'}px 18px 0">${dots}</div>
+    <div class="si-step-lbl" style="padding:12px 18px 0">Step ${relSiState.step + 1} of ${INTAKE_GROUPS.length} · ${esc(group.name)}</div>
+    <div style="padding:0 18px">${questionsHTML}</div>
+    <div style="display:flex;gap:10px;padding:16px 18px 24px">
+      ${!isFirst ? `<button class="gate-back" style="border:1px solid var(--line2);padding:14px;flex:1;text-align:center" onclick="relPrevIntakeStep()">← Back</button>` : ''}
+      <button class="act-btn" style="flex:2;margin:0" onclick="${isLast ? 'submitRelIntake()' : 'relNextIntakeStep()'}">${isLast ? 'Submit Project' : 'Next →'}</button>
     </div>
+    <div class="gate-err" id="ri-err" style="margin:0 18px"></div>`;
+}
 
-    <div class="rel-section">
-      <label class="rel-q-lbl">What do you need done?</label>
-      <textarea class="rel-q-textarea" id="ri-goal" placeholder="Describe the project or task"></textarea>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">What does done look like?</label>
-      <textarea class="rel-q-textarea" id="ri-done" placeholder="The outcome you're expecting"></textarea>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">When does it need to be done?</label>
-      <input class="rel-q-input" id="ri-timeline" placeholder="Timeline or deadline"/>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">What is the obstacle right now?</label>
-      <textarea class="rel-q-textarea" id="ri-obstacle" placeholder="What is blocking progress"></textarea>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">Has this been attempted before?</label>
-      <input class="rel-q-input" id="ri-attempted" placeholder="Yes / No — and what happened"/>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">Who else is involved?</label>
-      <input class="rel-q-input" id="ri-others" placeholder="Other people or parties"/>
-    </div>
-    <div class="rel-section">
-      <label class="rel-q-lbl">Where are you located?</label>
-      <input class="rel-q-input" id="ri-location" placeholder="City, region"/>
-    </div>
+function setRelIntakeAnswer(id, val) {
+  relSiState.answers[id] = val;
+  renderRelIntakeStep();
+}
 
-    <div style="padding:8px 0 16px">
-      <button class="act-btn" onclick="submitRelIntake()">Submit Project</button>
-      <div class="gate-err" id="ri-err" style="margin:0 18px"></div>
-    </div>`;
+function relNextIntakeStep() {
+  if (relSiState.step < INTAKE_GROUPS.length - 1) { relSiState.step++; renderRelIntakeStep(); }
+}
+
+function relPrevIntakeStep() {
+  if (relSiState.step > 0) { relSiState.step--; renderRelIntakeStep(); }
 }
 
 async function submitRelIntake() {
-  const goal     = document.getElementById('ri-goal')?.value.trim();
-  const done     = document.getElementById('ri-done')?.value.trim();
-  const timeline = document.getElementById('ri-timeline')?.value.trim();
-  const obstacle = document.getElementById('ri-obstacle')?.value.trim();
-  const err      = document.getElementById('ri-err');
-  err.classList.remove('show');
+  const err = document.getElementById('ri-err');
+  if (err) err.classList.remove('show');
 
-  if (!goal) {
-    err.textContent = 'Describe what you need done before submitting.';
-    err.classList.add('show'); return;
+  const answers = relSiState.answers;
+  if (!answers.q5 || !String(answers.q5).trim()) {
+    if (err) { err.textContent = 'Describe the primary deliverable before submitting.'; err.classList.add('show'); }
+    relSiState.step = 1; // "Scope & Effort" group, where q5 lives
+    renderRelIntakeStep();
+    return;
   }
 
-  const intake = {
-    goal,
-    done:      done      || null,
-    timeline:  timeline  || null,
-    obstacle:  obstacle  || null,
-    attempted: document.getElementById('ri-attempted')?.value.trim() || null,
-    others:    document.getElementById('ri-others')?.value.trim()    || null,
-    location:  document.getElementById('ri-location')?.value.trim()  || null,
-  };
+  const score       = computeFrictionScore(answers);
+  const start        = answers.q1 ? new Date(answers.q1).toISOString() : null;
+  const end          = answers.q2 ? new Date(answers.q2).toISOString() : null;
+  const deliverable  = String(answers.q5).trim();
 
   try {
     const { error } = await sb.rpc('submit_intake', {
       p_code:         relation.code,
-      p_title:        goal.substring(0, 120),
-      p_scope:        goal,
-      p_deliverables: done ? [{ text: done }] : [],
-      p_intake:       intake,
+      p_title:        deliverable.substring(0, 120),
+      p_scope:        deliverable,
+      p_deliverables: [{ text: deliverable }],
+      p_intake:       { ...answers, _friction_score: score, _window_start: start, _window_end: end },
     });
     if (error) throw error;
 
@@ -4216,10 +4250,10 @@ async function submitRelIntake() {
     await renderRelationBody();
   } catch(e) {
     console.error(e);
-    err.textContent = 'Could not submit. Check your connection and try again.';
-    err.classList.add('show');
+    if (err) { err.textContent = 'Could not submit. Check your connection and try again.'; err.classList.add('show'); }
   }
 }
+
 
 // ── RELATION STATUS VIEW ──
 async function renderRelStatus(body) {

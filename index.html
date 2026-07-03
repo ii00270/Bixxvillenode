@@ -325,6 +325,66 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .rel-exit{background:none;border:none;font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);cursor:pointer;}
 .rel-exit:hover{color:var(--soft);}
 #rel-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+
+/* ── RELATION TAB BAR ── */
+.rel-tabs{
+  display:flex;background:var(--black);border-bottom:1px solid var(--line);
+  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+}
+.rel-tab{
+  flex:1;min-width:80px;text-align:center;padding:13px 8px;
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;color:var(--grey);cursor:pointer;
+  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
+}
+.rel-tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* ── AVAILABILITY / CAPACITY GRID ── */
+.rel-cap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:16px 18px;}
+.rel-cap-cell{
+  aspect-ratio:1;border-radius:6px;background:var(--surface);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--grey);
+}
+.rel-cap-cell.open{background:rgba(140,240,96,.10);border-color:rgba(140,240,96,.35);color:var(--green);}
+.rel-cap-cell.taken{background:rgba(232,136,74,.08);border-color:rgba(232,136,74,.3);color:var(--orange);}
+.rel-cap-legend{display:flex;gap:18px;margin:4px 18px 4px;font-family:var(--mono);font-size:10px;color:var(--grey);}
+.rel-cap-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:middle;}
+
+/* ── WALLET BOX ── */
+.rel-wallet-box{background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:16px;margin:0 18px 18px;}
+.rel-wallet-row{display:flex;justify-content:space-between;align-items:center;}
+.rel-wallet-balance{font-family:var(--mono);font-size:22px;font-weight:700;color:#FFFFFF;}
+.rel-wallet-confirmed{color:var(--green);font-size:11px;font-family:var(--mono);display:flex;align-items:center;gap:6px;margin-top:10px;}
+.rel-wallet-btn{
+  margin-top:12px;background:transparent;border:1px solid var(--line2);color:var(--cream);
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
+  padding:11px;cursor:pointer;width:100%;transition:border-color .15s,color .15s;
+}
+.rel-wallet-btn:hover{border-color:var(--green);color:var(--green);}
+
+/* ── MY WORK — submission history ── */
+.rel-sub-item{border-bottom:1px solid var(--line);padding:16px 18px;cursor:pointer;transition:background .15s;}
+.rel-sub-item:hover{background:var(--surface);}
+.rel-sub-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+.rel-sub-title{font-family:var(--sans);font-weight:600;font-size:14px;color:#FFFFFF;}
+.rel-sub-meta{font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:5px;}
+.rel-pill{
+  display:inline-block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:4px 9px;border-radius:20px;font-weight:700;white-space:nowrap;
+}
+.rel-pill.pending,.rel-pill.open{background:rgba(232,136,74,.14);color:var(--orange);}
+.rel-pill.settling{background:rgba(200,198,194,.14);color:var(--soft);}
+.rel-pill.settled{background:rgba(140,240,96,.14);color:var(--green);}
+
+/* ── MESSAGES — encrypted ── */
+.rel-msg-lock{padding:20px 18px;}
+.rel-msg-hint{font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:16px;}
+.rel-msg-scroll{max-height:none;display:flex;flex-direction:column;gap:8px;padding:16px 18px;}
+.rel-bubble{max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;font-family:var(--sans);}
+.rel-bubble.me{align-self:flex-end;background:var(--green);color:#08110C;border-bottom-right-radius:4px;}
+.rel-bubble.them{align-self:flex-start;background:var(--surface);border:1px solid var(--line2);color:var(--cream);border-bottom-left-radius:4px;}
+.rel-bubble-who{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:3px;}
+
 .rel-section{padding:20px 18px;border-bottom:1px solid var(--line);}
 .rel-q-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:10px;}
 .rel-q-input,.rel-q-textarea{
@@ -1305,6 +1365,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
     <div class="rel-peer" id="rel-peer-name">—</div>
     <button class="rel-exit" onclick="doRelLogout()">Exit</button>
   </div>
+  <div class="rel-tabs" id="rel-tabs">
+    <div class="rel-tab active" id="rt-submit" onclick="showRelTab('submit')">Submit</div>
+    <div class="rel-tab" id="rt-capacity" onclick="showRelTab('capacity')">Availability</div>
+    <div class="rel-tab" id="rt-work" onclick="showRelTab('work')">My Work</div>
+    <div class="rel-tab" id="rt-messages" onclick="showRelTab('messages')">Messages</div>
+  </div>
   <div id="rel-body"></div>
 </div>
 
@@ -1858,7 +1924,7 @@ async function loadMessages() {
   }
 
   body.innerHTML = projects.map(p => `
-    <div class="member-row" onclick="openMessages('${p.id}', '${esc(p.relation_name || p.relation_code)}')">
+    <div class="member-row" onclick="openMessages('${esc(p.relation_code)}', '${esc(p.relation_name || p.relation_code)}')">
       <div class="member-avatar">
         <svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
           <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
@@ -1915,43 +1981,75 @@ async function loadNotifications() {
 }
 
 // ── OPEN MESSAGES THREAD ──
-function openMessages(projectId, projectName) {
-  openOverlay(projectName, async (body) => {
-    body.innerHTML = '<div style="padding:16px;font-family:var(--mono);font-size:10px;color:var(--grey)">Loading messages…</div>';
-    const { data: msgs } = await sb.rpc('get_messages', { p_code: projectId });
-    const messages = msgs || [];
+let opMsgKey = null;
+let opMsgCode = null;
 
-    const renderMsgs = () => messages.map(m => `
-      <div style="padding:10px 18px;border-bottom:1px solid var(--line);">
-        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:4px;">${m.sender}</div>
-        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;">${esc(m.ciphertext)}</div>
-      </div>`).join('');
-
+function openMessages(relationCode, projectName) {
+  opMsgCode = relationCode;
+  opMsgKey = null;
+  openOverlay(projectName, (body) => {
     body.innerHTML = `
-      <div style="flex:1;overflow-y:auto" id="msg-list">${messages.length ? renderMsgs() : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No messages yet.</div></div>'}</div>
-      <div style="padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-shrink:0;">
-        <input class="form-input" id="msg-input" placeholder="Send a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg('${projectId}')"/>
-        <button class="act-btn" style="white-space:nowrap;margin:0;padding:0 16px;" onclick="sendMsg('${projectId}')">Send</button>
+      <div class="rel-msg-lock" style="padding:16px 18px">
+        <div class="rel-msg-hint">Messages are end-to-end encrypted. Enter the shared password you gave this relation to read and reply.</div>
+        <label class="form-lbl">Shared message password</label>
+        <input class="form-input" type="password" id="op-msg-pw" placeholder="Password shared with this relation"
+          onkeydown="if(event.key==='Enter')unlockOpMsgs()"/>
+        <button class="act-btn" style="margin:16px 0 0" onclick="unlockOpMsgs()">Unlock messages</button>
       </div>`;
   });
 }
 
-async function sendMsg(projectId) {
+async function unlockOpMsgs() {
+  const pw = document.getElementById('op-msg-pw')?.value;
+  if (!pw) { toast('Enter the password.'); return; }
+  opMsgKey = await deriveMsgKey(pw);
+  renderOpMsgThread();
+}
+
+function renderOpMsgThread() {
+  const body = document.getElementById('ov-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:14px 18px" id="msg-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
+    <div style="padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-shrink:0;">
+      <input class="form-input" id="msg-input" placeholder="Send a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()"/>
+      <button class="act-btn" style="white-space:nowrap;margin:0;padding:0 16px;" onclick="sendMsg()">Send</button>
+    </div>`;
+  loadOpMsgs();
+}
+
+async function loadOpMsgs() {
+  const list = document.getElementById('msg-list');
+  if (!list || !opMsgKey) return;
+  const { data: msgs } = await sb.rpc('get_messages', { p_code: opMsgCode });
+  const messages = msgs || [];
+
+  if (!messages.length) {
+    list.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">No messages yet.</div></div>';
+    return;
+  }
+
+  const rendered = await Promise.all(messages.map(async m => {
+    const text = await decryptMsgText(m.ciphertext, opMsgKey);
+    const mine = m.sender === 'OPERATORS';
+    return `
+      <div style="align-self:${mine ? 'flex-end' : 'flex-start'};max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;font-family:var(--sans);${mine ? 'background:var(--green);color:#08110C' : 'background:var(--surface);border:1px solid var(--line2);color:var(--cream)'}">
+        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:3px">${mine ? 'You' : esc(m.sender)}</div>
+        ${esc(text)}
+      </div>`;
+  }));
+  list.innerHTML = rendered.join('');
+  list.scrollTop = list.scrollHeight;
+}
+
+async function sendMsg() {
   const inp = document.getElementById('msg-input');
   const text = inp?.value.trim();
-  if (!text) return;
+  if (!text || !opMsgKey || !opMsgCode) return;
   inp.value = '';
-  await sb.rpc('send_message', { p_code: projectId, p_ciphertext: text });
-  const { data: msgs } = await sb.rpc('get_messages', { p_code: projectId });
-  const list = document.getElementById('msg-list');
-  if (list && msgs) {
-    list.innerHTML = msgs.map(m => `
-      <div style="padding:10px 18px;border-bottom:1px solid var(--line);">
-        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:4px;">${m.sender}</div>
-        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;">${esc(m.ciphertext)}</div>
-      </div>`).join('');
-    list.scrollTop = list.scrollHeight;
-  }
+  const ct = await encryptMsgText(text, opMsgKey);
+  await sb.rpc('send_message', { p_code: opMsgCode, p_ciphertext: ct });
+  await loadOpMsgs();
 }
 
 // ── INTAKE SURFACE ──
@@ -4052,6 +4150,10 @@ function switchGate(mode) {
 // ── RELATION STATE ──
 let relation = null; // { code, name, projectId }
 let relMsgPoll = null;
+let relTab = 'submit';
+let relWallet = { addr: null, usdc: null, confirmed: false };
+let relMsgKey = null;
+const REL_MSG_SALT = new TextEncoder().encode('bixxville-node-msg-v1');
 
 // ── RELATION LOGIN ──
 let relLogging = false;
@@ -4109,12 +4211,16 @@ function enterRelationShell() {
   document.getElementById('rel-peer-name').textContent = relation.name;
   document.getElementById('gate').classList.add('out');
   document.getElementById('rel-shell').classList.add('in');
-  renderRelationBody();
+  relTab = 'submit';
+  relWallet = { addr: null, usdc: null, confirmed: false };
+  relMsgKey = null;
+  showRelTab('submit');
 }
 
 function doRelLogout() {
   if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
   relation = null;
+  relMsgKey = null;
   document.getElementById('rel-shell').classList.remove('in');
   document.getElementById('gate').classList.remove('out');
   document.getElementById('g-code').value = '';
@@ -4122,31 +4228,22 @@ function doRelLogout() {
   gateShowSplash();
 }
 
-// ── RELATION BODY ROUTER ──
-async function renderRelationBody() {
+// ── RELATION TAB ROUTER ──
+function showRelTab(tab) {
+  if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
+  relTab = tab;
+  ['submit','capacity','work','messages'].forEach(t => {
+    document.getElementById('rt-' + t)?.classList.toggle('active', t === tab);
+  });
   const body = document.getElementById('rel-body');
-  if (!relation) return;
-
-  // Refresh project state
-  if (relation.code) {
-    const { data: projects } = await sb
-      .from('relation_submissions')
-      .select('id, status')
-      .eq('relation_code', relation.code)
-      .order('created_at', { ascending: false })
-      .limit(1);
-    if (projects?.[0]) {
-      relation.projectId     = projects[0].id;
-      relation.projectStatus = projects[0].status;
-    }
-  }
-
-  if (!relation.projectId) {
-    renderRelIntake(body);
-  } else {
-    renderRelStatus(body);
-  }
+  if (!body) return;
+  if (tab === 'submit')    renderRelIntake(body);
+  if (tab === 'capacity')  renderRelCapacity(body);
+  if (tab === 'work')      renderRelMyWork(body);
+  if (tab === 'messages')  renderRelMessagesTab(body);
 }
+
+// (routing now handled by showRelTab — see RELATION TAB ROUTER above)
 
 // ── RELATION INTAKE FORM (structured, 20-question — mirrors operator intake) ──
 let relSiState = { answers: {}, step: 0 };
@@ -4210,6 +4307,11 @@ function renderRelIntakeStep(bodyEl) {
     <div class="si-progress" style="margin:${isFirst ? '4' : '20'}px 18px 0">${dots}</div>
     <div class="si-step-lbl" style="padding:12px 18px 0">Step ${relSiState.step + 1} of ${INTAKE_GROUPS.length} · ${esc(group.name)}</div>
     <div style="padding:0 18px">${questionsHTML}</div>
+    ${isLast ? `
+    <div style="padding:8px 18px 0">
+      <div class="rel-q-lbl">Fund availability</div>
+    </div>
+    ${renderRelWalletBox()}` : ''}
     <div style="display:flex;gap:10px;padding:16px 18px 24px">
       ${!isFirst ? `<button class="gate-back" style="border:1px solid var(--line2);padding:14px;flex:1;text-align:center" onclick="relPrevIntakeStep()">← Back</button>` : ''}
       <button class="act-btn" style="flex:2;margin:0" onclick="${isLast ? 'submitRelIntake()' : 'relNextIntakeStep()'}">${isLast ? 'Submit Project' : 'Next →'}</button>
@@ -4228,6 +4330,59 @@ function relNextIntakeStep() {
 
 function relPrevIntakeStep() {
   if (relSiState.step > 0) { relSiState.step--; renderRelIntakeStep(); }
+}
+
+// ── WALLET (read-only USDC balance confirm, ported from the standalone portal) ──
+function renderRelWalletBox() {
+  if (!relWallet.confirmed) {
+    return `
+      <div class="rel-wallet-box">
+        <div style="font-family:var(--sans);font-size:13px;font-weight:600;color:#FFFFFF">Confirm you can fund this</div>
+        <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-top:4px;line-height:1.5">Connect your wallet so operators can confirm funds are available. We only read your balance — nothing moves.</div>
+        <button class="rel-wallet-btn" onclick="connectRelWallet()">Connect wallet</button>
+      </div>`;
+  }
+  return `
+    <div class="rel-wallet-box">
+      <div class="rel-wallet-row">
+        <div>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)">USDC available</div>
+          <div class="rel-wallet-balance">${relWallet.usdc != null ? relWallet.usdc.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'}</div>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--grey)">${relWallet.addr.slice(0,6)}…${relWallet.addr.slice(-4)}</div>
+      </div>
+      <div class="rel-wallet-confirmed">✓ Wallet connected · funds visible to operators</div>
+    </div>`;
+}
+
+async function connectRelWallet() {
+  if (!window.ethereum) { toast('No wallet found. Open this page in your wallet\'s browser, or install MetaMask.'); return; }
+  try {
+    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    relWallet.addr = accts[0];
+    // Switch to Base so the balance reads on the right network
+    try {
+      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
+    } catch(se) {
+      if (se.code === 4902) {
+        try {
+          await window.ethereum.request({
+            method: 'wallet_addEthereumChain',
+            params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name:'Ether', symbol:'ETH', decimals:18 }, rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org'] }],
+          });
+        } catch(ae) {}
+      }
+    }
+    const data = '0x70a08231000000000000000000000000' + relWallet.addr.slice(2);
+    const res = await window.ethereum.request({ method: 'eth_call', params: [{ to: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', data }, 'latest'] });
+    relWallet.usdc = (res && res !== '0x') ? parseInt(res, 16) / 1e6 : 0;
+    relWallet.confirmed = true;
+    toast('Wallet connected on Base.');
+    renderRelIntakeStep();
+  } catch(e) {
+    console.error(e);
+    toast('Connection cancelled.');
+  }
 }
 
 async function submitRelIntake() {
@@ -4253,33 +4408,129 @@ async function submitRelIntake() {
       p_title:        deliverable.substring(0, 120),
       p_scope:        deliverable,
       p_deliverables: [{ text: deliverable }],
-      p_intake:       { ...answers, _friction_score: score, _window_start: start, _window_end: end },
+      p_intake:       {
+        ...answers,
+        _friction_score:  score,
+        _window_start:    start,
+        _window_end:      end,
+        _wallet_addr:     relWallet.confirmed ? relWallet.addr : null,
+        _wallet_usdc:     relWallet.confirmed ? relWallet.usdc : null,
+        _wallet_confirmed: relWallet.confirmed,
+      },
     });
     if (error) throw error;
 
-    toast('Project submitted.');
-    await renderRelationBody();
+    toast('Project submitted — your operators will review it.');
+    relSiState = { answers: {}, step: 0 };
+    relWallet  = { addr: null, usdc: null, confirmed: false };
+    showRelTab('work');
   } catch(e) {
     console.error(e);
     if (err) { err.textContent = 'Could not submit. Check your connection and try again.'; err.classList.add('show'); }
   }
 }
 
+// ── AVAILABILITY / CAPACITY ──
+async function renderRelCapacity(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">This Cycle</div>
+      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">The network works in 4-hour blocks. Green blocks have room for new work; orange blocks are already committed. Submit early in the cycle for the best chance of a fast start.</div>
+    </div>
+    <div id="rel-cap-body" style="padding:16px 0"><div class="empty"><div class="empty-msg">Loading availability…</div></div></div>`;
 
-// ── RELATION STATUS VIEW ──
-async function renderRelStatus(body) {
+  try {
+    const { data } = await sb.from('bids').select('log_size,status').not('status', 'in', '("confirmed")');
+    const committed = (data || []).reduce((n, b) => n + Math.ceil(Number(b.log_size || 0) / 4), 0);
+    const TOTAL = 42; // a 6x7 grid — a friendly sense of capacity, not a precise schedule
+    const taken = Math.min(committed, TOTAL);
+
+    let cells = '';
+    for (let i = 0; i < TOTAL; i++) {
+      cells += `<div class="rel-cap-cell ${i < taken ? 'taken' : 'open'}">${i < taken ? '' : '·'}</div>`;
+    }
+
+    const capEl = document.getElementById('rel-cap-body');
+    if (capEl) {
+      capEl.innerHTML = `
+        <div class="rel-cap-grid">${cells}</div>
+        <div class="rel-cap-legend">
+          <span><span class="rel-cap-dot" style="background:rgba(140,240,96,.5)"></span>Open</span>
+          <span><span class="rel-cap-dot" style="background:rgba(232,136,74,.5)"></span>Committed</span>
+        </div>
+        <div style="font-family:var(--mono);font-size:11px;color:var(--grey);margin:14px 18px 0">${TOTAL - taken} of ${TOTAL} blocks open this cycle.</div>`;
+    }
+  } catch(e) {
+    console.error(e);
+    const capEl = document.getElementById('rel-cap-body');
+    if (capEl) capEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load availability.</div></div>';
+  }
+}
+
+// ── MY WORK — submission history ──
+async function renderRelMyWork(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Your Requests</div>
+      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">Every project you've submitted, and where it stands.</div>
+    </div>
+    <div id="rel-work-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+
+  try {
+    const { data } = await sb
+      .from('relation_submissions')
+      .select('*, bids(*)')
+      .eq('relation_code', relation.code)
+      .order('created_at', { ascending: false });
+
+    const subs = data || [];
+    const workEl = document.getElementById('rel-work-body');
+    if (!workEl) return;
+
+    if (!subs.length) {
+      workEl.innerHTML = '<div class="empty"><div class="empty-msg">No requests yet. Submit your first under "Submit."</div></div>';
+      return;
+    }
+
+    workEl.innerHTML = subs.map(s => {
+      const scopes = s.bids || [];
+      const st = s.status || 'pending';
+      return `
+        <div class="rel-sub-item" onclick="openRelSubmissionDetail('${s.id}')">
+          <div class="rel-sub-head">
+            <div>
+              <div class="rel-sub-title">${esc(s.title || s.scope || 'Untitled')}</div>
+              <div class="rel-sub-meta">${scopes.length} scope${scopes.length !== 1 ? 's' : ''} · ${new Date(s.created_at).toLocaleDateString()}</div>
+            </div>
+            <span class="rel-pill ${st}">${esc(st)}</span>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    console.error(e);
+    const workEl = document.getElementById('rel-work-body');
+    if (workEl) workEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load your work.</div></div>';
+  }
+}
+
+async function openRelSubmissionDetail(id) {
+  const body = document.getElementById('rel-body');
+  if (!body) return;
+  body.innerHTML = '<div class="empty"><div class="empty-msg">Loading…</div></div>';
+
   const { data: project } = await sb
     .from('relation_submissions')
     .select('*, bids(*)')
-    .eq('id', relation.projectId)
+    .eq('id', id)
     .single();
 
   if (!project) { body.innerHTML = '<div class="empty"><div class="empty-msg">Project not found.</div></div>'; return; }
 
-  const scopes     = project.bids || [];
-  const delivered  = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
-  const statusColor= project.status === 'settled' ? 'var(--green)' : project.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
+  const scopes      = project.bids || [];
+  const delivered   = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
+  const statusColor = project.status === 'settled' ? 'var(--green)' : project.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
   window._relDagData = project.dag || null;
+
   const dagBlock = project.dag ? `
     <div class="section-lbl" style="position:relative;top:0">Project Map</div>
     <div class="dag-view-toggle" style="margin:0 18px 10px">
@@ -4289,13 +4540,16 @@ async function renderRelStatus(body) {
     <div id="rel-dag-view-container" style="margin:0 18px 14px"><pre id="rel-dag-text-block" style="font-family:var(--mono);font-size:10px;line-height:1.7;color:#FFFFFF;background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:14px;overflow-x:auto;white-space:pre;">${esc(renderDAGText(project.dag))}</pre></div>` : '';
 
   body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px">
+    <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
+      <span class="gate-back" onclick="showRelTab('work')">← My Work</span>
+    </div>
+    <div class="rel-section" style="padding-top:0">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px">Your Project</div>
       <div style="font-family:var(--sans);font-size:15px;font-weight:600;color:var(--cream);line-height:1.4">${esc(project.title || project.scope || '—')}</div>
     </div>
     <div class="rel-status-badge">
       <div class="rel-status-dot" style="background:${statusColor}"></div>
-      <div class="rel-status-text" style="color:${statusColor}">${project.status}</div>
+      <div class="rel-status-text" style="color:${statusColor}">${esc(project.status)}</div>
     </div>
     ${dagBlock}
     ${scopes.length ? `
@@ -4315,23 +4569,13 @@ async function renderRelStatus(body) {
         <div class="scope-dot ${s.status === 'confirmed' || s.status === 'delivered' ? 'delivered' : 'assigned'}"></div>
         <div class="scope-info">
           <div class="scope-name">${esc(s.title || 'Scope')}</div>
-          <div class="scope-meta">${s.log_size || 0} LOG · ${s.status}</div>
+          <div class="scope-meta">${s.log_size || 0} LOG · ${esc(s.status)}</div>
         </div>
-      </div>`).join('')}` : ''}
-
-    <div class="section-lbl" style="position:relative;top:0">Messages</div>
-    <div id="rel-msgs"></div>
-    <div class="rel-msg-compose">
-      <input class="rel-msg-inp" id="rel-msg-inp" placeholder="Message your operator…"
-        onkeydown="if(event.key==='Enter')sendRelMessage()"/>
-      <button class="rel-msg-send" onclick="sendRelMessage()">Send</button>
-    </div>`;
-
-  loadRelMessages();
-  if (relMsgPoll) clearInterval(relMsgPoll);
-  relMsgPoll = setInterval(loadRelMessages, 8000);
+      </div>`).join('')}` : ''}`;
 }
 
+
+// ── RELATION STATUS VIEW ──
 function setRelDagView(mode) {
   const dag = window._relDagData;
   if (!dag) return;
@@ -4348,36 +4592,104 @@ function setRelDagView(mode) {
   }
 }
 
-async function loadRelMessages() {
-  const el = document.getElementById('rel-msgs');
-  if (!el) return;
+// ── MESSAGE ENCRYPTION (shared password, PBKDF2 + AES-GCM) ──
+// Both the relation portal and the operator's message thread use these same
+// functions with the same password, so messages actually stay unreadable to
+// anyone without it — including in transit through Supabase.
+async function deriveMsgKey(pw) {
+  const enc  = new TextEncoder();
+  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt: REL_MSG_SALT, iterations: 100000, hash: 'SHA-256' },
+    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
+  );
+}
+async function encryptMsgText(text, key) {
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const ct  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text));
+  const buf = new Uint8Array(iv.length + ct.byteLength);
+  buf.set(iv, 0); buf.set(new Uint8Array(ct), iv.length);
+  return btoa(String.fromCharCode(...buf));
+}
+async function decryptMsgText(b64, key) {
+  try {
+    const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+    const iv = raw.slice(0, 12), data = raw.slice(12);
+    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
+    return new TextDecoder().decode(pt);
+  } catch(e) { return '🔒 (wrong password — can\'t decrypt this message)'; }
+}
+
+// ── MESSAGES TAB (relation side) ──
+function renderRelMessagesTab(body) {
+  if (relMsgKey) {
+    body.innerHTML = `
+      <div class="rel-msg-scroll" id="rel-msg-scroll"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
+      <div class="rel-msg-compose">
+        <input class="rel-msg-inp" id="rel-msg-inp" placeholder="Message your operator…"
+          onkeydown="if(event.key==='Enter')relSendMsg()"/>
+        <button class="rel-msg-send" onclick="relSendMsg()">Send</button>
+      </div>`;
+    relLoadMsgs();
+    if (relMsgPoll) clearInterval(relMsgPoll);
+    relMsgPoll = setInterval(relLoadMsgs, 8000);
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="rel-msg-lock">
+      <div class="rel-msg-hint">Messages here are end-to-end encrypted. Enter the shared password your operator gave you — without it, messages can't be read by anyone, including us.</div>
+      <label class="rel-q-lbl">Shared message password</label>
+      <input class="rel-q-input" type="password" id="rel-msg-pw" placeholder="Password from your operator"
+        onkeydown="if(event.key==='Enter')relUnlockMsgs()"/>
+      <button class="act-btn" style="margin:16px 0 0" onclick="relUnlockMsgs()">Unlock messages</button>
+    </div>`;
+}
+
+async function relUnlockMsgs() {
+  const pw = document.getElementById('rel-msg-pw')?.value;
+  if (!pw) { toast('Enter the password.'); return; }
+  relMsgKey = await deriveMsgKey(pw);
+  renderRelMessagesTab(document.getElementById('rel-body'));
+}
+
+async function relLoadMsgs() {
+  const el = document.getElementById('rel-msg-scroll');
+  if (!el || !relMsgKey) return;
 
   try {
     const { data } = await sb.rpc('get_messages', { p_code: relation.code });
     const msgs = data || [];
 
     if (!msgs.length) {
-      el.innerHTML = `<div class="empty" style="padding:20px 18px"><div class="empty-msg">No messages yet. Send one below.</div></div>`;
+      el.innerHTML = '<div class="empty"><div class="empty-msg">No messages yet. Say hello below.</div></div>';
       return;
     }
 
-    el.innerHTML = msgs.map(m => `
-      <div class="rel-msg-item">
-        <div class="rel-msg-sender ${m.sender !== 'OPERATORS' ? 'mine' : ''}">${m.sender === 'OPERATORS' ? 'Operator' : relation.name}</div>
-        <div class="rel-msg-text">${esc(m.ciphertext)}</div>
-      </div>`).join('');
+    const rendered = await Promise.all(msgs.map(async m => {
+      const mine = m.sender !== 'OPERATORS';
+      const text = await decryptMsgText(m.ciphertext, relMsgKey);
+      return `
+        <div class="rel-bubble ${mine ? 'me' : 'them'}">
+          <div class="rel-bubble-who">${mine ? 'You' : 'Operator'}</div>
+          ${esc(text)}
+        </div>`;
+    }));
+    el.innerHTML = rendered.join('');
+    el.scrollTop = el.scrollHeight;
   } catch(e) { console.error(e); }
 }
 
-async function sendRelMessage() {
+async function relSendMsg() {
   const inp  = document.getElementById('rel-msg-inp');
   const text = inp?.value.trim();
-  if (!text) return;
+  if (!text || !relMsgKey) return;
 
   try {
-    await sb.rpc('send_message', { p_code: relation.code, p_ciphertext: text });
+    const ct = await encryptMsgText(text, relMsgKey);
+    await sb.rpc('send_message', { p_code: relation.code, p_ciphertext: ct });
     inp.value = '';
-    await loadRelMessages();
+    await relLoadMsgs();
   } catch(e) {
     toast('Could not send message.');
   }

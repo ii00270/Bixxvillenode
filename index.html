@@ -3858,7 +3858,8 @@ function buildScopeRow(s, idx, projectCycle) {
 
 function openMemberRecord(memberId) {
   openOverlay('Profile', async (body) => {
-    const { data: op } = await sb.from('operators').select('*').eq('id', memberId).single();
+    const { data: allOps } = await sb.rpc('list_operators');
+    const op = (allOps || []).find(o => o.id === memberId);
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
     const { data: projects } = await sb.rpc('get_settled_projects');
@@ -3897,7 +3898,7 @@ function renderProfileView(body, op, breakdown, memberId) {
   const handle  = op.handle || '@' + (op.peer_name||'').replace(/\s/g,'').toUpperCase();
   const creds   = window._profCreds;
   const skills  = window._profSkills;
-  const isSelf  = operator && op.email === operator.email;
+  const isSelf  = operator && op.id === operator.id;
 
   body.innerHTML = `
     <!-- Avatar + header -->
@@ -3977,6 +3978,19 @@ function renderProfileView(body, op, breakdown, memberId) {
 
 // ── PAYMENT LEDGER ──
 const USDC_BASE_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // real USDC on Base — same contract already used for the wallet balance check
+
+async function connectProfileWallet() {
+  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
+  try {
+    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const input = document.getElementById('prof-wallet');
+    if (input) input.value = accts[0];
+    toast('Wallet connected — remember to Save Profile.');
+  } catch(e) {
+    console.error(e);
+    toast('Connection cancelled.');
+  }
+}
 
 async function loadMemberLedger(operatorId, walletAddress, isSelf) {
   const el = document.getElementById('ledger-body');
@@ -4153,7 +4167,11 @@ function renderProfileEdit() {
     </div>
     <div class="prof-field">
       <div class="prof-field-lbl">Wallet address (USDC on Base)</div>
-      <input class="prof-field-input" id="prof-wallet" value="${esc(op.wallet_address||'')}" placeholder="0x… — where payments to you are sent"/>
+      <div style="display:flex;gap:8px">
+        <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(op.wallet_address||'')}" placeholder="0x… — where payments to you are sent"/>
+        <button class="prof-add-btn" style="white-space:nowrap" onclick="connectProfileWallet()">Connect</button>
+      </div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">Or connect MetaMask to fill this in automatically.</div>
     </div>
 
     <div class="prof-section">Credentials</div>

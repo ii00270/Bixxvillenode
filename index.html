@@ -1820,13 +1820,45 @@ async function submitProject() {
 }
 
 // ── SPRINT 2: RULE-BASED DAG GENERATION ──
+function estimateLOG(text) {
+  // Milestone/goal language = lower effort (it's a target, not a task)
+  if (/^(reach|goal|year \d+ goal)/i.test(text)) return 2;
+  // Count discrete items/actions in the text (commas, "and")
+  const itemCount = text.split(/,|\band\b/i).filter(s => s.trim().length > 2).length;
+  // Word count as a secondary signal
+  const wordCount = text.split(/\s+/).length;
+  let est = Math.max(2, Math.min(8, Math.round(itemCount * 1.5)));
+  if (wordCount > 12 && itemCount <= 1) est = Math.max(est, 4);
+  return est;
+}
+
+function splitBundledAction(text) {
+  // Detect list-style bundling: "Acquire trailer, water tanks, pumps, hoses, and service equipment"
+  // Split on commas when there are 3+ items, keep the leading verb attached to the first item
+  const commaCount = (text.match(/,/g) || []).length;
+  if (commaCount < 2) return [text];
+
+  const verbMatch = text.match(/^(Acquire|Purchase|Buy|Form|Obtain|Secure|Develop|Achieve|Grow|Hire|Prepare|Complete)\s+(.+)$/i);
+  const verb = verbMatch ? verbMatch[1] : null;
+  const rest = verbMatch ? verbMatch[2] : text;
+
+  // Split the remainder on commas and "and"
+  const items = rest
+    .replace(/\band\b/gi, ',')
+    .split(',')
+    .map(s => s.trim())
+    .filter(s => s.length > 1);
+
+  if (items.length < 2) return [text];
+
+  return items.map((item, i) => verb && i === 0 ? `${verb} ${item}` : (verb ? `${verb} ${item}` : item));
+}
+
 function generateDAG(title, market, doc) {
   const nodes = [];
   const lines = doc.split('\n').map(l => l.trim()).filter(Boolean);
 
-  // Pattern 1: look for phase/month/year headers like "Month 1-2:", "Year 1-2:", "Years 3-5:"
   const phasePattern = /^(Month|Months|Year|Years)\s+[\d\-–toand]+\s*[:.]?\s*(.+)$/i;
-  // Pattern 2: numbered list items "1. Something"
   const numberedPattern = /^\d+\.\s*(.+)$/;
 
   let matches = [];
@@ -1834,13 +1866,15 @@ function generateDAG(title, market, doc) {
   lines.forEach(line => {
     const phaseMatch = line.match(phasePattern);
     if (phaseMatch) {
-      // Split on periods to catch multiple actions per phase line
       const actions = phaseMatch[2].split(/\.\s+/).filter(a => a.trim().length > 3);
-      actions.forEach(a => matches.push(a.trim().replace(/\.$/, '')));
+      actions.forEach(a => {
+        const clean = a.trim().replace(/\.$/, '');
+        // Split bundled comma lists into separate scopes instead of truncating
+        splitBundledAction(clean).forEach(item => matches.push(item));
+      });
     }
   });
 
-  // Fallback: numbered "Keys to Success" or roadmap items if no phase lines found
   if (matches.length < 3) {
     lines.forEach(line => {
       const numMatch = line.match(numberedPattern);
@@ -1850,26 +1884,25 @@ function generateDAG(title, market, doc) {
     });
   }
 
-  // Cap and dedupe
-  matches = [...new Set(matches)].slice(0, 10);
+  matches = [...new Set(matches)].slice(0, 14);
 
   if (!matches.length) {
     matches = ['Define scope', 'Assign resources', 'Execute plan', 'Review outcome'];
   }
 
-  // Build node structure: START, tiers of 1-2 nodes, OUTCOME
   nodes.push({ id: 'start', type: 'start', label: 'Genesis · ' + title, tier: 0 });
 
   let tierIdx = 1;
   for (let i = 0; i < matches.length; i += 2) {
     const pair = matches.slice(i, i + 2);
     pair.forEach((label, j) => {
-      const isKey = j === 0 && i < 4; // first item in early tiers marked key
+      const isKey = j === 0 && i < 4;
+      const cleanLabel = label.length > 70 ? label.substring(0, 67) + '…' : label;
       nodes.push({
         id: 'n' + (i + j),
         type: isKey ? 'key' : 'standard',
-        label: label.length > 60 ? label.substring(0, 57) + '…' : label,
-        log_estimate: 4,
+        label: cleanLabel,
+        log_estimate: estimateLOG(label),
         tier: tierIdx,
       });
     });

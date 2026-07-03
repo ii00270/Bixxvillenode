@@ -989,6 +989,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .ds-peer-mark{width:34px;height:34px;border-radius:50%;background:var(--surface2);border:1px solid var(--line2);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
 .ds-peer-name{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--cream);}
 .ds-peer-handle{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:2px;}
+.ds-signout{
+  background:none;border:1px solid var(--line2);border-radius:6px;color:var(--grey);
+  width:30px;height:30px;flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:all .15s;padding:0;
+}
+.ds-signout:hover{border-color:var(--red);color:var(--red);}
 .dr-widget{padding:14px 16px;border-bottom:1px solid var(--line);}
 .dr-title{font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;}
 .dr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1E1E1E;}
@@ -1349,10 +1355,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
           <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
         </svg>
       </div>
-      <div>
+      <div style="flex:1;min-width:0">
         <div class="ds-peer-name" id="ds-peer-name">—</div>
         <div class="ds-peer-handle" id="ds-peer-handle">—</div>
       </div>
+      <button class="ds-signout" onclick="doLogout()" title="Sign out">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
     </div>
   </aside>
 
@@ -1635,6 +1644,7 @@ async function doLogout() {
   document.getElementById('gate').classList.remove('out');
   document.getElementById('g-pw').value = '';
   document.getElementById('g-err').classList.remove('show');
+  gateShowSplash();
 }
 
 // ── SHELL ENTRY ──
@@ -4109,6 +4119,7 @@ function doRelLogout() {
   document.getElementById('gate').classList.remove('out');
   document.getElementById('g-code').value = '';
   document.getElementById('g-rel-err').classList.remove('show');
+  gateShowSplash();
 }
 
 // ── RELATION BODY ROUTER ──

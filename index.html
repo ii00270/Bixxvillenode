@@ -510,6 +510,54 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   white-space:nowrap;
 }
 
+/* ── PROJECT SCOPE NODES (dependency-graph styled, expand in place) ── */
+.proj-scopes{padding:6px 18px 4px;display:flex;flex-direction:column;gap:8px;}
+.proj-scope-node{
+  border-radius:8px;border:1.5px solid var(--line2);background:var(--surface);
+  cursor:pointer;overflow:hidden;transition:border-color .15s;
+}
+.proj-scope-node.pending{border-color:var(--line2);}
+.proj-scope-node.assigned,.proj-scope-node.delivered{border-color:var(--orange);background:rgba(232,136,74,.05);}
+.proj-scope-node.confirmed{border-color:var(--green);background:rgba(140,240,96,.06);}
+.proj-scope-node.disputed{border-color:var(--red);background:rgba(224,82,82,.06);}
+.proj-scope-head{display:flex;align-items:center;gap:12px;padding:13px 14px;}
+.proj-scope-head-main{flex:1;min-width:0;}
+.proj-scope-tag{
+  font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;margin-bottom:4px;
+}
+.proj-scope-node.pending .proj-scope-tag{color:var(--grey);}
+.proj-scope-node.assigned .proj-scope-tag,
+.proj-scope-node.delivered .proj-scope-tag{color:var(--orange);}
+.proj-scope-node.confirmed .proj-scope-tag{color:var(--green);}
+.proj-scope-node.disputed .proj-scope-tag{color:var(--red);}
+.proj-scope-title{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;}
+.proj-scope-logs{font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft);white-space:nowrap;}
+.proj-scope-chevron{
+  font-family:var(--mono);font-size:11px;color:var(--grey);
+  transition:transform .2s;flex-shrink:0;
+}
+.proj-scope-node.open .proj-scope-chevron{transform:rotate(90deg);}
+.proj-scope-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
+.proj-scope-node.open .proj-scope-body{max-height:280px;}
+.proj-scope-body-inner{
+  display:flex;gap:22px;flex-wrap:wrap;
+  border-top:1px solid var(--line);padding:12px 14px 14px;
+}
+.proj-scope-field-lbl{
+  font-family:var(--mono);font-size:8px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--grey);margin-bottom:3px;
+}
+.proj-scope-field-val{font-family:var(--sans);font-size:13px;color:var(--soft);}
+.proj-scope-action{
+  width:calc(100% - 28px);margin:0 14px 14px;
+  background:none;border:1px solid var(--green);color:var(--green);
+  font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:11px;cursor:pointer;transition:background .15s;
+  display:block;
+}
+.proj-scope-action:hover{background:rgba(140,240,96,.08);}
+
 /* ── ACTION BUTTON ── */
 .act-btn{
   width:calc(100% - 36px);margin:16px 18px;
@@ -1391,7 +1439,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 <div id="overlay">
   <div class="ov-handle"></div>
   <div class="ov-head">
-    <button class="ov-back" onclick="closeOverlay()">← Back</button>
+    <button class="ov-back" onclick="overlayBack()">← Back</button>
     <div class="ov-title" id="ov-title"></div>
     <button class="ov-action hidden" id="ov-action"></button>
   </div>
@@ -1454,6 +1502,7 @@ let sb = null;
 let operator = null;    // { peer_name, access_key, tier, reputation_score, total_logs, ... }
 let currentSurface = 'intake';
 let overlayStack = [];  // track what's in the overlay for back navigation
+let overlayCurrent = null;
 
 function initSB() {
   if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY);
@@ -1595,7 +1644,19 @@ function showSurface(name) {
 }
 
 // ── OVERLAY ──
-function openOverlay(title, bodyFn, actionLabel, actionFn) {
+function openOverlay(title, bodyFn, actionLabel, actionFn, push) {
+  const isOpen = document.getElementById('overlay').classList.contains('open');
+  if (push && isOpen && overlayCurrent) {
+    overlayStack.push(overlayCurrent);
+  } else if (!push) {
+    overlayStack = [];
+  }
+  overlayCurrent = { title, bodyFn, actionLabel, actionFn };
+  renderOverlay(title, bodyFn, actionLabel, actionFn);
+  document.getElementById('overlay').classList.add('open');
+}
+
+function renderOverlay(title, bodyFn, actionLabel, actionFn) {
   document.getElementById('ov-title').textContent = title;
   const body = document.getElementById('ov-body');
   body.innerHTML = '';
@@ -1609,11 +1670,20 @@ function openOverlay(title, bodyFn, actionLabel, actionFn) {
   } else {
     act.classList.add('hidden');
   }
+}
 
-  document.getElementById('overlay').classList.add('open');
+function overlayBack() {
+  if (overlayStack.length) {
+    overlayCurrent = overlayStack.pop();
+    renderOverlay(overlayCurrent.title, overlayCurrent.bodyFn, overlayCurrent.actionLabel, overlayCurrent.actionFn);
+  } else {
+    closeOverlay();
+  }
 }
 
 function closeOverlay() {
+  overlayStack = [];
+  overlayCurrent = null;
   document.getElementById('overlay').classList.remove('open');
   setTimeout(() => {
     document.getElementById('ov-body').innerHTML = '';
@@ -2624,41 +2694,70 @@ function openProject(id) {
         <div style="font-family:var(--mono);font-size:13px;color:var(--soft)">${esc(r.relation_name || r.relation_code)}</div>
       </div>
       <div class="section-lbl" style="position:relative;top:0">Scopes</div>
-      ${scopes.map(s => `
-        <div class="scope-row" onclick="openScope('${s.id}','${id}')">
-          <div class="scope-dot ${s.status}"></div>
-          <div class="scope-info">
-            <div class="scope-name">${esc(s.title || 'Untitled scope')}</div>
-            <div class="scope-meta">${esc(s.assignee || 'Unassigned')} · ${s.status}</div>
-          </div>
-          <div class="scope-logs">${s.log_size || 0} LOG</div>
-        </div>`).join('') || `
+      <div class="proj-scopes">
+        ${scopes.map((s, i) => {
+          const scId = 'psc-' + i;
+          const key = s.status === 'confirmed' ? 'confirmed'
+                    : s.status === 'disputed'  ? 'disputed'
+                    : s.status === 'delivered' ? 'delivered'
+                    : s.status === 'assigned'  ? 'assigned'
+                    : 'pending';
+          const actionBtn = key === 'assigned'
+            ? `<button class="proj-scope-action" onclick="event.stopPropagation();markDelivered('${s.id}','${id}')">Mark Delivered</button>`
+            : key === 'delivered'
+            ? `<button class="proj-scope-action" onclick="event.stopPropagation();confirmScope('${s.id}','${id}')">Confirm Delivery</button>`
+            : '';
+          return `
+          <div class="proj-scope-node ${key}" id="${scId}">
+            <div class="proj-scope-head" onclick="toggleProjScope('${scId}')">
+              <div class="proj-scope-head-main">
+                <div class="proj-scope-tag">${key} · ${esc(s.assignee || 'unassigned')}</div>
+                <div class="proj-scope-title">${esc(s.title || 'Untitled scope')}</div>
+              </div>
+              <div class="proj-scope-logs">${s.log_size || 0} LOG</div>
+              <div class="proj-scope-chevron">▸</div>
+            </div>
+            <div class="proj-scope-body">
+              <div class="proj-scope-body-inner">
+                <div><div class="proj-scope-field-lbl">Assignee</div><div class="proj-scope-field-val">${esc(s.assignee || 'Unassigned')}</div></div>
+                <div><div class="proj-scope-field-lbl">Status</div><div class="proj-scope-field-val">${key}</div></div>
+                <div><div class="proj-scope-field-lbl">LOGs</div><div class="proj-scope-field-val">${s.log_size || 0}</div></div>
+              </div>
+              ${actionBtn}
+            </div>
+          </div>`;
+        }).join('') || `
         <div class="empty" style="padding:24px 18px">
           <div class="empty-msg">No scopes yet. Add the first one.</div>
         </div>`}
+      </div>
       <button class="act-btn" onclick="openAddScope('${id}')">+ Add Scope</button>
       ${confirmed && scopes.length ? `<button class="act-btn" onclick="settleProject('${id}')">Confirm Settlement</button>` : ''}`;
   }, null, null);
 }
 
-function openAddScope(projectId) {
-  document.getElementById('ov-title').textContent = 'Add Scope';
-  const body = document.getElementById('ov-body');
+function toggleProjScope(scId) {
+  const el = document.getElementById(scId);
+  if (el) el.classList.toggle('open');
+}
 
-  body.innerHTML = `
-    <div class="form-block">
-      <label class="form-lbl">Scope name</label>
-      <input class="form-input" id="sc-name" placeholder="e.g. Foundation work"/>
-    </div>
-    <div class="form-block">
-      <label class="form-lbl">LOG estimate</label>
-      <input class="form-input" id="sc-logs" type="number" min="1" placeholder="Hours of qualified work"/>
-    </div>
-    <div class="form-block">
-      <label class="form-lbl">Assign to</label>
-      <input class="form-input" id="sc-assignee" placeholder="Peer name or access key"/>
-    </div>
-    <button class="act-btn" onclick="saveScope('${projectId}')">Add Scope to Project</button>`;
+function openAddScope(projectId) {
+  openOverlay('Add Scope', (body) => {
+    body.innerHTML = `
+      <div class="form-block">
+        <label class="form-lbl">Scope name</label>
+        <input class="form-input" id="sc-name" placeholder="e.g. Foundation work"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">LOG estimate</label>
+        <input class="form-input" id="sc-logs" type="number" min="1" placeholder="Hours of qualified work"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Assign to</label>
+        <input class="form-input" id="sc-assignee" placeholder="Peer name or access key"/>
+      </div>
+      <button class="act-btn" onclick="saveScope('${projectId}')">Add Scope to Project</button>`;
+  }, null, null, true);
 }
 
 async function saveScope(projectId) {
@@ -2677,45 +2776,14 @@ async function saveScope(projectId) {
 
   if (error) { toast('Could not add scope.'); console.error(error); return; }
   toast('Scope added.');
-  closeOverlay();
   await loadOps();
   openProject(projectId);
-}
-
-function openScope(scopeId, projectId) {
-  openOverlay('Scope', async (body) => {
-    const { data: s } = await sb.from('bids').select('*').eq('id', scopeId).single();
-    if (!s) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
-
-    body.innerHTML = `
-      <div class="stat-grid">
-        <div class="stat-cell">
-          <div class="stat-val green">${s.log_size || 0}</div>
-          <div class="stat-lbl">LOGs</div>
-        </div>
-        <div class="stat-cell">
-          <div class="stat-val">${s.status}</div>
-          <div class="stat-lbl">Status</div>
-        </div>
-      </div>
-      <div class="form-block">
-        <div class="form-lbl">Scope</div>
-        <div style="font-family:var(--sans);font-size:15px;font-weight:600;color:var(--cream)">${esc(s.title || '—')}</div>
-      </div>
-      <div class="form-block">
-        <div class="form-lbl">Assigned to</div>
-        <div style="font-family:var(--mono);font-size:13px;color:var(--soft)">${esc(s.assignee || 'Unassigned')}</div>
-      </div>
-      ${s.status === 'assigned' ? `<button class="act-btn" onclick="markDelivered('${scopeId}','${projectId}')">Mark Delivered</button>` : ''}
-      ${s.status === 'delivered' ? `<button class="act-btn" onclick="confirmScope('${scopeId}','${projectId}')">Confirm Delivery</button>` : ''}`;
-  });
 }
 
 async function markDelivered(scopeId, projectId) {
   const { error } = await sb.from('bids').update({ status: 'delivered', delivered_at: new Date().toISOString() }).eq('id', scopeId);
   if (error) { toast('Could not update scope.'); return; }
   toast('Scope marked delivered.');
-  closeOverlay();
   await loadOps();
   openProject(projectId);
 }
@@ -2733,7 +2801,6 @@ async function confirmScope(scopeId, projectId) {
     toast('Scope confirmed.');
   }
 
-  closeOverlay();
   await loadOps();
   openProject(projectId);
 }

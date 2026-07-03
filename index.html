@@ -2175,6 +2175,67 @@ async function runDAGGeneration(projectId, title, market, doc) {
   return dag;
 }
 
+// ── PLAIN-TEXT DAG FORMAT ──
+function letterFor(idx) {
+  // A, B, C ... Z, then AA, AB...
+  let s = '';
+  idx++;
+  while (idx > 0) {
+    const rem = (idx - 1) % 26;
+    s = String.fromCharCode(65 + rem) + s;
+    idx = Math.floor((idx - 1) / 26);
+  }
+  return s;
+}
+
+function renderDAGText(dag) {
+  const tiers = {};
+  dag.nodes.forEach(n => {
+    if (!tiers[n.tier]) tiers[n.tier] = [];
+    tiers[n.tier].push(n);
+  });
+  const tierKeys = Object.keys(tiers).map(Number).sort((a,b) => a-b);
+
+  // Assign letters to every non-start, non-outcome node in tier order
+  let letterIdx = 0;
+  const lettered = {};
+  tierKeys.forEach(t => {
+    tiers[t].forEach(n => {
+      if (n.type !== 'start' && n.type !== 'outcome') {
+        lettered[n.id] = letterFor(letterIdx++);
+      }
+    });
+  });
+
+  const lines = [];
+  const colW = 28; // column width for side-by-side alignment
+
+  tierKeys.forEach((t, idx) => {
+    const nodes = tiers[t];
+    const tierLabel = t == 0 ? 'START' : idx === tierKeys.length - 1 ? ('T' + t) : ('T' + t);
+
+    // Header row: tier label + letter/tag per node
+    let headerRow = tierLabel.padEnd(8);
+    let bodyRow   = ''.padEnd(8);
+
+    nodes.forEach((n, i) => {
+      let tag;
+      if (n.type === 'start')       tag = 'A · GENESIS';
+      else if (n.type === 'outcome')tag = (lettered[n.id] || letterFor(letterIdx)) + ' · OUTCOME';
+      else if (n.type === 'key')    tag = lettered[n.id] + ' · KEY';
+      else                          tag = lettered[n.id];
+
+      headerRow += tag.padEnd(colW);
+      bodyRow   += (n.label || '').padEnd(colW);
+    });
+
+    lines.push(headerRow.trimEnd());
+    lines.push(bodyRow.trimEnd());
+  });
+
+  return lines.join('\n');
+}
+
 function renderDAG(dag) {
   const tiers = {};
   dag.nodes.forEach(n => {
@@ -2258,6 +2319,9 @@ async function handleGenerateDAG(id, title, market) {
 }
 
 function renderDagApproval(body, p, dag) {
+  const textDag = renderDAGText(dag);
+  const escapedText = textDag.replace(/`/g, '\\`').replace(/\$/g, '\\$');
+
   body.innerHTML = `
     <div class="prof-field">
       <div class="prof-field-lbl">Project</div>
@@ -2266,12 +2330,23 @@ function renderDagApproval(body, p, dag) {
     </div>
     <div style="padding:18px">
       <div class="dag-meta">Goal solved · dependency-ordered · ${dag.nodes.length} nodes</div>
-      ${renderDAG(dag)}
+      <pre id="dag-text-block" style="font-family:var(--mono);font-size:11px;line-height:1.7;color:#FFFFFF;background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:16px;overflow-x:auto;white-space:pre;">${esc(textDag)}</pre>
+      <button class="act-btn-sm" style="margin-top:10px" onclick="copyDagText()">Copy DAG</button>
       <div class="dag-actions">
         <button class="dag-approve" onclick="approveDAG('${p.id}')">Approve</button>
         <button class="dag-reject" onclick="rejectDAG('${p.id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Regenerate</button>
       </div>
     </div>`;
+}
+
+function copyDagText() {
+  const el = document.getElementById('dag-text-block');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(() => {
+    toast('DAG copied to clipboard.');
+  }).catch(() => {
+    toast('Could not copy — select and copy manually.');
+  });
 }
 
 async function approveDAG(id) {
@@ -3563,6 +3638,9 @@ async function renderRelStatus(body) {
   const scopes     = project.bids || [];
   const delivered  = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
   const statusColor= project.status === 'settled' ? 'var(--green)' : project.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
+  const dagBlock = project.dag ? `
+    <div class="section-lbl" style="position:relative;top:0">Project Map</div>
+    <pre style="font-family:var(--mono);font-size:10px;line-height:1.7;color:#FFFFFF;background:var(--surface);border:1px solid var(--line2);border-radius:8px;padding:14px;margin:0 18px 14px;overflow-x:auto;white-space:pre;">${esc(renderDAGText(project.dag))}</pre>` : '';
 
   body.innerHTML = `
     <div class="rel-section" style="padding-top:24px">
@@ -3573,6 +3651,7 @@ async function renderRelStatus(body) {
       <div class="rel-status-dot" style="background:${statusColor}"></div>
       <div class="rel-status-text" style="color:${statusColor}">${project.status}</div>
     </div>
+    ${dagBlock}
     ${scopes.length ? `
     <div class="section-lbl" style="position:relative;top:0">Progress</div>
     <div class="stat-grid" style="border-top:none">

@@ -978,6 +978,49 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .dag-reject:hover{border-color:var(--red);color:var(--red);}
 
+/* ── STRUCTURED INTAKE FORM ── */
+.si-progress{
+  display:flex;gap:4px;padding:14px 18px 0;
+}
+.si-step-dot{
+  flex:1;height:3px;background:var(--line2);border-radius:2px;
+  transition:background .2s;
+}
+.si-step-dot.done{background:var(--green);}
+.si-step-dot.current{background:var(--orange);}
+.si-step-lbl{
+  font-family:var(--mono);font-size:9px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--grey);padding:12px 18px 0;
+}
+.si-friction{
+  margin:14px 18px;padding:12px 14px;border:1px solid var(--line2);
+  border-radius:8px;background:var(--surface);
+  display:flex;justify-content:space-between;align-items:center;
+}
+.si-friction-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);}
+.si-friction-val{font-family:var(--mono);font-size:13px;font-weight:700;}
+.si-q{padding:16px 18px;border-bottom:1px solid var(--line);}
+.si-q-text{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;margin-bottom:12px;line-height:1.5;}
+.si-yn{display:flex;gap:8px;}
+.si-yn-btn{
+  flex:1;background:none;border:1.5px solid var(--line2);color:var(--soft);
+  font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;padding:12px;cursor:pointer;transition:all .15s;
+}
+.si-yn-btn.selected{border-color:var(--green);color:var(--green);background:rgba(140,240,96,.06);}
+.si-nav{display:flex;gap:10px;padding:16px 18px;}
+.si-nav-back{
+  flex:0 0 90px;background:none;border:1.5px solid var(--line2);color:var(--grey);
+  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;
+  text-transform:uppercase;padding:14px;cursor:pointer;
+}
+.si-nav-next{
+  flex:1;background:none;border:1.5px solid var(--green);color:var(--green);
+  font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;padding:14px;cursor:pointer;transition:background .15s;
+}
+.si-nav-next:hover{background:rgba(140,240,96,.08);}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 </style>
@@ -1775,7 +1818,79 @@ async function loadPlanning() {
     </div>`).join('');
 }
 
+// ── SPRINT 3.5: STRUCTURED 20-QUESTION INTAKE ──
+const INTAKE_GROUPS = [
+  {
+    name: 'Time & Window',
+    questions: [
+      { id: 'q1', text: 'What is the desired start date?', type: 'date' },
+      { id: 'q2', text: 'What is the required completion date?', type: 'date' },
+      { id: 'q3', text: 'Is this date fixed, or is there flexibility?', type: 'yn', yes: 'Fixed', no: 'Flexible', weight: +1 },
+      { id: 'q4', text: 'Does this work need to happen during specific hours or days?', type: 'yn', weight: +1 },
+    ]
+  },
+  {
+    name: 'Scope & Effort',
+    questions: [
+      { id: 'q5', text: 'What is the primary deliverable?', type: 'text' },
+      { id: 'q6', text: 'Are there multiple deliverables, or is this a single outcome?', type: 'yn', yes: 'Multiple', no: 'Single' },
+      { id: 'q7', text: 'Roughly how many distinct steps or phases does this involve?', type: 'number' },
+      { id: 'q8', text: 'Has this type of work been done before, by you or anyone in the network?', type: 'yn', weight: -1, invert: true },
+    ]
+  },
+  {
+    name: 'Dependencies',
+    questions: [
+      { id: 'q9',  text: 'Does this work depend on any other person completing something first?', type: 'yn', weight: +1 },
+      { id: 'q10', text: 'Does this depend on materials, equipment, or approvals from outside sources?', type: 'yn', weight: +1 },
+      { id: 'q11', text: 'If a dependency is delayed, does the whole project stall?', type: 'yn', weight: +1 },
+      { id: 'q12', text: 'Are there multiple people who need to coordinate for this to succeed?', type: 'yn', weight: +1 },
+    ]
+  },
+  {
+    name: 'Constraints',
+    questions: [
+      { id: 'q13', text: 'Is there a hard budget ceiling on this project?', type: 'yn', weight: +1 },
+      { id: 'q14', text: 'Are there legal, regulatory, or licensing requirements involved?', type: 'yn', weight: +1 },
+      { id: 'q15', text: 'Is specialized equipment or a specific location required?', type: 'yn', weight: +1 },
+      { id: 'q16', text: 'Are there any safety-critical elements involved?', type: 'yn', weight: +1 },
+    ]
+  },
+  {
+    name: 'Pain Point & Stakes',
+    questions: [
+      { id: 'q17', text: 'What happens if this deadline is missed?', type: 'text' },
+      { id: 'q18', text: 'Who is affected if this goes wrong — just you, or others downstream?', type: 'yn', yes: 'Others too', no: 'Just me', weight: +1 },
+      { id: 'q19', text: 'What is driving the urgency behind this request?', type: 'text' },
+      { id: 'q20', text: 'How would you describe this project\'s importance?', type: 'yn', yes: 'Mission critical', no: 'Nice to have', weight: +1 },
+    ]
+  },
+];
+
+const FRICTION_UNIT = 0.0375;
+let siState = { answers: {}, step: 0 };
+
+function computeFrictionScore() {
+  let score = 0;
+  INTAKE_GROUPS.forEach(g => g.questions.forEach(q => {
+    if (!q.weight) return;
+    const val = siState.answers[q.id];
+    if (val === undefined) return;
+    const isYes = val === true;
+    const effective = q.invert ? !isYes : isYes;
+    score += effective ? (q.weight * FRICTION_UNIT) : (-Math.abs(q.weight) * FRICTION_UNIT * 0.3);
+  }));
+  return Math.max(0, Math.min(0.75, score));
+}
+
+function frictionLabel(score) {
+  if (score >= 0.5) return { label: 'High friction', color: 'var(--red)' };
+  if (score >= 0.25) return { label: 'Moderate friction', color: 'var(--orange)' };
+  return { label: 'Low friction', color: 'var(--green)' };
+}
+
 function openStartProject() {
+  siState = { answers: {}, step: 0 };
   openOverlay('Start a Project', (body) => {
     body.innerHTML = `
       <div class="prof-field">
@@ -1786,33 +1901,115 @@ function openStartProject() {
         <div class="prof-field-lbl">Market</div>
         <input class="prof-field-input" id="sp-market" placeholder="e.g. Portable Sanitation"/>
       </div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">Source document — paste full text</div>
-        <textarea class="prof-field-textarea" id="sp-doc" style="min-height:200px" placeholder="Paste the business plan, scope, or brief here…"></textarea>
-      </div>
-      <button class="act-btn" onclick="submitProject()">Create Project</button>`;
+      <button class="act-btn" onclick="beginIntakeForm()">Begin Scope Intake</button>`;
   });
 }
 
-async function submitProject() {
+function beginIntakeForm() {
   const title  = document.getElementById('sp-title')?.value.trim();
   const market = document.getElementById('sp-market')?.value.trim();
-  const doc    = document.getElementById('sp-doc')?.value.trim();
+  if (!title || !market) { toast('Enter a project name and market first.'); return; }
+  siState.title = title;
+  siState.market = market;
+  siState.step = 0;
+  renderIntakeStep();
+}
 
-  if (!title || !market || !doc) { toast('Fill in all fields.'); return; }
+function renderIntakeStep() {
+  const body = document.getElementById('ov-body');
+  if (!body) return;
+  const group = INTAKE_GROUPS[siState.step];
+  const score = computeFrictionScore();
+  const fl = frictionLabel(score);
+
+  const dots = INTAKE_GROUPS.map((g, i) => `<div class="si-step-dot ${i < siState.step ? 'done' : i === siState.step ? 'current' : ''}"></div>`).join('');
+
+  const questionsHTML = group.questions.map(q => {
+    const val = siState.answers[q.id];
+    if (q.type === 'yn') {
+      const yesLabel = q.yes || 'Yes';
+      const noLabel  = q.no  || 'No';
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <div class="si-yn">
+            <button class="si-yn-btn ${val === true ? 'selected' : ''}" onclick="setIntakeAnswer('${q.id}', true)">${esc(yesLabel)}</button>
+            <button class="si-yn-btn ${val === false ? 'selected' : ''}" onclick="setIntakeAnswer('${q.id}', false)">${esc(noLabel)}</button>
+          </div>
+        </div>`;
+    }
+    if (q.type === 'date') {
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <input class="prof-field-input" type="datetime-local" value="${val || ''}" onchange="setIntakeAnswer('${q.id}', this.value)"/>
+        </div>`;
+    }
+    if (q.type === 'number') {
+      return `
+        <div class="si-q">
+          <div class="si-q-text">${esc(q.text)}</div>
+          <input class="prof-field-input" type="number" min="1" value="${val || ''}" onchange="setIntakeAnswer('${q.id}', this.value)"/>
+        </div>`;
+    }
+    return `
+      <div class="si-q">
+        <div class="si-q-text">${esc(q.text)}</div>
+        <input class="prof-field-input" value="${esc(val || '')}" onchange="setIntakeAnswer('${q.id}', this.value)"/>
+      </div>`;
+  }).join('');
+
+  const isLast = siState.step === INTAKE_GROUPS.length - 1;
+
+  body.innerHTML = `
+    <div class="si-progress">${dots}</div>
+    <div class="si-step-lbl">Step ${siState.step + 1} of ${INTAKE_GROUPS.length} · ${esc(group.name)}</div>
+    <div class="si-friction">
+      <span class="si-friction-lbl">Comfort threshold</span>
+      <span class="si-friction-val" style="color:${fl.color}">${(score * 100).toFixed(1)}% · ${fl.label}</span>
+    </div>
+    ${questionsHTML}
+    <div class="si-nav">
+      ${siState.step > 0 ? `<button class="si-nav-back" onclick="prevIntakeStep()">← Back</button>` : ''}
+      <button class="si-nav-next" onclick="${isLast ? 'submitIntakeForm()' : 'nextIntakeStep()'}">${isLast ? 'Submit & Generate DAG' : 'Next →'}</button>
+    </div>`;
+}
+
+function setIntakeAnswer(id, val) {
+  siState.answers[id] = val;
+  renderIntakeStep();
+}
+
+function nextIntakeStep() {
+  if (siState.step < INTAKE_GROUPS.length - 1) { siState.step++; renderIntakeStep(); }
+}
+
+function prevIntakeStep() {
+  if (siState.step > 0) { siState.step--; renderIntakeStep(); }
+}
+
+async function submitIntakeForm() {
+  const score = computeFrictionScore();
+  const start = siState.answers.q1 ? new Date(siState.answers.q1).toISOString() : null;
+  const end   = siState.answers.q2 ? new Date(siState.answers.q2).toISOString() : null;
 
   try {
-    const { data: id, error } = await sb.rpc('create_operator_project', {
-      p_email: operator.email,
-      p_title: title,
-      p_market: market,
-      p_source_doc: doc,
+    const { data: id, error } = await sb.rpc('create_structured_project', {
+      p_email:     operator.email,
+      p_title:     siState.title,
+      p_market:    siState.market,
+      p_answers:   JSON.stringify(siState.answers),
+      p_friction:  score,
+      p_threshold: score,
+      p_start:     start,
+      p_end:       end,
     });
     if (error) throw error;
-    toast('Project created — planning stage.');
+    toast('Scope captured — generating DAG.');
     closeOverlay();
     await loadOps();
     showSurface('ops');
+    setTimeout(() => openPlanningProject(id), 400);
   } catch(e) {
     toast('Could not create project.');
     console.error(e);
@@ -1914,6 +2111,63 @@ function generateDAG(title, market, doc) {
   return { nodes, generated_at: new Date().toISOString(), method: 'rule-based' };
 }
 
+function generateDAGFromAnswers(title, market, answers) {
+  const nodes = [];
+  const phaseCount = parseInt(answers.q7) || 4;
+  const isMultiDeliverable = answers.q6 === true;
+  const deliverable = answers.q5 || title;
+  const painPoint = answers.q19 || '';
+
+  nodes.push({ id: 'start', type: 'start', label: 'Genesis · ' + title, tier: 0 });
+
+  // Build a generic phase structure sized to the stated step count
+  const phaseLabels = [];
+  phaseLabels.push('Define scope: ' + deliverable);
+  if (answers.q9 === true)  phaseLabels.push('Resolve external dependency');
+  if (answers.q10 === true) phaseLabels.push('Secure materials / approvals');
+  if (answers.q14 === true) phaseLabels.push('Complete legal / regulatory requirements');
+  if (answers.q15 === true) phaseLabels.push('Arrange equipment / location');
+  phaseLabels.push('Execute core work');
+  if (isMultiDeliverable) phaseLabels.push('Deliver secondary outputs');
+  if (answers.q16 === true) phaseLabels.push('Safety review & compliance check');
+  phaseLabels.push('Final review & handoff');
+
+  // Cap to roughly match stated phase count, minimum 3
+  const capped = phaseLabels.slice(0, Math.max(3, Math.min(phaseCount + 2, phaseLabels.length)));
+
+  let tierIdx = 1;
+  for (let i = 0; i < capped.length; i += 2) {
+    const pair = capped.slice(i, i + 2);
+    pair.forEach((label, j) => {
+      const isKey = j === 0 && i < 4;
+      nodes.push({
+        id: 'n' + (i + j),
+        type: isKey ? 'key' : 'standard',
+        label,
+        log_estimate: estimateLOG(label),
+        tier: tierIdx,
+      });
+    });
+    tierIdx++;
+  }
+
+  nodes.push({ id: 'outcome', type: 'outcome', label: title + ' — delivered', tier: tierIdx });
+
+  return {
+    nodes,
+    generated_at: new Date().toISOString(),
+    method: 'structured-intake',
+    friction_note: painPoint,
+  };
+}
+
+async function runDAGGenerationFromAnswers(projectId, title, market, answers) {
+  const dag = generateDAGFromAnswers(title, market, answers);
+  const { error } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
+  if (error) { toast('Could not save DAG.'); console.error(error); return null; }
+  return dag;
+}
+
 async function runDAGGeneration(projectId, title, market, doc) {
   const dag = generateDAG(title, market, doc);
   const { error } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
@@ -1954,14 +2208,16 @@ function openPlanningProject(id) {
     const p = (data || []).find(x => x.id === id);
     if (!p) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-    // Check if DAG already exists
-    const { data: projRow } = await sb.from('relation_submissions').select('dag').eq('id', id).single();
-    const existingDag = projRow?.dag;
-
-    if (existingDag) {
-      renderDagApproval(body, p, existingDag);
+    if (p.dag) {
+      renderDagApproval(body, p, p.dag);
       return;
     }
+
+    const answers = p.intake_answers || {};
+    const fl = frictionLabel(p.comfort_threshold || 0);
+    const windowStr = p.window_start && p.window_end
+      ? `${fmtDate(p.window_start)} → ${fmtDate(p.window_end)}`
+      : 'Not specified';
 
     body.innerHTML = `
       <div class="prof-field">
@@ -1969,9 +2225,17 @@ function openPlanningProject(id) {
         <div style="font-family:var(--sans);font-size:16px;font-weight:700;color:#FFFFFF">${esc(p.title)}</div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:4px">${esc(p.market)}</div>
       </div>
+      <div class="si-friction" style="margin:14px 18px">
+        <span class="si-friction-lbl">Comfort threshold</span>
+        <span class="si-friction-val" style="color:${fl.color}">${((p.comfort_threshold||0) * 100).toFixed(1)}% · ${fl.label}</span>
+      </div>
       <div class="prof-field">
-        <div class="prof-field-lbl">Source document</div>
-        <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.7;max-height:280px;overflow-y:auto;white-space:pre-wrap">${esc(p.source_doc || '')}</div>
+        <div class="prof-field-lbl">Window</div>
+        <div style="font-family:var(--mono);font-size:12px;color:var(--soft)">${windowStr}</div>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Primary deliverable</div>
+        <div style="font-family:var(--sans);font-size:13px;color:var(--soft)">${esc(answers.q5 || '—')}</div>
       </div>
       <button class="act-btn" id="gen-dag-btn" onclick="handleGenerateDAG('${id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Generate DAG</button>`;
   });
@@ -1979,12 +2243,12 @@ function openPlanningProject(id) {
 
 async function handleGenerateDAG(id, title, market) {
   const btn = document.getElementById('gen-dag-btn');
-  if (btn) { btn.textContent = 'Reading document…'; btn.disabled = true; }
+  if (btn) { btn.textContent = 'Reading scope…'; btn.disabled = true; }
 
-  const { data: projRow } = await sb.from('relation_submissions').select('source_doc').eq('id', id).single();
-  const doc = projRow?.source_doc || '';
+  const { data: projRow } = await sb.from('relation_submissions').select('intake_answers').eq('id', id).single();
+  const answers = projRow?.intake_answers || {};
 
-  const dag = await runDAGGeneration(id, title, market, doc);
+  const dag = await runDAGGenerationFromAnswers(id, title, market, answers);
   if (!dag) { if (btn) { btn.textContent = 'Generate DAG'; btn.disabled = false; } return; }
 
   const { data } = await sb.rpc('get_planning_projects');
@@ -2045,9 +2309,9 @@ async function approveDAG(id) {
 }
 
 async function rejectDAG(id, title, market) {
-  const { data: projRow } = await sb.from('relation_submissions').select('source_doc').eq('id', id).single();
-  const doc = projRow?.source_doc || '';
-  const dag = await runDAGGeneration(id, title, market, doc);
+  const { data: projRow } = await sb.from('relation_submissions').select('intake_answers').eq('id', id).single();
+  const answers = projRow?.intake_answers || {};
+  const dag = await runDAGGenerationFromAnswers(id, title, market, answers);
   if (!dag) return;
   const { data } = await sb.rpc('get_planning_projects');
   const p = (data || []).find(x => x.id === id);

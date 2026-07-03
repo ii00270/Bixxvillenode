@@ -713,6 +713,58 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   text-transform:uppercase;color:var(--grey);margin-top:2px;
 }
 
+/* ── MEMBER REGISTRY ── */
+.reg-filter-bar{display:flex;flex-wrap:wrap;gap:6px;padding:14px 18px;border-bottom:1px solid var(--line);align-items:center;}
+.reg-fpill{
+  font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:600;
+  padding:5px 11px;border:1px solid var(--line2);color:var(--grey);cursor:pointer;
+  background:transparent;transition:all .15s;border-radius:20px;
+}
+.reg-fpill:hover{border-color:var(--soft);color:var(--soft);}
+.reg-fpill.active{border-color:var(--green);color:var(--green);background:rgba(140,240,96,.08);}
+.reg-fsep{width:1px;height:16px;background:var(--line2);margin:0 2px;}
+.reg-rep-bar{height:2px;background:var(--line);margin-top:7px;width:120px;max-width:100%;}
+.reg-rep-fill{height:100%;background:var(--green);}
+.reg-standing-badge{
+  font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  padding:2px 8px;border-radius:20px;display:inline-block;
+}
+.reg-standing-badge.standing-sovereign{background:rgba(232,136,74,.15);color:var(--orange);}
+.reg-standing-badge.standing-active{background:rgba(140,240,96,.14);color:var(--green);}
+.reg-standing-badge.standing-probation{background:rgba(232,136,74,.14);color:var(--orange);}
+.reg-standing-badge.standing-suspended{background:rgba(224,82,82,.14);color:var(--red);}
+
+/* ── EVENT SYSTEM ── */
+.evt-row{display:flex;gap:14px;padding:16px 18px;border-bottom:1px solid var(--line);border-left:2px solid transparent;}
+.evt-row.critical{border-left-color:var(--orange);}
+.evt-time{font-family:var(--mono);font-size:9px;color:var(--grey);width:48px;flex-shrink:0;line-height:1.4;padding-top:2px;}
+.evt-body{flex:1;min-width:0;}
+.evt-tags{display:flex;gap:6px;align-items:center;margin-bottom:6px;flex-wrap:wrap;}
+.evt-type{font-family:var(--mono);font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);font-weight:700;}
+.evt-type.PAYMENT_CONFIRMED,.evt-type.MEMBER_JOINED{color:var(--green);}
+.evt-critical-tag{
+  font-family:var(--mono);font-size:7px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  color:var(--orange);border:1px solid var(--orange);padding:1px 6px;border-radius:3px;
+}
+.evt-title{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;margin-bottom:4px;line-height:1.4;}
+.evt-payload{font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.55;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+.evt-recip{font-family:var(--mono);font-size:8px;color:var(--grey);border:1px solid var(--line2);
+  padding:2px 7px;border-radius:3px;display:inline-block;margin-top:8px;}
+.evt-right{text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:6px;}
+.evt-status{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;}
+.evt-status-dot{width:5px;height:5px;border-radius:50%;}
+.evt-status.acknowledged{color:var(--green);} .evt-status.acknowledged .evt-status-dot{background:var(--green);}
+.evt-status.delivered{color:var(--orange);} .evt-status.delivered .evt-status-dot{background:var(--orange);}
+.evt-status.emitted{color:var(--grey);} .evt-status.emitted .evt-status-dot{background:var(--grey);}
+.evt-ack-btn{
+  font-family:var(--mono);font-size:8px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;
+  padding:4px 9px;border:1px solid var(--line2);color:var(--grey);background:none;cursor:pointer;transition:all .15s;
+}
+.evt-ack-btn:hover{border-color:var(--green);color:var(--green);}
+
+
 /* ── LEDGER ROW ── */
 .ledger-row{
   padding:14px 18px;border-bottom:1px solid var(--line);
@@ -1107,7 +1159,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   background:rgba(0,0,0,.92);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(5,1fr);z-index:50;
+  display:grid;grid-template-columns:repeat(7,1fr);z-index:50;
 }
 
 /* ── NOTIFICATIONS ── */
@@ -1430,6 +1482,15 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <span class="ds-label">Profile</span>
       </button>
+      <button class="ds-item" id="ds-members" onclick="showSurface('members')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <span class="ds-label">Members</span>
+      </button>
+      <button class="ds-item" id="ds-events" onclick="showSurface('events')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <span class="ds-label">Events</span>
+        <div class="ds-badge hidden" id="ds-events-badge">0</div>
+      </button>
     </div>
     <div class="ds-peer">
       <div class="ds-peer-mark" id="ds-peer-mark">
@@ -1530,6 +1591,28 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         </div>
       </div>
 
+      <!-- MEMBERS (registry) -->
+      <div class="surface" id="surface-members">
+        <div class="s-head">
+          <div class="s-title">Members</div>
+          <div class="s-count" id="members-count"></div>
+        </div>
+        <div id="members-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Registry</div><div class="empty-msg">Loading members…</div></div>
+        </div>
+      </div>
+
+      <!-- EVENTS (audit trail) -->
+      <div class="surface" id="surface-events">
+        <div class="s-head">
+          <div class="s-title">Events</div>
+          <div class="s-count" id="events-count"></div>
+        </div>
+        <div id="events-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Audit Trail</div><div class="empty-msg">Loading events…</div></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Mobile bottom nav (5 tabs) -->
@@ -1552,6 +1635,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       </button>
       <button class="nav-btn" id="nav-profile" onclick="showSurface('profile')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-members" onclick="showSurface('members')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-events" onclick="showSurface('events')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <div class="nav-dot"></div>
       </button>
     </nav>
@@ -1794,6 +1885,8 @@ function showSurface(name) {
   if (name === 'profile')       loadProfile();
   if (name === 'messages')      loadMessages();
   if (name === 'notifications') loadNotifications();
+  if (name === 'members')       loadMembers();
+  if (name === 'events')        loadEvents();
 }
 
 // ── OVERLAY ──
@@ -1885,7 +1978,7 @@ function populateSidebar() {
 async function loadAll() {
   if (!sb) return;
   populateSidebar();
-  await Promise.all([loadHome(), loadOps(), loadProfile()]);
+  await Promise.all([loadHome(), loadOps(), loadProfile(), loadEvents()]);
   populateSidebar();
 }
 
@@ -2016,6 +2109,240 @@ async function loadNotifications() {
       </div>
     </div>`).join('');
 }
+
+// ── MEMBER REGISTRY ──
+let memberFilterTier = 'all';
+let memberFilterStanding = 'all';
+
+async function loadMembers() {
+  const body = document.getElementById('members-body');
+  const count = document.getElementById('members-count');
+  if (!body) return;
+
+  try {
+    const { data } = await sb.rpc('list_operators');
+    window._allMembers = data || [];
+    if (count) count.textContent = window._allMembers.length ? `${window._allMembers.length} members` : '';
+    renderMembersList();
+  } catch(e) {
+    console.error(e);
+    body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load members.</div></div>';
+  }
+}
+
+function setMemberFilter(kind, val) {
+  if (kind === 'tier') memberFilterTier = val;
+  if (kind === 'standing') memberFilterStanding = val;
+  renderMembersList();
+}
+
+function renderMembersList() {
+  const body = document.getElementById('members-body');
+  if (!body) return;
+  const members = window._allMembers || [];
+  const RATES = { operator:100, architect:85, wrangler:65, apprentice:39 };
+  const owavSm = `<svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
+
+  const filtered = members.filter(m => {
+    const mTier = tier(m.total_logs).toLowerCase();
+    const mStanding = (m.standing || 'active').toLowerCase();
+    const tierOk = memberFilterTier === 'all' || mTier === memberFilterTier;
+    const standingOk = memberFilterStanding === 'all' || mStanding === memberFilterStanding;
+    return tierOk && standingOk;
+  });
+
+  const tierPills = ['all','apprentice','wrangler','architect','operator'];
+  const standingPills = ['all','sovereign','active','probation','suspended'];
+
+  body.innerHTML = `
+    <div class="reg-filter-bar">
+      ${tierPills.map(t => `<button class="reg-fpill ${memberFilterTier===t?'active':''}" onclick="setMemberFilter('tier','${t}')">${esc(t)}</button>`).join('')}
+      <span class="reg-fsep"></span>
+      ${standingPills.map(s => `<button class="reg-fpill ${memberFilterStanding===s?'active':''}" onclick="setMemberFilter('standing','${s}')">${esc(s)}</button>`).join('')}
+    </div>
+    ${filtered.length ? filtered.map(m => {
+      const mTier = tier(m.total_logs);
+      const standing = (m.standing || 'active').toLowerCase();
+      const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
+      const rate = RATES[mTier.toLowerCase()] || 39;
+      return `
+        <div class="member-row" onclick="openMemberRecord('${m.id}')">
+          <div class="member-avatar">${m.handle ? owavSm : `<span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span>`}</div>
+          <div class="member-info">
+            <div class="member-name">${esc(m.peer_name)}</div>
+            <div class="member-meta">${esc(m.region || m.lane || '—')} · $${rate}/LOG · ${m.total_logs||0} LOG</div>
+            <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
+          </div>
+          <div class="member-right">
+            <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
+            <div class="member-tier">${esc(mTier)} · ${rep.toFixed(3)}</div>
+          </div>
+        </div>`;
+    }).join('') : '<div class="empty" style="padding:30px 18px"><div class="empty-msg">No members match this filter.</div></div>'}`;
+}
+
+// ── EVENT SYSTEM (permanent audit trail) ──
+function timeAgo(dateStr) {
+  const diffMs = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diffMs / 60000);
+  if (mins < 1)   return 'now';
+  if (mins < 60)  return mins + 'm';
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24)   return hrs + 'h';
+  const days = Math.floor(hrs / 24);
+  return days + 'd';
+}
+
+let eventFilterStatus = 'all';
+let eventFilterType = 'all';
+
+async function loadEvents() {
+  const body = document.getElementById('events-body');
+  const count = document.getElementById('events-count');
+  if (!body) return;
+
+  try {
+    const { data, error } = await sb.rpc('get_events');
+    if (error) throw error;
+    window._allEvents = data || [];
+    if (count) count.textContent = window._allEvents.length ? `${window._allEvents.length} events` : '';
+
+    const undelivered = window._allEvents.filter(e => e.status !== 'acknowledged').length;
+    const badge = document.getElementById('ds-events-badge');
+    if (badge) { badge.textContent = String(undelivered); badge.classList.toggle('hidden', !undelivered); }
+
+    renderEventsList();
+  } catch(e) {
+    console.error(e);
+    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Audit Trail</div><div class="empty-msg">Could not load events. Run the events migration in Supabase if this is the first time.</div></div>';
+  }
+}
+
+function setEventFilter(kind, val) {
+  if (kind === 'status') eventFilterStatus = val;
+  if (kind === 'type') eventFilterType = val;
+  renderEventsList();
+}
+
+function renderEventsList() {
+  const body = document.getElementById('events-body');
+  if (!body) return;
+  const events = window._allEvents || [];
+
+  const filtered = events.filter(e => {
+    const statusOk = eventFilterStatus === 'all' || e.status === eventFilterStatus;
+    const typeOk = eventFilterType === 'all' || e.type === eventFilterType;
+    return statusOk && typeOk;
+  });
+
+  const statusPills = ['all','emitted','delivered','acknowledged','escalated'];
+  const typePills = [...new Set(events.map(e => e.type))];
+
+  body.innerHTML = `
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:14px 18px 0">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)">Live audit trail</div>
+      <div style="display:flex;gap:8px">
+        <button class="act-btn-sm" onclick="ackAllEvents()">Ack All</button>
+        <button class="act-btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="openEmitEventModal()">+ Emit Event</button>
+      </div>
+    </div>
+    <div class="reg-filter-bar">
+      ${statusPills.map(s => `<button class="reg-fpill ${eventFilterStatus===s?'active':''}" onclick="setEventFilter('status','${s}')">${esc(s)}</button>`).join('')}
+      ${typePills.length ? `<span class="reg-fsep"></span>` : ''}
+      ${typePills.map(t => `<button class="reg-fpill ${eventFilterType===t?'active':''}" onclick="setEventFilter('type','${t}')">${esc(t)}</button>`).join('')}
+    </div>
+    ${filtered.length ? filtered.map(e => `
+      <div class="evt-row ${e.critical ? 'critical' : ''}">
+        <div class="evt-time">${timeAgo(e.created_at)}<br>ago</div>
+        <div class="evt-body">
+          <div class="evt-tags">
+            <span class="evt-type ${esc(e.type)}">${esc(e.type)}</span>
+            ${e.critical ? `<span class="evt-critical-tag">Critical</span>` : ''}
+          </div>
+          <div class="evt-title">${esc(e.title)}</div>
+          ${e.payload ? `<div class="evt-payload">${esc(e.payload)}</div>` : ''}
+          ${(e.recipients || []).map(r => `<span class="evt-recip">${esc(r)}</span>`).join('')}
+        </div>
+        <div class="evt-right">
+          <div class="evt-status ${esc(e.status)}"><span class="evt-status-dot"></span>${esc(e.status)}</div>
+          ${e.status !== 'acknowledged' ? `<button class="evt-ack-btn" onclick="ackEvent('${e.id}')">ACK</button>` : ''}
+        </div>
+      </div>`).join('') : '<div class="empty" style="padding:30px 18px"><div class="empty-msg">No events match this filter.</div></div>'}`;
+}
+
+async function ackEvent(id) {
+  const by = operator?.peer_name || 'Operator';
+  const { error } = await sb.rpc('ack_event', { p_id: id, p_by: by });
+  if (error) { toast('Could not acknowledge event.'); console.error(error); return; }
+  await loadEvents();
+}
+
+async function ackAllEvents() {
+  const by = operator?.peer_name || 'Operator';
+  const { error } = await sb.rpc('ack_all_events', { p_by: by });
+  if (error) { toast('Could not acknowledge events.'); console.error(error); return; }
+  toast('All events acknowledged.');
+  await loadEvents();
+}
+
+function openEmitEventModal() {
+  openOverlay('Emit Event', (body) => {
+    body.innerHTML = `
+      <div class="form-block">
+        <label class="form-lbl">Type</label>
+        <select class="form-input" id="ev-type">
+          <option value="SYSTEM">SYSTEM</option>
+          <option value="MEMBER_JOINED">MEMBER_JOINED</option>
+          <option value="PAYMENT_CONFIRMED">PAYMENT_CONFIRMED</option>
+          <option value="ENGAGEMENT">ENGAGEMENT</option>
+          <option value="CYCLE">CYCLE</option>
+          <option value="LOG">LOG</option>
+        </select>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Title</label>
+        <input class="form-input" id="ev-title" placeholder="Short headline for this event"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Details</label>
+        <textarea class="form-input" id="ev-payload" style="min-height:80px" placeholder="Full description"></textarea>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Recipient</label>
+        <input class="form-input" id="ev-recipient" placeholder="e.g. R. James (leave blank for all)"/>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;padding:0 18px;font-family:var(--mono);font-size:11px;color:var(--soft)">
+        <input type="checkbox" id="ev-critical"/> Mark critical
+      </label>
+      <button class="act-btn" onclick="submitEmitEvent()">Emit Event</button>`;
+  });
+}
+
+async function submitEmitEvent() {
+  const type      = document.getElementById('ev-type')?.value;
+  const title     = document.getElementById('ev-title')?.value.trim();
+  const payload   = document.getElementById('ev-payload')?.value.trim();
+  const recipient = document.getElementById('ev-recipient')?.value.trim();
+  const critical  = document.getElementById('ev-critical')?.checked || false;
+
+  if (!title) { toast('Give the event a title.'); return; }
+
+  const { error } = await sb.rpc('emit_event', {
+    p_type: type,
+    p_title: title,
+    p_payload: payload || null,
+    p_source_entity: 'Manual',
+    p_source_id: null,
+    p_recipients: recipient ? [recipient] : null,
+    p_critical: critical,
+  });
+  if (error) { toast('Could not emit event.'); console.error(error); return; }
+
+  toast('Event emitted.');
+  closeOverlay();
+  await loadEvents();
+}
+
 
 // ── OPEN MESSAGES THREAD ──
 let opMsgKey = null;
@@ -2801,6 +3128,16 @@ async function approveDAG(id) {
       toast('DAG approved — project moved to Ops.');
     }
 
+    sb.rpc('emit_event', {
+      p_type: 'ENGAGEMENT',
+      p_title: `${projRow?.title || 'Project'} moved to Ops`,
+      p_payload: `DAG approved with ${actionNodes.length} scope${actionNodes.length !== 1 ? 's' : ''} generated.`,
+      p_source_entity: 'Ops',
+      p_source_id: id,
+      p_recipients: operator?.peer_name ? [operator.peer_name] : null,
+      p_critical: false,
+    }).catch(() => {});
+
     closeOverlay();
     await loadAll();
     showSurface('ops');
@@ -3258,6 +3595,8 @@ async function settleProject(projectId) {
   const { data: scopes } = await sb.from('bids').select('log_size').eq('project_id', projectId);
   const totalLogs = (scopes || []).reduce((n, s) => n + (s.log_size || 0), 0);
 
+  const { data: projRow } = await sb.from('relation_submissions').select('title, relation_name, relation_code').eq('id', projectId).single();
+
   const { error } = await sb.from('relation_submissions').update({
     status:               'settled',
     settled_at:           new Date().toISOString(),
@@ -3269,10 +3608,21 @@ async function settleProject(projectId) {
 
   await updateReputation(projectId);
 
+  const projLabel = projRow?.title || projRow?.relation_name || projRow?.relation_code || 'Project';
+  sb.rpc('emit_event', {
+    p_type: 'SYSTEM',
+    p_title: `${projLabel} settled — ${totalLogs} LOGs confirmed`,
+    p_payload: `Settled on Cycle ${cycle.num}. Ledger entry is now permanent.`,
+    p_source_entity: 'Ledger',
+    p_source_id: projectId,
+    p_recipients: operator?.peer_name ? [operator.peer_name] : null,
+    p_critical: false,
+  }).catch(() => {}); // best-effort — settlement itself already succeeded
+
   toast('Project settled and locked on the ledger.');
   closeOverlay();
   await loadAll();
-  showSurface('record');
+  showSurface('profile');
 }
 
 async function updateReputation(projectId) {
@@ -3488,8 +3838,7 @@ function buildScopeRow(s, idx, projectCycle) {
 
 function openMemberRecord(memberId) {
   openOverlay('Profile', async (body) => {
-    const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
-    const op = Array.isArray(opRows) ? opRows[0] : opRows;
+    const { data: op } = await sb.from('operators').select('*').eq('id', memberId).single();
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
     const { data: projects } = await sb.rpc('get_settled_projects');
@@ -3528,6 +3877,7 @@ function renderProfileView(body, op, breakdown, memberId) {
   const handle  = op.handle || '@' + (op.peer_name||'').replace(/\s/g,'').toUpperCase();
   const creds   = window._profCreds;
   const skills  = window._profSkills;
+  const isSelf  = operator && op.email === operator.email;
 
   body.innerHTML = `
     <!-- Avatar + header -->
@@ -3547,7 +3897,7 @@ function renderProfileView(body, op, breakdown, memberId) {
         <div class="prof-handle">${esc(handle)}</div>
         <div class="prof-lane">${esc(op.lane||'—')} · ${esc(op.region||'—')}</div>
       </div>
-      <button class="export-btn" onclick="renderProfileEdit()" style="white-space:nowrap">Edit</button>
+      ${isSelf ? `<button class="export-btn" onclick="renderProfileEdit()" style="white-space:nowrap">Edit</button>` : ''}
     </div>
 
     <!-- Stats -->

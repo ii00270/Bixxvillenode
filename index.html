@@ -7,7 +7,7 @@
 <title>Bixxville OS</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -30,6 +30,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   --red:      #E05252;
   --mono:     'IBM Plex Mono', monospace;
   --sans:     'Inter', system-ui, sans-serif;
+  --display:  'Syne', 'Inter', sans-serif;
   --nav-h:    60px;
   --top-h:    56px;
   --safe-b:   env(safe-area-inset-bottom, 0px);
@@ -842,8 +843,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .stat-cell:nth-child(even){border-right:none;}
 .stat-cell:nth-child(n+3){border-top:1px solid var(--line);}
 .stat-val{
-  font-family:var(--mono);font-size:22px;font-weight:600;
-  color:var(--cream);letter-spacing:.02em;
+  font-family:var(--display);font-size:24px;font-weight:800;
+  color:var(--cream);letter-spacing:-.01em;
 }
 .stat-val.orange{color:var(--orange);}
 .stat-lbl{
@@ -1059,6 +1060,21 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .dr-title{font-family:var(--mono);font-size:7px;letter-spacing:.2em;text-transform:uppercase;color:var(--grey);margin-bottom:10px;}
 .dr-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #1E1E1E;}
 .dr-row:last-child{border-bottom:none;}
+
+/* ── STANDING BAR (rep score, at a glance) ── */
+.dr-standing-num{font-family:var(--display);font-size:26px;font-weight:800;line-height:1;color:#FFFFFF;}
+.dr-standing-bar{height:2px;background:var(--line);margin-top:10px;position:relative;overflow:hidden;}
+.dr-standing-fill{height:100%;background:var(--green);transition:width .6s ease;}
+
+/* ── CYCLE COUNTDOWN WIDGET ── */
+.dr-cd-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin:2px 0 8px;}
+.dr-cd-cell{background:var(--surface);border:1px solid var(--line);padding:7px 4px;text-align:center;}
+.dr-cd-num{font-family:var(--display);font-size:17px;font-weight:800;color:#FFFFFF;line-height:1;}
+.dr-cd-num.urgent{color:var(--red);}
+.dr-cd-unit{font-family:var(--mono);font-size:7px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
+.dr-cd-bar{height:2px;background:var(--line);margin-bottom:8px;}
+.dr-cd-bar-fill{height:100%;background:var(--orange);transition:width 1s linear;}
+.dr-cd-bar-fill.urgent{background:var(--red);}
 .dr-label{font-family:var(--mono);font-size:9px;color:var(--grey);}
 .dr-val{font-family:var(--mono);font-size:11px;font-weight:600;text-align:right;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#FFFFFF;}
 
@@ -1546,15 +1562,20 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   <aside id="d-right">
     <div class="dr-widget">
       <div class="dr-title">Your node</div>
-      <div class="dr-row"><span class="dr-label">LOGs</span><span class="dr-val" id="dr-logs" style="color:var(--green)">—</span></div>
-      <div class="dr-row"><span class="dr-label">Rep score</span><span class="dr-val" id="dr-rep">—</span></div>
+      <div class="dr-standing-num" id="dr-logs">—</div>
+      <div class="dr-title" style="margin:2px 0 0">LOGs</div>
+      <div class="dr-standing-bar"><div class="dr-standing-fill" id="dr-rep-fill" style="width:0%"></div></div>
+      <div class="dr-row" style="border-top:1px solid var(--line);margin-top:10px;padding-top:10px"><span class="dr-label">Rep score</span><span class="dr-val" id="dr-rep">—</span></div>
       <div class="dr-row"><span class="dr-label">Tier</span><span class="dr-val" id="dr-tier">—</span></div>
       <div class="dr-row"><span class="dr-label">Streak</span><span class="dr-val" id="dr-streak">—</span></div>
     </div>
     <div class="dr-widget">
-      <div class="dr-title">Cycle</div>
-      <div class="dr-row"><span class="dr-label">Active</span><span class="dr-val" id="dr-cycle" style="color:var(--orange)">—</span></div>
-      <div class="dr-row"><span class="dr-label">Day</span><span class="dr-val" id="dr-day">—</span></div>
+      <div class="dr-title">Cycle <span id="dr-cycle" style="color:var(--orange)">—</span></div>
+      <div class="dr-cd-grid">
+        <div class="dr-cd-cell"><div class="dr-cd-num" id="dr-cd-day">—</div><div class="dr-cd-unit">Day</div></div>
+        <div class="dr-cd-cell"><div class="dr-cd-num" id="dr-cd-left">—</div><div class="dr-cd-unit">Days left</div></div>
+      </div>
+      <div class="dr-cd-bar"><div class="dr-cd-bar-fill" id="dr-cd-fill" style="width:0%"></div></div>
       <div class="dr-row"><span class="dr-label">Closes</span><span class="dr-val" id="dr-closes">—</span></div>
     </div>
     <div class="dr-widget">
@@ -1839,10 +1860,26 @@ function populateSidebar() {
   set('dr-tier',        tier(operator.total_logs));
   set('dr-streak',      operator.streak || 0);
   set('dr-cycle',       'C' + cycle.num);
-  set('dr-day',         'D' + cycle.day + ' of 28');
+  set('dr-cd-day',      cycle.day);
+  set('dr-cd-left',     cycle.left);
   set('dr-closes',      cycle.left + 'd left');
   set('ds-peer-name',   operator.peer_name || '—');
   set('ds-peer-handle', handle);
+
+  // Standing bar — reputation score out of 1.0
+  const repFill = document.getElementById('dr-rep-fill');
+  if (repFill) repFill.style.width = `${Math.max(0, Math.min(1, repNum || 0)) * 100}%`;
+
+  // Cycle countdown bar — how much of the 28-day cycle has elapsed
+  const cdFill = document.getElementById('dr-cd-fill');
+  const cdLeftEl = document.getElementById('dr-cd-left');
+  if (cdFill) {
+    const pct = Math.max(0, Math.min(1, cycle.day / 28)) * 100;
+    cdFill.style.width = pct + '%';
+    const urgent = cycle.left <= 5;
+    cdFill.classList.toggle('urgent', urgent);
+    if (cdLeftEl) cdLeftEl.classList.toggle('urgent', urgent);
+  }
 }
 
 async function loadAll() {

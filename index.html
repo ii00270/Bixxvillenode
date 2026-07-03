@@ -558,6 +558,33 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .proj-scope-action:hover{background:rgba(140,240,96,.08);}
 
+/* ── PROJECT DEPENDENCY GRAPH (tiered, interactive) ── */
+.proj-graph{padding:6px 18px 4px;}
+.proj-tier{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;}
+.proj-tier-lbl{
+  font-family:var(--mono);font-size:9px;font-weight:600;color:var(--grey);
+  width:44px;flex-shrink:0;padding-top:13px;text-transform:uppercase;letter-spacing:.06em;
+}
+.proj-tier-nodes{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+.proj-tier-arrow{
+  font-family:var(--mono);color:var(--grey);font-size:14px;
+  text-align:center;padding:2px 0;margin-left:56px;
+}
+.proj-bookend{
+  border-radius:8px;padding:10px 14px;border:1.5px dashed var(--line2);
+  background:transparent;
+}
+.proj-bookend .proj-scope-tag{color:var(--grey);}
+.proj-bookend.start{border-color:var(--orange);}
+.proj-bookend.start .proj-scope-tag{color:var(--orange);}
+.proj-bookend.outcome{border-color:var(--green);}
+.proj-bookend.outcome .proj-scope-tag{color:var(--green);}
+.proj-bookend .proj-scope-title{font-size:13px;color:var(--soft);font-weight:500;}
+.proj-scope-node.unscoped{border-style:dashed;border-color:var(--line2);background:transparent;}
+.proj-scope-node.unscoped .proj-scope-tag{color:var(--grey);}
+.proj-scope-node.unscoped .proj-scope-title{color:var(--soft);}
+
+
 /* ── ACTION BUTTON ── */
 .act-btn{
   width:calc(100% - 36px);margin:16px 18px;
@@ -2598,7 +2625,23 @@ async function approveDAG(id) {
       });
     }
 
-    toast('DAG approved — project moved to Ops.');
+    // Turn every actionable DAG node into a real, trackable scope —
+    // this is what makes the map interactive instead of just a picture.
+    const actionNodes = (projRow?.dag?.nodes || []).filter(n => n.type === 'key' || n.type === 'standard');
+    if (actionNodes.length) {
+      const results = await Promise.all(actionNodes.map(n => sb.rpc('add_scope', {
+        p_project_id: id,
+        p_title:      n.label,
+        p_log_size:   n.log_estimate || 1,
+        p_assignee:   null,
+      })));
+      const failed = results.filter(r => r.error).length;
+      if (failed) toast(`DAG approved — ${failed} scope(s) failed to create.`);
+      else        toast('DAG approved — scopes created and ready to work.');
+    } else {
+      toast('DAG approved — project moved to Ops.');
+    }
+
     closeOverlay();
     await loadAll();
     showSurface('ops');
@@ -2684,7 +2727,58 @@ function openProject(id) {
 
     const scopes = r.bids || [];
     const totalLogs = scopes.reduce((n,s) => n + (s.log_size || 0), 0);
-    const confirmed = scopes.every(s => s.status === 'confirmed');
+    const confirmed = scopes.length > 0 && scopes.every(s => s.status === 'confirmed');
+
+    // Match scopes back to the DAG node that generated them (by title), so the
+    // map and the tracker are the same thing instead of two disconnected views.
+    const usedScopeIds = new Set();
+    let graphHTML = '';
+
+    if (r.dag && Array.isArray(r.dag.nodes) && r.dag.nodes.length) {
+      const tiers = {};
+      r.dag.nodes.forEach(n => { (tiers[n.tier] = tiers[n.tier] || []).push(n); });
+      const tierKeys = Object.keys(tiers).map(Number).sort((a,b) => a - b);
+
+      graphHTML = tierKeys.map((t, idx) => {
+        const tierLabel = t == 0 ? 'START' : (idx === tierKeys.length - 1 ? 'DONE' : 'T' + t);
+        const nodesHTML = tiers[t].map(n => {
+          if (n.type === 'start' || n.type === 'outcome') {
+            return `
+              <div class="proj-bookend ${n.type}">
+                <div class="proj-scope-tag">${n.type === 'start' ? 'genesis' : 'outcome'}</div>
+                <div class="proj-scope-title">${esc(n.label)}</div>
+              </div>`;
+          }
+          const match = scopes.find(s => !usedScopeIds.has(s.id) && s.title === n.label);
+          if (match) {
+            usedScopeIds.add(match.id);
+            return buildProjScopeNode(match, id, n.type === 'key');
+          }
+          // DAG node with no scope behind it yet (e.g. approved before this feature, or manually removed)
+          return `
+            <div class="proj-scope-node unscoped">
+              <div class="proj-scope-head" style="cursor:default">
+                <div class="proj-scope-head-main">
+                  <div class="proj-scope-tag">not yet scoped${n.type === 'key' ? ' · key' : ''}</div>
+                  <div class="proj-scope-title">${esc(n.label)}</div>
+                </div>
+                <div class="proj-scope-logs">${n.log_estimate || 1} LOG</div>
+              </div>
+              <button class="proj-scope-action" style="margin:0 14px 14px" onclick="createScopeFromNode('${id}','${esc(n.label).replace(/'/g,"\\'")}',${n.log_estimate || 1})">+ Create Scope</button>
+            </div>`;
+        }).join('');
+        return `
+          <div class="proj-tier">
+            <div class="proj-tier-lbl">${tierLabel}</div>
+            <div class="proj-tier-nodes">${nodesHTML}</div>
+          </div>
+          ${idx < tierKeys.length - 1 ? '<div class="proj-tier-arrow">↓</div>' : ''}`;
+      }).join('');
+    }
+
+    // Any scopes not accounted for by the DAG (manually added, or no DAG at all)
+    const extraScopes = scopes.filter(s => !usedScopeIds.has(s.id));
+    const extraHTML = extraScopes.map(s => buildProjScopeNode(s, id, false)).join('');
 
     body.innerHTML = `
       <div class="stat-grid">
@@ -2709,53 +2803,71 @@ function openProject(id) {
         <div class="form-lbl">Relation</div>
         <div style="font-family:var(--mono);font-size:13px;color:var(--soft)">${esc(r.relation_name || r.relation_code)}</div>
       </div>
-      <div class="section-lbl" style="position:relative;top:0">Scopes</div>
-      <div class="proj-scopes">
-        ${scopes.map((s, i) => {
-          const scId = 'psc-' + i;
-          const key = s.status === 'confirmed' ? 'confirmed'
-                    : s.status === 'disputed'  ? 'disputed'
-                    : s.status === 'delivered' ? 'delivered'
-                    : s.status === 'assigned'  ? 'assigned'
-                    : 'pending';
-          const actionBtn = key === 'assigned'
-            ? `<button class="proj-scope-action" onclick="event.stopPropagation();markDelivered('${s.id}','${id}')">Mark Delivered</button>`
-            : key === 'delivered'
-            ? `<button class="proj-scope-action" onclick="event.stopPropagation();confirmScope('${s.id}','${id}')">Confirm Delivery</button>`
-            : '';
-          return `
-          <div class="proj-scope-node ${key}" id="${scId}">
-            <div class="proj-scope-head" onclick="toggleProjScope('${scId}')">
-              <div class="proj-scope-head-main">
-                <div class="proj-scope-tag">${key} · ${esc(s.assignee || 'unassigned')}</div>
-                <div class="proj-scope-title">${esc(s.title || 'Untitled scope')}</div>
-              </div>
-              <div class="proj-scope-logs">${s.log_size || 0} LOG</div>
-              <div class="proj-scope-chevron">▸</div>
-            </div>
-            <div class="proj-scope-body">
-              <div class="proj-scope-body-inner">
-                <div><div class="proj-scope-field-lbl">Assignee</div><div class="proj-scope-field-val">${esc(s.assignee || 'Unassigned')}</div></div>
-                <div><div class="proj-scope-field-lbl">Status</div><div class="proj-scope-field-val">${key}</div></div>
-                <div><div class="proj-scope-field-lbl">LOGs</div><div class="proj-scope-field-val">${s.log_size || 0}</div></div>
-              </div>
-              ${actionBtn}
-            </div>
-          </div>`;
-        }).join('') || `
-        <div class="empty" style="padding:24px 18px">
-          <div class="empty-msg">No scopes yet. Add the first one.</div>
-        </div>`}
-      </div>
+      ${graphHTML ? `
+        <div class="section-lbl" style="position:relative;top:0">Dependency Map</div>
+        <div class="proj-graph">${graphHTML}</div>` : ''}
+      ${extraHTML || !graphHTML ? `
+        <div class="section-lbl" style="position:relative;top:0">${graphHTML ? 'Additional Scopes' : 'Scopes'}</div>
+        <div class="proj-scopes">${extraHTML || `
+          <div class="empty" style="padding:24px 18px">
+            <div class="empty-msg">No scopes yet. Add the first one.</div>
+          </div>`}</div>` : ''}
       <button class="act-btn" onclick="openAddScope('${id}')">+ Add Scope</button>
       ${confirmed && scopes.length ? `<button class="act-btn" onclick="settleProject('${id}')">Confirm Settlement</button>` : ''}`;
   }, null, null);
+}
+
+function buildProjScopeNode(s, projectId, isKey) {
+  const key = s.status === 'confirmed' ? 'confirmed'
+            : s.status === 'disputed'  ? 'disputed'
+            : s.status === 'delivered' ? 'delivered'
+            : s.status === 'assigned'  ? 'assigned'
+            : 'pending';
+  const actionBtn = key === 'assigned'
+    ? `<button class="proj-scope-action" onclick="event.stopPropagation();markDelivered('${s.id}','${projectId}')">Mark Delivered</button>`
+    : key === 'delivered'
+    ? `<button class="proj-scope-action" onclick="event.stopPropagation();confirmScope('${s.id}','${projectId}')">Confirm Delivery</button>`
+    : '';
+  const scId = 'psc-' + s.id;
+  return `
+    <div class="proj-scope-node ${key}" id="${scId}">
+      <div class="proj-scope-head" onclick="toggleProjScope('${scId}')">
+        <div class="proj-scope-head-main">
+          <div class="proj-scope-tag">${key} · ${esc(s.assignee || 'unassigned')}${isKey ? ' · key' : ''}</div>
+          <div class="proj-scope-title">${esc(s.title || 'Untitled scope')}</div>
+        </div>
+        <div class="proj-scope-logs">${s.log_size || 0} LOG</div>
+        <div class="proj-scope-chevron">▸</div>
+      </div>
+      <div class="proj-scope-body">
+        <div class="proj-scope-body-inner">
+          <div><div class="proj-scope-field-lbl">Assignee</div><div class="proj-scope-field-val">${esc(s.assignee || 'Unassigned')}</div></div>
+          <div><div class="proj-scope-field-lbl">Status</div><div class="proj-scope-field-val">${key}</div></div>
+          <div><div class="proj-scope-field-lbl">LOGs</div><div class="proj-scope-field-val">${s.log_size || 0}</div></div>
+        </div>
+        ${actionBtn}
+      </div>
+    </div>`;
+}
+
+async function createScopeFromNode(projectId, title, logs) {
+  const { error } = await sb.rpc('add_scope', {
+    p_project_id: projectId,
+    p_title:      title,
+    p_log_size:   logs,
+    p_assignee:   null,
+  });
+  if (error) { toast('Could not create scope.'); console.error(error); return; }
+  toast('Scope created.');
+  await loadOps();
+  openProject(projectId);
 }
 
 function toggleProjScope(scId) {
   const el = document.getElementById(scId);
   if (el) el.classList.toggle('open');
 }
+
 
 function openAddScope(projectId) {
   openOverlay('Add Scope', (body) => {

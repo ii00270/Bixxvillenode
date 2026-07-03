@@ -539,7 +539,20 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .proj-scope-node.open .proj-scope-chevron{transform:rotate(90deg);}
 .proj-scope-body{max-height:0;overflow:hidden;transition:max-height .25s ease;}
-.proj-scope-node.open .proj-scope-body{max-height:280px;}
+.proj-scope-node.open .proj-scope-body{max-height:340px;}
+.proj-assign-row{display:flex;gap:6px;margin-top:2px;}
+.proj-assign-input{
+  flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line2);
+  color:var(--cream);font-family:var(--mono);font-size:11px;
+  padding:6px 8px;border-radius:5px;outline:none;transition:border-color .15s;
+}
+.proj-assign-input:focus{border-color:var(--green);}
+.proj-assign-btn{
+  background:none;border:1px solid var(--line2);color:var(--grey);
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.08em;
+  text-transform:uppercase;padding:0 10px;border-radius:5px;cursor:pointer;transition:all .15s;
+}
+.proj-assign-btn:hover{border-color:var(--green);color:var(--green);}
 .proj-scope-body-inner{
   display:flex;gap:22px;flex-wrap:wrap;
   border-top:1px solid var(--line);padding:12px 14px 14px;
@@ -2813,6 +2826,7 @@ function openProject(id) {
             <div class="empty-msg">No scopes yet. Add the first one.</div>
           </div>`}</div>` : ''}
       <button class="act-btn" onclick="openAddScope('${id}')">+ Add Scope</button>
+      <button class="act-btn-sm" style="margin:0 18px 14px" onclick="exportProjectMap('${id}')">Export Map (PDF)</button>
       ${confirmed && scopes.length ? `<button class="act-btn" onclick="settleProject('${id}')">Confirm Settlement</button>` : ''}`;
   }, null, null);
 }
@@ -2841,7 +2855,15 @@ function buildProjScopeNode(s, projectId, isKey) {
       </div>
       <div class="proj-scope-body">
         <div class="proj-scope-body-inner">
-          <div><div class="proj-scope-field-lbl">Assignee</div><div class="proj-scope-field-val">${esc(s.assignee || 'Unassigned')}</div></div>
+          <div style="flex:1;min-width:140px">
+            <div class="proj-scope-field-lbl">Assignee</div>
+            <div class="proj-assign-row" onclick="event.stopPropagation()">
+              <input class="proj-assign-input" id="assign-${s.id}" value="${esc(s.assignee || '')}"
+                placeholder="Peer name or access key"
+                onkeydown="if(event.key==='Enter'){event.stopPropagation();saveAssignee('${s.id}','${projectId}')}"/>
+              <button class="proj-assign-btn" onclick="saveAssignee('${s.id}','${projectId}')">Save</button>
+            </div>
+          </div>
           <div><div class="proj-scope-field-lbl">Status</div><div class="proj-scope-field-val">${key}</div></div>
           <div><div class="proj-scope-field-lbl">LOGs</div><div class="proj-scope-field-val">${s.log_size || 0}</div></div>
         </div>
@@ -2868,6 +2890,136 @@ function toggleProjScope(scId) {
   if (el) el.classList.toggle('open');
 }
 
+async function exportProjectMap(projectId) {
+  if (!window.jspdf) { toast('PDF library not loaded. Try again.'); return; }
+
+  const { data: r } = await sb
+    .from('relation_submissions')
+    .select('*, bids(*)')
+    .eq('id', projectId)
+    .single();
+  if (!r) { toast('Could not load project.'); return; }
+
+  toast('Generating PDF…');
+  const scopes    = r.bids || [];
+  const totalLogs = scopes.reduce((n,s) => n + (s.log_size || 0), 0);
+  const delivered = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
+  const settled   = scopes.length > 0 && scopes.every(s => s.status === 'confirmed');
+  const dateStr   = new Date().toLocaleDateString('en-US', { year:'numeric', month:'long', day:'numeric' });
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF('p', 'mm', 'a4');
+  const W = 210, H = 297, M = 20, CW = W - M * 2;
+  let y = 0;
+
+  const bg = (r_,g,b) => doc.setFillColor(r_,g,b);
+  const tc = (r_,g,b) => doc.setTextColor(r_,g,b);
+  const dc = (r_,g,b) => doc.setDrawColor(r_,g,b);
+  const fw = (f) => doc.setFont('helvetica', f);
+  const fs = (s) => doc.setFontSize(s);
+  const lw = (w) => doc.setLineWidth(w);
+
+  const STATUS_COLORS = {
+    confirmed: { bar:[140,240,96], bg:[234,243,222], text:[39,80,10] },
+    delivered: { bar:[232,136,74], bg:[250,238,218], text:[99,56,6]  },
+    assigned:  { bar:[232,136,74], bg:[250,238,218], text:[99,56,6]  },
+    disputed:  { bar:[224,82,82],  bg:[252,235,235], text:[121,31,31]},
+    pending:   { bar:[82,80,78],   bg:[17,17,19],    text:[168,166,162]},
+  };
+
+  const addPageIfNeeded = (needed) => {
+    if (y + needed > H - 24) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
+  };
+
+  bg(9,9,11); doc.rect(0,0,W,H,'F');
+
+  // ── HEADER ──
+  y = 22;
+  tc(140,240,96); fw('bold'); fs(7);
+  doc.text('@BIXXVILLE', M, y);
+  tc(82,80,78); fw('normal'); fs(6.5);
+  doc.text('Land of Geb, LLC  ·  St. Croix  ·  USVI', W-M, y, { align:'right' });
+
+  y = 36;
+  tc(82,80,78); fw('normal'); fs(7);
+  doc.text('PROJECT MAP', M, y);
+
+  y = 46;
+  tc(242,240,236); fw('bold'); fs(18);
+  doc.text(r.title || r.relation_name || 'Untitled Project', M, y);
+
+  y = 53;
+  tc(82,80,78); fw('normal'); fs(6.5);
+  doc.text(`${r.relation_name || r.relation_code || '—'}  ·  Generated ${dateStr}`, M, y);
+
+  y = 58; dc(232,136,74); lw(0.8);
+  doc.line(M, y, M+14, y);
+
+  // ── STAT GRID ──
+  y = 66;
+  const statW = CW / 4, statH = 20;
+  const stats = [
+    { val: String(scopes.length), lbl: 'SCOPES' },
+    { val: String(totalLogs),     lbl: 'LOGS EST.', green: true },
+    { val: String(delivered),     lbl: 'DELIVERED' },
+    { val: settled ? 'READY' : 'OPEN', lbl: 'SETTLEMENT', green: settled },
+  ];
+  dc(30,30,34); lw(0.2);
+  doc.rect(M, y, CW, statH, 'S');
+  stats.forEach((s,i) => {
+    const x = M + i * statW;
+    if (i > 0) doc.line(x, y, x, y+statH);
+    s.green ? tc(140,240,96) : tc(242,240,236);
+    fw('bold'); fs(13);
+    doc.text(s.val, x+statW/2, y+10, { align:'center' });
+    tc(82,80,78); fw('normal'); fs(5.5);
+    doc.text(s.lbl, x+statW/2, y+16, { align:'center' });
+  });
+
+  // ── SCOPE / MAP LIST ──
+  y += statH + 10;
+  tc(82,80,78); fw('normal'); fs(5.5);
+  doc.text(r.dag ? 'DEPENDENCY MAP' : 'SCOPES', M, y);
+  y += 6;
+
+  const rowH = 16;
+  scopes.forEach(s => {
+    addPageIfNeeded(rowH + 2);
+    const c = STATUS_COLORS[s.status] || STATUS_COLORS.pending;
+    bg(...c.bg); doc.rect(M, y, CW, rowH, 'F');
+    dc(...c.bar); lw(1); doc.line(M, y, M, y+rowH);
+
+    tc(242,240,236); fw('bold'); fs(9);
+    doc.text(s.title || 'Untitled scope', M+5, y+7);
+    tc(...c.text); fw('normal'); fs(6.5);
+    doc.text(`${(s.status||'pending').toUpperCase()}  ·  ${s.assignee || 'Unassigned'}`, M+5, y+13);
+
+    tc(242,240,236); fw('bold'); fs(9);
+    doc.text(`${s.log_size || 0} LOG`, W-M-3, y+9.5, { align:'right' });
+
+    y += rowH + 3;
+  });
+
+  if (!scopes.length) {
+    tc(82,80,78); fw('normal'); fs(8);
+    doc.text('No scopes yet.', M, y+4);
+    y += 10;
+  }
+
+  // ── FOOTER ──
+  addPageIfNeeded(20);
+  y = H - 18;
+  dc(30,30,34); lw(0.2);
+  doc.line(M, y, W-M, y);
+  y += 6;
+  tc(82,80,78); fw('normal'); fs(6);
+  doc.text('Scoped · Verified · Settled', M, y);
+  doc.text('We trust the math.', W-M, y, { align:'right' });
+
+  const safeTitle = (r.title || r.relation_name || 'project').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  doc.save(`bixxville-${safeTitle}-map.pdf`);
+  toast('PDF downloaded.');
+}
 
 function openAddScope(projectId) {
   openOverlay('Add Scope', (body) => {
@@ -2904,6 +3056,23 @@ async function saveScope(projectId) {
 
   if (error) { toast('Could not add scope.'); console.error(error); return; }
   toast('Scope added.');
+  await loadOps();
+  openProject(projectId);
+}
+
+async function saveAssignee(scopeId, projectId) {
+  const input = document.getElementById('assign-' + scopeId);
+  const val = input?.value.trim() || null;
+  const { error } = await sb.from('bids').update({ assignee: val }).eq('id', scopeId);
+  if (error) { toast('Could not update assignee.'); console.error(error); return; }
+  // If this scope had no assignee and no work has started yet, moving it to "assigned" makes sense
+  if (val) {
+    const { data: cur } = await sb.from('bids').select('status').eq('id', scopeId).single();
+    if (cur && cur.status === 'pending') {
+      await sb.from('bids').update({ status: 'assigned' }).eq('id', scopeId);
+    }
+  }
+  toast('Assignee updated.');
   await loadOps();
   openProject(projectId);
 }

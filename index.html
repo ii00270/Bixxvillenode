@@ -3979,6 +3979,52 @@ function renderProfileView(body, op, breakdown, memberId) {
 // ── PAYMENT LEDGER ──
 const USDC_BASE_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // real USDC on Base — same contract already used for the wallet balance check
 
+async function fetchUsdcBalance(address) {
+  const data = '0x70a08231000000000000000000000000' + address.toLowerCase().replace(/^0x/, '');
+  const res = await fetch('https://mainnet.base.org', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: USDC_BASE_CONTRACT, data }, 'latest'] }),
+  });
+  const json = await res.json();
+  if (json.error || !json.result || json.result === '0x') return null;
+  return parseInt(json.result, 16) / 1e6;
+}
+
+async function checkProfileWalletBalance() {
+  const addr = document.getElementById('prof-wallet')?.value.trim();
+  const status = document.getElementById('prof-wallet-status');
+  if (!status) return;
+
+  if (!addr) {
+    status.textContent = 'Or connect MetaMask to fill this in automatically.';
+    status.style.color = 'var(--grey)';
+    return;
+  }
+  if (!/^0x[a-fA-F0-9]{40}$/.test(addr)) {
+    status.textContent = 'That doesn\'t look like a valid wallet address.';
+    status.style.color = 'var(--red)';
+    return;
+  }
+
+  status.textContent = 'Checking balance on Base…';
+  status.style.color = 'var(--grey)';
+  try {
+    const balance = await fetchUsdcBalance(addr);
+    if (balance === null) {
+      status.textContent = 'Valid address format, but could not read a balance.';
+      status.style.color = 'var(--orange)';
+    } else {
+      status.textContent = `✓ Verified — $${balance.toLocaleString(undefined,{maximumFractionDigits:2})} USDC on Base`;
+      status.style.color = 'var(--green)';
+    }
+  } catch(e) {
+    console.error(e);
+    status.textContent = 'Could not reach the network to verify.';
+    status.style.color = 'var(--orange)';
+  }
+}
+
 async function connectProfileWallet() {
   if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
   try {
@@ -3986,6 +4032,7 @@ async function connectProfileWallet() {
     const input = document.getElementById('prof-wallet');
     if (input) input.value = accts[0];
     toast('Wallet connected — remember to Save Profile.');
+    checkProfileWalletBalance();
   } catch(e) {
     console.error(e);
     toast('Connection cancelled.');
@@ -4168,10 +4215,13 @@ function renderProfileEdit() {
     <div class="prof-field">
       <div class="prof-field-lbl">Wallet address (USDC on Base)</div>
       <div style="display:flex;gap:8px">
-        <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(op.wallet_address||'')}" placeholder="0x… — where payments to you are sent"/>
+        <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(op.wallet_address||'')}"
+          placeholder="0x… — where payments to you are sent" onblur="checkProfileWalletBalance()"/>
         <button class="prof-add-btn" style="white-space:nowrap" onclick="connectProfileWallet()">Connect</button>
       </div>
-      <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">Or connect MetaMask to fill this in automatically.</div>
+      <div id="prof-wallet-status" style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">
+        Or connect MetaMask to fill this in automatically.
+      </div>
     </div>
 
     <div class="prof-section">Credentials</div>
@@ -4197,6 +4247,8 @@ function renderProfileEdit() {
     </div>
 
     <button class="act-btn" onclick="saveProfile()">Save Profile</button>`;
+
+  if (op.wallet_address) checkProfileWalletBalance();
 }
 
 function cancelProfileEdit() {

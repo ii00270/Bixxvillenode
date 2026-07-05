@@ -2438,10 +2438,23 @@ async function loadMembers() {
     window._allMembers = data || [];
     if (count) count.textContent = window._allMembers.length ? `${window._allMembers.length} members` : '';
     renderMembersList();
+    loadMemberBalances();
   } catch(e) {
     console.error(e);
     body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load members.</div></div>';
   }
+}
+
+async function loadMemberBalances() {
+  const members = (window._allMembers || []).filter(m => m.wallet_address);
+  if (!members.length) return;
+
+  await Promise.all(members.map(async (m) => {
+    try { m._balance = await fetchUsdcBalance(m.wallet_address); }
+    catch(e) { m._balance = null; }
+  }));
+
+  renderMembersList();
 }
 
 function setMemberFilter(kind, val) {
@@ -2530,7 +2543,7 @@ function renderMembersList() {
         <div class="member-row" onclick="openMemberRecord('${m.id}')">
           <div class="member-avatar">${m.handle ? owavSm : `<span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span>`}</div>
           <div class="member-info">
-            <div class="member-name">${esc(m.peer_name)}</div>
+            <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
             <div class="member-meta">${esc(m.region || m.lane || '—')} · $${rate}/LOG · ${m.total_logs||0} LOG</div>
             <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
           </div>
@@ -6151,33 +6164,50 @@ async function loadRelNetworkList() {
   try {
     const { data } = await sb.rpc('list_operators');
     window._relMembers = data || [];
-    if (!window._relMembers.length) {
-      el.innerHTML = '<div class="empty"><div class="empty-msg">No network members yet.</div></div>';
-      return;
-    }
+    renderRelNetworkList();
 
-    el.innerHTML = window._relMembers.map(m => {
-      const mTier = tier(m.total_logs);
-      const standing = (m.standing || 'active').toLowerCase();
-      const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
-      return `
-        <div class="member-row" onclick="openRelMemberProfile('${m.id}')">
-          <div class="member-avatar"><span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span></div>
-          <div class="member-info">
-            <div class="member-name">${esc(m.peer_name)}</div>
-            <div class="member-meta">${esc(m.region || m.lane || '—')} · ${m.total_logs||0} LOG</div>
-            <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
-          </div>
-          <div class="member-right">
-            <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
-            <div class="member-tier">${esc(mTier)} · ${rep.toFixed(3)}</div>
-          </div>
-        </div>`;
-    }).join('');
+    const withWallets = window._relMembers.filter(m => m.wallet_address);
+    if (withWallets.length) {
+      await Promise.all(withWallets.map(async (m) => {
+        try { m._balance = await fetchUsdcBalance(m.wallet_address); }
+        catch(e) { m._balance = null; }
+      }));
+      renderRelNetworkList();
+    }
   } catch(e) {
     console.error(e);
     el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load network.</div></div>';
   }
+}
+
+function renderRelNetworkList() {
+  const el = document.getElementById('rel-network-body');
+  if (!el) return;
+  const members = window._relMembers || [];
+
+  if (!members.length) {
+    el.innerHTML = '<div class="empty"><div class="empty-msg">No network members yet.</div></div>';
+    return;
+  }
+
+  el.innerHTML = members.map(m => {
+    const mTier = tier(m.total_logs);
+    const standing = (m.standing || 'active').toLowerCase();
+    const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
+    return `
+      <div class="member-row" onclick="openRelMemberProfile('${m.id}')">
+        <div class="member-avatar"><span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span></div>
+        <div class="member-info">
+          <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
+          <div class="member-meta">${esc(m.region || m.lane || '—')} · ${m.total_logs||0} LOG</div>
+          <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
+        </div>
+        <div class="member-right">
+          <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
+          <div class="member-tier">${esc(mTier)} · ${rep.toFixed(3)}</div>
+        </div>
+      </div>`;
+  }).join('');
 }
 
 // Read-only member profile for relations — visualization only, no editing, no scope tools

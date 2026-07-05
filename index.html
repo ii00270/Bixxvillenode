@@ -803,6 +803,74 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .log-row-hours{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);white-space:nowrap;}
 .log-row-agreed{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:3px;white-space:nowrap;}
 
+/* ── HOME DASHBOARD ── */
+.dash-greeting{padding:22px 18px 6px;}
+.dash-greeting-text{font-family:var(--display);font-size:24px;font-weight:800;color:#FFFFFF;line-height:1.15;}
+.dash-greeting-sub{font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:6px;letter-spacing:.04em;}
+
+.dash-stats-row{display:flex;gap:10px;padding:14px 18px;overflow-x:auto;}
+.dash-stat-chip{
+  flex:1;min-width:84px;background:var(--surface);border:1px solid var(--line2);border-radius:10px;
+  padding:11px 13px;
+}
+.dash-stat-val{font-family:var(--display);font-size:18px;font-weight:800;color:#FFFFFF;white-space:nowrap;}
+.dash-stat-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
+
+.dash-widgets{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 18px 18px;}
+@media(max-width:640px){.dash-widgets{grid-template-columns:1fr;}}
+.dash-widget{background:var(--surface);border:1px solid var(--line2);border-radius:12px;padding:16px;}
+.dash-widget.full{grid-column:1/-1;}
+.dash-widget-title{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--orange);font-weight:700;margin-bottom:12px;}
+
+.dash-task-row{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);}
+.dash-task-row:last-child{border-bottom:none;}
+.dash-task-check{
+  width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line2);cursor:pointer;
+  flex-shrink:0;display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:#08110C;font-weight:700;
+}
+.dash-task-check.done{background:var(--green);border-color:var(--green);}
+.dash-task-text{flex:1;font-family:var(--sans);font-size:13px;color:#FFFFFF;word-break:break-word;}
+.dash-task-text.done{color:var(--grey);text-decoration:line-through;}
+.dash-task-del{background:none;border:none;color:var(--grey);cursor:pointer;font-size:12px;padding:2px 6px;flex-shrink:0;}
+.dash-task-del:hover{color:var(--red);}
+.dash-task-add{display:flex;gap:8px;margin-top:10px;}
+.dash-task-input{
+  flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line2);border-radius:6px;
+  padding:8px 10px;color:var(--cream);font-family:var(--sans);font-size:13px;outline:none;
+}
+.dash-task-input:focus{border-color:var(--green);}
+.dash-task-add-btn{
+  background:var(--green);color:#08110C;border:none;border-radius:6px;padding:0 14px;
+  font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;
+}
+
+.dash-calc-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;gap:10px;}
+.dash-calc-lbl{font-family:var(--mono);font-size:10px;color:var(--grey);white-space:nowrap;}
+.dash-calc-input{
+  width:80px;background:var(--surface2);border:1px solid var(--line2);border-radius:6px;
+  padding:6px 8px;color:var(--cream);font-family:var(--mono);font-size:13px;text-align:right;outline:none;
+}
+.dash-calc-input:focus{border-color:var(--green);}
+.dash-calc-select{
+  background:var(--surface2);border:1px solid var(--line2);border-radius:6px;color:var(--cream);
+  font-family:var(--mono);font-size:11px;padding:6px 8px;max-width:160px;
+}
+.dash-calc-result{
+  margin-top:12px;padding-top:12px;border-top:1px solid var(--line);
+  display:flex;justify-content:space-between;align-items:baseline;
+}
+.dash-calc-result-val{font-family:var(--display);font-size:22px;font-weight:800;color:var(--green);}
+
+.dash-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.dash-action-btn{
+  flex:1;min-width:110px;background:var(--surface2);border:1px solid var(--line2);border-radius:8px;
+  padding:12px 10px;text-align:center;cursor:pointer;transition:border-color .15s;
+}
+.dash-action-btn:hover{border-color:var(--green);}
+.dash-action-lbl{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--cream);letter-spacing:.02em;}
+
+
 
 
 
@@ -2050,8 +2118,148 @@ async function loadAll() {
 // ── HOME FEED ──
 async function loadHome() {
   const body = document.getElementById('home-body');
-  if (!body) return;
-  body.innerHTML = '<div class="empty"><div class="empty-msg" style="color:var(--grey)">Loading feed…</div></div>';
+  const cycleEl = document.getElementById('home-cycle');
+  if (!body || !operator) return;
+
+  const cycle = getActiveCycle();
+  if (cycleEl) cycleEl.textContent = `C${cycle.num} · Day ${cycle.day}`;
+
+  const hourNow = new Date().getHours();
+  const greeting = hourNow < 12 ? 'Good morning' : hourNow < 18 ? 'Good afternoon' : 'Good evening';
+  const myTier = tier(operator.total_logs);
+  const RATES = { Operator:100, Architect:85, Wrangler:65, Apprentice:39 };
+  const myRate = RATES[myTier] || 39;
+
+  try {
+    const [opsRes, tasksRes, logsRes] = await Promise.all([
+      sb.from('relation_submissions').select('id,status').in('status', ['open','settling']),
+      sb.rpc('get_my_tasks', { p_operator_id: operator.id }),
+      sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
+    ]);
+
+    const activeProjects = (opsRes.data || []).length;
+    window._myTasks = tasksRes.data || [];
+    const cycleHours = (logsRes.data || [])
+      .filter(l => l.cycle_number === cycle.num)
+      .reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
+
+    body.innerHTML = `
+      <div class="dash-greeting">
+        <div class="dash-greeting-text">${greeting}, ${esc(operator.peer_name || 'Operator')}.</div>
+        <div class="dash-greeting-sub">Cycle ${cycle.num} · Day ${cycle.day} of 28 · ${cycle.left}d left</div>
+      </div>
+
+      <div class="dash-stats-row">
+        <div class="dash-stat-chip"><div class="dash-stat-val">${activeProjects}</div><div class="dash-stat-lbl">Active</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">${cycleHours.toFixed(0)}</div><div class="dash-stat-lbl">Hrs this cycle</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">${esc(myTier)}</div><div class="dash-stat-lbl">Tier</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">$${myRate}</div><div class="dash-stat-lbl">Per LOG</div></div>
+      </div>
+
+      <div class="dash-widgets">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Task Tracker</div>
+          <div id="dash-tasks-list">${renderDashTasks()}</div>
+          <div class="dash-task-add">
+            <input class="dash-task-input" id="dash-task-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addDashTask()"/>
+            <button class="dash-task-add-btn" onclick="addDashTask()">Add</button>
+          </div>
+        </div>
+
+        <div class="dash-widget">
+          <div class="dash-widget-title">Quick Price Calculator</div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">LOGs</span>
+            <input class="dash-calc-input" id="calc-logs" type="number" min="0" value="10" oninput="updateDashCalc()"/>
+          </div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">Rate</span>
+            <select class="dash-calc-select" id="calc-rate" onchange="updateDashCalc()">
+              <option value="39" ${myRate===39?'selected':''}>Apprentice · $39/hr</option>
+              <option value="65" ${myRate===65?'selected':''}>Wrangler · $65/hr</option>
+              <option value="85" ${myRate===85?'selected':''}>Architect · $85/hr</option>
+              <option value="100" ${myRate===100?'selected':''}>Operator · $100/hr</option>
+            </select>
+          </div>
+          <div class="dash-calc-result">
+            <span class="dash-calc-lbl">Project price</span>
+            <span class="dash-calc-result-val" id="calc-result">$${((10*myRate)/0.75).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--grey);margin-top:8px">LOGs × rate ÷ 0.75</div>
+        </div>
+
+        <div class="dash-widget full">
+          <div class="dash-widget-title">Quick Actions</div>
+          <div class="dash-actions">
+            <div class="dash-action-btn" onclick="showSurface('ops')"><div class="dash-action-lbl">+ Start a Project</div></div>
+            <div class="dash-action-btn" onclick="openLogWorkModal()"><div class="dash-action-lbl">+ Log Work</div></div>
+            <div class="dash-action-btn" onclick="showSurface('events')"><div class="dash-action-lbl">View Events</div></div>
+            <div class="dash-action-btn" onclick="showSurface('members')"><div class="dash-action-lbl">View Members</div></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-lbl" style="position:relative;top:0">Recent Activity</div>
+      <div id="dash-recent-activity" style="padding-bottom:20px"><div class="empty" style="padding:16px 0"><div class="empty-msg">Loading…</div></div></div>`;
+
+    updateDashCalc();
+    loadDashRecentActivity();
+  } catch(e) {
+    console.error(e);
+    body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load dashboard. Run the tasks migration if this is the first time.</div></div>';
+  }
+}
+
+function renderDashTasks() {
+  const tasks = window._myTasks || [];
+  if (!tasks.length) return '<div style="font-family:var(--sans);font-size:12px;color:var(--grey);padding:4px 0 8px">No tasks yet.</div>';
+  return tasks.map(t => `
+    <div class="dash-task-row">
+      <div class="dash-task-check ${t.done ? 'done' : ''}" onclick="toggleDashTask('${t.id}', ${!t.done})">${t.done ? '✓' : ''}</div>
+      <div class="dash-task-text ${t.done ? 'done' : ''}">${esc(t.text)}</div>
+      <button class="dash-task-del" onclick="deleteDashTask('${t.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function addDashTask() {
+  const input = document.getElementById('dash-task-input');
+  const text = input?.value.trim();
+  if (!text) return;
+  const { error } = await sb.rpc('add_task', { p_operator_id: operator.id, p_text: text });
+  if (error) { toast('Could not add task.'); console.error(error); return; }
+  input.value = '';
+  const { data } = await sb.rpc('get_my_tasks', { p_operator_id: operator.id });
+  window._myTasks = data || [];
+  const list = document.getElementById('dash-tasks-list');
+  if (list) list.innerHTML = renderDashTasks();
+}
+
+async function toggleDashTask(id, done) {
+  await sb.rpc('toggle_task', { p_id: id, p_done: done });
+  const t = (window._myTasks || []).find(x => x.id === id);
+  if (t) t.done = done;
+  const list = document.getElementById('dash-tasks-list');
+  if (list) list.innerHTML = renderDashTasks();
+}
+
+async function deleteDashTask(id) {
+  await sb.rpc('delete_task', { p_id: id });
+  window._myTasks = (window._myTasks || []).filter(x => x.id !== id);
+  const list = document.getElementById('dash-tasks-list');
+  if (list) list.innerHTML = renderDashTasks();
+}
+
+function updateDashCalc() {
+  const logs = parseFloat(document.getElementById('calc-logs')?.value) || 0;
+  const rate = parseFloat(document.getElementById('calc-rate')?.value) || 39;
+  const price = (logs * rate) / 0.75;
+  const resultEl = document.getElementById('calc-result');
+  if (resultEl) resultEl.textContent = '$' + price.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+async function loadDashRecentActivity() {
+  const el = document.getElementById('dash-recent-activity');
+  if (!el) return;
 
   const [settledRes, opsRes] = await Promise.all([
     sb.rpc('get_settled_projects'),
@@ -2060,10 +2268,8 @@ async function loadHome() {
 
   const settled   = settledRes.data || [];
   const operators = opsRes.data || [];
-
   const events = [];
 
-  // Settlements → green
   settled.forEach(p => {
     if (p.settled_at) events.push({
       color: '#8CF060', time: p.settled_at,
@@ -2073,7 +2279,6 @@ async function loadHome() {
     });
   });
 
-  // Operators joining → cream
   operators.forEach(op => {
     if (op.invited_at) events.push({
       color: '#FFFFFF', time: op.invited_at,
@@ -2083,15 +2288,14 @@ async function loadHome() {
     });
   });
 
-  // Sort newest first
   events.sort((a, b) => new Date(b.time) - new Date(a.time));
 
   if (!events.length) {
-    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Network</div><div class="empty-msg">No network activity yet. Work will appear here as it happens.</div></div>';
+    el.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">No activity yet.</div></div>';
     return;
   }
 
-  body.innerHTML = events.map(e => `
+  el.innerHTML = events.slice(0, 5).map(e => `
     <div class="feed-row">
       <div class="feed-dot" style="background:${e.color}"></div>
       <div class="feed-time">${fmtDate(e.time)}</div>

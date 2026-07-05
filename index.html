@@ -1268,7 +1268,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   background:rgba(0,0,0,.92);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(7,1fr);z-index:50;
+  display:grid;grid-template-columns:repeat(5,1fr);z-index:50;
 }
 
 /* ── NOTIFICATIONS ── */
@@ -1574,10 +1574,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
         <span class="ds-label">Home</span>
       </button>
-      <button class="ds-item" id="ds-ops" onclick="showSurface('ops')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
-        <span class="ds-label">Ops</span>
-      </button>
       <button class="ds-item" id="ds-messages" onclick="showSurface('messages')">
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         <span class="ds-label">Messages</span>
@@ -1586,10 +1582,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
         <span class="ds-label">Notifications</span>
         <div class="ds-badge hidden" id="ds-notif-badge">0</div>
-      </button>
-      <button class="ds-item" id="ds-profile" onclick="showSurface('profile')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="ds-label">Profile</span>
       </button>
       <button class="ds-item" id="ds-members" onclick="showSurface('members')">
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
@@ -1656,17 +1648,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       </div>
 
       <!-- OPS -->
-      <div class="surface" id="surface-ops">
-        <div class="s-head">
-          <div class="s-title">Ops</div>
-          <button class="act-btn-sm" onclick="openStartProject()">+ Start a project</button>
-        </div>
-        <div id="planning-body"></div>
-        <div id="ops-body">
-          <div class="empty"><div class="empty-line"></div><div class="empty-label">Active</div><div class="empty-msg">No active projects. Accept an intake to begin decomposition.</div></div>
-        </div>
-      </div>
-
       <!-- MESSAGES -->
       <div class="surface" id="surface-messages">
         <div class="s-head">
@@ -1689,21 +1670,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         </div>
       </div>
 
-      <!-- PROFILE (was Record) -->
-      <div class="surface" id="surface-profile">
-        <div class="s-head">
-          <div class="s-title">Profile</div>
-          <div class="s-count" id="profile-count"></div>
-        </div>
-        <div id="profile-body">
-          <div class="empty"><div class="empty-line"></div><div class="empty-label">Network</div><div class="empty-msg">Loading network...</div></div>
-        </div>
-      </div>
-
-      <!-- MEMBERS (registry) -->
+      <!-- MEMBERS (registry + fused profile/ops) -->
       <div class="surface" id="surface-members">
         <div class="s-head">
-          <div class="s-title">Members</div>
+          <div class="s-title" id="members-title">Members</div>
           <div class="s-count" id="members-count"></div>
         </div>
         <div id="members-body">
@@ -1730,20 +1700,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
         <div class="nav-dot"></div>
       </button>
-      <button class="nav-btn" id="nav-ops" onclick="showSurface('ops')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>
-        <div class="nav-dot"></div>
-      </button>
       <button class="nav-btn" id="nav-messages" onclick="showSurface('messages')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-notifications" onclick="showSurface('notifications')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <div class="nav-dot"></div>
-      </button>
-      <button class="nav-btn" id="nav-profile" onclick="showSurface('profile')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-members" onclick="showSurface('members')">
@@ -2002,6 +1964,9 @@ async function enterShell() {
 
 // ── NAVIGATION ──
 function showSurface(name) {
+  // Ops and Profile are now folded into Members — redirect any existing call sites transparently
+  if (name === 'ops' || name === 'profile') name = 'members';
+
   document.querySelectorAll('.surface').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.remove('active');
@@ -2027,8 +1992,6 @@ function showSurface(name) {
 
   // Load surface content on first visit
   if (name === 'home')          loadHome();
-  if (name === 'ops')           loadOps();
-  if (name === 'profile')       loadProfile();
   if (name === 'messages')      loadMessages();
   if (name === 'notifications') loadNotifications();
   if (name === 'members')       loadMembers();
@@ -2124,7 +2087,7 @@ function populateSidebar() {
 async function loadAll() {
   if (!sb) return;
   populateSidebar();
-  await Promise.all([loadHome(), loadOps(), loadProfile(), loadEvents()]);
+  await Promise.all([loadHome(), loadOps(), loadEvents()]);
   populateSidebar();
 }
 
@@ -2206,7 +2169,7 @@ async function loadHome() {
         <div class="dash-widget full">
           <div class="dash-widget-title">Quick Actions</div>
           <div class="dash-actions">
-            <div class="dash-action-btn" onclick="showSurface('ops')"><div class="dash-action-lbl">+ Start a Project</div></div>
+            <div class="dash-action-btn" onclick="showSurface('members'); if(operator) openMemberRecord(operator.id);"><div class="dash-action-lbl">+ Start a Project</div></div>
             <div class="dash-action-btn" onclick="openLogWorkModal()"><div class="dash-action-lbl">+ Log Work</div></div>
             <div class="dash-action-btn" onclick="showSurface('events')"><div class="dash-action-lbl">View Events</div></div>
             <div class="dash-action-btn" onclick="showSurface('members')"><div class="dash-action-lbl">View Members</div></div>
@@ -2848,7 +2811,8 @@ async function acceptIntake(id) {
   closeOverlay();
   toast('Intake accepted — project is now open.');
   await loadAll();
-  showSurface('ops');
+  showSurface('members');
+  if (operator) openMemberRecord(operator.id);
 }
 
 async function declineIntake(id) {
@@ -2866,7 +2830,7 @@ async function declineIntake(id) {
 // ── OPS SURFACE ──
 // ── SPRINT 1: OPERATOR-INITIATED PROJECTS ──
 async function loadPlanning() {
-  const body = document.getElementById('planning-body');
+  const body = document.getElementById('my-planning-body');
   if (!body) return;
 
   const { data } = await sb.rpc('get_planning_projects');
@@ -3075,7 +3039,8 @@ async function submitIntakeForm() {
     toast('Scope captured — generating DAG.');
     closeOverlay();
     await loadOps();
-    showSurface('ops');
+    showSurface('members');
+    if (operator) openMemberRecord(operator.id);
     setTimeout(() => openPlanningProject(id), 400);
   } catch(e) {
     toast('Could not create project.');
@@ -3484,7 +3449,8 @@ async function approveManualDecomposition() {
     decompSteps = [];
     closeOverlay();
     await loadAll();
-    showSurface('ops');
+    showSurface('members');
+    if (operator) openMemberRecord(operator.id);
   } catch(e) {
     toast('Could not save decomposition.');
     console.error(e);
@@ -3615,7 +3581,8 @@ async function approveDAG(id) {
 
     closeOverlay();
     await loadAll();
-    showSurface('ops');
+    showSurface('members');
+    if (operator) openMemberRecord(operator.id);
   } catch(e) {
     toast('Could not approve DAG.');
     console.error(e);
@@ -3637,7 +3604,7 @@ async function rejectDAG(id, title, market) {
 }
 
 async function loadOps() {
-  const body = document.getElementById('ops-body');
+  const body = document.getElementById('my-ops-body');
   if (!body) return;
   await loadPlanning();
 
@@ -4139,7 +4106,8 @@ async function settleProject(projectId) {
   toast('Project settled and locked on the ledger.');
   closeOverlay();
   await loadAll();
-  showSurface('profile');
+  showSurface('members');
+  if (operator) openMemberRecord(operator.id);
 }
 
 async function updateReputation(projectId) {
@@ -4346,7 +4314,12 @@ async function submitLogWork() {
 
   toast(`Logged — Cycle ${cycle}, Block ${block}.`);
   closeOverlay();
-  if (wasFulfillingClaim) loadHome(); else loadProfile();
+  if (wasFulfillingClaim) {
+    loadHome();
+  } else {
+    loadHome();
+    if (operator && window._profMember === operator.id) openMemberRecord(operator.id);
+  }
 }
 
 async function generateCycleAudit(cycleNum) {
@@ -4730,6 +4703,8 @@ function openMemberRecord(memberId) {
     const op = (allOps || []).find(o => o.id === memberId);
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
+    const isSelf = operator && op.id === operator.id;
+
     const { data: projects } = await sb.rpc('get_settled_projects');
     const settled = projects || [];
     const settledIds = settled.map(p => p.id);
@@ -4753,20 +4728,49 @@ function openMemberRecord(memberId) {
         }).join('')
       : '<div class="empty" style="padding:16px 0"><div class="empty-msg">No settled projects yet.</div></div>';
 
+    // Current Work — this member's assigned scopes on active projects, visible to everyone
+    const { data: activeProjects } = await sb
+      .from('relation_submissions')
+      .select('id,title,relation_name,relation_code,status')
+      .in('status', ['open', 'settling']);
+    let currentWork = [];
+    const activeIds = (activeProjects || []).map(p => p.id);
+    if (activeIds.length) {
+      const { data: activeBids } = await sb.rpc('get_scopes_for_projects', { p_ids: activeIds });
+      const nameLower = (op.peer_name || '').toLowerCase();
+      currentWork = (activeBids || [])
+        .filter(s => s.assignee && s.assignee.toLowerCase() === nameLower)
+        .map(s => ({ ...s, projectInfo: (activeProjects || []).find(p => p.id === s.project_id) }));
+    }
+
+    // Self-only data: execution logs, open claims, planning queue
+    let myLogs = [], myClaims = [];
+    if (isSelf) {
+      const [logsRes, claimsRes] = await Promise.all([
+        sb.rpc('get_execution_logs', { p_operator_id: op.id }),
+        sb.rpc('get_my_claims', { p_operator_id: op.id }),
+      ]);
+      myLogs   = logsRes.data || [];
+      myClaims = claimsRes.data || [];
+    }
+
     window._profCreds  = Array.isArray(op.credentials) ? [...op.credentials] : [];
     window._profSkills = Array.isArray(op.skills) ? [...op.skills] : [];
     window._profOp     = op;
     window._profMember = memberId;
+    window._myLogs     = myLogs;
+    window._myClaims   = myClaims;
 
-    renderProfileView(body, op, breakdown, memberId);
+    renderProfileView(body, op, breakdown, memberId, currentWork);
   });
 }
 
-function renderProfileView(body, op, breakdown, memberId) {
+function renderProfileView(body, op, breakdown, memberId, currentWork) {
   const handle  = op.handle || '@' + (op.peer_name||'').replace(/\s/g,'').toUpperCase();
   const creds   = window._profCreds;
   const skills  = window._profSkills;
   const isSelf  = operator && op.id === operator.id;
+  currentWork   = currentWork || [];
 
   body.innerHTML = `
     <!-- Avatar + header -->
@@ -4821,6 +4825,17 @@ function renderProfileView(body, op, breakdown, memberId) {
       <div class="prof-tag-list">${skills.map(s => `<div class="prof-tag" style="cursor:default">${esc(s)}</div>`).join('')}</div>
     </div>` : ''}
 
+    <!-- Current Work — visible to everyone, editable by no one but the assignee's own actions elsewhere -->
+    <div class="section-lbl" style="position:relative;top:0">Current Work</div>
+    <div>${currentWork.length ? currentWork.map(s => `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(s.title || 'Scope')}</div>
+          <div class="log-row-meta">${esc((s.projectInfo && (s.projectInfo.title || s.projectInfo.relation_name)) || '—')} · ${esc(s.status)}</div>
+        </div>
+        <div class="log-row-right"><div class="log-row-hours">${s.log_size || 0} LOG</div></div>
+      </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No active work right now.</div></div>'}</div>
+
     <!-- Scope breakdown -->
     <div class="section-lbl" style="position:relative;top:0">Scope Breakdown</div>
     <div style="padding:12px 18px">${breakdown}</div>
@@ -4835,6 +4850,37 @@ function renderProfileView(body, op, breakdown, memberId) {
       <button class="act-btn-sm" onclick="openRecordPayment('${op.id}','${esc(op.peer_name).replace(/'/g,"\\'")}')">+ Record Payment</button>
     </div>
 
+    ${isSelf ? `
+    <!-- Execution Log — self only -->
+    <div class="section-lbl" style="position:relative;top:0">Execution Log</div>
+    <div style="padding:0 18px 10px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
+      Every block of real work — timestamped in UTC and numbered against the current 28-day cycle.
+    </div>
+    <div id="my-logs-body">${renderExecutionLogsList(window._myLogs || [])}</div>
+    <div style="display:flex;gap:10px;padding:14px 18px 24px">
+      <button class="act-btn" style="margin:0;flex:1" onclick="openLogWorkModal()">+ Log Work</button>
+      <button class="act-btn-sm" style="white-space:nowrap" onclick="downloadLogsCSV()">Download Logs</button>
+    </div>
+
+    <!-- Cycle Audit — self only -->
+    <div class="section-lbl" style="position:relative;top:0">Cycle Audit</div>
+    <div style="padding:0 18px 10px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
+      The full month review — claimed vs. logged vs. missed, settlements, and payments for any cycle.
+    </div>
+    <div style="display:flex;gap:8px;padding:0 18px 24px">
+      <input class="form-input" id="audit-cycle-num" type="number" min="1" value="${getActiveCycle().num}" style="max-width:110px"/>
+      <button class="act-btn" style="margin:0;flex:1" onclick="openCycleAudit(parseInt(document.getElementById('audit-cycle-num').value))">Generate Audit</button>
+    </div>
+
+    <!-- My Ops — self only: everything that used to be the standalone Ops tab -->
+    <div class="section-lbl" style="position:relative;top:0">My Ops</div>
+    <div style="display:flex;justify-content:flex-end;padding:0 18px 10px">
+      <button class="act-btn-sm" onclick="openStartProject()">+ Start a Project</button>
+    </div>
+    <div id="my-planning-body"></div>
+    <div id="my-ops-body"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>
+    ` : ''}
+
     <!-- Export -->
     <div class="export-row">
       <div class="export-lbl">Verified Work Record</div>
@@ -4842,6 +4888,7 @@ function renderProfileView(body, op, breakdown, memberId) {
     </div>`;
 
   loadMemberLedger(op.id, op.wallet_address, isSelf);
+  if (isSelf) loadOps();
 }
 
 // ── PAYMENT LEDGER ──
@@ -5096,6 +5143,11 @@ function renderProfileEdit() {
       <input class="prof-field-input" id="prof-phone" type="tel" value="${esc(op.phone||'')}" placeholder="Contact number"/>
     </div>
     <div class="prof-field">
+      <div class="prof-field-lbl">Desired bid size</div>
+      <input class="prof-field-input" id="prof-bid-size" value="${esc(op.desired_bid_size||'')}" placeholder="e.g. 4-8 LOG projects, $500-2000 range"/>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">Remembered so the system can match you to bids that fit.</div>
+    </div>
+    <div class="prof-field">
       <div class="prof-field-lbl">Wallet address (USDC on Base)</div>
       <div style="display:flex;gap:8px">
         <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(op.wallet_address||'')}"
@@ -5135,11 +5187,7 @@ function renderProfileEdit() {
 }
 
 function cancelProfileEdit() {
-  const body = document.getElementById('ov-body');
-  if (!body) return;
-  renderProfileView(body, window._profOp,
-    '<div class="empty" style="padding:16px 0"><div class="empty-msg">Reload to see breakdown.</div></div>',
-    window._profMember);
+  if (window._profMember) openMemberRecord(window._profMember);
 }
 
 function renderTagList(listId, arr, removeFn) {
@@ -5186,6 +5234,7 @@ async function saveProfile() {
   const contactEmail = document.getElementById('prof-contact-email')?.value.trim();
   const phone        = document.getElementById('prof-phone')?.value.trim();
   const wallet       = document.getElementById('prof-wallet')?.value.trim();
+  const bidSize      = document.getElementById('prof-bid-size')?.value.trim();
 
   try {
     const { error } = await sb.rpc('update_operator_profile', {
@@ -5201,6 +5250,7 @@ async function saveProfile() {
 
     if (window._profOp?.id) {
       await sb.rpc('update_wallet_address', { p_operator_id: window._profOp.id, p_wallet_address: wallet || null });
+      await sb.rpc('update_desired_bid_size', { p_operator_id: window._profOp.id, p_desired_bid_size: bidSize || null });
     }
 
     // Update local state
@@ -5210,16 +5260,13 @@ async function saveProfile() {
     operator.phone         = phone;
     operator.credentials   = window._profCreds;
     operator.skills        = window._profSkills;
-    window._profOp = { ...window._profOp, handle, bio, contact_email: contactEmail, phone, wallet_address: wallet,
-      credentials: window._profCreds, skills: window._profSkills };
+    operator.wallet_address = wallet;
+    operator.desired_bid_size = bidSize;
 
     toast('Profile saved.');
 
-    // Snap back to view mode
-    const body = document.getElementById('ov-body');
-    if (body) renderProfileView(body, window._profOp,
-      '<div class="empty" style="padding:16px 0"><div class="empty-msg">Reload to refresh breakdown.</div></div>',
-      window._profMember);
+    // Fully refresh — this pulls fresh Current Work / ledger / logs too, not just the edited fields
+    if (window._profMember) openMemberRecord(window._profMember);
 
   } catch(e) {
     toast('Could not save profile.');
@@ -5972,7 +6019,12 @@ async function renderRelCapacity(body) {
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">This Cycle</div>
       <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">The network works in 4-hour blocks. Green blocks have room for new work; orange blocks are already committed. Submit early in the cycle for the best chance of a fast start.</div>
     </div>
-    <div id="rel-cap-body" style="padding:16px 0"><div class="empty"><div class="empty-msg">Loading availability…</div></div></div>`;
+    <div id="rel-cap-body" style="padding:16px 0"><div class="empty"><div class="empty-msg">Loading availability…</div></div></div>
+    <div class="rel-section" style="border-top:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Network</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Who's in the network right now — standing, reputation, and what they're currently working on.</div>
+    </div>
+    <div id="rel-network-body" style="padding:6px 0 20px"><div class="empty"><div class="empty-msg">Loading network…</div></div></div>`;
 
   try {
     const { data } = await sb.from('bids').select('log_size,status').not('status', 'in', '("confirmed")');
@@ -6000,7 +6052,113 @@ async function renderRelCapacity(body) {
     const capEl = document.getElementById('rel-cap-body');
     if (capEl) capEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load availability.</div></div>';
   }
+
+  loadRelNetworkList();
 }
+
+async function loadRelNetworkList() {
+  const el = document.getElementById('rel-network-body');
+  if (!el) return;
+
+  try {
+    const { data } = await sb.rpc('list_operators');
+    window._relMembers = data || [];
+    if (!window._relMembers.length) {
+      el.innerHTML = '<div class="empty"><div class="empty-msg">No network members yet.</div></div>';
+      return;
+    }
+
+    el.innerHTML = window._relMembers.map(m => {
+      const mTier = tier(m.total_logs);
+      const standing = (m.standing || 'active').toLowerCase();
+      const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
+      return `
+        <div class="member-row" onclick="openRelMemberProfile('${m.id}')">
+          <div class="member-avatar"><span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span></div>
+          <div class="member-info">
+            <div class="member-name">${esc(m.peer_name)}</div>
+            <div class="member-meta">${esc(m.region || m.lane || '—')} · ${m.total_logs||0} LOG</div>
+            <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
+          </div>
+          <div class="member-right">
+            <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
+            <div class="member-tier">${esc(mTier)} · ${rep.toFixed(3)}</div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load network.</div></div>';
+  }
+}
+
+// Read-only member profile for relations — visualization only, no editing, no scope tools
+async function openRelMemberProfile(memberId) {
+  const body = document.getElementById('rel-body');
+  if (!body) return;
+  body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Loading…</div></div>';
+
+  const op = (window._relMembers || []).find(m => m.id === memberId);
+  if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+
+  const mTier = tier(op.total_logs);
+  const standing = (op.standing || 'active').toLowerCase();
+  const rep = op.reputation_score != null ? Number(op.reputation_score) : 0;
+
+  let currentWork = [];
+  try {
+    const { data: activeProjects } = await sb
+      .from('relation_submissions')
+      .select('id,title,relation_name,relation_code,status')
+      .in('status', ['open', 'settling']);
+    const activeIds = (activeProjects || []).map(p => p.id);
+    if (activeIds.length) {
+      const { data: activeBids } = await sb.rpc('get_scopes_for_projects', { p_ids: activeIds });
+      const nameLower = (op.peer_name || '').toLowerCase();
+      currentWork = (activeBids || [])
+        .filter(s => s.assignee && s.assignee.toLowerCase() === nameLower)
+        .map(s => ({ ...s, projectInfo: (activeProjects || []).find(p => p.id === s.project_id) }));
+    }
+  } catch(e) { console.error(e); }
+
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
+      <span class="gate-back" onclick="showRelTab('capacity')">← Network</span>
+    </div>
+    <div class="rel-section" style="padding-top:0;display:flex;align-items:center;gap:14px">
+      <div class="prof-avatar"><span style="font-size:16px;font-weight:700;color:var(--green)">${esc((op.peer_name||'?').charAt(0))}</span></div>
+      <div>
+        <div class="prof-peer">${esc(op.peer_name)}</div>
+        <div class="prof-lane">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-cell"><div class="stat-val green">${op.total_logs||0}</div><div class="stat-lbl">LOGs</div></div>
+      <div class="stat-cell"><div class="stat-val">${rep.toFixed(3)}</div><div class="stat-lbl">Rep Score</div></div>
+      <div class="stat-cell"><div class="stat-val">${esc(mTier)}</div><div class="stat-lbl">Tier</div></div>
+      <div class="stat-cell"><div class="stat-val ${standing==='sovereign'||standing==='active'?'green':'orange'}">${esc(standing)}</div><div class="stat-lbl">Standing</div></div>
+    </div>
+
+    ${op.bio ? `<div class="rel-section">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">About</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.65">${esc(op.bio)}</div>
+    </div>` : ''}
+
+    <div class="section-lbl" style="position:relative;top:0">Current Work</div>
+    <div>${currentWork.length ? currentWork.map(s => `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(s.title || 'Scope')}</div>
+          <div class="log-row-meta">${esc((s.projectInfo && (s.projectInfo.title || s.projectInfo.relation_name)) || '—')} · ${esc(s.status)}</div>
+        </div>
+        <div class="log-row-right"><div class="log-row-hours">${s.log_size || 0} LOG</div></div>
+      </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No active work right now.</div></div>'}</div>
+
+    <div style="padding:20px 18px;font-family:var(--mono);font-size:9px;color:var(--grey);text-align:center">View only — reach out through your operator to work with this person.</div>`;
+}
+
+
 
 // ── MY WORK — submission history ──
 async function renderRelMyWork(body) {

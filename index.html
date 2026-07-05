@@ -4757,11 +4757,12 @@ function buildScopeRow(s, idx, projectCycle) {
     </div>`;
 }
 
-function openMemberRecord(memberId) {
+function openMemberRecord(memberId, overrides) {
   openOverlay('Profile', async (body) => {
     const { data: allOps } = await sb.rpc('list_operators');
-    const op = (allOps || []).find(o => o.id === memberId);
+    let op = (allOps || []).find(o => o.id === memberId);
     if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+    if (overrides) op = { ...op, ...overrides };
 
     const isSelf = operator && op.id === operator.id;
 
@@ -5321,13 +5322,13 @@ async function saveProfile() {
     });
     if (error) throw error;
 
-    if (window._profOp?.id) {
-      const { error: walletErr } = await sb.rpc('update_wallet_address', { p_operator_id: window._profOp.id, p_wallet_address: wallet || null });
-      if (walletErr) { console.error('Wallet save failed:', walletErr); toast('Profile saved, but the wallet address failed to save: ' + walletErr.message); return; }
+    // Use operator.id — the authoritative ID from your actual logged-in session —
+    // not a value looked up from a list, which could point at a different row.
+    const { error: walletErr } = await sb.rpc('update_wallet_address', { p_operator_id: operator.id, p_wallet_address: wallet || null });
+    if (walletErr) { console.error('Wallet save failed:', walletErr); toast('Profile saved, but the wallet address failed to save: ' + walletErr.message); return; }
 
-      const { error: bidErr } = await sb.rpc('update_desired_bid_size', { p_operator_id: window._profOp.id, p_desired_bid_size: bidSize || null });
-      if (bidErr) console.error('Bid size save failed:', bidErr);
-    }
+    const { error: bidErr } = await sb.rpc('update_desired_bid_size', { p_operator_id: operator.id, p_desired_bid_size: bidSize || null });
+    if (bidErr) console.error('Bid size save failed:', bidErr);
 
     // Update local state
     operator.handle        = handle;
@@ -5336,13 +5337,20 @@ async function saveProfile() {
     operator.phone         = phone;
     operator.credentials   = window._profCreds;
     operator.skills        = window._profSkills;
-    operator.wallet_address = wallet;
-    operator.desired_bid_size = bidSize;
+    operator.wallet_address = wallet || null;
+    operator.desired_bid_size = bidSize || null;
 
     toast('Profile saved.');
 
-    // Fully refresh — this pulls fresh Current Work / ledger / logs too, not just the edited fields
-    if (window._profMember) openMemberRecord(window._profMember);
+    // Refresh, but patch in exactly what we just successfully wrote — this way the
+    // display never depends on the re-fetch happening to include these columns.
+    if (window._profMember) {
+      openMemberRecord(window._profMember, {
+        handle, bio, contact_email: contactEmail, phone,
+        credentials: window._profCreds, skills: window._profSkills,
+        wallet_address: wallet || null, desired_bid_size: bidSize || null,
+      });
+    }
 
   } catch(e) {
     toast('Could not save profile.');

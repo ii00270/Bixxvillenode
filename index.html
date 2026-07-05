@@ -533,15 +533,23 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .proj-logs{color:var(--soft);}
 
-.proj-scopes{
-  display:flex;gap:4px;flex-wrap:wrap;margin-top:2px;
+.proj-progress{margin-top:8px;}
+.proj-progress-bar{height:3px;background:var(--line);border-radius:2px;overflow:hidden;}
+.proj-progress-fill{height:100%;background:var(--green);transition:width .4s ease;}
+.proj-progress-label{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:5px;}
+
+/* ── MANUAL DECOMPOSITION BUILDER ── */
+.decomp-step-row{display:flex;gap:12px;padding:12px 18px;border-bottom:1px solid var(--line);}
+.decomp-step-num{
+  font-family:var(--mono);font-size:12px;font-weight:700;color:var(--orange);
+  width:20px;flex-shrink:0;padding-top:11px;
 }
-.scope-pip{
-  width:6px;height:6px;border-radius:50%;
-  background:var(--line2);
+.decomp-step-fields{flex:1;min-width:0;}
+.decomp-step-remove{
+  background:none;border:1px solid var(--line2);color:var(--grey);
+  width:30px;height:30px;border-radius:6px;cursor:pointer;flex-shrink:0;transition:all .15s;
 }
-.scope-pip.delivered{background:var(--green);}
-.scope-pip.assigned{background:var(--orange);}
+.decomp-step-remove:hover{border-color:var(--red);color:var(--red);}
 
 /* ── SCOPE DETAIL ── */
 .scope-row{
@@ -2586,7 +2594,7 @@ async function loadPlanning() {
         <div class="planning-title">${esc(p.title)}</div>
         <div class="planning-market">${esc(p.market || '—')}</div>
       </div>
-      <div class="planning-tag">Planning · Awaiting DAG</div>
+      <div class="planning-tag">Planning · Awaiting Decomposition</div>
     </div>`).join('');
 }
 
@@ -3058,11 +3066,6 @@ function openPlanningProject(id) {
     const p = (data || []).find(x => x.id === id);
     if (!p) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-    if (p.dag) {
-      renderDagApproval(body, p, p.dag);
-      return;
-    }
-
     const answers = p.intake_answers || {};
     const fl = frictionLabel(p.comfort_threshold || 0);
     const windowStr = p.window_start && p.window_end
@@ -3087,9 +3090,121 @@ function openPlanningProject(id) {
         <div class="prof-field-lbl">Primary deliverable</div>
         <div style="font-family:var(--sans);font-size:13px;color:var(--soft)">${esc(answers.q5 || '—')}</div>
       </div>
-      <button class="act-btn" id="gen-dag-btn" onclick="handleGenerateDAG('${id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Generate DAG</button>`;
+      <button class="act-btn" onclick="openManualDecomposition('${id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Enter Decomposition</button>`;
   });
 }
+
+// ── MANUAL DECOMPOSITION ENTRY (no DAG, no AI — you type in the steps) ──
+let decompCtx = null;   // { id, title, market }
+let decompSteps = [];
+
+function openManualDecomposition(id, title, market) {
+  decompCtx = { id, title, market };
+  decompSteps = [{ title: '', logs: '', isKey: false }];
+  openOverlay('Decomposition', renderDecompBody, null, null, true);
+}
+
+function renderDecompBody(bodyEl) {
+  const body = bodyEl || document.getElementById('ov-body');
+  if (!body || !decompCtx) return;
+
+  body.innerHTML = `
+    <div class="prof-field">
+      <div class="prof-field-lbl">Project</div>
+      <div style="font-family:var(--sans);font-size:16px;font-weight:700;color:#FFFFFF">${esc(decompCtx.title)}</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--orange);margin-top:4px">${esc(decompCtx.market)}</div>
+    </div>
+    <div class="section-lbl" style="position:relative;top:0">Steps, in order</div>
+    <div style="padding:0 18px 4px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
+      Add each step of the process yourself, in the order it happens. Mark the ones everything else depends on as a Wisdom Key — that saves them to the Library too.
+    </div>
+    <div id="decomp-steps-list">${decompSteps.map((s, i) => renderDecompStepRow(s, i)).join('')}</div>
+    <div style="padding:6px 18px 14px">
+      <button class="act-btn-sm" onclick="addDecompStep()">+ Add Step</button>
+    </div>
+    <button class="act-btn" onclick="approveManualDecomposition()">Approve &amp; Create Scopes</button>`;
+}
+
+function renderDecompStepRow(s, i) {
+  return `
+    <div class="decomp-step-row">
+      <div class="decomp-step-num">${i + 1}</div>
+      <div class="decomp-step-fields">
+        <input class="form-input" placeholder="Step title" value="${esc(s.title)}" oninput="updateDecompStep(${i},'title',this.value)"/>
+        <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+          <input class="form-input" style="max-width:90px" type="number" min="1" placeholder="LOG" value="${s.logs}" oninput="updateDecompStep(${i},'logs',this.value)"/>
+          <label style="display:flex;align-items:center;gap:6px;font-family:var(--mono);font-size:10px;color:var(--soft);white-space:nowrap">
+            <input type="checkbox" ${s.isKey ? 'checked' : ''} onchange="updateDecompStep(${i},'isKey',this.checked)"/> Wisdom Key
+          </label>
+          ${decompSteps.length > 1 ? `<button class="decomp-step-remove" onclick="removeDecompStep(${i})">✕</button>` : ''}
+        </div>
+      </div>
+    </div>`;
+}
+
+function updateDecompStep(i, field, value) {
+  decompSteps[i][field] = value;
+}
+
+function addDecompStep() {
+  decompSteps.push({ title: '', logs: '', isKey: false });
+  renderDecompBody();
+}
+
+function removeDecompStep(i) {
+  decompSteps.splice(i, 1);
+  renderDecompBody();
+}
+
+async function approveManualDecomposition() {
+  if (!decompCtx) return;
+  const valid = decompSteps.filter(s => s.title.trim() && s.logs);
+  if (!valid.length) { toast('Add at least one step with a title and LOG estimate.'); return; }
+
+  try {
+    for (const s of valid) {
+      const { error } = await sb.rpc('add_scope', {
+        p_project_id: decompCtx.id,
+        p_title:      s.title.trim(),
+        p_log_size:   parseInt(s.logs) || 1,
+        p_assignee:   null,
+      });
+      if (error) throw error;
+
+      if (s.isKey) {
+        await sb.rpc('add_library_entry', {
+          p_email:     operator.email,
+          p_type:      'canon',
+          p_market:    decompCtx.market,
+          p_title:     s.title.trim(),
+          p_content:   { note: 'Marked as a wisdom key during manual decomposition.', project_id: decompCtx.id },
+          p_source_id: decompCtx.id,
+        }).catch(() => {});
+      }
+    }
+
+    const { error: statusErr } = await sb.from('relation_submissions').update({ status: 'open' }).eq('id', decompCtx.id);
+    if (statusErr) throw statusErr;
+
+    sb.rpc('emit_event', {
+      p_type: 'ENGAGEMENT', p_title: `${decompCtx.title} decomposed — ${valid.length} steps`,
+      p_payload: `Manually entered decomposition moved this project to Ops.${valid.some(s=>s.isKey) ? ' ' + valid.filter(s=>s.isKey).length + ' wisdom key(s) saved.' : ''}`,
+      p_source_entity: 'Ops', p_source_id: decompCtx.id,
+      p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+    }).catch(() => {});
+
+    toast('Decomposition saved — project moved to Ops.');
+    decompCtx = null;
+    decompSteps = [];
+    closeOverlay();
+    await loadAll();
+    showSurface('ops');
+  } catch(e) {
+    toast('Could not save decomposition.');
+    console.error(e);
+  }
+}
+
 
 async function handleGenerateDAG(id, title, market) {
   const btn = document.getElementById('gen-dag-btn');
@@ -3267,6 +3382,7 @@ async function loadOps() {
         const scopes = r.bids || [];
         const delivered = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
         const totalLogs = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
+        const pct = scopes.length ? Math.round((delivered / scopes.length) * 100) : 0;
         return `
           <div class="proj-card" onclick="openProject('${r.id}')">
             <div class="proj-top">
@@ -3277,8 +3393,9 @@ async function loadOps() {
               <span>${scopes.length} scope${scopes.length !== 1 ? 's' : ''}</span>
               <span class="proj-logs">${totalLogs} LOG${totalLogs !== 1 ? 's' : ''}</span>
             </div>
-            <div class="proj-scopes">
-              ${scopes.map(s => `<div class="scope-pip ${s.status === 'delivered' || s.status === 'confirmed' ? 'delivered' : 'assigned'}"></div>`).join('')}
+            <div class="proj-progress">
+              <div class="proj-progress-bar"><div class="proj-progress-fill" style="width:${pct}%"></div></div>
+              <div class="proj-progress-label">${delivered} of ${scopes.length} delivered</div>
             </div>
           </div>`;
       }).join('')}` : '';

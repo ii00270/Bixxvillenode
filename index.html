@@ -2131,14 +2131,16 @@ async function loadHome() {
   const myRate = RATES[myTier] || 39;
 
   try {
-    const [opsRes, tasksRes, logsRes] = await Promise.all([
+    const [opsRes, tasksRes, logsRes, claimsRes] = await Promise.all([
       sb.from('relation_submissions').select('id,status').in('status', ['open','settling']),
       sb.rpc('get_my_tasks', { p_operator_id: operator.id }),
       sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
+      sb.rpc('get_my_claims', { p_operator_id: operator.id }),
     ]);
 
     const activeProjects = (opsRes.data || []).length;
-    window._myTasks = tasksRes.data || [];
+    window._myTasks  = tasksRes.data || [];
+    window._myClaims = claimsRes.data || [];
     const cycleHours = (logsRes.data || [])
       .filter(l => l.cycle_number === cycle.num)
       .reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
@@ -2196,6 +2198,20 @@ async function loadHome() {
             <div class="dash-action-btn" onclick="showSurface('events')"><div class="dash-action-lbl">View Events</div></div>
             <div class="dash-action-btn" onclick="showSurface('members')"><div class="dash-action-lbl">View Members</div></div>
           </div>
+        </div>
+
+        <div class="dash-widget full">
+          <div class="dash-widget-title">Claim a Block</div>
+          <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:12px;line-height:1.5">Reserve a block ahead of time — the habit starts with committing before you start.</div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">When</span>
+            <input class="form-input" id="claim-when" type="datetime-local" value="${new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}" style="max-width:220px"/>
+          </div>
+          <div style="margin-bottom:10px">
+            <input class="dash-task-input" id="claim-desc" placeholder="What will you work on?" style="width:100%"/>
+          </div>
+          <button class="dash-task-add-btn" style="width:100%;padding:10px" onclick="submitClaimBlock()">Claim Block</button>
+          <div id="dash-claims-list" style="margin-top:14px">${renderDashClaims()}</div>
         </div>
       </div>
 
@@ -2255,6 +2271,59 @@ function updateDashCalc() {
   const price = (logs * rate) / 0.75;
   const resultEl = document.getElementById('calc-result');
   if (resultEl) resultEl.textContent = '$' + price.toLocaleString(undefined, { maximumFractionDigits: 0 });
+}
+
+function renderDashClaims() {
+  const claims = (window._myClaims || []).filter(c => c.status !== 'fulfilled').slice(0, 6);
+  if (!claims.length) return '<div style="font-family:var(--mono);font-size:10px;color:var(--grey);padding:6px 0">No open claims.</div>';
+  return claims.map(c => `
+    <div class="dash-task-row">
+      <div style="flex:1;min-width:0">
+        <div class="dash-task-text">${esc(c.description)}</div>
+        <div style="font-family:var(--mono);font-size:9px;color:${c.status === 'missed' ? 'var(--red)' : 'var(--grey)'};margin-top:2px">Cycle ${c.cycle_number} · Block ${c.block_number} · ${esc(c.status)}</div>
+      </div>
+      ${c.status === 'claimed' ? `<button class="dash-task-del" style="color:var(--green);border:1px solid var(--green);border-radius:5px;padding:3px 8px;font-family:var(--mono);font-size:9px" onclick='logClaimedBlock(${JSON.stringify(c.id)},${c.cycle_number},${c.block_number},${JSON.stringify(c.description)})'>Log it</button>` : ''}
+      <button class="dash-task-del" onclick="deleteDashClaim('${c.id}')">✕</button>
+    </div>`).join('');
+}
+
+async function submitClaimBlock() {
+  const whenVal = document.getElementById('claim-when')?.value;
+  const desc    = document.getElementById('claim-desc')?.value.trim();
+  if (!whenVal || !desc) { toast('Pick a time and describe the work.'); return; }
+
+  const date = new Date(whenVal);
+  const { cycle, block } = getCycleAndBlock(date);
+
+  const { error } = await sb.rpc('claim_block', {
+    p_operator_id: operator.id, p_cycle_number: cycle, p_block_number: block, p_description: desc,
+  });
+  if (error) { toast('Could not claim block.'); console.error(error); return; }
+
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: `${operator.peer_name || 'Operator'} claimed Cycle ${cycle}, Block ${block}`,
+    p_payload: desc, p_source_entity: 'Execution Log', p_source_id: null,
+    p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
+  toast(`Claimed — Cycle ${cycle}, Block ${block}.`);
+  const descInput = document.getElementById('claim-desc');
+  if (descInput) descInput.value = '';
+  const { data } = await sb.rpc('get_my_claims', { p_operator_id: operator.id });
+  window._myClaims = data || [];
+  const list = document.getElementById('dash-claims-list');
+  if (list) list.innerHTML = renderDashClaims();
+}
+
+function logClaimedBlock(claimId, cycle, block, description) {
+  openLogWorkModal({ claimId, cycle, block, description });
+}
+
+async function deleteDashClaim(id) {
+  await sb.rpc('delete_claim', { p_id: id, p_operator_id: operator.id });
+  window._myClaims = (window._myClaims || []).filter(c => c.id !== id);
+  const list = document.getElementById('dash-claims-list');
+  if (list) list.innerHTML = renderDashClaims();
 }
 
 async function loadDashRecentActivity() {
@@ -4182,14 +4251,17 @@ function renderExecutionLogsList(logs) {
   }).join('');
 }
 
-function openLogWorkModal() {
+let fulfillingClaimId = null;
+
+function openLogWorkModal(prefill) {
+  fulfillingClaimId = prefill?.claimId || null;
   openOverlay('Log Work', (body) => {
     const now = new Date();
     const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     body.innerHTML = `
       <div class="form-block">
         <label class="form-lbl">What did you work on</label>
-        <input class="form-input" id="log-desc" placeholder="Job description"/>
+        <input class="form-input" id="log-desc" value="${esc(prefill?.description || '')}" placeholder="Job description"/>
       </div>
       <div class="form-block">
         <label class="form-lbl">Job / reference ID (optional)</label>
@@ -4207,6 +4279,7 @@ function openLogWorkModal() {
         <label class="form-lbl">Agreed time to complete (hours)</label>
         <input class="form-input" id="log-agreed" type="number" min="0" step="0.5" placeholder="Used to measure reputation later"/>
       </div>
+      ${prefill?.claimId ? `<div style="font-family:var(--mono);font-size:9px;color:var(--orange);padding:0 18px 10px">Fulfilling Cycle ${prefill.cycle}, Block ${prefill.block}</div>` : ''}
       <button class="act-btn" onclick="submitLogWork()">Save Log</button>`;
   });
 }
@@ -4224,7 +4297,7 @@ async function submitLogWork() {
   const endDate   = endVal ? new Date(endVal) : null;
   const { cycle, block } = getCycleAndBlock(startDate);
 
-  const { error } = await sb.rpc('add_execution_log', {
+  const { data: newLogId, error } = await sb.rpc('add_execution_log', {
     p_operator_id: operator.id,
     p_job_id:      jobId,
     p_description: desc,
@@ -4237,6 +4310,12 @@ async function submitLogWork() {
 
   if (error) { toast('Could not save log.'); console.error(error); return; }
 
+  const wasFulfillingClaim = !!fulfillingClaimId;
+  if (fulfillingClaimId) {
+    await sb.rpc('fulfill_claim', { p_claim_id: fulfillingClaimId, p_log_id: newLogId }).catch(() => {});
+    fulfillingClaimId = null;
+  }
+
   sb.rpc('emit_event', {
     p_type: 'LOG', p_title: `${operator.peer_name || 'Operator'} logged work — Cycle ${cycle}, Block ${block}`,
     p_payload: desc, p_source_entity: 'Execution Log', p_source_id: jobId,
@@ -4245,7 +4324,7 @@ async function submitLogWork() {
 
   toast(`Logged — Cycle ${cycle}, Block ${block}.`);
   closeOverlay();
-  loadProfile();
+  if (wasFulfillingClaim) loadHome(); else loadProfile();
 }
 
 function downloadLogsCSV() {

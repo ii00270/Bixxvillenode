@@ -811,9 +811,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .dash-stats-row{display:flex;gap:10px;padding:14px 18px;overflow-x:auto;}
 .dash-stat-chip{
   flex:1;min-width:84px;background:var(--surface);border:1px solid var(--line2);border-radius:10px;
-  padding:11px 13px;
+  padding:11px 13px;overflow:hidden;
 }
-.dash-stat-val{font-family:var(--display);font-size:18px;font-weight:800;color:#FFFFFF;white-space:nowrap;}
+.dash-stat-val{font-family:var(--display);font-size:16px;font-weight:800;color:#FFFFFF;line-height:1.15;overflow-wrap:break-word;}
 .dash-stat-lbl{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
 
 .dash-widgets{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:4px 18px 18px;}

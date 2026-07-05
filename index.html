@@ -1849,6 +1849,11 @@ async function doLogin() {
     }
 
     operator = { ...op, email };
+    sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${op.peer_name || email} signed in`,
+      p_payload: 'Operator session started.', p_source_entity: 'Auth', p_source_id: op.id,
+      p_recipients: op.peer_name ? [op.peer_name] : null, p_critical: false,
+    }).catch(() => {});
     enterShell();
   } catch(e) {
     err.textContent = 'Connection error. Check your internet and try again.';
@@ -1861,6 +1866,13 @@ async function doLogin() {
 }
 
 async function doLogout() {
+  if (operator) {
+    sb?.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} signed out`,
+      p_payload: 'Operator session ended.', p_source_entity: 'Auth', p_source_id: operator.id,
+      p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+    }).catch(() => {});
+  }
   if (sb) await sb.auth.signOut().catch(() => {});
   operator = null;
   document.getElementById('shell').classList.remove('in');
@@ -3603,6 +3615,14 @@ async function saveScope(projectId) {
   });
 
   if (error) { toast('Could not add scope.'); console.error(error); return; }
+
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: `Scope added — ${name}`,
+    p_payload: `${logs} LOG estimate${assignee ? ' · assigned to ' + assignee : ' · unassigned'}.`,
+    p_source_entity: 'Ops', p_source_id: projectId,
+    p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Scope added.');
   await loadOps();
   openProject(projectId);
@@ -3620,6 +3640,14 @@ async function saveAssignee(scopeId, projectId) {
       await sb.from('bids').update({ status: 'assigned' }).eq('id', scopeId);
     }
   }
+
+  sb.rpc('emit_event', {
+    p_type: 'ENGAGEMENT', p_title: `Scope assigned to ${val || 'nobody'}`,
+    p_payload: `Assignee updated on a scope in an active project.`,
+    p_source_entity: 'Ops', p_source_id: projectId,
+    p_recipients: val ? [val] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Assignee updated.');
   await loadOps();
   openProject(projectId);
@@ -3628,6 +3656,14 @@ async function saveAssignee(scopeId, projectId) {
 async function markDelivered(scopeId, projectId) {
   const { error } = await sb.from('bids').update({ status: 'delivered', delivered_at: new Date().toISOString() }).eq('id', scopeId);
   if (error) { toast('Could not update scope.'); return; }
+
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: 'Scope marked delivered',
+    p_payload: 'A scope in an active project was marked delivered, awaiting confirmation.',
+    p_source_entity: 'Ops', p_source_id: projectId,
+    p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Scope marked delivered.');
   await loadOps();
   openProject(projectId);
@@ -3637,10 +3673,23 @@ async function confirmScope(scopeId, projectId) {
   const { error } = await sb.from('bids').update({ status: 'confirmed', confirmed_at: new Date().toISOString() }).eq('id', scopeId);
   if (error) { toast('Could not confirm scope.'); return; }
 
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: 'Scope confirmed',
+    p_payload: 'A scope was confirmed complete.',
+    p_source_entity: 'Ops', p_source_id: projectId,
+    p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   // Check if all scopes in this project are now confirmed → move to settling
   const { data: scopes } = await sb.from('bids').select('status').eq('project_id', projectId);
   if (scopes && scopes.every(s => s.status === 'confirmed')) {
     await sb.from('relation_submissions').update({ status: 'settling' }).eq('id', projectId);
+    sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: 'All scopes confirmed — ready to settle',
+      p_payload: 'Every scope in this project is now confirmed and it has moved to settling.',
+      p_source_entity: 'Ops', p_source_id: projectId,
+      p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: true,
+    }).catch(() => {});
     toast('All scopes confirmed — project ready to settle.');
   } else {
     toast('Scope confirmed.');
@@ -3866,6 +3915,13 @@ async function submitLogWork() {
   });
 
   if (error) { toast('Could not save log.'); console.error(error); return; }
+
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: `${operator.peer_name || 'Operator'} logged work — Cycle ${cycle}, Block ${block}`,
+    p_payload: desc, p_source_entity: 'Execution Log', p_source_id: jobId,
+    p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast(`Logged — Cycle ${cycle}, Block ${block}.`);
   closeOverlay();
   loadProfile();
@@ -3888,6 +3944,12 @@ function downloadLogsCSV() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
+
+  sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: `${operator.peer_name || 'Operator'} downloaded their execution log`,
+    p_payload: `${logs.length} log entries exported.`, p_source_entity: 'Execution Log', p_source_id: operator.id,
+    p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
 }
 
 async function saveMyBidSize() {
@@ -3895,6 +3957,13 @@ async function saveMyBidSize() {
   const { error } = await sb.rpc('update_desired_bid_size', { p_operator_id: operator.id, p_desired_bid_size: val });
   if (error) { toast('Could not save.'); console.error(error); return; }
   operator.desired_bid_size = val;
+
+  sb.rpc('emit_event', {
+    p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} updated desired bid size`,
+    p_payload: val || 'Cleared.', p_source_entity: 'Profile', p_source_id: operator.id,
+    p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Bid size preference saved.');
 }
 
@@ -3903,6 +3972,13 @@ async function saveMyWallet() {
   const { error } = await sb.rpc('update_wallet_address', { p_operator_id: operator.id, p_wallet_address: wallet });
   if (error) { toast('Could not save wallet.'); console.error(error); return; }
   operator.wallet_address = wallet;
+
+  sb.rpc('emit_event', {
+    p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} updated their wallet address`,
+    p_payload: wallet ? `${wallet.slice(0,6)}…${wallet.slice(-4)}` : 'Cleared.', p_source_entity: 'Profile', p_source_id: operator.id,
+    p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Wallet saved.');
   loadMemberLedger(operator.id, wallet, true);
 }
@@ -4278,6 +4354,13 @@ async function submitRecordPayment(operatorId) {
   });
   if (error) { toast('Could not record payment.'); console.error(error); return; }
 
+  sb.rpc('emit_event', {
+    p_type: 'SYSTEM', p_title: `Payment recorded — $${amount.toLocaleString()} (${status})`,
+    p_payload: notes || `${logs ? logs + ' LOGs · ' : ''}Recorded manually.`,
+    p_source_entity: 'Ledger', p_source_id: operatorId,
+    p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+  }).catch(() => {});
+
   toast('Payment recorded.');
   overlayBack();
 }
@@ -4319,6 +4402,14 @@ async function payMemberWithWallet(paymentId, toAddress, amountUsd, currentStatu
     });
 
     await sb.rpc('mark_payment_paid', { p_payment_id: paymentId, p_tx_hash: txHash, p_paid_by: from });
+
+    sb.rpc('emit_event', {
+      p_type: 'PAYMENT_CONFIRMED', p_title: `$${Number(amountUsd).toLocaleString()} USDC sent to ${toAddress.slice(0,6)}…${toAddress.slice(-4)}`,
+      p_payload: `Sent on Base from ${from}. Tx: ${txHash}`,
+      p_source_entity: 'Ledger', p_source_id: paymentId,
+      p_recipients: window._profOp?.peer_name ? [window._profOp.peer_name] : null, p_critical: true,
+    }).catch(() => {});
+
     toast('Payment submitted — check Basescan to confirm it lands.');
 
     const opId = window._profOp?.id;
@@ -4988,6 +5079,12 @@ async function doRelationLogin() {
       projectStatus: projects?.[0]?.status || null,
     };
 
+    sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${data} signed in`,
+      p_payload: 'Relation session started.', p_source_entity: 'Auth', p_source_id: code,
+      p_recipients: [data], p_critical: false,
+    }).catch(() => {});
+
     enterRelationShell();
   } catch(e) {
     err.textContent = 'Connection error. Try again.';
@@ -5010,6 +5107,13 @@ function enterRelationShell() {
 }
 
 function doRelLogout() {
+  if (relation) {
+    sb?.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${relation.name} signed out`,
+      p_payload: 'Relation session ended.', p_source_entity: 'Auth', p_source_id: relation.code,
+      p_recipients: [relation.name], p_critical: false,
+    }).catch(() => {});
+  }
   if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
   relation = null;
   relMsgKey = null;
@@ -5211,6 +5315,12 @@ async function submitRelIntake() {
       },
     });
     if (error) throw error;
+
+    sb.rpc('emit_event', {
+      p_type: 'ENGAGEMENT', p_title: `${relation.name} submitted a new project`,
+      p_payload: deliverable, p_source_entity: 'Intake', p_source_id: relation.code,
+      p_recipients: null, p_critical: true,
+    }).catch(() => {});
 
     toast('Project submitted — your operators will review it.');
     relSiState = { answers: {}, step: 0 };

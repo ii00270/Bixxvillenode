@@ -5309,8 +5309,11 @@ async function saveProfile() {
     if (error) throw error;
 
     if (window._profOp?.id) {
-      await sb.rpc('update_wallet_address', { p_operator_id: window._profOp.id, p_wallet_address: wallet || null });
-      await sb.rpc('update_desired_bid_size', { p_operator_id: window._profOp.id, p_desired_bid_size: bidSize || null });
+      const { error: walletErr } = await sb.rpc('update_wallet_address', { p_operator_id: window._profOp.id, p_wallet_address: wallet || null });
+      if (walletErr) { console.error('Wallet save failed:', walletErr); toast('Profile saved, but the wallet address failed to save: ' + walletErr.message); return; }
+
+      const { error: bidErr } = await sb.rpc('update_desired_bid_size', { p_operator_id: window._profOp.id, p_desired_bid_size: bidSize || null });
+      if (bidErr) console.error('Bid size save failed:', bidErr);
     }
 
     // Update local state

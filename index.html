@@ -572,16 +572,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 
 /* ── PROJECT SCOPE NODES (dependency-graph styled, expand in place) ── */
-.proj-scopes{padding:6px 18px 4px;display:flex;flex-direction:column;gap:8px;}
+.proj-scopes{padding:2px 18px 4px;}
 .proj-scope-node{
-  border-radius:8px;border:1.5px solid var(--line2);background:var(--surface);
-  cursor:pointer;overflow:hidden;transition:border-color .15s;
+  border-left:2px solid var(--line2);border-bottom:1px solid var(--line);
+  background:transparent;cursor:pointer;transition:border-color .15s;
 }
-.proj-scope-node.pending{border-color:var(--line2);}
-.proj-scope-node.assigned,.proj-scope-node.delivered{border-color:var(--orange);background:rgba(232,136,74,.05);}
-.proj-scope-node.confirmed{border-color:var(--green);background:rgba(140,240,96,.06);}
-.proj-scope-node.disputed{border-color:var(--red);background:rgba(224,82,82,.06);}
-.proj-scope-head{display:flex;align-items:center;gap:12px;padding:13px 14px;}
+.proj-scope-node:last-child{border-bottom:none;}
+.proj-scope-node.pending{border-left-color:var(--line2);}
+.proj-scope-node.assigned,.proj-scope-node.delivered{border-left-color:var(--orange);}
+.proj-scope-node.confirmed{border-left-color:var(--green);}
+.proj-scope-node.disputed{border-left-color:var(--red);}
+.proj-scope-head{display:flex;align-items:center;gap:12px;padding:12px 0 12px 14px;}
 .proj-scope-head-main{flex:1;min-width:0;}
 .proj-scope-tag{
   font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.1em;
@@ -616,7 +617,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .proj-assign-btn:hover{border-color:var(--green);color:var(--green);}
 .proj-scope-body-inner{
   display:flex;gap:22px;flex-wrap:wrap;
-  border-top:1px solid var(--line);padding:12px 14px 14px;
+  padding:0 0 14px 14px;
 }
 .proj-scope-field-lbl{
   font-family:var(--mono);font-size:8px;letter-spacing:.1em;
@@ -624,7 +625,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .proj-scope-field-val{font-family:var(--sans);font-size:13px;color:var(--soft);}
 .proj-scope-action{
-  width:calc(100% - 28px);margin:0 14px 14px;
+  width:calc(100% - 14px);margin:0 0 14px 14px;
   background:none;border:1px solid var(--green);color:var(--green);
   font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;
   text-transform:uppercase;padding:11px;cursor:pointer;transition:background .15s;
@@ -633,28 +634,28 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .proj-scope-action:hover{background:rgba(140,240,96,.08);}
 
 /* ── PROJECT DEPENDENCY GRAPH (tiered, interactive) ── */
-.proj-graph{padding:6px 18px 4px;}
-.proj-tier{display:flex;gap:12px;margin-bottom:8px;align-items:flex-start;}
+.proj-graph{padding:2px 18px 4px;}
+.proj-tier{display:flex;gap:12px;align-items:flex-start;}
 .proj-tier-lbl{
   font-family:var(--mono);font-size:9px;font-weight:600;color:var(--grey);
   width:44px;flex-shrink:0;padding-top:13px;text-transform:uppercase;letter-spacing:.06em;
 }
-.proj-tier-nodes{display:flex;flex-direction:column;gap:8px;flex:1;min-width:0;}
+.proj-tier-nodes{display:flex;flex-direction:column;flex:1;min-width:0;}
 .proj-tier-arrow{
-  font-family:var(--mono);color:var(--grey);font-size:14px;
+  font-family:var(--mono);color:var(--grey);font-size:12px;
   text-align:center;padding:2px 0;margin-left:56px;
 }
 .proj-bookend{
-  border-radius:8px;padding:10px 14px;border:1.5px dashed var(--line2);
+  padding:10px 0 10px 14px;border-left:2px dashed var(--line2);border-bottom:1px solid var(--line);
   background:transparent;
 }
 .proj-bookend .proj-scope-tag{color:var(--grey);}
-.proj-bookend.start{border-color:var(--orange);}
+.proj-bookend.start{border-left-color:var(--orange);}
 .proj-bookend.start .proj-scope-tag{color:var(--orange);}
-.proj-bookend.outcome{border-color:var(--green);}
+.proj-bookend.outcome{border-left-color:var(--green);border-bottom:none;}
 .proj-bookend.outcome .proj-scope-tag{color:var(--green);}
 .proj-bookend .proj-scope-title{font-size:13px;color:var(--soft);font-weight:500;}
-.proj-scope-node.unscoped{border-style:dashed;border-color:var(--line2);background:transparent;}
+.proj-scope-node.unscoped{border-left-style:dashed;border-left-color:var(--line2);background:transparent;}
 .proj-scope-node.unscoped .proj-scope-tag{color:var(--grey);}
 .proj-scope-node.unscoped .proj-scope-title{color:var(--soft);}
 
@@ -782,6 +783,18 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   transition:background .15s;white-space:nowrap;
 }
 .pay-btn:hover{background:rgba(140,240,96,.08);}
+
+/* ── EXECUTION LOG ── */
+.log-row{
+  display:flex;justify-content:space-between;gap:14px;
+  padding:12px 18px;border-left:2px solid var(--line2);border-bottom:1px solid var(--line);
+}
+.log-row-title{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;}
+.log-row-meta{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px;line-height:1.6;}
+.log-row-right{text-align:right;flex-shrink:0;}
+.log-row-hours{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--green);white-space:nowrap;}
+.log-row-agreed{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:3px;white-space:nowrap;}
+
 
 
 
@@ -1223,10 +1236,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   font-family:var(--mono);font-size:9px;font-weight:600;color:var(--grey);
   width:36px;flex-shrink:0;padding-top:12px;
 }
-.dag-nodes{display:flex;flex-direction:column;gap:8px;flex:1;}
+.dag-nodes{display:flex;flex-direction:column;flex:1;}
 .dag-node{
-  border-radius:8px;padding:12px 14px;border:1.5px solid var(--line2);
-  background:var(--surface);
+  padding:10px 0 10px 14px;border-left:2px solid var(--line2);border-bottom:1px solid var(--line);
+  background:transparent;
 }
 .dag-node-tag{
   font-family:var(--mono);font-size:8px;font-weight:700;
@@ -1234,13 +1247,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .dag-node-label{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;}
 .dag-node-log{font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px;}
-.dag-node.start{border-color:var(--orange);background:rgba(232,136,74,.06);}
+.dag-node.start{border-left-color:var(--orange);}
 .dag-node.start .dag-node-tag{color:var(--orange);}
-.dag-node.key{border-color:#D4AF37;background:rgba(212,175,55,.06);}
+.dag-node.key{border-left-color:#D4AF37;}
 .dag-node.key .dag-node-tag{color:#D4AF37;}
-.dag-node.standard{border-color:var(--line2);}
+.dag-node.standard{border-left-color:var(--line2);}
 .dag-node.standard .dag-node-tag{color:var(--grey);}
-.dag-node.outcome{border-color:var(--green);background:rgba(140,240,96,.06);}
+.dag-node.outcome{border-left-color:var(--green);border-bottom:none;}
 .dag-node.outcome .dag-node-tag{color:var(--green);}
 .dag-arrow{
   font-family:var(--mono);color:var(--grey);font-size:14px;
@@ -1752,6 +1765,18 @@ function getActiveCycle(now = new Date()) {
     }
   }
   return { num: 1, day: 1, left: 28, end: new Date() };
+}
+
+function getCycleAndBlock(date) {
+  for (let i = LUNAR_NM.length - 1; i >= 0; i--) {
+    const s = new Date(LUNAR_NM[i].date + 'T00:00:00');
+    if (s <= date) {
+      const msPerBlock = 4 * 60 * 60 * 1000;
+      const block = Math.floor((date - s) / msPerBlock) + 1;
+      return { cycle: LUNAR_NM[i].cycle, block: Math.max(1, Math.min(168, block)) };
+    }
+  }
+  return { cycle: 1, block: 1 };
 }
 
 // ── OS MATH ──
@@ -2898,9 +2923,22 @@ function generateDAGFromAnswers(title, market, answers) {
 }
 
 async function runDAGGenerationFromAnswers(projectId, title, market, answers) {
-  const dag = generateDAGFromAnswers(title, market, answers);
-  const { error } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
-  if (error) { toast('Could not save DAG.'); console.error(error); return null; }
+  let dag;
+  try {
+    const { data, error } = await sb.functions.invoke('generate-dag', {
+      body: { title, market, answers },
+    });
+    if (error) throw error;
+    if (!data || !Array.isArray(data.nodes) || !data.nodes.length) throw new Error('Malformed DAG returned');
+    dag = data;
+  } catch (e) {
+    console.error('AI decomposition failed, falling back to the rule-based generator:', e);
+    toast('AI decomposition unavailable right now — used the fallback generator instead.');
+    dag = generateDAGFromAnswers(title, market, answers);
+  }
+
+  const { error: saveError } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
+  if (saveError) { toast('Could not save DAG.'); console.error(saveError); return null; }
   return dag;
 }
 
@@ -2932,19 +2970,22 @@ function renderDAGText(dag) {
   });
   const tierKeys = Object.keys(tiers).map(Number).sort((a,b) => a-b);
 
-  // Assign letters to every non-start, non-outcome node in tier order
+  // Assign one continuous sequence of letters to every node, tier by tier —
+  // genesis gets A naturally, everything else follows in true sequence.
   let letterIdx = 0;
   const lettered = {};
   tierKeys.forEach(t => {
     tiers[t].forEach(n => {
-      if (n.type !== 'start' && n.type !== 'outcome') {
-        lettered[n.id] = letterFor(letterIdx++);
-      }
+      lettered[n.id] = letterFor(letterIdx++);
     });
   });
 
   const lines = [];
-  const colW = 28; // column width for side-by-side alignment
+  const colW = 28; // target column width for side-by-side alignment
+
+  // Pad to colW, but never let content shrink below the column — just add a
+  // small fixed gap instead so long labels can't run into the next column.
+  const pad = (str) => str.length >= colW ? str + '   ' : str.padEnd(colW);
 
   tierKeys.forEach((t, idx) => {
     const nodes = tiers[t];
@@ -2956,13 +2997,13 @@ function renderDAGText(dag) {
 
     nodes.forEach((n, i) => {
       let tag;
-      if (n.type === 'start')       tag = 'A · GENESIS';
-      else if (n.type === 'outcome')tag = (lettered[n.id] || letterFor(letterIdx)) + ' · OUTCOME';
-      else if (n.type === 'key')    tag = lettered[n.id] + ' · KEY';
-      else                          tag = lettered[n.id];
+      if (n.type === 'start')        tag = lettered[n.id] + ' · GENESIS';
+      else if (n.type === 'outcome') tag = lettered[n.id] + ' · OUTCOME';
+      else if (n.type === 'key')     tag = lettered[n.id] + ' · KEY';
+      else                           tag = lettered[n.id];
 
-      headerRow += tag.padEnd(colW);
-      bodyRow   += (n.label || '').padEnd(colW);
+      headerRow += pad(tag);
+      bodyRow   += pad(n.label || '');
     });
 
     lines.push(headerRow.trimEnd());
@@ -3045,6 +3086,7 @@ async function handleGenerateDAG(id, title, market) {
   const { data: projRow } = await sb.from('relation_submissions').select('intake_answers').eq('id', id).single();
   const answers = projRow?.intake_answers || {};
 
+  if (btn) btn.textContent = 'Thinking through the map…';
   const dag = await runDAGGenerationFromAnswers(id, title, market, answers);
   if (!dag) { if (btn) { btn.textContent = 'Generate DAG'; btn.disabled = false; } return; }
 
@@ -3074,7 +3116,7 @@ function renderDagApproval(body, p, dag) {
       <button class="act-btn-sm" id="copy-dag-btn" style="margin-top:10px" onclick="copyDagText()">Copy DAG</button>
       <div class="dag-actions">
         <button class="dag-approve" onclick="approveDAG('${p.id}')">Approve</button>
-        <button class="dag-reject" onclick="rejectDAG('${p.id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Regenerate</button>
+        <button class="dag-reject" id="regen-dag-btn" onclick="rejectDAG('${p.id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Regenerate</button>
       </div>
     </div>`;
 }
@@ -3168,10 +3210,13 @@ async function approveDAG(id) {
 }
 
 async function rejectDAG(id, title, market) {
+  const btn = document.getElementById('regen-dag-btn');
+  if (btn) { btn.textContent = 'Regenerating…'; btn.disabled = true; }
+
   const { data: projRow } = await sb.from('relation_submissions').select('intake_answers').eq('id', id).single();
   const answers = projRow?.intake_answers || {};
   const dag = await runDAGGenerationFromAnswers(id, title, market, answers);
-  if (!dag) return;
+  if (!dag) { if (btn) { btn.textContent = 'Regenerate'; btn.disabled = false; } return; }
   const { data } = await sb.rpc('get_planning_projects');
   const p = (data || []).find(x => x.id === id);
   const body = document.getElementById('ov-body');
@@ -3683,69 +3728,183 @@ async function loadProfile() {
   const body = document.getElementById('profile-body');
   const count = document.getElementById('profile-count');
   if (!body) return;
+  if (!operator) return;
 
   try {
-    const [settledRes, membersRes, libraryRes] = await Promise.all([
-      sb.rpc('get_settled_projects'),
+    const [logsRes, opsRes] = await Promise.all([
+      sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
       sb.rpc('list_operators'),
-      sb.from('bixxville_library').select('*').order('created_at', { ascending: false }).limit(20),
     ]);
 
-    const s = settledRes.data || [];
-    const m = membersRes.data || [];
-    const lib = libraryRes.data || [];
-    if (count) count.textContent = s.length ? `${s.length} settled` : '';
-
-    const owavSm = `<svg width="28" height="28" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
-
-    const libIcon = { canon:'CANON', dag_example:'DAG', override_note:'OVERRIDE', market_framework:'FRAMEWORK' };
+    const logs = logsRes.data || [];
+    const freshOp = (opsRes.data || []).find(o => o.id === operator.id) || operator;
+    window._profOp  = freshOp;
+    window._myLogs  = logs;
+    if (count) count.textContent = logs.length ? `${logs.length} logs` : '';
 
     body.innerHTML = `
-      <div class="section-lbl" style="position:relative;top:0">Network</div>
-      ${m.length ? m.map(op => `
-        <div class="member-row" onclick="openMemberRecord('${op.id}')">
-          <div class="member-avatar">${op.handle ? owavSm : `<span style="font-size:12px;font-weight:600;color:var(--green)">${(op.peer_name||'?').charAt(0)}</span>`}</div>
-          <div class="member-info">
-            <div class="member-name">${esc(op.peer_name)}</div>
-            <div class="member-meta">${op.total_logs || 0} LOG · ${esc(op.lane || '—')}${op.bio ? ' · ' + esc(op.bio.substring(0,40)) : ''}</div>
-          </div>
-          <div class="member-right">
-            <div class="member-score">${op.reputation_score ? Number(op.reputation_score).toFixed(3) : '—'}</div>
-            <div class="member-tier">${tier(op.total_logs)}</div>
-          </div>
-        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No network members yet.</div></div>'}
-      <div class="section-lbl">Library — wisdom keys</div>
-      ${lib.length ? lib.map(e => `
-        <div class="member-row" style="cursor:default">
-          <div class="member-avatar" style="background:rgba(140,240,96,.08);border-color:var(--green)">
-            <span style="font-size:8px;font-weight:700;color:var(--green);letter-spacing:.05em">${libIcon[e.entry_type] || 'KEY'}</span>
-          </div>
-          <div class="member-info">
-            <div class="member-name">${esc(e.title)}</div>
-            <div class="member-meta">${esc(e.market || 'Universal')} · ${new Date(e.created_at).toLocaleDateString('en-US',{month:'short',day:'numeric'})}</div>
-          </div>
-        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No wisdom keys yet. They accumulate as you approve DAGs.</div></div>'}
-      <div class="section-lbl">Build Status</div>
-      <div class="member-row" onclick="openBuildStatus()">
-        <div class="member-avatar" style="background:rgba(232,136,74,.08);border-color:var(--orange)">
-          <span style="font-size:7px;font-weight:700;color:var(--orange);letter-spacing:.03em">MAP</span>
+      <div class="form-block" style="padding-top:20px">
+        <label class="form-lbl">Desired bid size</label>
+        <div style="display:flex;gap:8px">
+          <input class="form-input" id="my-bid-size" style="flex:1" value="${esc(freshOp.desired_bid_size || '')}" placeholder="e.g. 4-8 LOG projects, $500-2000 range"/>
+          <button class="prof-add-btn" onclick="saveMyBidSize()">Save</button>
         </div>
-        <div class="member-info">
-          <div class="member-name">Bixxville build map</div>
-          <div class="member-meta">Where the system stands — foundation to unlock</div>
-        </div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">Remembered so the system can match you to bids that fit.</div>
       </div>
-      <div class="section-lbl">Ledger</div>
-      ${s.length ? s.map(r => `
-        <div class="ledger-row" onclick="openSettledProject('${r.id}')">
-          <div class="ledger-name">${esc(r.relation_name || r.relation_code)}</div>
-          <div class="ledger-logs">${r.total_logs_confirmed || 0} LOG</div>
-          <div class="ledger-meta">${esc(r.title || '—')}</div>
-          <div class="ledger-cycle">C${r.cycle_number || '—'}</div>
-        </div>`).join('') : '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No settled projects yet.</div></div>'}`;
+
+      <div class="section-lbl" style="position:relative;top:0">Wallet</div>
+      <div class="prof-field" style="padding:0 18px 6px">
+        <div style="display:flex;gap:8px">
+          <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(freshOp.wallet_address || '')}"
+            placeholder="0x… — where payments to you are sent" onblur="checkProfileWalletBalance()"/>
+          <button class="prof-add-btn" style="white-space:nowrap" onclick="connectProfileWallet()">Connect</button>
+        </div>
+        <div id="prof-wallet-status" style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">
+          Or connect MetaMask to fill this in automatically.
+        </div>
+        <button class="act-btn-sm" style="margin-top:10px" onclick="saveMyWallet()">Save Wallet</button>
+      </div>
+
+      <div class="section-lbl" style="position:relative;top:0">Ledger</div>
+      <div id="ledger-body" style="padding:6px 18px 8px"><div class="empty" style="padding:16px 0"><div class="empty-msg">Loading ledger…</div></div></div>
+      <div style="padding:0 18px 8px">
+        <button class="act-btn-sm" onclick="openRecordPayment('${freshOp.id}','${esc(freshOp.peer_name || '').replace(/'/g,"\\'")}')">+ Record Payment</button>
+      </div>
+
+      <div class="section-lbl" style="position:relative;top:0">Execution Log</div>
+      <div style="padding:0 18px 10px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
+        Every block of real work — timestamped in UTC and numbered against the current 28-day cycle.
+      </div>
+      <div id="my-logs-body">${renderExecutionLogsList(logs)}</div>
+      <div style="display:flex;gap:10px;padding:14px 18px 24px">
+        <button class="act-btn" style="margin:0;flex:1" onclick="openLogWorkModal()">+ Log Work</button>
+        <button class="act-btn-sm" style="white-space:nowrap" onclick="downloadLogsCSV()">Download Logs</button>
+      </div>`;
+
+    loadMemberLedger(freshOp.id, freshOp.wallet_address, true);
   } catch(e) {
+    console.error(e);
     body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load profile.</div></div>';
   }
+}
+
+function renderExecutionLogsList(logs) {
+  if (!logs.length) {
+    return '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No logs yet. Log your first block of work.</div></div>';
+  }
+  return logs.map(l => {
+    const agreed = l.agreed_hours != null ? `${l.agreed_hours}h agreed` : '';
+    const actual = l.actual_hours != null ? `${Number(l.actual_hours).toFixed(1)}h actual` : 'In progress';
+    const startStr = new Date(l.start_utc).toLocaleString('en-US', { timeZone:'UTC', dateStyle:'medium', timeStyle:'short' });
+    const endStr   = l.end_utc ? new Date(l.end_utc).toLocaleString('en-US', { timeZone:'UTC', timeStyle:'short' }) : null;
+    return `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(l.description)}</div>
+          <div class="log-row-meta">Cycle ${l.cycle_number} · Block ${l.block_number}${l.job_id ? ' · ' + esc(l.job_id) : ''}</div>
+          <div class="log-row-meta">${startStr} UTC${endStr ? ' → ' + endStr + ' UTC' : ''}</div>
+        </div>
+        <div class="log-row-right">
+          <div class="log-row-hours">${actual}</div>
+          ${agreed ? `<div class="log-row-agreed">${agreed}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
+
+function openLogWorkModal() {
+  openOverlay('Log Work', (body) => {
+    const now = new Date();
+    const nowLocal = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 16);
+    body.innerHTML = `
+      <div class="form-block">
+        <label class="form-lbl">What did you work on</label>
+        <input class="form-input" id="log-desc" placeholder="Job description"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Job / reference ID (optional)</label>
+        <input class="form-input" id="log-job-id" placeholder="Scope title, project reference, or your own tag"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Start (your local time — converted to UTC automatically)</label>
+        <input class="form-input" id="log-start" type="datetime-local" value="${nowLocal}"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">End (leave blank if still in progress)</label>
+        <input class="form-input" id="log-end" type="datetime-local"/>
+      </div>
+      <div class="form-block">
+        <label class="form-lbl">Agreed time to complete (hours)</label>
+        <input class="form-input" id="log-agreed" type="number" min="0" step="0.5" placeholder="Used to measure reputation later"/>
+      </div>
+      <button class="act-btn" onclick="submitLogWork()">Save Log</button>`;
+  });
+}
+
+async function submitLogWork() {
+  const desc     = document.getElementById('log-desc')?.value.trim();
+  const jobId    = document.getElementById('log-job-id')?.value.trim() || null;
+  const startVal = document.getElementById('log-start')?.value;
+  const endVal   = document.getElementById('log-end')?.value;
+  const agreed   = parseFloat(document.getElementById('log-agreed')?.value) || null;
+
+  if (!desc || !startVal) { toast('Description and start time are required.'); return; }
+
+  const startDate = new Date(startVal);
+  const endDate   = endVal ? new Date(endVal) : null;
+  const { cycle, block } = getCycleAndBlock(startDate);
+
+  const { error } = await sb.rpc('add_execution_log', {
+    p_operator_id: operator.id,
+    p_job_id:      jobId,
+    p_description: desc,
+    p_start_utc:   startDate.toISOString(),
+    p_end_utc:     endDate ? endDate.toISOString() : null,
+    p_cycle_number: cycle,
+    p_block_number: block,
+    p_agreed_hours: agreed,
+  });
+
+  if (error) { toast('Could not save log.'); console.error(error); return; }
+  toast(`Logged — Cycle ${cycle}, Block ${block}.`);
+  closeOverlay();
+  loadProfile();
+}
+
+function downloadLogsCSV() {
+  const logs = window._myLogs || [];
+  if (!logs.length) { toast('No logs to download yet.'); return; }
+
+  const headers = ['job_id','description','start_utc','end_utc','cycle_number','block_number','agreed_hours','actual_hours'];
+  const rows = logs.map(l => headers.map(h => `"${String(l[h] == null ? '' : l[h]).replace(/"/g,'""')}"`).join(','));
+  const csv = [headers.join(','), ...rows].join('\n');
+
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url;
+  a.download = `bixxville-execution-log-${(operator.peer_name || 'export').replace(/\s+/g,'-').toLowerCase()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+async function saveMyBidSize() {
+  const val = document.getElementById('my-bid-size')?.value.trim() || null;
+  const { error } = await sb.rpc('update_desired_bid_size', { p_operator_id: operator.id, p_desired_bid_size: val });
+  if (error) { toast('Could not save.'); console.error(error); return; }
+  operator.desired_bid_size = val;
+  toast('Bid size preference saved.');
+}
+
+async function saveMyWallet() {
+  const wallet = document.getElementById('prof-wallet')?.value.trim() || null;
+  const { error } = await sb.rpc('update_wallet_address', { p_operator_id: operator.id, p_wallet_address: wallet });
+  if (error) { toast('Could not save wallet.'); console.error(error); return; }
+  operator.wallet_address = wallet;
+  toast('Wallet saved.');
+  loadMemberLedger(operator.id, wallet, true);
 }
 
 

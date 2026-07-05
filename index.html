@@ -1072,7 +1072,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   display:flex;align-items:center;justify-content:center;
   font-family:var(--mono);font-size:10px;font-weight:600;
   color:var(--green);letter-spacing:.05em;text-align:center;
-  margin:20px 18px 0;flex-shrink:0;
+  margin:20px 18px 0;flex-shrink:0;overflow:hidden;
   box-shadow:0 0 16px rgba(140,240,96,.2);
 }
 .prof-head{
@@ -2068,6 +2068,9 @@ function populateSidebar() {
   set('ds-peer-name',   operator.peer_name || '—');
   set('ds-peer-handle', handle);
 
+  const peerMark = document.getElementById('ds-peer-mark');
+  if (peerMark) peerMark.innerHTML = avatarHtml(operator.peer_name, operator.avatar_url, 14);
+
   // Standing bar — reputation score out of 1.0
   const repFill = document.getElementById('dr-rep-fill');
   if (repFill) repFill.style.width = `${Math.max(0, Math.min(1, repNum || 0)) * 100}%`;
@@ -2541,7 +2544,7 @@ function renderMembersList() {
       const rate = RATES[mTier.toLowerCase()] || 39;
       return `
         <div class="member-row" onclick="openMemberRecord('${m.id}')">
-          <div class="member-avatar">${m.handle ? owavSm : `<span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span>`}</div>
+          <div class="member-avatar">${avatarHtml(m.peer_name, m.avatar_url)}</div>
           <div class="member-info">
             <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
             <div class="member-meta">${esc(m.region || m.lane || '—')} · $${rate}/LOG · ${m.total_logs||0} LOG</div>
@@ -4842,16 +4845,7 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
   body.innerHTML = `
     <!-- Avatar + header -->
     <div style="padding:20px 18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar"><svg id="owav-lg" width="40" height="40" style="display:block"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 775.27 789.54">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #8CF060;
-      }
-    </style>
-  </defs>
-  <path class="cls-1" d="M534.49,377.3l-41.02,192.07c-2.05,11.06-3.69,17.41-5.73,26.42-2.12-9.01-3.69-14.27-6.35-26.42l-33.04-144.02c77.88-23.55,127.09-92.15,127.09-174.19,0-100.68-75.7-181.7-188.05-181.7s-187.57,81.02-187.57,181.7c0,82.11,48.94,150.78,126.96,174.26l-33.45,143.95c-2.66,12.15-4.23,17.41-6.28,26.42-1.64-9.01-3.69-16.93-5.26-26.42l-36.79-192.07h-102.45l86.14,342.79h317.87l86.14-342.79h-98.22ZM306.85,251.16c0-51.12,36.18-88.12,80.54-88.12,47.51,0,81.02,37,81.02,88.12s-33.51,89.28-81.02,89.28-80.54-37-80.54-89.28ZM368.29,579.27l11.19-44.84c3.14-12.15,5.26-22.73,7.92-34.4,2.59,11.67,4.71,22.25,7.85,34.4l11.19,44.84h-38.16Z"/>
-</svg></div>
+      <div class="prof-avatar">${avatarHtml(op.peer_name, op.avatar_url, 20)}</div>
       <div style="flex:1">
         <div class="prof-peer">${esc(op.peer_name)}</div>
         <div class="prof-handle">${esc(handle)}</div>
@@ -5183,19 +5177,14 @@ function renderProfileEdit() {
 
   body.innerHTML = `
     <div style="padding:20px 18px 16px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar"><svg id="owav-lg" width="40" height="40" style="display:block"  xmlns="http://www.w3.org/2000/svg" viewBox="0 0 775.27 789.54">
-  <defs>
-    <style>
-      .cls-1 {
-        fill: #8CF060;
-      }
-    </style>
-  </defs>
-  <path class="cls-1" d="M534.49,377.3l-41.02,192.07c-2.05,11.06-3.69,17.41-5.73,26.42-2.12-9.01-3.69-14.27-6.35-26.42l-33.04-144.02c77.88-23.55,127.09-92.15,127.09-174.19,0-100.68-75.7-181.7-188.05-181.7s-187.57,81.02-187.57,181.7c0,82.11,48.94,150.78,126.96,174.26l-33.45,143.95c-2.66,12.15-4.23,17.41-6.28,26.42-1.64-9.01-3.69-16.93-5.26-26.42l-36.79-192.07h-102.45l86.14,342.79h317.87l86.14-342.79h-98.22ZM306.85,251.16c0-51.12,36.18-88.12,80.54-88.12,47.51,0,81.02,37,81.02,88.12s-33.51,89.28-81.02,89.28-80.54-37-80.54-89.28ZM368.29,579.27l11.19-44.84c3.14-12.15,5.26-22.73,7.92-34.4,2.59,11.67,4.71,22.25,7.85,34.4l11.19,44.84h-38.16Z"/>
-</svg></div>
+      <div style="position:relative;flex-shrink:0">
+        <div class="prof-avatar" id="prof-avatar-preview" style="margin:0;cursor:pointer" onclick="document.getElementById('avatar-file-input').click()">${avatarHtml(op.peer_name, op.avatar_url, 20)}</div>
+        <input type="file" id="avatar-file-input" accept="image/*" style="display:none" onchange="uploadAvatarFile(this)"/>
+      </div>
       <div style="flex:1">
         <div class="prof-peer">${esc(op.peer_name)}</div>
         <div class="prof-lane">${esc(op.lane||'—')} · ${esc(op.region||'—')}</div>
+        <span class="gate-back" style="display:inline-block;margin-top:4px" onclick="document.getElementById('avatar-file-input').click()">Change photo</span>
       </div>
       <button class="export-btn" onclick="cancelProfileEdit()">Cancel</button>
     </div>
@@ -5302,6 +5291,43 @@ function removeSkill(i) {
   renderTagList('skills-list', window._profSkills, 'removeSkill');
 }
 
+async function uploadAvatarFile(inputEl) {
+  const file = inputEl.files?.[0];
+  if (!file) return;
+
+  if (!file.type.startsWith('image/')) { toast('Please choose an image file.'); return; }
+  if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB.'); return; }
+
+  toast('Uploading photo…');
+
+  const ext  = (file.name.split('.').pop() || 'jpg').toLowerCase();
+  const path = `${operator.id}-${Date.now()}.${ext}`;
+
+  try {
+    const { error: uploadErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true, cacheControl: '3600' });
+    if (uploadErr) throw uploadErr;
+
+    const { data: urlData } = sb.storage.from('avatars').getPublicUrl(path);
+    const publicUrl = urlData?.publicUrl;
+    if (!publicUrl) throw new Error('Could not get a public URL for the upload.');
+
+    const { error: saveErr } = await sb.rpc('update_avatar_url', { p_operator_id: operator.id, p_avatar_url: publicUrl });
+    if (saveErr) throw saveErr;
+
+    operator.avatar_url = publicUrl;
+    if (window._profOp) window._profOp.avatar_url = publicUrl;
+
+    const preview = document.getElementById('prof-avatar-preview');
+    if (preview) preview.innerHTML = avatarHtml(operator.peer_name, publicUrl, 20);
+
+    populateSidebar();
+    toast('Photo updated.');
+  } catch(e) {
+    console.error('Avatar upload failed:', e);
+    toast('Could not upload photo: ' + (e.message || 'unknown error'));
+  }
+}
+
 async function saveProfile() {
   const handle       = document.getElementById('prof-handle')?.value.trim();
   const bio          = document.getElementById('prof-bio')?.value.trim();
@@ -5349,6 +5375,7 @@ async function saveProfile() {
         handle, bio, contact_email: contactEmail, phone,
         credentials: window._profCreds, skills: window._profSkills,
         wallet_address: wallet || null, desired_bid_size: bidSize || null,
+        avatar_url: operator.avatar_url || null,
       });
     }
 
@@ -5743,6 +5770,16 @@ function tier(logs) {
 function esc(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Returns the inner content for an avatar circle — a real uploaded photo if
+// one exists, otherwise the person's initial. Used everywhere an avatar shows.
+function avatarHtml(peerName, avatarUrl, fontSize) {
+  if (avatarUrl) {
+    return `<img src="${esc(avatarUrl)}" style="width:100%;height:100%;object-fit:cover" onerror="this.style.display='none'"/>`;
+  }
+  const size = fontSize || 12;
+  return `<span style="font-size:${size}px;font-weight:700;color:var(--green)">${esc((peerName || '?').charAt(0).toUpperCase())}</span>`;
 }
 
 function fmtDate(str) {
@@ -6204,7 +6241,7 @@ function renderRelNetworkList() {
     const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
     return `
       <div class="member-row" onclick="openRelMemberProfile('${m.id}')">
-        <div class="member-avatar"><span style="font-size:12px;font-weight:600;color:var(--green)">${esc((m.peer_name||'?').charAt(0))}</span></div>
+        <div class="member-avatar">${avatarHtml(m.peer_name, m.avatar_url)}</div>
         <div class="member-info">
           <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
           <div class="member-meta">${esc(m.region || m.lane || '—')} · ${m.total_logs||0} LOG</div>
@@ -6257,7 +6294,7 @@ async function openRelMemberProfile(memberId) {
       <span class="gate-back" onclick="showRelTab('capacity')">← Network</span>
     </div>
     <div class="rel-section" style="padding-top:0;display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar"><span style="font-size:16px;font-weight:700;color:var(--green)">${esc((op.peer_name||'?').charAt(0))}</span></div>
+      <div class="prof-avatar">${avatarHtml(op.peer_name, op.avatar_url, 16)}</div>
       <div>
         <div class="prof-peer">${esc(op.peer_name)}</div>
         <div class="prof-lane">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>

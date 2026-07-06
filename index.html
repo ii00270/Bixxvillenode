@@ -1936,7 +1936,10 @@ async function doLogout() {
       p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
     }).catch(() => {});
   }
-  if (sb) await sb.auth.signOut().catch(() => {});
+
+  // Fire-and-forget — a slow or hung network call must never block getting back to the gate
+  if (sb) sb.auth.signOut().catch(() => {});
+
   operator = null;
   document.getElementById('shell').classList.remove('in');
   document.getElementById('gate').classList.remove('out');

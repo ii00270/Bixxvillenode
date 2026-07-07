@@ -31,7 +31,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   --mono:     'IBM Plex Mono', monospace;
   --sans:     'Inter', system-ui, sans-serif;
   --display:  'Syne', 'Inter', sans-serif;
-  --nav-h:    60px;
+  --nav-h:    56px; /* must match #bottom-nav height — spacing calcs depend on it */
   --top-h:    56px;
   --safe-b:   env(safe-area-inset-bottom, 0px);
 }
@@ -266,18 +266,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   50%{text-shadow:0 0 14px rgba(140,240,96,.4);}
 }
 
-/* ── BOTTOM NAV ── */
-#bottom-nav{
-  position:fixed;
-  bottom:0;left:0;right:0;
-  height:calc(var(--nav-h) + var(--safe-b));
-  padding-bottom:var(--safe-b);
-  background:rgba(0,0,0,.92);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-top:1px solid var(--line);
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  z-index:50;
-}
+/* ── BOTTOM NAV — single declaration lives in the 5-tab block further down ── */
 
 /* ── SURFACE BACKGROUNDS ── */
 .surface{
@@ -918,8 +907,8 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .nav-btn{
   display:flex;flex-direction:column;
   align-items:center;justify-content:center;
-  gap:5px;background:none;border:none;cursor:pointer;
-  padding:8px 0;transition:opacity .1s;
+  gap:3px;background:none;border:none;cursor:pointer;
+  padding:5px 0 4px;transition:opacity .1s;
   -webkit-tap-highlight-color:transparent;
 }
 .nav-btn:active{opacity:.6;}
@@ -1710,22 +1699,27 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
     <nav id="bottom-nav">
       <button class="nav-btn active" id="nav-home" onclick="showSurface('home')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        <div class="nav-label">Home</div>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-messages" onclick="showSurface('messages')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <div class="nav-label">Msgs</div>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-notifications" onclick="showSurface('notifications')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <div class="nav-label">Alerts</div>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-members" onclick="showSurface('members')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <div class="nav-label">Members</div>
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn" id="nav-events" onclick="showSurface('events')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+        <div class="nav-label">Events</div>
         <div class="nav-dot"></div>
       </button>
     </nav>
@@ -1810,7 +1804,7 @@ function getActiveCycle(now = new Date()) {
     if (s <= now) {
       const e = new Date(s); e.setDate(e.getDate() + 28);
       const day = Math.floor((now - s) / 86400000) + 1;
-      const left = 28 - day + 1;
+      const left = 28 - day; // days remaining after today — Day 28 shows 0d left (closes today)
       return { num: LUNAR_NM[i].cycle, day, left, end: e };
     }
   }
@@ -1851,7 +1845,7 @@ function repScore(d, t, s, disp) { return Math.max(0, (0.50*d) + (0.25*t) + (0.1
 // ── STATE ──
 let sb = null;
 let operator = null;    // { peer_name, access_key, tier, reputation_score, total_logs, ... }
-let currentSurface = 'intake';
+let currentSurface = 'home';
 let overlayStack = [];  // track what's in the overlay for back navigation
 let overlayCurrent = null;
 
@@ -2105,7 +2099,9 @@ function populateSidebar() {
 async function loadAll() {
   if (!sb) return;
   populateSidebar();
-  await Promise.all([loadHome(), loadOps(), loadEvents()]);
+  // loadOps is NOT called here — its container (#my-ops-body) only exists inside
+  // the member-profile overlay; it loads when that overlay opens.
+  await Promise.all([loadHome(), loadEvents()]);
   populateSidebar();
 }
 
@@ -2881,11 +2877,8 @@ function openIntake(id) {
 }
 
 async function acceptIntake(id) {
-  const { error } = await sb
-    .from('relation_submissions')
-    .update({ status: 'open' })
-    .eq('id', id);
-  if (error) { toast('Could not accept intake.'); return; }
+  const { error } = await sb.rpc('update_submission_status', { p_id: id, p_status: 'open' });
+  if (error) { toast('Could not accept intake.'); console.error(error); return; }
   closeOverlay();
   toast('Intake accepted — project is now open.');
   await loadAll();
@@ -2894,15 +2887,13 @@ async function acceptIntake(id) {
 }
 
 async function declineIntake(id) {
-  if (!confirm('Decline this intake? This cannot be undone.')) return;
-  const { error } = await sb
-    .from('relation_submissions')
-    .update({ status: 'declined' })
-    .eq('id', id);
-  if (error) { toast('Could not decline intake.'); return; }
+  const ok = await osConfirm('Decline this intake? This cannot be undone.');
+  if (!ok) return;
+  const { error } = await sb.rpc('update_submission_status', { p_id: id, p_status: 'declined' });
+  if (error) { toast('Could not decline intake.'); console.error(error); return; }
   closeOverlay();
   toast('Intake declined.');
-  await loadIntake();
+  await loadAll();
 }
 
 // ── OPS SURFACE ──
@@ -3080,7 +3071,7 @@ function renderIntakeStep() {
     ${questionsHTML}
     <div class="si-nav">
       ${siState.step > 0 ? `<button class="si-nav-back" onclick="prevIntakeStep()">← Back</button>` : ''}
-      <button class="si-nav-next" onclick="${isLast ? 'submitIntakeForm()' : 'nextIntakeStep()'}">${isLast ? 'Submit & Generate DAG' : 'Next →'}</button>
+      <button class="si-nav-next" onclick="${isLast ? 'submitIntakeForm()' : 'nextIntakeStep()'}">${isLast ? 'Submit Scope' : 'Next →'}</button>
     </div>`;
 }
 
@@ -3114,7 +3105,7 @@ async function submitIntakeForm() {
       p_end:       end,
     });
     if (error) throw error;
-    toast('Scope captured — generating DAG.');
+    toast('Scope captured — ready for decomposition.');
     closeOverlay();
     await loadOps();
     showSurface('members');
@@ -3512,7 +3503,7 @@ async function approveManualDecomposition() {
       }
     }
 
-    const { error: statusErr } = await sb.from('relation_submissions').update({ status: 'open' }).eq('id', decompCtx.id);
+    const { error: statusErr } = await sb.rpc('update_submission_status', { p_id: decompCtx.id, p_status: 'open' });
     if (statusErr) throw statusErr;
 
     sb.rpc('emit_event', {
@@ -4079,15 +4070,10 @@ async function saveScope(projectId) {
 async function saveAssignee(scopeId, projectId) {
   const input = document.getElementById('assign-' + scopeId);
   const val = input?.value.trim() || null;
-  const { error } = await sb.from('bids').update({ assignee: val }).eq('id', scopeId);
+  // Single RPC handles both the assignee write and the pending→assigned promotion
+  // server-side — no direct bids reads/writes that RLS can silently block.
+  const { error } = await sb.rpc('update_scope_assignee', { p_id: scopeId, p_assignee: val });
   if (error) { toast('Could not update assignee.'); console.error(error); return; }
-  // If this scope had no assignee and no work has started yet, moving it to "assigned" makes sense
-  if (val) {
-    const { data: cur } = await sb.from('bids').select('status').eq('id', scopeId).single();
-    if (cur && cur.status === 'pending') {
-      await sb.from('bids').update({ status: 'assigned' }).eq('id', scopeId);
-    }
-  }
 
   sb.rpc('emit_event', {
     p_type: 'ENGAGEMENT', p_title: `Scope assigned to ${val || 'nobody'}`,
@@ -4102,8 +4088,8 @@ async function saveAssignee(scopeId, projectId) {
 }
 
 async function markDelivered(scopeId, projectId) {
-  const { error } = await sb.from('bids').update({ status: 'delivered', delivered_at: new Date().toISOString() }).eq('id', scopeId);
-  if (error) { toast('Could not update scope.'); return; }
+  const { error } = await sb.rpc('update_scope_status', { p_id: scopeId, p_status: 'delivered' });
+  if (error) { toast('Could not update scope.'); console.error(error); return; }
 
   sb.rpc('emit_event', {
     p_type: 'LOG', p_title: 'Scope marked delivered',
@@ -4118,8 +4104,8 @@ async function markDelivered(scopeId, projectId) {
 }
 
 async function confirmScope(scopeId, projectId) {
-  const { error } = await sb.from('bids').update({ status: 'confirmed', confirmed_at: new Date().toISOString() }).eq('id', scopeId);
-  if (error) { toast('Could not confirm scope.'); return; }
+  const { error } = await sb.rpc('update_scope_status', { p_id: scopeId, p_status: 'confirmed' });
+  if (error) { toast('Could not confirm scope.'); console.error(error); return; }
 
   sb.rpc('emit_event', {
     p_type: 'LOG', p_title: 'Scope confirmed',
@@ -4129,9 +4115,9 @@ async function confirmScope(scopeId, projectId) {
   }).catch(() => {});
 
   // Check if all scopes in this project are now confirmed → move to settling
-  const { data: scopes } = await sb.from('bids').select('status').eq('project_id', projectId);
-  if (scopes && scopes.every(s => s.status === 'confirmed')) {
-    await sb.from('relation_submissions').update({ status: 'settling' }).eq('id', projectId);
+  const { data: scopes } = await sb.rpc('get_scopes_for_projects', { p_ids: [projectId] });
+  if (scopes && scopes.length && scopes.every(s => s.status === 'confirmed')) {
+    await sb.rpc('update_submission_status', { p_id: projectId, p_status: 'settling' });
     sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: 'All scopes confirmed — ready to settle',
       p_payload: 'Every scope in this project is now confirmed and it has moved to settling.',
@@ -4153,18 +4139,19 @@ async function settleProject(projectId) {
 
   const cycle = getActiveCycle();
 
-  // Calculate total logs for this project
-  const { data: scopes } = await sb.from('bids').select('log_size').eq('project_id', projectId);
+  // Calculate total logs for this project — RPC read, not a direct bids query
+  const { data: scopes } = await sb.rpc('get_scopes_for_projects', { p_ids: [projectId] });
   const totalLogs = (scopes || []).reduce((n, s) => n + (s.log_size || 0), 0);
 
   const { data: projRow } = await sb.from('relation_submissions').select('title, relation_name, relation_code').eq('id', projectId).single();
 
-  const { error } = await sb.from('relation_submissions').update({
-    status:               'settled',
-    settled_at:           new Date().toISOString(),
-    cycle_number:         cycle.num,
-    total_logs_confirmed: totalLogs,
-  }).eq('id', projectId);
+  // Settlement is the single most critical write in the system — SECURITY DEFINER
+  // RPC so RLS can never silently swallow it.
+  const { error } = await sb.rpc('settle_submission', {
+    p_id:         projectId,
+    p_cycle:      cycle.num,
+    p_total_logs: totalLogs,
+  });
 
   if (error) { toast('Settlement failed.'); console.error(error); return; }
 
@@ -4189,8 +4176,8 @@ async function settleProject(projectId) {
 }
 
 async function updateReputation(projectId) {
-  // Fetch all scopes for timing data
-  const { data: scopes } = await sb.from('bids').select('*').eq('project_id', projectId);
+  // Fetch all scopes for timing data — RPC read, not a direct bids query
+  const { data: scopes } = await sb.rpc('get_scopes_for_projects', { p_ids: [projectId] });
   if (!scopes?.length) return;
 
   // Simple delivery and timeliness calc — all confirmed = 1.0 delivery
@@ -4198,9 +4185,10 @@ async function updateReputation(projectId) {
   const timeliness = scopes.every(s => s.confirmed_at) ? 1.0 : 0.7;
   const totalLogs  = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
 
-  // Get current operator record
-  const { data: op } = await sb.from('operators').select('*').eq('email', operator.email).single();
-  if (!op) return;
+  // Get current operator record — via RPC, never a direct table read (RLS blocks those silently)
+  const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
+  const op = Array.isArray(opRows) ? opRows[0] : opRows;
+  if (!op) { console.error('updateReputation: could not load operator record'); return; }
 
   const newStreak  = (op.streak || 0) + 1;
   const newLogs    = (op.total_logs || 0) + totalLogs;
@@ -4209,11 +4197,13 @@ async function updateReputation(projectId) {
     ? (Number(op.reputation_score) * 0.7) + (newScore * 0.3)  // rolling weighted average
     : newScore;
 
-  await sb.from('operators').update({
-    total_logs:       newLogs,
-    reputation_score: Math.min(1, Number(finalScore.toFixed(3))),
-    streak:           newStreak,
-  }).eq('email', operator.email);
+  const { error: statErr } = await sb.rpc('update_operator_stats', {
+    p_email:            operator.email,
+    p_total_logs:       newLogs,
+    p_reputation_score: Math.min(1, Number(finalScore.toFixed(3))),
+    p_streak:           newStreak,
+  });
+  if (statErr) { console.error('updateReputation: stats write failed', statErr); toast('Settled, but reputation update failed.'); return; }
 
   // Update local state and topbar
   operator.total_logs       = newLogs;
@@ -6502,7 +6492,7 @@ async function decryptMsgText(b64, key) {
     const iv = raw.slice(0, 12), data = raw.slice(12);
     const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
     return new TextDecoder().decode(pt);
-  } catch(e) { return '🔒 (wrong password — can\'t decrypt this message)'; }
+  } catch(e) { return '[locked — wrong password, can\'t decrypt this message]'; }
 }
 
 // ── MESSAGES TAB (relation side) ──

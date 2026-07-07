@@ -306,34 +306,40 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   opacity:0;pointer-events:none;transition:opacity .3s;
 }
 #rel-shell.in{opacity:1;pointer-events:all;}
-#rel-topbar{
+#rel-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
+
+/* ── PENPAL MOBILE TOPBAR ── */
+#rel-mobile-topbar{
   height:var(--top-h);flex-shrink:0;
   background:var(--black);border-bottom:1px solid var(--line);
   display:flex;align-items:center;justify-content:space-between;padding:0 18px;
 }
-.rel-peer{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cream);letter-spacing:.08em;}
-.rel-exit{
-  background:none;border:1px solid var(--line2);border-radius:6px;
-  font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
-  color:var(--grey);cursor:pointer;padding:7px 11px;transition:all .15s;
-  -webkit-tap-highlight-color:transparent;
-}
-.rel-exit:active{border-color:var(--red);color:var(--red);background:rgba(224,82,82,.08);}
-.rel-exit:hover{color:var(--soft);}
-#rel-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
 
-/* ── RELATION TAB BAR ── */
-.rel-tabs{
-  display:flex;background:var(--black);border-bottom:1px solid var(--line);
-  flex-shrink:0;overflow-x:auto;-webkit-overflow-scrolling:touch;
+/* ── PENPAL DESKTOP SIDEBAR — hidden by default, shown ≥768px, same pattern as #d-sidebar ── */
+#rel-d-sidebar{
+  display:none;width:200px;flex-shrink:0;
+  border-right:1px solid var(--line);
+  flex-direction:column;
+  background:#000;
 }
-.rel-tab{
-  flex:1;min-width:80px;text-align:center;padding:13px 8px;
-  font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.08em;
-  text-transform:uppercase;color:var(--grey);cursor:pointer;
-  border-bottom:2px solid transparent;transition:all .15s;white-space:nowrap;
+@media(min-width:768px){
+  #rel-shell{flex-direction:row!important;}
+  #rel-d-sidebar{display:flex;}
+  #rel-mobile-topbar{display:none!important;}
+  #rel-bottom-nav{display:none!important;}
+  #rel-body{padding-bottom:0;flex:1;}
 }
-.rel-tab.active{color:var(--green);border-bottom-color:var(--green);}
+
+/* ── PENPAL MOBILE BOTTOM NAV — reuses .nav-btn styling from the operator bottom nav ── */
+#rel-bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;
+  height:calc(56px + var(--safe-b));padding-bottom:var(--safe-b);
+  background:rgba(0,0,0,.92);
+  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
+  border-top:1px solid var(--line);
+  display:grid;grid-template-columns:repeat(5,1fr);
+  z-index:95;
+}
 
 /* ── AVAILABILITY / CAPACITY GRID ── */
 .rel-cap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:16px 18px;}
@@ -1539,21 +1545,93 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
 <!-- ═══ RELATION SHELL ═══ -->
 <div id="rel-shell">
-  <div id="rel-topbar">
-    <div class="rel-peer" id="rel-peer-name">—</div>
-    <button class="rel-exit" onclick="doRelLogout()">Exit</button>
+
+  <!-- Desktop left sidebar — mirrors #d-sidebar exactly, same class names, text wordmark
+       instead of re-embedding the full logo SVG a third time in this file. -->
+  <aside id="rel-d-sidebar">
+    <div class="ds-logo">
+      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--green);letter-spacing:.02em">Bixxville</div>
+      <div style="font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:2px">Penpals</div>
+    </div>
+    <div class="ds-nav">
+      <button class="ds-item active" id="rds-home" onclick="showRelTab('home')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+        <span class="ds-label">Home</span>
+      </button>
+      <button class="ds-item" id="rds-messages" onclick="showRelTab('messages')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span class="ds-label">Messages</span>
+      </button>
+      <button class="ds-item" id="rds-notifications" onclick="showRelTab('notifications')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+        <span class="ds-label">Notifications</span>
+        <div class="ds-badge hidden" id="rds-notif-badge">0</div>
+      </button>
+      <button class="ds-item" id="rds-discover" onclick="showRelTab('discover')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span class="ds-label">Discover</span>
+      </button>
+      <button class="ds-item" id="rds-profile" onclick="showRelTab('profile')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        <span class="ds-label">Profile</span>
+      </button>
+    </div>
+    <div class="ds-peer">
+      <div class="ds-peer-mark" id="rel-peer-mark"></div>
+      <div>
+        <div class="ds-peer-name" id="rel-peer-name">—</div>
+        <div class="ds-peer-handle" id="rel-peer-handle">—</div>
+      </div>
+      <button class="ds-signout" onclick="doRelLogout()" title="Exit">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
+    </div>
+  </aside>
+
+  <!-- Mobile topbar -->
+  <div id="rel-mobile-topbar">
+    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--green)">Bixxville · Penpals</div>
+    <div class="tb-right-mobile">
+      <button class="tb-exit-sm" onclick="doRelLogout()">Exit</button>
+    </div>
   </div>
-  <div class="rel-tabs" id="rel-tabs">
-    <div class="rel-tab active" id="rt-submit" onclick="showRelTab('submit')">Submit</div>
-    <div class="rel-tab" id="rt-capacity" onclick="showRelTab('capacity')">Availability</div>
-    <div class="rel-tab" id="rt-work" onclick="showRelTab('work')">My Work</div>
-    <div class="rel-tab" id="rt-messages" onclick="showRelTab('messages')">Messages</div>
-  </div>
+
   <div id="rel-body"></div>
+
+  <!-- Mobile bottom nav — same 5 items, same nav-btn class as the operator bottom nav -->
+  <nav id="rel-bottom-nav">
+    <button class="nav-btn active" id="rnav-home" onclick="showRelTab('home')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
+      <div class="nav-label">Home</div>
+      <div class="nav-dot"></div>
+    </button>
+    <button class="nav-btn" id="rnav-messages" onclick="showRelTab('messages')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+      <div class="nav-label">Msgs</div>
+      <div class="nav-dot"></div>
+    </button>
+    <button class="nav-btn" id="rnav-notifications" onclick="showRelTab('notifications')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+      <div class="nav-label">Alerts</div>
+      <div class="nav-dot"></div>
+    </button>
+    <button class="nav-btn" id="rnav-discover" onclick="showRelTab('discover')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      <div class="nav-label">Discover</div>
+      <div class="nav-dot"></div>
+    </button>
+    <button class="nav-btn" id="rnav-profile" onclick="showRelTab('profile')">
+      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <div class="nav-label">Profile</div>
+      <div class="nav-dot"></div>
+    </button>
+  </nav>
 </div>
 
 <!-- ═══ SHELL ═══ -->
 <div id="shell">
+  <!-- Operator sidebar toggle into Penpal view — added inside ds-peer block below via JS injection is avoided;
+       button lives here so it never duplicates across re-renders. -->
 
   <!-- Desktop left sidebar -->
   <aside id="d-sidebar">
@@ -1593,6 +1671,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <span class="ds-label">Events</span>
         <div class="ds-badge hidden" id="ds-events-badge">0</div>
       </button>
+      <button class="ds-item" id="ds-penpals" onclick="enterPenpalViewAsOperator()">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <span class="ds-label">Penpals</span>
+      </button>
     </div>
     <div class="ds-peer">
       <div class="ds-peer-mark" id="ds-peer-mark">
@@ -1630,6 +1712,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       </div>
       <div class="tb-right-mobile">
         <span class="tb-rep-pill" id="tb-score">—</span>
+        <button class="tb-exit-sm" onclick="enterPenpalViewAsOperator()" title="Enter Penpal view">Penpals</button>
         <button class="tb-exit-sm" onclick="doLogout()">Exit</button>
       </div>
     </div>
@@ -5848,7 +5931,7 @@ function switchGate(mode) {
 // ── RELATION STATE ──
 let relation = null; // { code, name, projectId }
 let relMsgPoll = null;
-let relTab = 'submit';
+let relTab = 'home';
 let relWallet = { addr: null, usdc: null, confirmed: false };
 let relMsgKey = null;
 const REL_MSG_SALT = new TextEncoder().encode('bixxville-node-msg-v1');
@@ -5911,17 +5994,64 @@ async function doRelationLogin() {
   }
 }
 
+function renderRelPeerHeader() {
+  if (!relation) return;
+  const nameEl = document.getElementById('rel-peer-name');
+  const handleEl = document.getElementById('rel-peer-handle');
+  const markEl = document.getElementById('rel-peer-mark');
+  if (nameEl) nameEl.textContent = relation.name;
+  if (handleEl) handleEl.textContent = relation.handle || ('@' + (relation.name || '').replace(/\s/g, '').toUpperCase());
+  if (markEl) markEl.innerHTML = avatarHtml(relation.name, relation.avatarUrl, 14);
+}
+
 function enterRelationShell() {
-  document.getElementById('rel-peer-name').textContent = relation.name;
   document.getElementById('gate').classList.add('out');
   document.getElementById('rel-shell').classList.add('in');
-  relTab = 'submit';
+  relTab = 'home';
   relWallet = { addr: null, usdc: null, confirmed: false };
   relMsgKey = null;
-  showRelTab('submit');
+  renderRelPeerHeader();
+  showRelTab('home');
+}
+
+// Operator switching into the Penpal experience — same identity, different view.
+// No new login, no session change — just a synthesized relation-shaped object
+// so the existing Penpal render functions work unmodified.
+function enterPenpalViewAsOperator() {
+  if (!operator) return;
+  relation = {
+    code:            operator.email,
+    name:            operator.peer_name,
+    handle:          operator.handle || null,
+    bio:             operator.bio || null,
+    avatarUrl:       operator.avatar_url || null,
+    projectId:       null,
+    projectStatus:   null,
+    isOperatorProxy: true,
+    operatorId:      operator.id,
+    operatorEmail:   operator.email,
+  };
+  document.getElementById('shell').classList.remove('in');
+  document.getElementById('rel-shell').classList.add('in');
+  relTab = 'home';
+  relWallet = { addr: null, usdc: null, confirmed: false };
+  relMsgKey = null;
+  renderRelPeerHeader();
+  showRelTab('home');
+}
+
+function backToOperatorFromPenpal() {
+  document.getElementById('rel-shell').classList.remove('in');
+  document.getElementById('shell').classList.add('in');
+  relation = null;
+  if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
 }
 
 function doRelLogout() {
+  // An operator visiting the Penpal view exits back to their own dashboard —
+  // this is a view switch, not a real sign-out, so no session is touched.
+  if (relation?.isOperatorProxy) { backToOperatorFromPenpal(); return; }
+
   if (relation) {
     fireAndForget(sb?.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${relation.name} signed out`,
@@ -5939,22 +6069,24 @@ function doRelLogout() {
   gateShowSplash();
 }
 
-// ── RELATION TAB ROUTER ──
+// ── PENPAL TAB ROUTER ──
 function showRelTab(tab) {
   if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
   relTab = tab;
-  ['submit','capacity','work','messages'].forEach(t => {
-    document.getElementById('rt-' + t)?.classList.toggle('active', t === tab);
+  ['home', 'messages', 'notifications', 'discover', 'profile'].forEach(t => {
+    document.getElementById('rds-' + t)?.classList.toggle('active', t === tab);
+    document.getElementById('rnav-' + t)?.classList.toggle('active', t === tab);
+    const icon = document.getElementById('rnav-' + t)?.querySelector('.nav-icon');
+    if (icon) icon.setAttribute('stroke', t === tab ? '#8CF060' : '#888888');
   });
   const body = document.getElementById('rel-body');
   if (!body) return;
-  if (tab === 'submit')    renderRelIntake(body);
-  if (tab === 'capacity')  renderRelCapacity(body);
-  if (tab === 'work')      renderRelMyWork(body);
-  if (tab === 'messages')  renderRelMessagesTab(body);
+  if (tab === 'home')          renderRelHome(body);
+  if (tab === 'messages')      renderRelMessagesTab(body);
+  if (tab === 'notifications') renderRelNotifications(body);
+  if (tab === 'discover')      renderRelDiscover(body);
+  if (tab === 'profile')       renderRelProfile(body);
 }
-
-// (routing now handled by showRelTab — see RELATION TAB ROUTER above)
 
 // ── RELATION INTAKE FORM (structured, 20-question — mirrors operator intake) ──
 let relSiState = { answers: {}, step: 0 };
@@ -5965,7 +6097,9 @@ function renderRelIntake(body) {
 }
 
 function renderRelIntakeStep(bodyEl) {
-  const body = bodyEl || document.getElementById('rel-body');
+  // Submit is now a modal (openSubmitProjectModal), so the only valid target
+  // once past the first render is the overlay body, not the old #rel-body tab.
+  const body = bodyEl || document.getElementById('ov-body');
   if (!body) return;
 
   const group = INTAKE_GROUPS[relSiState.step];
@@ -6165,177 +6299,284 @@ async function submitRelIntake() {
     toast('Project submitted — your operators will review it.');
     relSiState = { answers: {}, step: 0 };
     relWallet  = { addr: null, usdc: null, confirmed: false };
-    showRelTab('work');
+    closeOverlay();
+    showRelTab('profile');
   } catch(e) {
     console.error(e);
     if (err) { err.textContent = 'Could not submit. Check your connection and try again.'; err.classList.add('show'); }
   }
 }
 
-// ── AVAILABILITY / CAPACITY ──
-async function renderRelCapacity(body) {
-  body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">This Cycle</div>
-      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">The network works in 4-hour blocks. Green blocks have room for new work; orange blocks are already committed. Submit early in the cycle for the best chance of a fast start.</div>
-    </div>
-    <div id="rel-cap-body" style="padding:16px 0"><div class="empty"><div class="empty-msg">Loading availability…</div></div></div>
-    <div class="rel-section" style="border-top:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Network</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Who's in the network right now — standing, reputation, and what they're currently working on.</div>
-    </div>
-    <div id="rel-network-body" style="padding:6px 0 20px"><div class="empty"><div class="empty-msg">Loading network…</div></div></div>`;
-
-  try {
-    const { data } = await sb.from('bids').select('log_size,status').not('status', 'in', '("confirmed")');
-    const committed = (data || []).reduce((n, b) => n + Math.ceil(Number(b.log_size || 0) / 4), 0);
-    const TOTAL = 42; // a 6x7 grid — a friendly sense of capacity, not a precise schedule
-    const taken = Math.min(committed, TOTAL);
-
-    let cells = '';
-    for (let i = 0; i < TOTAL; i++) {
-      cells += `<div class="rel-cap-cell ${i < taken ? 'taken' : 'open'}">${i < taken ? '' : '·'}</div>`;
-    }
-
-    const capEl = document.getElementById('rel-cap-body');
-    if (capEl) {
-      capEl.innerHTML = `
-        <div class="rel-cap-grid">${cells}</div>
-        <div class="rel-cap-legend">
-          <span><span class="rel-cap-dot" style="background:rgba(140,240,96,.5)"></span>Open</span>
-          <span><span class="rel-cap-dot" style="background:rgba(232,136,74,.5)"></span>Committed</span>
-        </div>
-        <div style="font-family:var(--mono);font-size:11px;color:var(--grey);margin:14px 18px 0">${TOTAL - taken} of ${TOTAL} blocks open this cycle.</div>`;
-    }
-  } catch(e) {
-    console.error(e);
-    const capEl = document.getElementById('rel-cap-body');
-    if (capEl) capEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load availability.</div></div>';
-  }
-
-  loadRelNetworkList();
+// ── HOME (dashboard + network pulse) ──
+function relGreeting() {
+  const h = new Date().getHours();
+  if (h < 12) return 'Good morning';
+  if (h < 18) return 'Good afternoon';
+  return 'Good evening';
 }
 
-async function loadRelNetworkList() {
-  const el = document.getElementById('rel-network-body');
-  if (!el) return;
+async function renderRelHome(body) {
+  const cycle = getActiveCycle();
+  const isProxy = !!relation.isOperatorProxy;
+
+  body.innerHTML = `
+    ${isProxy ? `
+    <div class="rel-section" style="padding-top:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(140,240,96,.06);border-bottom:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.06em">VIEWING AS OPERATOR · ${esc(operator?.peer_name || '')}</div>
+      <span class="gate-back" style="font-size:9px" onclick="backToOperatorFromPenpal()">← Back to Operator</span>
+    </div>` : ''}
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--display);font-size:24px;font-weight:800;color:var(--cream)">${relGreeting()}, ${esc((relation.name||'').split(' ')[0])}.</div>
+      <div style="font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:4px">Cycle ${cycle.num} · Day ${cycle.day} of 28 · ${cycle.left}d left</div>
+    </div>
+
+    <div id="rel-home-status" style="padding:0 18px 8px"></div>
+
+    <div class="rel-section" style="border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <button class="act-btn-sm" style="padding:12px;text-align:center" onclick="openSubmitProjectModal()">+ Submit a Project</button>
+      <button class="act-btn-sm" style="padding:12px;text-align:center" onclick="showRelTab('messages')">Message</button>
+    </div>
+
+    <div class="rel-section" style="border-top:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Network Pulse</div>
+      <div id="rel-pulse-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
+    </div>`;
+
+  // Own active project status, if this identity has one on file
+  if (!isProxy && relation.code) {
+    try {
+      const { data: subs } = await sb
+        .from('relation_submissions')
+        .select('id,title,status,created_at')
+        .eq('relation_code', relation.code)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      const statusEl = document.getElementById('rel-home-status');
+      if (statusEl && subs && subs.length) {
+        const s = subs[0];
+        const statusColor = s.status === 'settled' ? 'var(--green)' : s.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
+        statusEl.innerHTML = `
+          <div class="rel-status-badge" style="cursor:pointer" onclick="openRelSubmissionDetail('${s.id}')">
+            <div class="rel-status-dot" style="background:${statusColor}"></div>
+            <div class="rel-status-text" style="color:${statusColor}">Latest: ${esc(s.title || 'Untitled')} — ${esc(s.status)}</div>
+          </div>`;
+      }
+    } catch(e) { console.error(e); }
+  }
+
+  // Network pulse — safe aggregate signals only. Deliberately NOT the raw
+  // operator events feed: that contains other members' project titles and
+  // payloads, which would leak private business across the Penpal network.
+  try {
+    const { data: dir, error } = await sb.rpc('get_penpal_directory');
+    if (error) throw error;
+    const members = dir || [];
+    const pulseEl = document.getElementById('rel-pulse-body');
+    if (!pulseEl) return;
+
+    const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
+    const recentJoins = members
+      .filter(m => m.created_at && new Date(m.created_at).getTime() > weekAgo)
+      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
+      .slice(0, 3);
+
+    pulseEl.innerHTML = `
+      <div class="stat-grid" style="border-top:none;margin:0 -18px">
+        <div class="stat-cell"><div class="stat-val green">${members.length}</div><div class="stat-lbl">Penpals</div></div>
+        <div class="stat-cell"><div class="stat-val">${members.filter(m=>m.kind==='operator').length}</div><div class="stat-lbl">Operators</div></div>
+      </div>
+      ${recentJoins.length ? `
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 6px">Recently Joined</div>
+        ${recentJoins.map(m => `
+          <div class="member-row" onclick="openDiscoverProfile('${m.id}')" style="padding:8px 0">
+            <div class="member-avatar" style="width:28px;height:28px">${avatarHtml(m.peer_name, m.avatar_url, 11)}</div>
+            <div class="member-info"><div class="member-name" style="font-size:11px">${esc(m.peer_name)}</div></div>
+          </div>`).join('')}` : ''}`;
+  } catch(e) {
+    console.error(e);
+    const pulseEl = document.getElementById('rel-pulse-body');
+    if (pulseEl) pulseEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load network pulse.</div></div>';
+  }
+}
+
+function openSubmitProjectModal() {
+  openOverlay('Submit a Project', (body) => renderRelIntake(body), null, null, false);
+}
+
+// ── NOTIFICATIONS ──
+async function renderRelNotifications(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Notifications</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Updates on your own projects and messages — not a feed of everyone else's activity.</div>
+    </div>
+    <div id="rel-notif-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+
+  const notifEl = document.getElementById('rel-notif-body');
+  if (!notifEl) return;
 
   try {
-    const { data } = await sb.rpc('list_operators');
-    window._relMembers = data || [];
-    renderRelNetworkList();
+    const { data, error } = await sb.rpc('get_events');
+    if (error) throw error;
+    const name = relation.name;
+    const mine = (data || []).filter(e => (e.recipients || []).some(r => (r||'').toLowerCase() === (name||'').toLowerCase()));
 
-    const withWallets = window._relMembers.filter(m => m.wallet_address);
+    if (!mine.length) {
+      notifEl.innerHTML = '<div class="empty"><div class="empty-msg">Nothing yet — updates on your projects will show up here.</div></div>';
+      return;
+    }
+
+    notifEl.innerHTML = mine.map(e => `
+      <div class="evt-row ${e.critical ? 'critical' : ''}">
+        <div class="evt-time">${timeAgo(e.created_at)}<br>ago</div>
+        <div class="evt-body">
+          <div class="evt-tags"><span class="evt-type ${esc(e.type)}">${esc(e.type)}</span></div>
+          <div class="evt-title">${esc(e.title)}</div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    notifEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load notifications.</div></div>';
+  }
+}
+
+// ── DISCOVER (unified Penpal + Operator directory) ──
+async function renderRelDiscover(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:24px">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Discover</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Everyone in the network — operators and Penpals alike. Standing is public because that's how you know who you're writing to.</div>
+    </div>
+    <div id="rel-discover-body" style="padding:6px 0 20px"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+  await loadRelDiscover();
+}
+
+async function loadRelDiscover() {
+  const el = document.getElementById('rel-discover-body');
+  if (!el) return;
+  try {
+    const { data, error } = await sb.rpc('get_penpal_directory');
+    if (error) throw error;
+    window._penpalDirectory = data || [];
+
+    const withWallets = window._penpalDirectory.filter(m => m.wallet_address);
     if (withWallets.length) {
       await Promise.all(withWallets.map(async (m) => {
         try { m._balance = await fetchUsdcBalance(m.wallet_address); }
         catch(e) { m._balance = null; }
       }));
-      renderRelNetworkList();
     }
+    renderRelDiscoverList();
   } catch(e) {
     console.error(e);
-    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load network.</div></div>';
+    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load the directory.</div></div>';
   }
 }
 
-function renderRelNetworkList() {
-  const el = document.getElementById('rel-network-body');
+function renderRelDiscoverList() {
+  const el = document.getElementById('rel-discover-body');
   if (!el) return;
-  const members = window._relMembers || [];
+  const members = window._penpalDirectory || [];
 
   if (!members.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-msg">No network members yet.</div></div>';
+    el.innerHTML = '<div class="empty"><div class="empty-msg">No one in the network yet.</div></div>';
     return;
   }
 
   el.innerHTML = members.map(m => {
-    const mTier = tier(m.total_logs);
     const standing = (m.standing || 'active').toLowerCase();
-    const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
+    const rep = m.reputation_score != null ? Number(m.reputation_score) : null;
+    const kindPill = m.kind === 'operator'
+      ? `<span class="rel-pill" style="background:rgba(140,240,96,.1);color:var(--green);border-color:var(--green)">Operator</span>`
+      : `<span class="rel-pill" style="background:rgba(255,255,255,.06);color:var(--grey);border-color:var(--line2)">Penpal</span>`;
     return `
-      <div class="member-row" onclick="openRelMemberProfile('${m.id}')">
+      <div class="member-row" onclick="openDiscoverProfile('${m.id}')">
         <div class="member-avatar">${avatarHtml(m.peer_name, m.avatar_url)}</div>
         <div class="member-info">
           <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
-          <div class="member-meta">${esc(m.region || m.lane || '—')} · ${m.total_logs||0} LOG</div>
-          <div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>
+          <div class="member-meta">${m.kind === 'operator' ? esc(m.region || m.lane || '—') + ' · ' + (m.total_logs||0) + ' LOG' : (m.handle || '—')}</div>
+          ${rep != null ? `<div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>` : ''}
         </div>
         <div class="member-right">
           <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
-          <div class="member-tier">${esc(mTier)} · ${rep.toFixed(3)}</div>
+          ${kindPill}
         </div>
       </div>`;
   }).join('');
 }
 
-// Read-only member profile for relations — visualization only, no editing, no scope tools
-async function openRelMemberProfile(memberId) {
+// Unified profile view for anyone in Discover — branches by kind.
+// View-only: no editing, no scope tools, regardless of who's looking.
+async function openDiscoverProfile(memberId) {
   const body = document.getElementById('rel-body');
   if (!body) return;
   body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Loading…</div></div>';
 
-  const op = (window._relMembers || []).find(m => m.id === memberId);
-  if (!op) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+  const m = (window._penpalDirectory || []).find(x => x.id === memberId);
+  if (!m) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
-  const mTier = tier(op.total_logs);
-  const standing = (op.standing || 'active').toLowerCase();
-  const rep = op.reputation_score != null ? Number(op.reputation_score) : 0;
-
-  let currentWork = [];
-  try {
-    const { data: activeProjects } = await sb
-      .from('relation_submissions')
-      .select('id,title,relation_name,relation_code,status')
-      .in('status', ['open', 'settling']);
-    const activeIds = (activeProjects || []).map(p => p.id);
-    if (activeIds.length) {
-      const { data: activeBids } = await sb.rpc('get_scopes_for_projects', { p_ids: activeIds });
-      const nameLower = (op.peer_name || '').toLowerCase();
-      currentWork = (activeBids || [])
-        .filter(s => s.assignee && s.assignee.toLowerCase() === nameLower)
-        .map(s => ({ ...s, projectInfo: (activeProjects || []).find(p => p.id === s.project_id) }));
-    }
-  } catch(e) { console.error(e); }
+  const standing = (m.standing || 'active').toLowerCase();
+  const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
+  const isOp = m.kind === 'operator';
 
   let walletBalance = null;
-  if (op.wallet_address) {
-    try { walletBalance = await fetchUsdcBalance(op.wallet_address); } catch(e) { console.error(e); }
+  if (m.wallet_address) {
+    try { walletBalance = await fetchUsdcBalance(m.wallet_address); } catch(e) { console.error(e); }
+  }
+
+  let currentWork = [];
+  if (isOp) {
+    try {
+      const { data: activeProjects } = await sb
+        .from('relation_submissions')
+        .select('id,title,relation_name,relation_code,status')
+        .in('status', ['open', 'settling']);
+      const activeIds = (activeProjects || []).map(p => p.id);
+      if (activeIds.length) {
+        const { data: activeBids } = await sb.rpc('get_scopes_for_projects', { p_ids: activeIds });
+        const nameLower = (m.peer_name || '').toLowerCase();
+        currentWork = (activeBids || [])
+          .filter(s => s.assignee && s.assignee.toLowerCase() === nameLower)
+          .map(s => ({ ...s, projectInfo: (activeProjects || []).find(p => p.id === s.project_id) }));
+      }
+    } catch(e) { console.error(e); }
   }
 
   body.innerHTML = `
     <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
-      <span class="gate-back" onclick="showRelTab('capacity')">← Network</span>
+      <span class="gate-back" onclick="showRelTab('discover')">← Discover</span>
     </div>
     <div class="rel-section" style="padding-top:0;display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar">${avatarHtml(op.peer_name, op.avatar_url, 16)}</div>
+      <div class="prof-avatar">${avatarHtml(m.peer_name, m.avatar_url, 16)}</div>
       <div>
-        <div class="prof-peer">${esc(op.peer_name)}</div>
-        <div class="prof-lane">${esc(op.lane || '—')} · ${esc(op.region || '—')}</div>
+        <div class="prof-peer">${esc(m.peer_name)}</div>
+        <div class="prof-lane">${isOp ? esc(m.lane || '—') + ' · ' + esc(m.region || '—') : esc(m.handle || 'Penpal')}</div>
       </div>
     </div>
 
     <div class="stat-grid">
-      <div class="stat-cell"><div class="stat-val green">${op.total_logs||0}</div><div class="stat-lbl">LOGs</div></div>
+      ${isOp ? `
+      <div class="stat-cell"><div class="stat-val green">${m.total_logs||0}</div><div class="stat-lbl">LOGs</div></div>
       <div class="stat-cell"><div class="stat-val">${rep.toFixed(3)}</div><div class="stat-lbl">Rep Score</div></div>
-      <div class="stat-cell"><div class="stat-val">${esc(mTier)}</div><div class="stat-lbl">Tier</div></div>
+      ` : ''}
       <div class="stat-cell"><div class="stat-val ${standing==='sovereign'||standing==='active'?'green':'orange'}">${esc(standing)}</div><div class="stat-lbl">Standing</div></div>
+      <div class="stat-cell"><div class="stat-val">${isOp ? 'Operator' : 'Penpal'}</div><div class="stat-lbl">Role</div></div>
     </div>
 
+    ${m.wallet_address ? `
     <div class="rel-section">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Funds on File</div>
-      ${op.wallet_address
-        ? (walletBalance != null
-            ? `<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--green)">$${walletBalance.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--grey)">USDC on Base</span></div>`
-            : `<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">Could not verify balance right now.</div>`)
-        : `<div style="font-family:var(--mono);font-size:11px;color:var(--grey)">No wallet on file.</div>`}
-    </div>
-
-    ${op.bio ? `<div class="rel-section">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">About</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.65">${esc(op.bio)}</div>
+      ${walletBalance != null
+        ? `<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--green)">$${walletBalance.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--grey)">USDC on Base</span></div>`
+        : `<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">Could not verify balance right now.</div>`}
     </div>` : ''}
 
+    ${m.bio ? `<div class="rel-section">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">About</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.65">${esc(m.bio)}</div>
+    </div>` : ''}
+
+    ${isOp ? `
     <div class="section-lbl" style="position:relative;top:0">Current Work</div>
     <div>${currentWork.length ? currentWork.map(s => `
       <div class="log-row">
@@ -6344,22 +6585,49 @@ async function openRelMemberProfile(memberId) {
           <div class="log-row-meta">${esc((s.projectInfo && (s.projectInfo.title || s.projectInfo.relation_name)) || '—')} · ${esc(s.status)}</div>
         </div>
         <div class="log-row-right"><div class="log-row-hours">${s.log_size || 0} LOG</div></div>
-      </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No active work right now.</div></div>'}</div>
+      </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No active work right now.</div></div>'}</div>` : ''}
 
     <div style="padding:20px 18px;font-family:var(--mono);font-size:9px;color:var(--grey);text-align:center">View only — reach out through your operator to work with this person.</div>`;
 }
 
-
-
-// ── MY WORK — submission history ──
-async function renderRelMyWork(body) {
+// ── PROFILE (own profile — bio, handle, avatar, submission history) ──
+async function renderRelProfile(body) {
+  const isProxy = !!relation.isOperatorProxy;
   body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px">
+    <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;gap:14px">
+      <div class="prof-avatar" id="rel-prof-avatar" style="cursor:pointer" onclick="document.getElementById('rel-avatar-input').click()">${avatarHtml(relation.name, relation.avatarUrl, 16)}</div>
+      <input type="file" id="rel-avatar-input" accept="image/*" style="display:none" onchange="uploadPenpalAvatar(this.files[0])"/>
+      <div>
+        <div class="prof-peer">${esc(relation.name)}</div>
+        <div class="prof-lane">${isProxy ? 'Operator · ' + esc(operator?.email||'') : 'Penpal'}</div>
+      </div>
+    </div>
+
+    <div class="rel-section" style="border-top:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:10px">Edit Profile</div>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Handle</div>
+      <input class="rel-q-input" id="rel-prof-handle" placeholder="@handle" value="${esc(relation.handle || '')}" style="margin-bottom:12px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Bio</div>
+      <textarea class="rel-q-input" id="rel-prof-bio" rows="3" placeholder="A line about you or what you're working on.">${esc(relation.bio || '')}</textarea>
+      ${!isProxy ? `
+      <div class="rel-q-lbl" style="margin:12px 0 4px">Contact email</div>
+      <input class="rel-q-input" id="rel-prof-email" placeholder="you@example.com" value="${esc(relation.contactEmail || '')}" style="margin-bottom:12px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Phone</div>
+      <input class="rel-q-input" id="rel-prof-phone" placeholder="Optional" value="${esc(relation.phone || '')}"/>` : ''}
+      <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="savePenpalProfile()">Save Profile</button>
+    </div>
+
+    <div class="rel-section" style="border-top:1px solid var(--line);padding-top:24px">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Your Requests</div>
-      <div style="font-family:var(--sans);font-size:14px;color:var(--soft);line-height:1.65">Every project you've submitted, and where it stands.</div>
     </div>
     <div id="rel-work-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
+  // Fold in submission history under Profile — safe to call even for an
+  // operator proxy (no relation_code will match, list is simply empty).
+  await renderRelMyWorkList();
+}
+
+async function renderRelMyWorkList() {
   try {
     const { data } = await sb
       .from('relation_submissions')
@@ -6372,7 +6640,7 @@ async function renderRelMyWork(body) {
     if (!workEl) return;
 
     if (!subs.length) {
-      workEl.innerHTML = '<div class="empty"><div class="empty-msg">No requests yet. Submit your first under "Submit."</div></div>';
+      workEl.innerHTML = '<div class="empty"><div class="empty-msg">No requests yet. Use "+ Submit a Project" from Home.</div></div>';
       return;
     }
 
@@ -6396,6 +6664,70 @@ async function renderRelMyWork(body) {
     if (workEl) workEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load your work.</div></div>';
   }
 }
+
+async function savePenpalProfile() {
+  const handle = document.getElementById('rel-prof-handle')?.value.trim() || null;
+  const bio    = document.getElementById('rel-prof-bio')?.value.trim() || null;
+  try {
+    if (relation.isOperatorProxy) {
+      const contactEmail = operator.contact_email || null;
+      const phone        = operator.phone || null;
+      const { error } = await sb.rpc('update_operator_profile', {
+        p_email: relation.operatorEmail, p_handle: handle, p_contact_email: contactEmail, p_phone: phone, p_bio: bio,
+      });
+      if (error) throw error;
+      operator.handle = handle; operator.bio = bio;
+    } else {
+      const contactEmail = document.getElementById('rel-prof-email')?.value.trim() || null;
+      const phone        = document.getElementById('rel-prof-phone')?.value.trim() || null;
+      const { error } = await sb.rpc('update_penpal_profile', {
+        p_code: relation.code, p_handle: handle, p_bio: bio, p_contact_email: contactEmail, p_phone: phone,
+      });
+      if (error) throw error;
+      relation.contactEmail = contactEmail; relation.phone = phone;
+    }
+    relation.handle = handle; relation.bio = bio;
+    renderRelPeerHeader();
+    toast('Profile saved.');
+  } catch(e) {
+    console.error(e);
+    toast('Could not save profile.');
+  }
+}
+
+async function uploadPenpalAvatar(file) {
+  if (!file) return;
+  if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB.'); return; }
+  if (!file.type.startsWith('image/')) { toast('Please choose an image file.'); return; }
+
+  try {
+    const ext = file.name.split('.').pop();
+    const path = `penpal-${(relation.code||'x').replace(/[^a-zA-Z0-9]/g,'')}-${Date.now()}.${ext}`;
+    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
+    const publicUrl = pub?.publicUrl;
+    if (!publicUrl) throw new Error('No public URL returned');
+
+    if (relation.isOperatorProxy) {
+      const { error: saveErr } = await sb.rpc('update_avatar_url', { p_operator_id: relation.operatorId, p_avatar_url: publicUrl });
+      if (saveErr) throw saveErr;
+      operator.avatar_url = publicUrl;
+    } else {
+      const { error: saveErr } = await sb.rpc('update_penpal_avatar', { p_code: relation.code, p_avatar_url: publicUrl });
+      if (saveErr) throw saveErr;
+    }
+    relation.avatarUrl = publicUrl;
+    renderRelPeerHeader();
+    const avEl = document.getElementById('rel-prof-avatar');
+    if (avEl) avEl.innerHTML = avatarHtml(relation.name, publicUrl, 16);
+    toast('Avatar updated.');
+  } catch(e) {
+    console.error(e);
+    toast('Could not upload avatar.');
+  }
+}
+
 
 async function openRelSubmissionDetail(id) {
   const body = document.getElementById('rel-body');
@@ -6425,7 +6757,7 @@ async function openRelSubmissionDetail(id) {
 
   body.innerHTML = `
     <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
-      <span class="gate-back" onclick="showRelTab('work')">← My Work</span>
+      <span class="gate-back" onclick="showRelTab('profile')">← Profile</span>
     </div>
     <div class="rel-section" style="padding-top:0">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px">Your Project</div>

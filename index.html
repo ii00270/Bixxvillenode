@@ -1615,16 +1615,46 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
     <!-- Operator mode — hidden until switched -->
     <div id="gate-op" style="display:none">
-      <label class="gate-label" for="g-email">Email</label>
-      <input class="gate-input" id="g-email" type="email"
-        placeholder="operator@email.com" autocomplete="email"
-        onkeydown="if(event.key==='Enter')doLogin()"/>
-      <label class="gate-label gate-label-gap" for="g-pw">Password</label>
-      <input class="gate-input" id="g-pw" type="password"
-        placeholder="Password" autocomplete="current-password"
-        onkeydown="if(event.key==='Enter')doLogin()"/>
-      <button class="gate-btn" id="g-btn" onclick="doLogin()">Enter</button>
-      <div class="gate-err" id="g-err"></div>
+      <div id="gate-op-pin">
+        <label class="gate-label" for="g-pin">PIN</label>
+        <input class="gate-input" id="g-pin" type="password" inputmode="numeric" maxlength="7"
+          placeholder="7-digit PIN" autocomplete="off"
+          onkeydown="if(event.key==='Enter')doPinLogin()"/>
+        <button class="gate-btn" id="g-pin-btn" onclick="doPinLogin()">Enter</button>
+        <div class="gate-err" id="g-pin-err"></div>
+        <div style="display:flex;justify-content:space-between;margin-top:10px">
+          <span class="gate-back" style="font-size:9px" onclick="gateShowGenesis()">Genesis? Use password</span>
+          <span class="gate-back" style="font-size:9px" onclick="gateShowForgotPin()">Forgot PIN?</span>
+        </div>
+      </div>
+
+      <div id="gate-op-genesis" style="display:none">
+        <label class="gate-label" for="g-email">Email</label>
+        <input class="gate-input" id="g-email" type="email"
+          placeholder="operator@email.com" autocomplete="email"
+          onkeydown="if(event.key==='Enter')doLogin()"/>
+        <label class="gate-label gate-label-gap" for="g-pw">Password</label>
+        <input class="gate-input" id="g-pw" type="password"
+          placeholder="Password" autocomplete="current-password"
+          onkeydown="if(event.key==='Enter')doLogin()"/>
+        <button class="gate-btn" id="g-btn" onclick="doLogin()">Enter</button>
+        <div class="gate-err" id="g-err"></div>
+        <span class="gate-back" style="font-size:9px" onclick="gateShowPin()">← Use PIN instead</span>
+      </div>
+
+      <div id="gate-op-forgot" style="display:none">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--soft);margin-bottom:12px;line-height:1.6">
+          There's no self-service reset — your PIN is your only credential, so it can't be recovered automatically. Enter your name and we'll flag it for Genesis to verify and reissue it directly.
+        </div>
+        <label class="gate-label" for="g-forgot-name">Your name</label>
+        <input class="gate-input" id="g-forgot-name" placeholder="Full name" autocomplete="off"/>
+        <label class="gate-label gate-label-gap" for="g-forgot-contact">Best way to reach you</label>
+        <input class="gate-input" id="g-forgot-contact" placeholder="Email or phone" autocomplete="off"/>
+        <button class="gate-btn" id="g-forgot-btn" onclick="submitPinRecovery()">Send Request</button>
+        <div class="gate-err" id="g-forgot-err"></div>
+        <span class="gate-back" style="font-size:9px" onclick="gateShowPin()">← Back to PIN</span>
+      </div>
+
       <span class="gate-back" onclick="gateShowChoice()">← Back</span>
     </div>
 
@@ -2138,6 +2168,101 @@ async function doLogin() {
     logging = false;
     btn.disabled = false;
     btn.textContent = 'Enter';
+  }
+}
+
+// ── PIN LOGIN — every operator except Genesis ──
+function gateShowPin() {
+  document.getElementById('gate-op-pin').style.display = '';
+  document.getElementById('gate-op-genesis').style.display = 'none';
+  document.getElementById('gate-op-forgot').style.display = 'none';
+}
+function gateShowGenesis() {
+  document.getElementById('gate-op-pin').style.display = 'none';
+  document.getElementById('gate-op-genesis').style.display = '';
+  document.getElementById('gate-op-forgot').style.display = 'none';
+}
+function gateShowForgotPin() {
+  document.getElementById('gate-op-pin').style.display = 'none';
+  document.getElementById('gate-op-genesis').style.display = 'none';
+  document.getElementById('gate-op-forgot').style.display = '';
+}
+
+let pinLogging = false;
+async function doPinLogin() {
+  if (pinLogging) return;
+  const pin = (document.getElementById('g-pin')?.value || '').trim();
+  const err = document.getElementById('g-pin-err');
+  const btn = document.getElementById('g-pin-btn');
+  err.classList.remove('show');
+
+  if (!/^\d{7}$/.test(pin)) {
+    err.textContent = 'PIN must be exactly 7 digits.';
+    err.classList.add('show'); return;
+  }
+
+  pinLogging = true;
+  btn.disabled = true;
+  btn.textContent = 'Verifying…';
+  initSB();
+
+  try {
+    const { data, error } = await sb.rpc('login_with_pin', { p_pin: pin });
+    const op = Array.isArray(data) ? data[0] : data;
+
+    if (error || !op) {
+      err.textContent = 'Incorrect PIN.';
+      err.classList.add('show'); return;
+    }
+
+    delete op.pin_hash; // never keep the hash in client state, even though it transited once
+
+    operator = op;
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${op.peer_name || 'Operator'} signed in`,
+      p_payload: 'Operator session started (PIN).', p_source_entity: 'Auth', p_source_id: op.id,
+      p_recipients: op.peer_name ? [op.peer_name] : null, p_critical: false,
+    }));
+    enterShell();
+  } catch(e) {
+    err.textContent = 'Connection error. Check your internet and try again.';
+    err.classList.add('show');
+  } finally {
+    pinLogging = false;
+    btn.disabled = false;
+    btn.textContent = 'Enter';
+    document.getElementById('g-pin').value = '';
+  }
+}
+
+async function submitPinRecovery() {
+  const name = document.getElementById('g-forgot-name')?.value.trim();
+  const contact = document.getElementById('g-forgot-contact')?.value.trim();
+  const err = document.getElementById('g-forgot-err');
+  const btn = document.getElementById('g-forgot-btn');
+  err.classList.remove('show');
+
+  if (!name) { err.textContent = 'Enter your name.'; err.classList.add('show'); return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Sending…';
+  initSB();
+  try {
+    const { error } = await sb.rpc('request_pin_recovery', { p_name: name, p_contact: contact || null, p_note: null });
+    if (error) throw error;
+    err.style.color = 'var(--green)';
+    err.textContent = 'Request sent. Genesis will reach out once it\'s verified.';
+    err.classList.add('show');
+    document.getElementById('g-forgot-name').value = '';
+    document.getElementById('g-forgot-contact').value = '';
+  } catch(e) {
+    console.error(e);
+    err.style.color = '';
+    err.textContent = 'Could not send the request. Try again.';
+    err.classList.add('show');
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Send Request';
   }
 }
 
@@ -6598,17 +6723,181 @@ async function renderSidekickPersonalPanel(container) {
       <div class="section-lbl" style="position:relative;top:0">Projects</div>
       <div id="sk-projects-body" style="padding-bottom:8px"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>
 
+      ${operator.is_genesis ? `
+      <div class="section-lbl" style="position:relative;top:0">Genesis Console</div>
+      <div class="rel-section" style="padding-top:0">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Invite a New Operator</div>
+        <input class="rel-q-input" id="gc-invite-name" placeholder="Name" style="margin-bottom:8px"/>
+        <select class="rel-q-input" id="gc-invite-tier" style="margin-bottom:8px">
+          <option value="Apprentice">Apprentice</option>
+          <option value="Wrangler">Wrangler</option>
+          <option value="Architect">Architect</option>
+        </select>
+        <button class="sk-verify-btn" onclick="genesisCreateInvite()">Generate Invite PIN</button>
+        <div id="gc-invite-result" style="margin-top:10px"></div>
+      </div>
+
+      <div class="rel-section" style="border-top:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">PIN Recovery Requests</div>
+        <div id="gc-recovery-list"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+      </div>
+
+      <div class="rel-section" style="border-top:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Central Wallet</div>
+        <input class="rel-q-input" id="gc-central-wallet" placeholder="0x… central wallet address" value="${esc(operator.central_wallet_address || '')}" style="margin-bottom:8px"/>
+        <button class="sk-verify-btn" onclick="genesisSaveCentralWallet()">Save</button>
+        <div id="gc-central-balance" style="margin-top:10px"></div>
+      </div>
+
+      <div class="rel-section" style="border-top:1px solid var(--line)">
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Payment Audit</div>
+        <div style="font-family:var(--sans);font-size:11px;color:var(--soft);margin-bottom:10px;line-height:1.5">Every real payment sent through Sidekick, network-wide — confirming delivery, not holding funds.</div>
+        <div id="gc-audit-list"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+      </div>` : ''}
+
       <div class="section-lbl" style="position:relative;top:0">Closing</div>`;
 
     renderSkWallet();
     renderSkProjects();
+    if (operator.is_genesis) {
+      renderGenesisRecoveryQueue();
+      renderGenesisAudit();
+      if (operator.central_wallet_address) renderGenesisCentralBalance();
+    }
   } catch(e) {
     console.error(e);
     container.innerHTML = '<div class="empty" style="padding:20px 18px"><div class="empty-msg">Could not load your dashboard.</div></div>';
   }
 }
 
-// ── SIDEKICK WALLET — balance on file, or a prompt to connect one ──
+// ── GENESIS CONSOLE — invite creation, PIN recovery, central wallet audit.
+// Visible only when operator.is_genesis is true (see the security note at
+// the top of the PIN system migration re: client-side gating). ──
+async function genesisCreateInvite() {
+  const name = document.getElementById('gc-invite-name')?.value.trim();
+  const tier = document.getElementById('gc-invite-tier')?.value;
+  const resultEl = document.getElementById('gc-invite-result');
+  if (!name) { toast('Enter a name first.'); return; }
+
+  try {
+    const { data, error } = await sb.rpc('create_operator_invite', { p_peer_name: name, p_tier: tier });
+    const row = Array.isArray(data) ? data[0] : data;
+    if (error || !row) throw error || new Error('No result');
+
+    resultEl.innerHTML = `
+      <div style="border:1px solid var(--green);border-radius:6px;padding:14px;text-align:center">
+        <div style="font-family:var(--mono);font-size:9px;color:var(--grey);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px">PIN for ${esc(name)} — shown once, hand it off now</div>
+        <div style="font-family:var(--display);font-size:28px;font-weight:800;color:var(--green);letter-spacing:.1em">${esc(row.pin)}</div>
+      </div>`;
+    document.getElementById('gc-invite-name').value = '';
+  } catch(e) {
+    console.error(e);
+    toast('Could not create the invite.');
+  }
+}
+
+async function renderGenesisRecoveryQueue() {
+  const el = document.getElementById('gc-recovery-list');
+  if (!el) return;
+  try {
+    const { data, error } = await sb.rpc('get_pin_recovery_requests');
+    if (error) throw error;
+    const reqs = data || [];
+    if (!reqs.length) { el.innerHTML = '<div class="empty" style="padding:8px 0"><div class="empty-msg">No pending requests.</div></div>'; return; }
+
+    el.innerHTML = reqs.map(r => `
+      <div class="sk-deal" id="gc-req-${r.id}" style="margin:0 0 10px">
+        <div class="sk-head"><div class="sk-title">${esc(r.requested_name)}</div><div class="sk-status pending">pending</div></div>
+        <div class="sk-parties">${esc(r.contact || 'No contact given')} · ${timeAgo(r.created_at)} ago</div>
+        <div style="display:flex;gap:8px;margin-top:10px">
+          <button class="sk-verify-btn" style="margin:0" onclick="genesisResolveRecovery('${r.id}', 'denied')">Dismiss</button>
+          <button class="sk-verify-btn" style="margin:0;border-color:var(--green);color:var(--green)" onclick="genesisPromptResetPin('${r.id}')">Verify &amp; Reset PIN…</button>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty" style="padding:8px 0"><div class="empty-msg">Could not load requests.</div></div>';
+  }
+}
+
+async function genesisResolveRecovery(id, status) {
+  try {
+    await sb.rpc('dismiss_pin_recovery_request', { p_id: id, p_status: status });
+    renderGenesisRecoveryQueue();
+  } catch(e) { console.error(e); toast('Could not update the request.'); }
+}
+
+// Verifying identity is a manual, out-of-band judgment call — this just
+// asks which operator record it actually is, once you've confirmed that
+// yourself, then resets and reveals the new PIN.
+async function genesisPromptResetPin(requestId) {
+  const { data: ops } = await sb.rpc('list_operators');
+  const names = (ops || []).map(o => `${o.peer_name} (${o.email})`).join('\n');
+  const chosen = prompt(`Which operator is this? Type their exact name as shown:\n\n${names}`);
+  if (!chosen) return;
+  const match = (ops || []).find(o => o.peer_name.toLowerCase() === chosen.trim().toLowerCase());
+  if (!match) { toast('No exact match found — check spelling.'); return; }
+
+  try {
+    const { data: newPin, error } = await sb.rpc('reset_operator_pin', { p_operator_id: match.id });
+    if (error) throw error;
+    await sb.rpc('dismiss_pin_recovery_request', { p_id: requestId, p_status: 'resolved' });
+    alert(`New PIN for ${match.peer_name}: ${newPin}\n\nShown once — hand it off now.`);
+    renderGenesisRecoveryQueue();
+  } catch(e) {
+    console.error(e);
+    toast('Could not reset the PIN.');
+  }
+}
+
+async function genesisSaveCentralWallet() {
+  const addr = document.getElementById('gc-central-wallet')?.value.trim();
+  try {
+    const { error } = await sb.rpc('update_central_wallet', { p_address: addr || null });
+    if (error) throw error;
+    operator.central_wallet_address = addr;
+    toast('Central wallet saved.');
+    if (addr) renderGenesisCentralBalance();
+  } catch(e) { console.error(e); toast('Could not save the wallet address.'); }
+}
+
+async function renderGenesisCentralBalance() {
+  const el = document.getElementById('gc-central-balance');
+  if (!el || !operator.central_wallet_address) return;
+  el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--grey)">Checking balance…</div>';
+  try {
+    const bal = await fetchUsdcBalance(operator.central_wallet_address);
+    el.innerHTML = `<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--green)">${bal != null ? '$' + bal.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'}</div>`;
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">Could not check balance.</div>';
+  }
+}
+
+async function renderGenesisAudit() {
+  const el = document.getElementById('gc-audit-list');
+  if (!el) return;
+  try {
+    const { data, error } = await sb.rpc('get_payment_audit');
+    if (error) throw error;
+    const rows = data || [];
+    if (!rows.length) { el.innerHTML = '<div class="empty" style="padding:8px 0"><div class="empty-msg">No payments recorded yet.</div></div>'; return; }
+
+    el.innerHTML = rows.map(r => `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(r.scope_title || 'Scope')} → ${esc(r.assignee || '—')}</div>
+          <div class="log-row-meta">${esc(r.project_title || '—')} · ${fmtDate(r.paid_at)} · tx ${esc((r.paid_tx_hash||'').slice(0,10))}…</div>
+        </div>
+        <div class="log-row-right"><div class="log-row-hours">${r.log_size || 0} LOG</div></div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty" style="padding:8px 0"><div class="empty-msg">Could not load the audit.</div></div>';
+  }
+}
+
+
 async function renderSkWallet() {
   const el = document.getElementById('sk-wallet-body');
   if (!el || !operator) return;

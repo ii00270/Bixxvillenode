@@ -6308,12 +6308,20 @@ async function submitWorkApplication(scopeId) {
   }
 }
 
-// ── SIDEKICK — closing the loop: documents, verification, payment ──
+// ── SIDEKICK — closing the loop: documents, verification, payment.
+// For operators, this is also the personal command center (what used to be
+// the standalone Home dashboard) — stats, tasks, price calc, claim a block —
+// sitting right above the deals that need closing. Relations just see deals. ──
 async function renderSidekick(body) {
   const assigneeName = currentIdentityLabel();
+  const isOp = !!operator && !relation;
+
   body.innerHTML = `
+    <div id="sk-personal"></div>
     <div class="sig-title-row"><div class="sig-title">Sidekick</div><div class="sig-note">Closing the loop</div></div>
     <div id="sk-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+
+  if (isOp) await renderSidekickPersonalPanel(document.getElementById('sk-personal'));
 
   try {
     const { data, error } = await sb.rpc('get_deals_for_member', { p_assignee: assigneeName });
@@ -6324,6 +6332,107 @@ async function renderSidekick(body) {
     console.error(e);
     const list = document.getElementById('sk-list');
     if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load deals. Run the unified system migration in Supabase if this is the first load.</div></div>';
+  }
+}
+
+async function renderSidekickPersonalPanel(container) {
+  if (!container || !operator) return;
+
+  const cycle = getActiveCycle();
+  const hourNow = new Date().getHours();
+  const greeting = hourNow < 12 ? 'Good morning' : hourNow < 18 ? 'Good afternoon' : 'Good evening';
+  const myTier = tier(operator.total_logs);
+  const RATES = { Operator: 100, Architect: 85, Wrangler: 65, Apprentice: 39 };
+  const myRate = RATES[myTier] || 39;
+
+  try {
+    const [opsRes, tasksRes, logsRes, claimsRes] = await Promise.all([
+      sb.from('relation_submissions').select('id,status').in('status', ['open', 'settling']),
+      sb.rpc('get_my_tasks', { p_operator_id: operator.id }),
+      sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
+      sb.rpc('get_my_claims', { p_operator_id: operator.id }),
+    ]);
+
+    const activeProjects = (opsRes.data || []).length;
+    window._myTasks = tasksRes.data || [];
+    window._myClaims = claimsRes.data || [];
+    const cycleHours = (logsRes.data || [])
+      .filter(l => l.cycle_number === cycle.num)
+      .reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
+
+    container.innerHTML = `
+      <div class="dash-greeting" style="padding-top:22px">
+        <div class="dash-greeting-text">${greeting}, ${esc(operator.peer_name || 'Operator')}.</div>
+        <div class="dash-greeting-sub">Cycle ${cycle.num} · Day ${cycle.day} of 28 · ${cycle.left}d left</div>
+      </div>
+
+      <div class="dash-stats-row">
+        <div class="dash-stat-chip"><div class="dash-stat-val">${activeProjects}</div><div class="dash-stat-lbl">Active</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">${cycleHours.toFixed(0)}</div><div class="dash-stat-lbl">Hrs this cycle</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">${esc(myTier)}</div><div class="dash-stat-lbl">Tier</div></div>
+        <div class="dash-stat-chip"><div class="dash-stat-val">$${myRate}</div><div class="dash-stat-lbl">Per LOG</div></div>
+      </div>
+
+      <div class="dash-widgets">
+        <div class="dash-widget">
+          <div class="dash-widget-title">Task Tracker</div>
+          <div id="dash-tasks-list">${renderDashTasks()}</div>
+          <div class="dash-task-add">
+            <input class="dash-task-input" id="dash-task-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addDashTask()"/>
+            <button class="dash-task-add-btn" onclick="addDashTask()">Add</button>
+          </div>
+        </div>
+
+        <div class="dash-widget">
+          <div class="dash-widget-title">Quick Price Calculator</div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">LOGs</span>
+            <input class="dash-calc-input" id="calc-logs" type="number" min="0" value="10" oninput="updateDashCalc()"/>
+          </div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">Rate</span>
+            <select class="dash-calc-select" id="calc-rate" onchange="updateDashCalc()">
+              <option value="39" ${myRate===39?'selected':''}>Apprentice · $39/hr</option>
+              <option value="65" ${myRate===65?'selected':''}>Wrangler · $65/hr</option>
+              <option value="85" ${myRate===85?'selected':''}>Architect · $85/hr</option>
+              <option value="100" ${myRate===100?'selected':''}>Operator · $100/hr</option>
+            </select>
+          </div>
+          <div class="dash-calc-result">
+            <span class="dash-calc-lbl">Project price</span>
+            <span class="dash-calc-result-val" id="calc-result">$${((10*myRate)/0.75).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
+          </div>
+          <div style="font-family:var(--mono);font-size:8px;color:var(--grey);margin-top:8px">LOGs × rate ÷ 0.75</div>
+        </div>
+
+        <div class="dash-widget full">
+          <div class="dash-widget-title">Quick Actions</div>
+          <div class="dash-actions">
+            <div class="dash-action-btn" onclick="openLogWorkModal()"><div class="dash-action-lbl">+ Log Work</div></div>
+            <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">View Work Board</div></div>
+            <div class="dash-action-btn" onclick="openAdminMode()"><div class="dash-action-lbl">Open Admin</div></div>
+          </div>
+        </div>
+
+        <div class="dash-widget full">
+          <div class="dash-widget-title">Claim a Block</div>
+          <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:12px;line-height:1.5">Reserve a block ahead of time — the habit starts with committing before you start.</div>
+          <div class="dash-calc-row">
+            <span class="dash-calc-lbl">When</span>
+            <input class="form-input" id="claim-when" type="datetime-local" value="${new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}" style="max-width:220px"/>
+          </div>
+          <div style="margin-bottom:10px">
+            <input class="dash-task-input" id="claim-desc" placeholder="What will you work on?" style="width:100%"/>
+          </div>
+          <button class="dash-task-add-btn" style="width:100%;padding:10px" onclick="submitClaimBlock()">Claim Block</button>
+          <div id="dash-claims-list" style="margin-top:14px">${renderDashClaims()}</div>
+        </div>
+      </div>
+
+      <div class="section-lbl" style="position:relative;top:0">Closing</div>`;
+  } catch(e) {
+    console.error(e);
+    container.innerHTML = '<div class="empty" style="padding:20px 18px"><div class="empty-msg">Could not load your dashboard.</div></div>';
   }
 }
 

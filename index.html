@@ -300,47 +300,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   border-bottom-color:var(--green);
   box-shadow:0 1px 0 rgba(140,240,96,.3);
 }
-#rel-shell{
-  position:fixed;inset:0;z-index:90;
-  display:flex;flex-direction:column;background:var(--black);
-  opacity:0;pointer-events:none;transition:opacity .3s;
-}
-#rel-shell.in{opacity:1;pointer-events:all;}
-#rel-body{flex:1;overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;padding-bottom:80px;}
-
-/* ── PENPAL MOBILE TOPBAR ── */
-#rel-mobile-topbar{
-  height:var(--top-h);flex-shrink:0;
-  background:var(--black);border-bottom:1px solid var(--line);
-  display:flex;align-items:center;justify-content:space-between;padding:0 18px;
-}
-
-/* ── PENPAL DESKTOP SIDEBAR — hidden by default, shown ≥768px, same pattern as #d-sidebar ── */
-#rel-d-sidebar{
-  display:none;width:200px;flex-shrink:0;
-  border-right:1px solid var(--line);
-  flex-direction:column;
-  background:#000;
-}
-@media(min-width:768px){
-  #rel-shell{flex-direction:row!important;}
-  #rel-d-sidebar{display:flex;}
-  #rel-mobile-topbar{display:none!important;}
-  #rel-bottom-nav{display:none!important;}
-  #rel-body{padding-bottom:0;flex:1;}
-}
-
-/* ── PENPAL MOBILE BOTTOM NAV — reuses .nav-btn styling from the operator bottom nav ── */
-#rel-bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;
-  height:calc(56px + var(--safe-b));padding-bottom:var(--safe-b);
-  background:rgba(0,0,0,.92);
-  backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
-  border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(5,1fr);
-  z-index:95;
-}
-
 /* ── UNIFIED SHELL ── */
 #uni-shell{
   position:fixed;inset:0;z-index:100;
@@ -406,6 +365,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .wb-contract-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-family:var(--sans);font-size:11px;color:var(--soft);border-bottom:1px solid #141414;}
 .wb-contract-row span:first-child{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);flex-shrink:0;padding-top:1px;}
 .wb-contract-row span:last-child{text-align:right;}
+.calc-mode-btn{
+  flex:1;padding:9px 0;background:none;border:1px solid var(--line2);border-radius:5px;
+  color:var(--grey);font-family:var(--mono);font-size:9px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;
+  cursor:pointer;
+}
+.calc-mode-btn.active{border-color:var(--green);color:var(--green);background:rgba(140,240,96,.06);}
 
 /* ── SIDEKICK ── */
 .sk-deal{border:1px solid var(--line2);border-radius:6px;padding:14px 16px;margin:0 18px 10px;}
@@ -1669,90 +1634,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 </div>
 
 <!-- ═══ RELATION SHELL ═══ -->
-<div id="rel-shell">
-
-  <!-- Desktop left sidebar — mirrors #d-sidebar exactly, same class names, text wordmark
-       instead of re-embedding the full logo SVG a third time in this file. -->
-  <aside id="rel-d-sidebar">
-    <div class="ds-logo">
-      <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:20px;color:var(--green);letter-spacing:.02em">Bixxville</div>
-      <div style="font-size:10px;color:var(--muted);letter-spacing:.12em;text-transform:uppercase;margin-top:2px">Penpals</div>
-    </div>
-    <div class="ds-nav">
-      <button class="ds-item active" id="rds-home" onclick="showRelTab('home')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
-        <span class="ds-label">Home</span>
-      </button>
-      <button class="ds-item" id="rds-messages" onclick="showRelTab('messages')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-        <span class="ds-label">Messages</span>
-      </button>
-      <button class="ds-item" id="rds-notifications" onclick="showRelTab('notifications')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-        <span class="ds-label">Notifications</span>
-        <div class="ds-badge hidden" id="rds-notif-badge">0</div>
-      </button>
-      <button class="ds-item" id="rds-discover" onclick="showRelTab('discover')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-        <span class="ds-label">Discover</span>
-      </button>
-      <button class="ds-item" id="rds-profile" onclick="showRelTab('profile')">
-        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        <span class="ds-label">Profile</span>
-      </button>
-    </div>
-    <div class="ds-peer">
-      <div class="ds-peer-mark" id="rel-peer-mark"></div>
-      <div>
-        <div class="ds-peer-name" id="rel-peer-name">—</div>
-        <div class="ds-peer-handle" id="rel-peer-handle">—</div>
-      </div>
-      <button class="ds-signout" onclick="doRelLogout()" title="Exit">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
-      </button>
-    </div>
-  </aside>
-
-  <!-- Mobile topbar -->
-  <div id="rel-mobile-topbar">
-    <div style="font-family:'Syne',sans-serif;font-weight:800;font-size:16px;color:var(--green)">Bixxville · Penpals</div>
-    <div class="tb-right-mobile">
-      <button class="tb-exit-sm" onclick="doRelLogout()">Exit</button>
-    </div>
-  </div>
-
-  <div id="rel-body"></div>
-
-  <!-- Mobile bottom nav — same 5 items, same nav-btn class as the operator bottom nav -->
-  <nav id="rel-bottom-nav">
-    <button class="nav-btn active" id="rnav-home" onclick="showRelTab('home')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M3 12L12 3l9 9M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg>
-      <div class="nav-label">Home</div>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="rnav-messages" onclick="showRelTab('messages')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
-      <div class="nav-label">Msgs</div>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="rnav-notifications" onclick="showRelTab('notifications')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
-      <div class="nav-label">Alerts</div>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="rnav-discover" onclick="showRelTab('discover')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
-      <div class="nav-label">Discover</div>
-      <div class="nav-dot"></div>
-    </button>
-    <button class="nav-btn" id="rnav-profile" onclick="showRelTab('profile')">
-      <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-      <div class="nav-label">Profile</div>
-      <div class="nav-dot"></div>
-    </button>
-  </nav>
-</div>
-
 <!-- ═══ UNIFIED SHELL — Signal / Messages / Work / Sidekick ═══ -->
 <div id="uni-shell">
   <div id="uni-topbar">
@@ -2609,7 +2490,217 @@ function updateDashCalc() {
   if (resultEl) resultEl.textContent = '$' + price.toLocaleString(undefined, { maximumFractionDigits: 0 });
 }
 
+// ── GENERAL CALCULATOR — fractions/expressions, unit conversion, accounting
+// math. A real deterministic tool for concrete math, distinct from the D
+// tool's AI chat (Ask tab) which handles genuinely open-ended questions
+// (quantum physics, anything requiring actual reasoning, not arithmetic).
+
+// Safe expression evaluator — no eval(), no Function() constructor, no
+// injection surface. Recursive-descent parser, standard precedence,
+// handles +, -, *, /, ^, parentheses, unary minus, decimals.
+function safeEvalMath(expr) {
+  const tokens = expr.replace(/\s+/g, '').match(/(\d+\.?\d*|\+|-|\*|\/|\^|\(|\))/g);
+  if (!tokens || !tokens.length) throw new Error('Enter an expression.');
+  let pos = 0;
+  const peek = () => tokens[pos];
+  const consume = () => tokens[pos++];
+
+  function parseExpr() {
+    let left = parseTerm();
+    while (peek() === '+' || peek() === '-') {
+      const op = consume();
+      const right = parseTerm();
+      left = op === '+' ? left + right : left - right;
+    }
+    return left;
+  }
+  function parseTerm() {
+    let left = parseFactor();
+    while (peek() === '*' || peek() === '/') {
+      const op = consume();
+      const right = parseFactor();
+      if (op === '/' && right === 0) throw new Error('Division by zero.');
+      left = op === '*' ? left * right : left / right;
+    }
+    return left;
+  }
+  function parseFactor() {
+    const base = parseUnary();
+    if (peek() === '^') { consume(); return Math.pow(base, parseFactor()); }
+    return base;
+  }
+  function parseUnary() {
+    if (peek() === '-') { consume(); return -parseUnary(); }
+    if (peek() === '+') { consume(); return parseUnary(); }
+    return parsePrimary();
+  }
+  function parsePrimary() {
+    if (peek() === '(') {
+      consume();
+      const val = parseExpr();
+      if (peek() !== ')') throw new Error('Missing closing parenthesis.');
+      consume();
+      return val;
+    }
+    const tok = consume();
+    const num = parseFloat(tok);
+    if (tok === undefined || isNaN(num)) throw new Error('Could not read: ' + (tok || 'end of expression'));
+    return num;
+  }
+
+  const result = parseExpr();
+  if (pos !== tokens.length) throw new Error('Unexpected character after expression.');
+  if (!isFinite(result)) throw new Error('Result is not a finite number.');
+  return result;
+}
+
+function decimalToFraction(dec, tolerance) {
+  tolerance = tolerance || 1e-6;
+  if (Number.isInteger(dec)) return `${dec}/1`;
+  const sign = dec < 0 ? -1 : 1;
+  dec = Math.abs(dec);
+  let h1 = 1, h2 = 0, k1 = 0, k2 = 1, b = dec;
+  do {
+    const a = Math.floor(b);
+    let aux = h1; h1 = a * h1 + h2; h2 = aux;
+    aux = k1; k1 = a * k1 + k2; k2 = aux;
+    b = 1 / (b - a);
+  } while (Math.abs(dec - h1 / k1) > dec * tolerance && k1 < 1e7);
+  return `${sign * h1}/${k1}`;
+}
+
+const CONVERSIONS = {
+  weight: { label: 'Weight', units: { lb: 453.59237, kg: 1000, g: 1, oz: 28.349523, ton: 907184.74 } }, // base: grams
+  length: { label: 'Length', units: { in: 2.54, ft: 30.48, cm: 1, m: 100, mi: 160934.4, km: 100000 } }, // base: cm
+  volume: { label: 'Volume', units: { gal: 3.785411, L: 1, mL: 0.001, floz: 0.0295735, cup: 0.236588 } }, // base: liters
+};
+
+function openGeneralCalculator() {
+  openOverlay('Calculator', (body) => renderGeneralCalculator(body), null, null, false);
+}
+
+let calcMode = 'basic';
+function renderGeneralCalculator(body) {
+  body.innerHTML = `
+    <div class="rel-section" style="padding-top:10px">
+      <div style="display:flex;gap:6px;margin-bottom:16px">
+        <button class="calc-mode-btn ${calcMode==='basic'?'active':''}" onclick="switchCalcMode('basic')">Basic</button>
+        <button class="calc-mode-btn ${calcMode==='convert'?'active':''}" onclick="switchCalcMode('convert')">Convert</button>
+        <button class="calc-mode-btn ${calcMode==='percent'?'active':''}" onclick="switchCalcMode('percent')">Accounting</button>
+      </div>
+      <div id="calc-body"></div>
+      <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:16px;line-height:1.6">For open-ended math or physics questions that need real reasoning rather than arithmetic — tap D on Work and use the Ask tab.</div>
+    </div>`;
+  renderCalcMode();
+}
+
+function switchCalcMode(mode) {
+  calcMode = mode;
+  document.querySelectorAll('.calc-mode-btn').forEach(b => b.classList.remove('active'));
+  event?.target?.classList.add('active');
+  renderCalcMode();
+}
+
+function renderCalcMode() {
+  const el = document.getElementById('calc-body');
+  if (!el) return;
+
+  if (calcMode === 'basic') {
+    el.innerHTML = `
+      <div class="rel-q-lbl" style="margin-bottom:4px">Expression — supports fractions as division (e.g. 3/4 + 1/2), parentheses, ^ for powers</div>
+      <input class="rel-q-input" id="calc-expr" placeholder="e.g. (3/4 + 1/2) * 2" onkeydown="if(event.key==='Enter')runBasicCalc()"/>
+      <button class="act-btn-sm" style="margin-top:10px;width:100%;padding:11px;text-align:center" onclick="runBasicCalc()">Calculate</button>
+      <div id="calc-basic-result" style="margin-top:14px"></div>`;
+  } else if (calcMode === 'convert') {
+    const catOpts = Object.entries(CONVERSIONS).map(([k,v]) => `<option value="${k}">${v.label}</option>`).join('');
+    el.innerHTML = `
+      <div class="rel-q-lbl" style="margin-bottom:4px">Category</div>
+      <select class="rel-q-input" id="conv-cat" onchange="renderConvertUnits()" style="margin-bottom:10px">${catOpts}</select>
+      <div class="dash-calc-row"><input class="rel-q-input" id="conv-value" type="number" value="1" oninput="runConvert()" style="flex:1"/></div>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:10px">
+        <select class="rel-q-input" id="conv-from" onchange="runConvert()" style="flex:1"></select>
+        <span style="font-family:var(--mono);font-size:11px;color:var(--grey)">→</span>
+        <select class="rel-q-input" id="conv-to" onchange="runConvert()" style="flex:1"></select>
+      </div>
+      <div id="calc-convert-result" style="margin-top:14px"></div>`;
+    renderConvertUnits();
+  } else if (calcMode === 'percent') {
+    el.innerHTML = `
+      <div class="rel-q-lbl" style="margin-bottom:4px">Cost</div>
+      <input class="rel-q-input" id="pct-cost" type="number" placeholder="What it costs you" oninput="runPercentCalc()" style="margin-bottom:10px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Markup % or Target Sale Price</div>
+      <input class="rel-q-input" id="pct-markup" type="number" placeholder="e.g. 40 for 40% markup" oninput="runPercentCalc()" style="margin-bottom:10px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Tax %</div>
+      <input class="rel-q-input" id="pct-tax" type="number" placeholder="e.g. 8.5" oninput="runPercentCalc()"/>
+      <div id="calc-percent-result" style="margin-top:14px"></div>`;
+  }
+}
+
+function runBasicCalc() {
+  const el = document.getElementById('calc-basic-result');
+  const expr = document.getElementById('calc-expr')?.value.trim();
+  if (!expr) return;
+  try {
+    const result = safeEvalMath(expr);
+    const frac = Math.abs(result % 1) > 1e-9 ? decimalToFraction(result) : null;
+    el.innerHTML = `
+      <div style="font-family:var(--display);font-size:26px;font-weight:800;color:var(--green)">${result.toLocaleString(undefined,{maximumFractionDigits:6})}</div>
+      ${frac ? `<div style="font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:4px">≈ ${frac}</div>` : ''}`;
+  } catch(e) {
+    el.innerHTML = `<div style="font-family:var(--mono);font-size:11px;color:var(--red)">${esc(e.message)}</div>`;
+  }
+}
+
+function renderConvertUnits() {
+  const cat = document.getElementById('conv-cat')?.value || 'weight';
+  const units = CONVERSIONS[cat].units;
+  const opts = Object.keys(units).map(u => `<option value="${u}">${u}</option>`).join('');
+  const fromEl = document.getElementById('conv-from');
+  const toEl = document.getElementById('conv-to');
+  if (fromEl) fromEl.innerHTML = opts;
+  if (toEl) toEl.innerHTML = opts;
+  if (toEl && toEl.options.length > 1) toEl.selectedIndex = 1;
+  runConvert();
+}
+
+function runConvert() {
+  const el = document.getElementById('calc-convert-result');
+  if (!el) return;
+  const cat = document.getElementById('conv-cat')?.value || 'weight';
+  const value = parseFloat(document.getElementById('conv-value')?.value);
+  const from = document.getElementById('conv-from')?.value;
+  const to = document.getElementById('conv-to')?.value;
+  if (isNaN(value) || !from || !to) { el.innerHTML = ''; return; }
+
+  const units = CONVERSIONS[cat].units;
+  const base = value * units[from];
+  const result = base / units[to];
+  el.innerHTML = `<div style="font-family:var(--display);font-size:24px;font-weight:800;color:var(--green)">${result.toLocaleString(undefined,{maximumFractionDigits:4})} ${esc(to)}</div>`;
+}
+
+function runPercentCalc() {
+  const el = document.getElementById('calc-percent-result');
+  const cost = parseFloat(document.getElementById('pct-cost')?.value);
+  const markup = parseFloat(document.getElementById('pct-markup')?.value);
+  const taxPct = parseFloat(document.getElementById('pct-tax')?.value) || 0;
+  if (isNaN(cost)) { el.innerHTML = ''; return; }
+
+  const markupAmt = isNaN(markup) ? 0 : cost * (markup / 100);
+  const salePrice = cost + markupAmt;
+  const marginPct = salePrice > 0 ? (markupAmt / salePrice) * 100 : 0;
+  const taxAmt = salePrice * (taxPct / 100);
+  const totalWithTax = salePrice + taxAmt;
+
+  el.innerHTML = `
+    <div class="wb-contract-row"><span>Sale Price</span><span style="color:var(--green);font-weight:700">$${salePrice.toLocaleString(undefined,{maximumFractionDigits:2})}</span></div>
+    <div class="wb-contract-row"><span>Margin</span><span>${marginPct.toFixed(1)}%</span></div>
+    <div class="wb-contract-row"><span>Tax</span><span>$${taxAmt.toLocaleString(undefined,{maximumFractionDigits:2})}</span></div>
+    <div class="wb-contract-row"><span>Total w/ Tax</span><span style="color:var(--green);font-weight:700">$${totalWithTax.toLocaleString(undefined,{maximumFractionDigits:2})}</span></div>`;
+}
+
 function renderDashClaims() {
+
+
   const claims = (window._myClaims || []).filter(c => c.status !== 'fulfilled').slice(0, 6);
   if (!claims.length) return '<div style="font-family:var(--mono);font-size:10px;color:var(--grey);padding:6px 0">No open claims.</div>';
   return claims.map(c => `
@@ -6462,21 +6553,115 @@ function toggleWorkCard(id) {
 // confirms before anything posts. Nothing goes live without that click. ──
 async function openDecompTool() {
   if (!operator) return;
-  openOverlay('Decompose & Post', async (body) => {
-    const { data: projects } = await sb.rpc('get_planning_projects');
-    const opts = (projects || []).map(p => `<option value="${esc(p.id)}">${esc(p.title || p.relation_name || 'Untitled')}</option>`).join('');
-
+  window._askInitialized = false;
+  openOverlay('D', async (body) => {
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px">
-        <div class="rel-q-lbl" style="margin-bottom:4px">Project</div>
-        <select class="rel-q-input" id="dt-project">${opts || '<option disabled>No active projects</option>'}</select>
-        <div class="rel-q-lbl" style="margin:14px 0 4px">What needs to happen</div>
-        <textarea class="rel-q-input" id="dt-context" rows="5" placeholder="Describe the work in plain language — what needs doing, any constraints, deadline, location. The AI breaks this into postable scopes."></textarea>
-        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" id="dt-gen-btn" onclick="generateDecompContract()">Generate Contract</button>
-        <div id="dt-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+        <div style="display:flex;gap:6px;margin-bottom:16px">
+          <button class="calc-mode-btn active" id="dt-tab-decompose" onclick="switchDTTab('decompose')">Decompose</button>
+          <button class="calc-mode-btn" id="dt-tab-ask" onclick="switchDTTab('ask')">Ask</button>
+        </div>
       </div>
-      <div id="dt-review"></div>`;
+      <div id="dt-decompose-pane"></div>
+      <div id="dt-ask-pane" style="display:none"></div>`;
+    renderDecomposePane();
   }, null, null, false);
+}
+
+function switchDTTab(tab) {
+  document.getElementById('dt-tab-decompose').classList.toggle('active', tab === 'decompose');
+  document.getElementById('dt-tab-ask').classList.toggle('active', tab === 'ask');
+  document.getElementById('dt-decompose-pane').style.display = tab === 'decompose' ? '' : 'none';
+  document.getElementById('dt-ask-pane').style.display = tab === 'ask' ? '' : 'none';
+  if (tab === 'ask' && !window._askInitialized) {
+    renderAskPane();
+    window._askInitialized = true;
+  }
+}
+
+async function renderDecomposePane() {
+  const pane = document.getElementById('dt-decompose-pane');
+  if (!pane) return;
+  const { data: projects } = await sb.rpc('get_planning_projects');
+  const opts = (projects || []).map(p => `<option value="${esc(p.id)}">${esc(p.title || p.relation_name || 'Untitled')}</option>`).join('');
+
+  pane.innerHTML = `
+    <div class="rel-section" style="padding-top:0">
+      <div class="rel-q-lbl" style="margin-bottom:4px">Project</div>
+      <select class="rel-q-input" id="dt-project">${opts || '<option disabled>No active projects</option>'}</select>
+      <div class="rel-q-lbl" style="margin:14px 0 4px">What needs to happen</div>
+      <textarea class="rel-q-input" id="dt-context" rows="5" placeholder="Describe the work in plain language — what needs doing, any constraints, deadline, location. The AI breaks this into postable scopes."></textarea>
+      <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" id="dt-gen-btn" onclick="generateDecompContract()">Generate Contract</button>
+      <div id="dt-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+    </div>
+    <div id="dt-review"></div>`;
+}
+
+// ── ASK — open-ended chat for math, physics, anything needing real
+// reasoning. Separate Edge Function from the contract generator; same
+// ANTHROPIC_API_KEY secret, no additional Supabase setup needed. ──
+let askHistory = [];
+function renderAskPane() {
+  const pane = document.getElementById('dt-ask-pane');
+  if (!pane) return;
+  pane.innerHTML = `
+    <div class="rel-section" style="padding-top:0">
+      <div id="ask-thread" style="max-height:340px;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input class="rel-q-input" id="ask-input" placeholder="Ask anything — math, physics, whatever you're stuck on" style="flex:1" onkeydown="if(event.key==='Enter')sendAskMessage()"/>
+        <button class="sk-pay-btn" style="margin:0" onclick="sendAskMessage()">Send</button>
+      </div>
+    </div>`;
+  renderAskThread();
+}
+
+function renderAskThread() {
+  const el = document.getElementById('ask-thread');
+  if (!el) return;
+  if (!askHistory.length) {
+    el.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--soft);padding:10px 0">Ask a question — unit conversions, algebra, physics, whatever needs real reasoning rather than a formula.</div>';
+    return;
+  }
+  el.innerHTML = askHistory.map(m => `
+    <div style="margin-bottom:12px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:${m.role === 'user' ? 'var(--green)' : 'var(--grey)'};margin-bottom:3px">${m.role === 'user' ? 'You' : 'Ask'}</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.6;white-space:pre-wrap">${esc(m.content)}</div>
+    </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendAskMessage() {
+  const input = document.getElementById('ask-input');
+  const text = input?.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  askHistory.push({ role: 'user', content: text });
+  renderAskThread();
+
+  const el = document.getElementById('ask-thread');
+  const loadingId = 'ask-loading-' + Date.now();
+  el.insertAdjacentHTML('beforeend', `<div id="${loadingId}" style="font-family:var(--mono);font-size:10px;color:var(--grey)">Thinking…</div>`);
+  el.scrollTop = el.scrollHeight;
+
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/ask-bixxville`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
+      body: JSON.stringify({ messages: askHistory }),
+    });
+    const data = await res.json();
+    document.getElementById(loadingId)?.remove();
+    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
+
+    askHistory.push({ role: 'assistant', content: data.reply });
+    renderAskThread();
+  } catch(e) {
+    console.error(e);
+    document.getElementById(loadingId)?.remove();
+    askHistory.push({ role: 'assistant', content: 'Could not reach the assistant — the ask-bixxville function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
+    renderAskThread();
+  }
 }
 
 async function generateDecompContract() {
@@ -6597,7 +6782,21 @@ async function renderSidekick(body) {
     <div class="sig-title-row"><div class="sig-title">Sidekick</div><div class="sig-note">Closing the loop</div></div>
     <div id="sk-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
-  if (isOp) await renderSidekickPersonalPanel(document.getElementById('sk-personal'));
+  if (isOp) {
+    await renderSidekickPersonalPanel(document.getElementById('sk-personal'));
+  } else if (relation) {
+    const el = document.getElementById('sk-personal');
+    if (el) {
+      el.innerHTML = `
+        <div class="rel-section" style="padding-top:22px">
+          <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream)">Hi, ${esc((relation.name||'').split(' ')[0])}.</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px">Your work with the network lives here.</div>
+        </div>
+        <div class="rel-section" style="border-top:1px solid var(--line)">
+          <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center" onclick="openSubmitProjectModal()">+ Submit a Project</button>
+        </div>`;
+    }
+  }
 
   try {
     const { data, error } = await sb.rpc('get_deals_for_member', { p_assignee: assigneeName });
@@ -6694,6 +6893,7 @@ async function renderSidekickPersonalPanel(container) {
             <span class="dash-calc-result-val" id="calc-result">$${((10*myRate)/0.75).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
           </div>
           <div style="font-family:var(--mono);font-size:8px;color:var(--grey);margin-top:8px">LOGs × rate ÷ 0.75</div>
+          <button class="sk-verify-btn" style="margin-top:12px" onclick="openGeneralCalculator()">Open General Calculator →</button>
         </div>
 
         <div class="dash-widget full">
@@ -7188,7 +7388,11 @@ function openUniProfile() {
     openOverlay('Profile', (body) => renderRelProfile(body), null, null, false);
     return;
   }
-  if (!operator) return;
+  if (!operator) {
+    console.warn('openUniProfile: no operator or relation set — session may be stale.');
+    toast('Session issue — try signing out and back in.');
+    return;
+  }
   openOverlay('Profile', (body) => {
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px;display:flex;align-items:center;gap:14px">
@@ -7204,24 +7408,6 @@ function openUniProfile() {
 }
 
 // ── PENPAL TAB ROUTER ──
-function showRelTab(tab) {
-  if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
-  relTab = tab;
-  ['home', 'messages', 'notifications', 'discover', 'profile'].forEach(t => {
-    document.getElementById('rds-' + t)?.classList.toggle('active', t === tab);
-    document.getElementById('rnav-' + t)?.classList.toggle('active', t === tab);
-    const icon = document.getElementById('rnav-' + t)?.querySelector('.nav-icon');
-    if (icon) icon.setAttribute('stroke', t === tab ? '#8CF060' : '#888888');
-  });
-  const body = document.getElementById('rel-body');
-  if (!body) return;
-  if (tab === 'home')          renderRelHome(body);
-  if (tab === 'messages')      renderRelMessagesTab(body);
-  if (tab === 'notifications') renderRelNotifications(body);
-  if (tab === 'discover')      renderRelDiscover(body);
-  if (tab === 'profile')       renderRelProfile(body);
-}
-
 // ── RELATION INTAKE FORM (structured, 20-question — mirrors operator intake) ──
 let relSiState = { answers: {}, step: 0 };
 
@@ -7232,7 +7418,7 @@ function renderRelIntake(body) {
 
 function renderRelIntakeStep(bodyEl) {
   // Submit is now a modal (openSubmitProjectModal), so the only valid target
-  // once past the first render is the overlay body, not the old #rel-body tab.
+  // once past the first render is the overlay body, not the old rel-shell tab surface.
   const body = bodyEl || document.getElementById('ov-body');
   if (!body) return;
 
@@ -7434,7 +7620,7 @@ async function submitRelIntake() {
     relSiState = { answers: {}, step: 0 };
     relWallet  = { addr: null, usdc: null, confirmed: false };
     closeOverlay();
-    showRelTab('profile');
+    openUniProfile();
   } catch(e) {
     console.error(e);
     if (err) { err.textContent = 'Could not submit. Check your connection and try again.'; err.classList.add('show'); }
@@ -7442,286 +7628,8 @@ async function submitRelIntake() {
 }
 
 // ── HOME (dashboard + network pulse) ──
-function relGreeting() {
-  const h = new Date().getHours();
-  if (h < 12) return 'Good morning';
-  if (h < 18) return 'Good afternoon';
-  return 'Good evening';
-}
-
-async function renderRelHome(body) {
-  const cycle = getActiveCycle();
-  const isProxy = !!relation.isOperatorProxy;
-
-  body.innerHTML = `
-    ${isProxy ? `
-    <div class="rel-section" style="padding-top:20px;display:flex;align-items:center;justify-content:space-between;background:rgba(140,240,96,.06);border-bottom:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:.06em">VIEWING AS OPERATOR · ${esc(operator?.peer_name || '')}</div>
-      <span class="gate-back" style="font-size:9px" onclick="backToOperatorFromPenpal()">← Back to Operator</span>
-    </div>` : ''}
-    <div class="rel-section" style="padding-top:24px">
-      <div style="font-family:var(--display);font-size:24px;font-weight:800;color:var(--cream)">${relGreeting()}, ${esc((relation.name||'').split(' ')[0])}.</div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:4px">Cycle ${cycle.num} · Day ${cycle.day} of 28 · ${cycle.left}d left</div>
-    </div>
-
-    <div id="rel-home-status" style="padding:0 18px 8px"></div>
-
-    <div class="rel-section" style="border-top:1px solid var(--line);display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <button class="act-btn-sm" style="padding:12px;text-align:center" onclick="openSubmitProjectModal()">+ Submit a Project</button>
-      <button class="act-btn-sm" style="padding:12px;text-align:center" onclick="showRelTab('messages')">Message</button>
-    </div>
-
-    <div class="rel-section" style="border-top:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Network Pulse</div>
-      <div id="rel-pulse-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
-    </div>`;
-
-  // Own active project status, if this identity has one on file
-  if (!isProxy && relation.code) {
-    try {
-      const { data: subs } = await sb
-        .from('relation_submissions')
-        .select('id,title,status,created_at')
-        .eq('relation_code', relation.code)
-        .order('created_at', { ascending: false })
-        .limit(1);
-      const statusEl = document.getElementById('rel-home-status');
-      if (statusEl && subs && subs.length) {
-        const s = subs[0];
-        const statusColor = s.status === 'settled' ? 'var(--green)' : s.status === 'settling' ? 'var(--cream)' : 'var(--orange)';
-        statusEl.innerHTML = `
-          <div class="rel-status-badge" style="cursor:pointer" onclick="openRelSubmissionDetail('${s.id}')">
-            <div class="rel-status-dot" style="background:${statusColor}"></div>
-            <div class="rel-status-text" style="color:${statusColor}">Latest: ${esc(s.title || 'Untitled')} — ${esc(s.status)}</div>
-          </div>`;
-      }
-    } catch(e) { console.error(e); }
-  }
-
-  // Network pulse — safe aggregate signals only. Deliberately NOT the raw
-  // operator events feed: that contains other members' project titles and
-  // payloads, which would leak private business across the Penpal network.
-  try {
-    const { data: dir, error } = await sb.rpc('get_penpal_directory');
-    if (error) throw error;
-    const members = dir || [];
-    const pulseEl = document.getElementById('rel-pulse-body');
-    if (!pulseEl) return;
-
-    const weekAgo = Date.now() - 7 * 24 * 3600 * 1000;
-    const recentJoins = members
-      .filter(m => m.created_at && new Date(m.created_at).getTime() > weekAgo)
-      .sort((a,b) => new Date(b.created_at) - new Date(a.created_at))
-      .slice(0, 3);
-
-    pulseEl.innerHTML = `
-      <div class="stat-grid" style="border-top:none;margin:0 -18px">
-        <div class="stat-cell"><div class="stat-val green">${members.length}</div><div class="stat-lbl">Penpals</div></div>
-        <div class="stat-cell"><div class="stat-val">${members.filter(m=>m.kind==='operator').length}</div><div class="stat-lbl">Operators</div></div>
-      </div>
-      ${recentJoins.length ? `
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 6px">Recently Joined</div>
-        ${recentJoins.map(m => `
-          <div class="member-row" onclick="openDiscoverProfile('${m.id}')" style="padding:8px 0">
-            <div class="member-avatar" style="width:28px;height:28px">${avatarHtml(m.peer_name, m.avatar_url, 11)}</div>
-            <div class="member-info"><div class="member-name" style="font-size:11px">${esc(m.peer_name)}</div></div>
-          </div>`).join('')}` : ''}`;
-  } catch(e) {
-    console.error(e);
-    const pulseEl = document.getElementById('rel-pulse-body');
-    if (pulseEl) pulseEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load network pulse.</div></div>';
-  }
-}
-
 function openSubmitProjectModal() {
   openOverlay('Submit a Project', (body) => renderRelIntake(body), null, null, false);
-}
-
-// ── NOTIFICATIONS ──
-async function renderRelNotifications(body) {
-  body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Notifications</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Updates on your own projects and messages — not a feed of everyone else's activity.</div>
-    </div>
-    <div id="rel-notif-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
-
-  const notifEl = document.getElementById('rel-notif-body');
-  if (!notifEl) return;
-
-  try {
-    const { data, error } = await sb.rpc('get_events');
-    if (error) throw error;
-    const name = relation.name;
-    const mine = (data || []).filter(e => (e.recipients || []).some(r => (r||'').toLowerCase() === (name||'').toLowerCase()));
-
-    if (!mine.length) {
-      notifEl.innerHTML = '<div class="empty"><div class="empty-msg">Nothing yet — updates on your projects will show up here.</div></div>';
-      return;
-    }
-
-    notifEl.innerHTML = mine.map(e => `
-      <div class="evt-row ${e.critical ? 'critical' : ''}">
-        <div class="evt-time">${timeAgo(e.created_at)}<br>ago</div>
-        <div class="evt-body">
-          <div class="evt-tags"><span class="evt-type ${esc(e.type)}">${esc(e.type)}</span></div>
-          <div class="evt-title">${esc(e.title)}</div>
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    console.error(e);
-    notifEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load notifications.</div></div>';
-  }
-}
-
-// ── DISCOVER (unified Penpal + Operator directory) ──
-async function renderRelDiscover(body) {
-  body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Discover</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">Everyone in the network — operators and Penpals alike. Standing is public because that's how you know who you're writing to.</div>
-    </div>
-    <div id="rel-discover-body" style="padding:6px 0 20px"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
-  await loadRelDiscover();
-}
-
-async function loadRelDiscover() {
-  const el = document.getElementById('rel-discover-body');
-  if (!el) return;
-  try {
-    const { data, error } = await sb.rpc('get_penpal_directory');
-    if (error) throw error;
-    window._penpalDirectory = data || [];
-
-    const withWallets = window._penpalDirectory.filter(m => m.wallet_address);
-    if (withWallets.length) {
-      await Promise.all(withWallets.map(async (m) => {
-        try { m._balance = await fetchUsdcBalance(m.wallet_address); }
-        catch(e) { m._balance = null; }
-      }));
-    }
-    renderRelDiscoverList();
-  } catch(e) {
-    console.error(e);
-    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load the directory.</div></div>';
-  }
-}
-
-function renderRelDiscoverList() {
-  const el = document.getElementById('rel-discover-body');
-  if (!el) return;
-  const members = window._penpalDirectory || [];
-
-  if (!members.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-msg">No one in the network yet.</div></div>';
-    return;
-  }
-
-  el.innerHTML = members.map(m => {
-    const standing = (m.standing || 'active').toLowerCase();
-    const rep = m.reputation_score != null ? Number(m.reputation_score) : null;
-    const kindPill = m.kind === 'operator'
-      ? `<span class="rel-pill" style="background:rgba(140,240,96,.1);color:var(--green);border-color:var(--green)">Operator</span>`
-      : `<span class="rel-pill" style="background:rgba(255,255,255,.06);color:var(--grey);border-color:var(--line2)">Penpal</span>`;
-    return `
-      <div class="member-row" onclick="openDiscoverProfile('${m.id}')">
-        <div class="member-avatar">${avatarHtml(m.peer_name, m.avatar_url)}</div>
-        <div class="member-info">
-          <div class="member-name">${esc(m.peer_name)}${m.wallet_address ? ` <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--green)">· $${m._balance != null ? m._balance.toLocaleString(undefined,{maximumFractionDigits:2}) : '…'}</span>` : ''}</div>
-          <div class="member-meta">${m.kind === 'operator' ? esc(m.region || m.lane || '—') + ' · ' + (m.total_logs||0) + ' LOG' : (m.handle || '—')}</div>
-          ${rep != null ? `<div class="reg-rep-bar"><div class="reg-rep-fill" style="width:${Math.max(0,Math.min(1,rep))*100}%"></div></div>` : ''}
-        </div>
-        <div class="member-right">
-          <div class="reg-standing-badge standing-${standing}">${esc(standing)}</div>
-          ${kindPill}
-        </div>
-      </div>`;
-  }).join('');
-}
-
-// Unified profile view for anyone in Discover — branches by kind.
-// View-only: no editing, no scope tools, regardless of who's looking.
-async function openDiscoverProfile(memberId) {
-  const body = document.getElementById('rel-body');
-  if (!body) return;
-  body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Loading…</div></div>';
-
-  const m = (window._penpalDirectory || []).find(x => x.id === memberId);
-  if (!m) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
-
-  const standing = (m.standing || 'active').toLowerCase();
-  const rep = m.reputation_score != null ? Number(m.reputation_score) : 0;
-  const isOp = m.kind === 'operator';
-
-  let walletBalance = null;
-  if (m.wallet_address) {
-    try { walletBalance = await fetchUsdcBalance(m.wallet_address); } catch(e) { console.error(e); }
-  }
-
-  let currentWork = [];
-  if (isOp) {
-    try {
-      const { data: activeProjects } = await sb
-        .from('relation_submissions')
-        .select('id,title,relation_name,relation_code,status')
-        .in('status', ['open', 'settling']);
-      const activeIds = (activeProjects || []).map(p => p.id);
-      if (activeIds.length) {
-        const { data: activeBids } = await sb.rpc('get_scopes_for_projects', { p_ids: activeIds });
-        const nameLower = (m.peer_name || '').toLowerCase();
-        currentWork = (activeBids || [])
-          .filter(s => s.assignee && s.assignee.toLowerCase() === nameLower)
-          .map(s => ({ ...s, projectInfo: (activeProjects || []).find(p => p.id === s.project_id) }));
-      }
-    } catch(e) { console.error(e); }
-  }
-
-  body.innerHTML = `
-    <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
-      <span class="gate-back" onclick="showRelTab('discover')">← Discover</span>
-    </div>
-    <div class="rel-section" style="padding-top:0;display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar">${avatarHtml(m.peer_name, m.avatar_url, 16)}</div>
-      <div>
-        <div class="prof-peer">${esc(m.peer_name)}</div>
-        <div class="prof-lane">${isOp ? esc(m.lane || '—') + ' · ' + esc(m.region || '—') : esc(m.handle || 'Penpal')}</div>
-      </div>
-    </div>
-
-    <div class="stat-grid">
-      ${isOp ? `
-      <div class="stat-cell"><div class="stat-val green">${m.total_logs||0}</div><div class="stat-lbl">LOGs</div></div>
-      <div class="stat-cell"><div class="stat-val">${rep.toFixed(3)}</div><div class="stat-lbl">Rep Score</div></div>
-      ` : ''}
-      <div class="stat-cell"><div class="stat-val ${standing==='sovereign'||standing==='active'?'green':'orange'}">${esc(standing)}</div><div class="stat-lbl">Standing</div></div>
-      <div class="stat-cell"><div class="stat-val">${isOp ? 'Operator' : 'Penpal'}</div><div class="stat-lbl">Role</div></div>
-    </div>
-
-    ${m.wallet_address ? `
-    <div class="rel-section">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Funds on File</div>
-      ${walletBalance != null
-        ? `<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--green)">$${walletBalance.toLocaleString(undefined,{maximumFractionDigits:2})} <span style="font-family:var(--mono);font-size:10px;font-weight:600;color:var(--grey)">USDC on Base</span></div>`
-        : `<div style="font-family:var(--mono);font-size:11px;color:var(--orange)">Could not verify balance right now.</div>`}
-    </div>` : ''}
-
-    ${m.bio ? `<div class="rel-section">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">About</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.65">${esc(m.bio)}</div>
-    </div>` : ''}
-
-    ${isOp ? `
-    <div class="section-lbl" style="position:relative;top:0">Current Work</div>
-    <div>${currentWork.length ? currentWork.map(s => `
-      <div class="log-row">
-        <div class="log-row-main">
-          <div class="log-row-title">${esc(s.title || 'Scope')}</div>
-          <div class="log-row-meta">${esc((s.projectInfo && (s.projectInfo.title || s.projectInfo.relation_name)) || '—')} · ${esc(s.status)}</div>
-        </div>
-        <div class="log-row-right"><div class="log-row-hours">${s.log_size || 0} LOG</div></div>
-      </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No active work right now.</div></div>'}</div>` : ''}
-
-    <div style="padding:20px 18px;font-family:var(--mono);font-size:9px;color:var(--grey);text-align:center">View only — reach out through your operator to work with this person.</div>`;
 }
 
 // ── PROFILE (own profile — bio, handle, avatar, submission history) ──
@@ -7864,7 +7772,7 @@ async function uploadPenpalAvatar(file) {
 
 
 async function openRelSubmissionDetail(id) {
-  const body = document.getElementById('rel-body');
+  const body = document.getElementById('ov-body');
   if (!body) return;
   body.innerHTML = '<div class="empty"><div class="empty-msg">Loading…</div></div>';
 
@@ -7891,7 +7799,7 @@ async function openRelSubmissionDetail(id) {
 
   body.innerHTML = `
     <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;justify-content:space-between">
-      <span class="gate-back" onclick="showRelTab('profile')">← Profile</span>
+      <span class="gate-back" onclick="openUniProfile()">← Profile</span>
     </div>
     <div class="rel-section" style="padding-top:0">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:12px">Your Project</div>
@@ -8000,7 +7908,7 @@ async function relUnlockMsgs() {
   const pw = document.getElementById('rel-msg-pw')?.value;
   if (!pw) { toast('Enter the password.'); return; }
   relMsgKey = await deriveMsgKey(pw);
-  renderRelMessagesTab(document.getElementById('rel-body'));
+  renderRelMessagesTab(document.getElementById('uni-body'));
 }
 
 async function relLoadMsgs() {

@@ -396,6 +396,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .wb-card.expanded .wb-desc{display:block;}
 .wb-apply{margin-top:12px;width:100%;padding:11px;background:none;border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;cursor:pointer;display:none;}
 .wb-card.expanded .wb-apply{display:block;}
+.wb-d-key{
+  width:26px;height:26px;border-radius:5px;background:var(--surface2);border:1px solid var(--line2);
+  color:var(--green);font-family:var(--mono);font-weight:700;font-size:12px;cursor:pointer;
+  box-shadow:0 2px 0 var(--line2);
+}
+.wb-d-key:active{transform:translateY(1px);box-shadow:0 1px 0 var(--line2);}
+.wb-ai-tag{font-family:var(--mono);font-size:8px;color:var(--orange);border:1px solid var(--orange);border-radius:2px;padding:1px 5px;letter-spacing:.06em;vertical-align:middle;}
+.wb-contract-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-family:var(--sans);font-size:11px;color:var(--soft);border-bottom:1px solid #141414;}
+.wb-contract-row span:first-child{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);flex-shrink:0;padding-top:1px;}
+.wb-contract-row span:last-child{text-align:right;}
 
 /* ── SIDEKICK ── */
 .sk-deal{border:1px solid var(--line2);border-radius:6px;padding:14px 16px;margin:0 18px 10px;}
@@ -6261,7 +6271,13 @@ async function renderWorkBoard(body) {
   const unlocked = ['Architect', 'Operator'].includes(tier(operator.total_logs));
 
   body.innerHTML = `
-    <div class="sig-title-row"><div class="sig-title">Work</div><div class="sig-note">${unlocked ? 'Open across the network' : 'Architect+ to view and apply'}</div></div>
+    <div class="sig-title-row">
+      <div class="sig-title">Work</div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="wb-d-key" onclick="openDecompTool()" title="Decompose &amp; post to the network">D</button>
+        <div class="sig-note">${unlocked ? 'Open across the network' : 'Architect+ to apply'}</div>
+      </div>
+    </div>
     <div id="wb-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
   try {
@@ -6275,11 +6291,15 @@ async function renderWorkBoard(body) {
     list.innerHTML = window._openWork.map(w => `
       <div class="wb-card ${unlocked ? 'unlocked' : 'locked'}" id="wb-${w.id}" onclick="${unlocked ? `toggleWorkCard('${w.id}')` : ''}">
         ${!unlocked ? '<div class="wb-lock-tag">Architect+</div>' : ''}
-        <div class="wb-head"><div class="wb-title">${esc(w.title || 'Scope')}</div><div class="wb-log">${w.log_size || 0} LOG</div></div>
+        <div class="wb-head">
+          <div class="wb-title">${esc(w.title || 'Scope')}${w.ai_generated ? ' <span class="wb-ai-tag">AI</span>' : ''}</div>
+          <div class="wb-log">${w.log_size || 0} LOG</div>
+        </div>
         <div class="wb-meta">${esc(w.project_title || '—')}</div>
-        <div class="wb-desc">Post interest below to apply. The operator running this project still confirms the final assignee — this puts your name in front of them.</div>
+        ${unlocked ? renderContractBlock(w) : ''}
+        ${unlocked ? `
         <textarea class="rel-q-input" id="wb-msg-${w.id}" rows="2" placeholder="A line on why you're a fit (optional)" onclick="event.stopPropagation()" style="margin-top:8px"></textarea>
-        <button class="wb-apply" onclick="event.stopPropagation();submitWorkApplication('${w.id}')">Post Bid</button>
+        <button class="wb-apply" onclick="event.stopPropagation();submitWorkApplication('${w.id}')">Post Bid</button>` : ''}
       </div>`).join('');
   } catch(e) {
     console.error(e);
@@ -6288,8 +6308,139 @@ async function renderWorkBoard(body) {
   }
 }
 
+// The Who/What/When/Where/How/Budget contract — shown inside an expanded
+// Work card. Falls back to a plain note for scopes posted the old manual
+// way, which don't have contract fields filled in.
+function renderContractBlock(w) {
+  if (!w.contract_who && !w.contract_what) {
+    return `<div class="wb-desc">Post interest below to apply. The operator running this project still confirms the final assignee.</div>`;
+  }
+  const fundsLabel = w.funds_status === 'confirmed' ? 'Confirmed by client' : 'Pending';
+  const fundsColor = w.funds_status === 'confirmed' ? 'var(--green)' : 'var(--orange)';
+  return `
+    <div class="wb-desc">
+      <div class="wb-contract-row"><span>Who</span><span>${esc(w.contract_who || '—')}</span></div>
+      <div class="wb-contract-row"><span>What</span><span>${esc(w.contract_what || '—')}</span></div>
+      <div class="wb-contract-row"><span>When</span><span>${esc(w.contract_when || '—')}</span></div>
+      <div class="wb-contract-row"><span>Where</span><span>${esc(w.contract_where || '—')}</span></div>
+      <div class="wb-contract-row"><span>How</span><span>${esc(w.contract_how || '—')}</span></div>
+      <div class="wb-contract-row"><span>Budget</span><span style="color:var(--green);font-weight:700">$${Number(w.contract_budget || 0).toLocaleString()}</span></div>
+      <div class="wb-contract-row"><span>Funds</span><span style="color:${fundsColor}">${fundsLabel}</span></div>
+    </div>`;
+}
+
 function toggleWorkCard(id) {
   document.getElementById('wb-' + id)?.classList.toggle('expanded');
+}
+
+// ── DECOMPOSITION TOOL ("D") — AI writes the contract, operator reviews and
+// confirms before anything posts. Nothing goes live without that click. ──
+async function openDecompTool() {
+  if (!operator) return;
+  openOverlay('Decompose & Post', async (body) => {
+    const { data: projects } = await sb.rpc('get_planning_projects');
+    const opts = (projects || []).map(p => `<option value="${esc(p.id)}">${esc(p.title || p.relation_name || 'Untitled')}</option>`).join('');
+
+    body.innerHTML = `
+      <div class="rel-section" style="padding-top:10px">
+        <div class="rel-q-lbl" style="margin-bottom:4px">Project</div>
+        <select class="rel-q-input" id="dt-project">${opts || '<option disabled>No active projects</option>'}</select>
+        <div class="rel-q-lbl" style="margin:14px 0 4px">What needs to happen</div>
+        <textarea class="rel-q-input" id="dt-context" rows="5" placeholder="Describe the work in plain language — what needs doing, any constraints, deadline, location. The AI breaks this into postable scopes."></textarea>
+        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" id="dt-gen-btn" onclick="generateDecompContract()">Generate Contract</button>
+        <div id="dt-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+      </div>
+      <div id="dt-review"></div>`;
+  }, null, null, false);
+}
+
+async function generateDecompContract() {
+  const context = document.getElementById('dt-context')?.value.trim();
+  const errEl = document.getElementById('dt-error');
+  const btn = document.getElementById('dt-gen-btn');
+  if (errEl) errEl.style.display = 'none';
+  if (!context) { if (errEl) { errEl.textContent = 'Describe the work first.'; errEl.style.display = 'block'; } return; }
+
+  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/generate-contract`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
+      body: JSON.stringify({
+        project_context: context,
+        tier_rates: { Apprentice: 39, Wrangler: 65, Architect: 85, Operator: 100 },
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok || data.error) throw new Error(data.error || 'Generation failed.');
+
+    window._dtScopes = data.scopes;
+    renderDecompReview();
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = e.message || 'Could not generate a contract. The generate-contract function may not be deployed yet.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.disabled = false; btn.textContent = 'Generate Contract'; }
+  }
+}
+
+function renderDecompReview() {
+  const el = document.getElementById('dt-review');
+  if (!el) return;
+  const scopes = window._dtScopes || [];
+
+  el.innerHTML = `
+    <div class="rel-section" style="border-top:1px solid var(--line)">
+      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Review before posting — edit anything that's off</div>
+      ${scopes.map((s, i) => `
+        <div class="sk-deal" style="margin:0 0 10px">
+          <input class="rel-q-input" style="font-weight:700;margin-bottom:8px" id="dt-title-${i}" value="${esc(s.title || '')}"/>
+          <div class="wb-contract-row"><span>LOG</span><input class="rel-q-input" id="dt-logs-${i}" type="number" style="width:80px;text-align:right" value="${esc(s.log_size || 0)}" oninput="recalcDtBudget(${i})"/></div>
+          <div class="wb-contract-row"><span>Who</span><input class="rel-q-input" id="dt-who-${i}" value="${esc(s.who || '')}"/></div>
+          <div class="wb-contract-row"><span>What</span><input class="rel-q-input" id="dt-what-${i}" value="${esc(s.what || '')}"/></div>
+          <div class="wb-contract-row"><span>When</span><input class="rel-q-input" id="dt-when-${i}" value="${esc(s.when || '')}"/></div>
+          <div class="wb-contract-row"><span>Where</span><input class="rel-q-input" id="dt-where-${i}" value="${esc(s.where || '')}"/></div>
+          <div class="wb-contract-row"><span>How</span><input class="rel-q-input" id="dt-how-${i}" value="${esc(s.how || '')}"/></div>
+          <div class="wb-contract-row"><span>Budget</span><input class="rel-q-input" id="dt-budget-${i}" type="number" style="width:100px;text-align:right;color:var(--green);font-weight:700" value="${esc(s.budget || 0)}"/></div>
+        </div>`).join('')}
+      <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center;border-color:var(--green);color:var(--green)" onclick="postDecompContract()">Post ${scopes.length} scope${scopes.length !== 1 ? 's' : ''} to the network</button>
+    </div>`;
+}
+
+function recalcDtBudget(i) {
+  const logs = Number(document.getElementById('dt-logs-' + i)?.value || 0);
+  const rate = 39; // Apprentice default — operator can hand-adjust the budget field directly if a higher tier applies
+  const budgetEl = document.getElementById('dt-budget-' + i);
+  if (budgetEl) budgetEl.value = Math.round((logs * rate) / 0.75);
+}
+
+async function postDecompContract() {
+  const projectId = document.getElementById('dt-project')?.value;
+  if (!projectId) { toast('Pick a project first.'); return; }
+  const scopes = window._dtScopes || [];
+
+  const payload = scopes.map((s, i) => ({
+    title: document.getElementById('dt-title-' + i)?.value.trim() || 'Scope',
+    log_size: Number(document.getElementById('dt-logs-' + i)?.value || 0),
+    who: document.getElementById('dt-who-' + i)?.value.trim() || '',
+    what: document.getElementById('dt-what-' + i)?.value.trim() || '',
+    when: document.getElementById('dt-when-' + i)?.value.trim() || '',
+    where: document.getElementById('dt-where-' + i)?.value.trim() || '',
+    how: document.getElementById('dt-how-' + i)?.value.trim() || '',
+    budget: Number(document.getElementById('dt-budget-' + i)?.value || 0),
+  }));
+
+  try {
+    const { error } = await sb.rpc('post_ai_contract_scopes', { p_project_id: projectId, p_scopes: payload });
+    if (error) throw error;
+    toast(`${payload.length} scope${payload.length !== 1 ? 's' : ''} posted to the network.`);
+    closeOverlay();
+    window._dtScopes = null;
+    if (uniTab === 'work') showUniTab('work');
+  } catch(e) {
+    console.error(e);
+    toast('Could not post to the network.');
+  }
 }
 
 async function submitWorkApplication(scopeId) {

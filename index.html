@@ -6552,7 +6552,11 @@ function toggleWorkCard(id) {
 // ── DECOMPOSITION TOOL ("D") — AI writes the contract, operator reviews and
 // confirms before anything posts. Nothing goes live without that click. ──
 async function openDecompTool() {
-  if (!operator) return;
+  if (!operator) {
+    console.warn('openDecompTool: operator is not set — session may be stale.');
+    toast('Session issue — try signing out and back in.');
+    return;
+  }
   window._askInitialized = false;
   openOverlay('D', async (body) => {
     body.innerHTML = `

@@ -6723,9 +6723,14 @@ function renderDecompReview() {
 
 function recalcDtBudget(i) {
   const logs = Number(document.getElementById('dt-logs-' + i)?.value || 0);
-  const rate = 39; // Apprentice default — operator can hand-adjust the budget field directly if a higher tier applies
+  const rate = 39; // Apprentice default — matches generate-contract's default; operator can hand-adjust if a higher tier applies
   const budgetEl = document.getElementById('dt-budget-' + i);
-  if (budgetEl) budgetEl.value = Math.round((logs * rate) / 0.75);
+  // Budget = LOGs × rate (no ÷0.75) — this is the worker's payout shown on
+  // a Work Board contract, not the client-facing price. Must match the
+  // same formula the AI uses server-side, or editing LOGs after generation
+  // would silently produce a budget inconsistent with the other scopes in
+  // the same contract.
+  if (budgetEl) budgetEl.value = Math.round(logs * rate);
 }
 
 async function postDecompContract() {
@@ -6803,9 +6808,13 @@ async function renderSidekick(body) {
   }
 
   try {
-    const { data, error } = await sb.rpc('get_deals_for_member', { p_assignee: assigneeName });
-    if (error) throw error;
-    window._sidekickDeals = data || [];
+    const [dealsRes, opsRes] = await Promise.all([
+      sb.rpc('get_deals_for_member', { p_assignee: assigneeName }),
+      sb.rpc('list_operators'),
+    ]);
+    if (dealsRes.error) throw dealsRes.error;
+    window._sidekickDeals = dealsRes.data || [];
+    window._allOperators = opsRes.data || [];
     renderSidekickList();
   } catch(e) {
     console.error(e);
@@ -7244,8 +7253,20 @@ function renderSidekickList() {
     const isVerified = !!d.verified_at;
     const isPaid = !!d.paid_at;
     const statusLabel = isPaid ? 'paid' : isVerified ? 'verified' : 'pending';
-    const rate = 100; // placeholder pending real rate lookup per assignee tier — flagged for the next pass
-    const amount = Number(d.log_size || 0) * rate;
+
+    // Real amount, not a guess: AI-generated scopes already have a computed
+    // contract_budget from generation time — use that directly. Otherwise,
+    // look up the assignee's actual current tier and use their real rate.
+    const RATES = { Operator: 100, Architect: 85, Wrangler: 65, Apprentice: 39 };
+    let amount;
+    if (d.contract_budget != null) {
+      amount = Number(d.contract_budget);
+    } else {
+      const assigneeOp = (window._allOperators || []).find(o => (o.peer_name || '').toLowerCase() === (d.assignee || '').toLowerCase());
+      const rate = assigneeOp ? (RATES[tier(assigneeOp.total_logs)] || RATES.Apprentice) : RATES.Apprentice;
+      amount = Number(d.log_size || 0) * rate;
+    }
+
     return `
       <div class="sk-deal" id="sk-${d.id}">
         <div class="sk-head"><div class="sk-title">${esc(d.title || 'Scope')}</div><div class="sk-status ${statusLabel}">${statusLabel}</div></div>

@@ -1961,7 +1961,8 @@ function isBlockPast(cycleStart, blockNumber) {
 const RESERVE = 0.25;
 function projectPrice(logs, rate) { return (logs * rate) / (1 - RESERVE); }
 function reserveAmt(gross) { return gross * RESERVE; }
-function repScore(d, t, s, disp) { return Math.max(0, (0.50*d) + (0.25*t) + (0.15*s) - (0.10*disp)); }
+// repScore formula now lives server-side, inside settle_submission —
+// removed here to avoid two copies of the same math drifting apart.
 
 // ── STATE ──
 let sb = null;
@@ -4592,7 +4593,10 @@ async function settleProject(projectId) {
 
   if (error) { toast('Settlement failed.'); console.error(error); return; }
 
-  await updateReputation(projectId);
+  // Reputation, total_logs, and the Signal ledger entry are now all
+  // handled atomically inside settle_submission itself, correctly
+  // attributed per assignee — no separate client-side call needed.
+  await refreshOwnStatsAfterSettlement();
 
   const projLabel = projRow?.title || projRow?.relation_name || projRow?.relation_code || 'Project';
   fireAndForget(sb.rpc('emit_event', {
@@ -4612,40 +4616,24 @@ async function settleProject(projectId) {
   if (operator) openMemberRecord(operator.id);
 }
 
-async function updateReputation(projectId) {
-  // Fetch all scopes for timing data — RPC read, not a direct bids query
-  const { data: scopes } = await sb.rpc('get_scopes_for_projects', { p_ids: [projectId] });
-  if (!scopes?.length) return;
-
-  // Simple delivery and timeliness calc — all confirmed = 1.0 delivery
-  const delivery   = 1.0;
-  const timeliness = scopes.every(s => s.confirmed_at) ? 1.0 : 0.7;
-  const totalLogs  = scopes.reduce((n, s) => n + (s.log_size || 0), 0);
-
-  // Get current operator record — via RPC, never a direct table read (RLS blocks those silently)
-  const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
-  const op = Array.isArray(opRows) ? opRows[0] : opRows;
-  if (!op) { console.error('updateReputation: could not load operator record'); return; }
-
-  const newStreak  = (op.streak || 0) + 1;
-  const newLogs    = (op.total_logs || 0) + totalLogs;
-  const newScore   = repScore(delivery, timeliness, Math.min(newStreak / 10, 1), 0);
-  const finalScore = op.reputation_score
-    ? (Number(op.reputation_score) * 0.7) + (newScore * 0.3)  // rolling weighted average
-    : newScore;
-
-  const { error: statErr } = await sb.rpc('update_operator_stats', {
-    p_email:            operator.email,
-    p_total_logs:       newLogs,
-    p_reputation_score: Math.min(1, Number(finalScore.toFixed(3))),
-    p_streak:           newStreak,
-  });
-  if (statErr) { console.error('updateReputation: stats write failed', statErr); toast('Settled, but reputation update failed.'); return; }
-
-  // Update local state and topbar
-  operator.total_logs       = newLogs;
-  operator.reputation_score = finalScore;
-  document.getElementById('tb-score').textContent = finalScore.toFixed(3);
+// Re-syncs the current operator's local state and topbar display after a
+// settlement — the actual reputation/total_logs calculation now happens
+// entirely server-side, atomically, per assignee, inside settle_submission.
+// This only matters if the person who clicked Settle is themselves one of
+// the assignees who was just credited.
+async function refreshOwnStatsAfterSettlement() {
+  try {
+    const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
+    const op = Array.isArray(opRows) ? opRows[0] : opRows;
+    if (!op) return;
+    operator.total_logs       = op.total_logs;
+    operator.reputation_score = op.reputation_score;
+    operator.streak           = op.streak;
+    const scoreEl = document.getElementById('tb-score');
+    if (scoreEl) scoreEl.textContent = Number(op.reputation_score || 0).toFixed(3);
+  } catch(e) {
+    console.error('refreshOwnStatsAfterSettlement failed:', e);
+  }
 }
 
 // ── RECORD SURFACE ──

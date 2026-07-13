@@ -1634,7 +1634,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 </div>
 
 <!-- ═══ RELATION SHELL ═══ -->
-<!-- ═══ UNIFIED SHELL — Signal / Messages / Work / Sidekick ═══ -->
+<!-- ═══ UNIFIED SHELL — Market / Messages / Work / Sidekick ═══ -->
 <div id="uni-shell">
   <div id="uni-topbar">
     <div style="font-family:var(--display);font-weight:800;font-size:15px;color:var(--green);letter-spacing:.02em">BIXXVILLE</div>
@@ -1653,7 +1653,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   <nav id="uni-nav">
     <button class="nav-btn active" id="unav-signal" onclick="showUniTab('signal')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.6" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
-      <div class="nav-label">Signal</div>
+      <div class="nav-label">Market</div>
     </button>
     <button class="nav-btn" id="unav-messages" onclick="showUniTab('messages')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.6" stroke-linecap="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
@@ -1672,7 +1672,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
 <!-- ═══ SHELL ═══ -->
 <div id="shell">
-  <div id="admin-banner"><span>Admin Mode — Operator tools</span><span onclick="closeAdminMode()" style="cursor:pointer;font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.06em;text-transform:uppercase">← Back to Signal</span></div>
+  <div id="admin-banner"><span>Admin Mode — Operator tools</span><span onclick="closeAdminMode()" style="cursor:pointer;font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.06em;text-transform:uppercase">← Back to Market</span></div>
   <!-- Operator sidebar toggle into Penpal view — added inside ds-peer block below via JS injection is avoided;
        button lives here so it never duplicates across re-renders. -->
 
@@ -1725,7 +1725,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <div class="ds-peer-name" id="ds-peer-name">—</div>
         <div class="ds-peer-handle" id="ds-peer-handle">—</div>
       </div>
-      <button class="ds-signout" onclick="closeAdminMode()" title="Back to Signal">
+      <button class="ds-signout" onclick="closeAdminMode()" title="Back to Market">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
       </button>
     </div>
@@ -1751,7 +1751,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       </div>
       <div class="tb-right-mobile">
         <span class="tb-rep-pill" id="tb-score">—</span>
-        <button class="tb-exit-sm" onclick="closeAdminMode()">← Signal</button>
+        <button class="tb-exit-sm" onclick="closeAdminMode()">← Market</button>
       </div>
     </div>
 
@@ -6374,7 +6374,7 @@ function doRelLogout() {
   gateShowSplash();
 }
 
-// ══ UNIFIED SHELL — Signal / Messages / Work / Sidekick ══
+// ══ UNIFIED SHELL — Market / Messages / Work / Sidekick ══
 let uniTab = 'signal';
 
 function currentIdentityLabel() {
@@ -6419,9 +6419,33 @@ function showUniTab(tab) {
 }
 
 // ── SIGNAL — raw, network-wide tape of signed LOGs ──
+let marketMode = 'tape';
 async function renderSignal(body) {
   body.innerHTML = `
-    <div class="sig-title-row"><div class="sig-title">Signal</div><div class="sig-note">Every signed LOG, network-wide</div></div>
+    <div class="sig-title-row"><div class="sig-title">Market</div><div class="sig-note">The network, priced and raw</div></div>
+    <div style="display:flex;gap:6px;padding:0 18px 16px">
+      <button class="calc-mode-btn ${marketMode==='tape'?'active':''}" onclick="switchMarketMode('tape')">Tape</button>
+      <button class="calc-mode-btn ${marketMode==='network'?'active':''}" onclick="switchMarketMode('network')">Network</button>
+    </div>
+    <div id="market-body"></div>`;
+  renderMarketMode();
+}
+
+function switchMarketMode(mode) {
+  marketMode = mode;
+  document.querySelectorAll('.calc-mode-btn').forEach(b => b.classList.remove('active'));
+  event?.target?.classList.add('active');
+  renderMarketMode();
+}
+
+function renderMarketMode() {
+  const el = document.getElementById('market-body');
+  if (!el) return;
+  if (marketMode === 'tape') renderMarketTape(el); else renderMarketNetwork(el);
+}
+
+async function renderMarketTape(el) {
+  el.innerHTML = `
     <div class="sig-col-head"><div>Time</div><div>Bixx ID</div><div style="text-align:right">Signed</div><div style="text-align:right">Total</div></div>
     <div id="sig-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
   try {
@@ -6440,8 +6464,76 @@ async function renderSignal(body) {
   } catch(e) {
     console.error(e);
     const list = document.getElementById('sig-list');
-    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load Signal. Run the unified system migration in Supabase if this is the first load.</div></div>';
+    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load the tape. Run the unified system migration in Supabase if this is the first load.</div></div>';
   }
+}
+
+// ── NETWORK — real businesses, real settled revenue only. No estimates,
+// no backfilled guesses — a business shows $0 until a real settlement
+// with a captured settled_price exists. Small and true beats big and guessed. ──
+async function renderMarketNetwork(el) {
+  el.innerHTML = `<div id="net-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+  try {
+    const { data, error } = await sb.rpc('get_network_directory');
+    if (error) throw error;
+    window._networkDirectory = data || [];
+    const list = document.getElementById('net-list');
+    if (!list) return;
+    if (!window._networkDirectory.length) { list.innerHTML = '<div class="empty"><div class="empty-msg">No businesses in the network yet.</div></div>'; return; }
+
+    list.innerHTML = `
+      <div class="sig-col-head" style="grid-template-columns:1.6fr 1fr 0.8fr"><div>Business</div><div style="text-align:right">Generated</div><div style="text-align:right">Settled</div></div>
+      ${window._networkDirectory.map(b => `
+        <div class="sig-row" style="grid-template-columns:1.6fr 1fr 0.8fr;cursor:pointer" onclick="openBusinessDetail('${esc(b.relation_code)}')">
+          <div class="sig-id"><div class="sig-avatar">${esc((b.name||'?').charAt(0).toUpperCase())}</div><span class="sig-handle">${esc(b.name || b.relation_code)}</span></div>
+          <div class="sig-log">$${Number(b.total_generated||0).toLocaleString()}</div>
+          <div class="sig-total">${b.settled_count || 0}</div>
+        </div>`).join('')}`;
+  } catch(e) {
+    console.error(e);
+    const list = document.getElementById('net-list');
+    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load Network. Run the network page migration in Supabase if this is the first load.</div></div>';
+  }
+}
+
+async function openBusinessDetail(relationCode) {
+  openOverlay('Business', async (body) => {
+    body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Loading…</div></div>';
+    const biz = (window._networkDirectory || []).find(b => b.relation_code === relationCode);
+    if (!biz) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
+
+    try {
+      const { data: projects, error } = await sb.rpc('get_business_detail', { p_relation_code: relationCode });
+      if (error) throw error;
+
+      const tenureDays = biz.first_seen ? Math.floor((Date.now() - new Date(biz.first_seen).getTime()) / 86400000) : 0;
+      const tenureLabel = tenureDays >= 60 ? Math.floor(tenureDays/30) + 'mo' : tenureDays + 'd';
+
+      body.innerHTML = `
+        <div class="rel-section" style="padding-top:10px;display:flex;align-items:center;gap:14px">
+          <div class="prof-avatar">${avatarHtml(biz.name, null, 16)}</div>
+          <div><div class="prof-peer">${esc(biz.name || biz.relation_code)}</div><div class="prof-lane">Since ${fmtDate(biz.first_seen)}</div></div>
+        </div>
+        <div class="stat-grid">
+          <div class="stat-cell"><div class="stat-val green">$${Number(biz.total_generated||0).toLocaleString()}</div><div class="stat-lbl">Generated</div></div>
+          <div class="stat-cell"><div class="stat-val">${tenureLabel}</div><div class="stat-lbl">In Network</div></div>
+          <div class="stat-cell"><div class="stat-val">${biz.settled_count || 0}</div><div class="stat-lbl">Settled</div></div>
+        </div>
+        <div class="section-lbl" style="position:relative;top:0">Projects</div>
+        <div>${(projects||[]).length ? projects.map(p => `
+          <div class="log-row">
+            <div class="log-row-main">
+              <div class="log-row-title">${esc(p.project_title || 'Untitled')}</div>
+              <div class="log-row-meta">${esc(p.status)} · ${fmtDate(p.created_at)}</div>
+            </div>
+            <div class="log-row-right"><div class="log-row-hours">${p.settled_price != null ? '$' + Number(p.settled_price).toLocaleString() : '—'}</div></div>
+          </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No projects yet.</div></div>'}</div>
+        <div style="padding:20px 18px;font-family:var(--mono);font-size:9px;color:var(--grey);text-align:center">Reviews are a planned feature — not built yet.</div>`;
+    } catch(e) {
+      console.error(e);
+      body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load this business.</div></div>';
+    }
+  }, null, null, false);
 }
 
 // ── MESSAGES — real/proxy relation identity reuses the Penpal thread view;

@@ -6491,11 +6491,21 @@ async function openBusinessDetail(relationCode) {
     if (!biz) { body.innerHTML = '<div class="empty"><div class="empty-msg">Not found.</div></div>'; return; }
 
     try {
-      const { data: projects, error } = await sb.rpc('get_business_detail', { p_relation_code: relationCode });
-      if (error) throw error;
+      const [projRes, engRes, revRes, canRevRes] = await Promise.all([
+        sb.rpc('get_business_detail', { p_relation_code: relationCode }),
+        sb.rpc('get_business_engagement', { p_relation_code: relationCode }),
+        sb.rpc('get_business_reviews', { p_relation_code: relationCode }),
+        operator ? sb.rpc('can_review_business', { p_relation_code: relationCode, p_operator_email: operator.email }) : Promise.resolve({ data: false }),
+      ]);
+      if (projRes.error) throw projRes.error;
+      const projects = projRes.data || [];
+      const engagement = engRes.data || [];
+      const reviews = revRes.data || [];
+      const canReview = !!canRevRes.data;
 
       const tenureDays = biz.first_seen ? Math.floor((Date.now() - new Date(biz.first_seen).getTime()) / 86400000) : 0;
       const tenureLabel = tenureDays >= 60 ? Math.floor(tenureDays/30) + 'mo' : tenureDays + 'd';
+      const avgStars = reviews.length ? (reviews.reduce((n,r) => n + r.stars, 0) / reviews.length) : 0;
 
       body.innerHTML = `
         <div class="rel-section" style="padding-top:10px;display:flex;align-items:center;gap:14px">
@@ -6505,10 +6515,25 @@ async function openBusinessDetail(relationCode) {
         <div class="stat-grid">
           <div class="stat-cell"><div class="stat-val green">$${Number(biz.total_generated||0).toLocaleString()}</div><div class="stat-lbl">Generated</div></div>
           <div class="stat-cell"><div class="stat-val">${tenureLabel}</div><div class="stat-lbl">In Network</div></div>
-          <div class="stat-cell"><div class="stat-val">${biz.settled_count || 0}</div><div class="stat-lbl">Settled</div></div>
+          <div class="stat-cell"><div class="stat-val">${reviews.length ? avgStars.toFixed(1) : '—'}</div><div class="stat-lbl">Rating · ${reviews.length} review${reviews.length!==1?'s':''}</div></div>
         </div>
+
+        <div class="section-lbl" style="position:relative;top:0">Who's Working On What</div>
+        <div>${engagement.length ? engagement.map(e => {
+          const firstDays = e.first_worked ? Math.floor((Date.now() - new Date(e.first_worked).getTime()) / 86400000) : 0;
+          const firstLabel = firstDays >= 60 ? Math.floor(firstDays/30) + 'mo' : firstDays + 'd';
+          return `
+          <div class="log-row">
+            <div class="log-row-main">
+              <div class="log-row-title">${esc(e.scope_title || 'Scope')} — ${esc(e.assignee || 'Unassigned')}</div>
+              <div class="log-row-meta">${esc(e.assignee_tier)} · ${esc(e.status)} · here ${firstLabel}</div>
+            </div>
+            <div class="log-row-right"><div class="log-row-hours">$${Number(e.price||0).toLocaleString()}</div></div>
+          </div>`;
+        }).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Nobody assigned yet.</div></div>'}</div>
+
         <div class="section-lbl" style="position:relative;top:0">Projects</div>
-        <div>${(projects||[]).length ? projects.map(p => `
+        <div>${projects.length ? projects.map(p => `
           <div class="log-row">
             <div class="log-row-main">
               <div class="log-row-title">${esc(p.project_title || 'Untitled')}</div>
@@ -6516,12 +6541,66 @@ async function openBusinessDetail(relationCode) {
             </div>
             <div class="log-row-right"><div class="log-row-hours">${p.settled_price != null ? '$' + Number(p.settled_price).toLocaleString() : '—'}</div></div>
           </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No projects yet.</div></div>'}</div>
-        <div style="padding:20px 18px;font-family:var(--mono);font-size:9px;color:var(--grey);text-align:center">Reviews are a planned feature — not built yet.</div>`;
+
+        <div class="section-lbl" style="position:relative;top:0">Reviews from operators</div>
+        ${canReview ? `<div style="padding:0 18px 14px"><button class="sk-verify-btn" onclick="openReviewForm('${esc(relationCode)}')">Rate this business</button></div>` : ''}
+        <div id="biz-reviews-list">${reviews.length ? reviews.map(r => `
+          <div class="review-item" style="padding:14px 18px;border-bottom:1px solid #141414">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+              <div style="font-size:10px;font-weight:600;color:var(--cream)">${esc(r.operator_name)}</div>
+              <div style="font-size:10px;color:var(--gold,var(--orange))">${'★'.repeat(r.stars)}${'☆'.repeat(5-r.stars)}</div>
+            </div>
+            ${r.review_text ? `<div style="font-family:var(--voice, serif);font-style:italic;font-size:12px;color:var(--soft);line-height:1.55">"${esc(r.review_text)}"</div>` : ''}
+          </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No reviews yet.</div></div>'}</div>`;
     } catch(e) {
       console.error(e);
       body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load this business.</div></div>';
     }
   }, null, null, false);
+}
+
+function openReviewForm(relationCode) {
+  openOverlay('Rate Business', (body) => {
+    body.innerHTML = `
+      <div class="rel-section" style="padding-top:10px">
+        <div class="rel-q-lbl" style="margin-bottom:8px">Stars</div>
+        <div style="display:flex;gap:8px;margin-bottom:16px" id="rev-stars">
+          ${[1,2,3,4,5].map(n => `<button class="calc-mode-btn" style="flex:0 0 auto;width:44px" data-star="${n}" onclick="setReviewStars(${n})">${n}★</button>`).join('')}
+        </div>
+        <div class="rel-q-lbl" style="margin-bottom:4px">A line about the experience (optional)</div>
+        <textarea class="rel-q-input" id="rev-text" rows="3" placeholder="What was it like working with them?"></textarea>
+        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="submitReview('${esc(relationCode)}')">Submit Review</button>
+        <div id="rev-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+      </div>`;
+  }, null, null, true);
+}
+
+let reviewStars = 0;
+function setReviewStars(n) {
+  reviewStars = n;
+  document.querySelectorAll('#rev-stars .calc-mode-btn').forEach(b => b.classList.toggle('active', Number(b.dataset.star) <= n));
+}
+
+async function submitReview(relationCode) {
+  const errEl = document.getElementById('rev-error');
+  if (errEl) errEl.style.display = 'none';
+  if (!reviewStars) { if (errEl) { errEl.textContent = 'Pick a star rating.'; errEl.style.display = 'block'; } return; }
+  const text = document.getElementById('rev-text')?.value.trim() || null;
+
+  try {
+    const { error } = await sb.rpc('submit_business_review', {
+      p_relation_code: relationCode, p_operator_email: operator.email,
+      p_project_id: null, p_stars: reviewStars, p_review_text: text,
+    });
+    if (error) throw error;
+    toast('Review submitted.');
+    reviewStars = 0;
+    overlayBack();
+    openBusinessDetail(relationCode);
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = e.message || 'Could not submit review.'; errEl.style.display = 'block'; }
+  }
 }
 
 // ── MESSAGES — real/proxy relation identity reuses the Penpal thread view;

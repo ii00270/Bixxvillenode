@@ -1661,7 +1661,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
     </button>
     <button class="nav-btn" id="unav-work" onclick="showUniTab('work')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v10M9 9.5c0-1.5 1.3-2.5 3-2.5s3 1 3 2.2c0 2.8-6 1.3-6 4.1 0 1.2 1.3 2.2 3 2.2s3-1 3-2.5"/></svg>
-      <div class="nav-label">Work</div>
+      <div class="nav-label">BIX AI</div>
     </button>
     <button class="nav-btn" id="unav-sidekick" onclick="showUniTab('sidekick')">
       <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.6" stroke-linecap="round"><path d="M9 11l3 3 8-8"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -6637,77 +6637,87 @@ async function renderUniMessages(body) {
 async function renderWorkBoard(body) {
   if (relation) {
     body.innerHTML = `
-      <div class="sig-title-row"><div class="sig-title">Work</div><div class="sig-note">Operators only</div></div>
-      <div class="empty" style="padding:30px 18px"><div class="empty-msg">The Work board is where network operators pick up open scopes. Submit a project instead, and an operator will scope it from here.</div></div>`;
+      <div class="sig-title-row"><div class="sig-title">BIX AI</div><div class="sig-note">Operators only</div></div>
+      <div class="empty" style="padding:30px 18px"><div class="empty-msg">BIX AI is where network operators work. Submit a project instead, and an operator will scope it from here.</div></div>`;
     return;
   }
   if (!operator) return;
 
-  const unlocked = ['Architect', 'Operator'].includes(tier(operator.total_logs));
-
   body.innerHTML = `
     <div class="sig-title-row">
-      <div class="sig-title">Work</div>
+      <div class="sig-title">BIX AI</div>
       <div style="display:flex;align-items:center;gap:10px">
         <button class="wb-d-key" onclick="openDecompTool()" title="Decompose &amp; post to the network">D</button>
-        <div class="sig-note">${unlocked ? 'Open across the network' : 'Architect+ to apply'}</div>
+        <div class="sig-note">Ask about open work, your projects, the network</div>
       </div>
     </div>
-    <div id="wb-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+    <div class="rel-section" style="padding-top:0">
+      <div id="bixai-thread" style="max-height:52vh;overflow-y:auto;margin-bottom:12px"></div>
+      <div style="display:flex;gap:8px">
+        <input class="rel-q-input" id="bixai-input" placeholder="Ask about open work, your projects, a business…" style="flex:1" onkeydown="if(event.key==='Enter')sendBixAiMessage()"/>
+        <button class="sk-pay-btn" style="margin:0" onclick="sendBixAiMessage()">Send</button>
+      </div>
+    </div>`;
+  renderBixAiThread();
+}
+
+let bixAiHistory = [];
+function renderBixAiThread() {
+  const el = document.getElementById('bixai-thread');
+  if (!el) return;
+  if (!bixAiHistory.length) {
+    el.innerHTML = `<div style="font-family:var(--sans);font-size:12px;color:var(--soft);padding:10px 0">Try: "what open work is available?", "what am I working on?", or "how much has Constitution Hill generated?" — this reads real, live data, not guesses.</div>`;
+    return;
+  }
+  el.innerHTML = bixAiHistory.map(m => `
+    <div style="margin-bottom:12px">
+      <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:${m.role === 'user' ? 'var(--green)' : 'var(--grey)'};margin-bottom:3px">${m.role === 'user' ? 'You' : 'BIX AI'}</div>
+      <div style="font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.6;white-space:pre-wrap">${esc(m.content)}</div>
+    </div>`).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendBixAiMessage() {
+  const input = document.getElementById('bixai-input');
+  const text = input?.value.trim();
+  if (!text || !operator) return;
+  input.value = '';
+
+  bixAiHistory.push({ role: 'user', content: text });
+  renderBixAiThread();
+
+  const el = document.getElementById('bixai-thread');
+  const loadingId = 'bixai-loading-' + Date.now();
+  el.insertAdjacentHTML('beforeend', `<div id="${loadingId}" style="font-family:var(--mono);font-size:10px;color:var(--grey)">Thinking…</div>`);
+  el.scrollTop = el.scrollHeight;
 
   try {
-    const { data, error } = await sb.rpc('get_open_work');
-    if (error) throw error;
-    window._openWork = data || [];
-    const list = document.getElementById('wb-list');
-    if (!list) return;
-    if (!window._openWork.length) { list.innerHTML = '<div class="empty"><div class="empty-msg">No open work right now.</div></div>'; return; }
+    const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
+      body: JSON.stringify({
+        messages: bixAiHistory,
+        operator_context: `${operator.peer_name}, tier ${tier(operator.total_logs)}, ${operator.total_logs || 0} total LOGs.`,
+        caller_tier: tier(operator.total_logs),
+      }),
+    });
+    const data = await res.json();
+    document.getElementById(loadingId)?.remove();
+    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
 
-    list.innerHTML = window._openWork.map(w => `
-      <div class="wb-card ${unlocked ? 'unlocked' : 'locked'}" id="wb-${w.id}" onclick="${unlocked ? `toggleWorkCard('${w.id}')` : ''}">
-        ${!unlocked ? '<div class="wb-lock-tag">Architect+</div>' : ''}
-        <div class="wb-head">
-          <div class="wb-title">${esc(w.title || 'Scope')}${w.ai_generated ? ' <span class="wb-ai-tag">AI</span>' : ''}</div>
-          <div class="wb-log">${w.log_size || 0} LOG</div>
-        </div>
-        <div class="wb-meta">${esc(w.project_title || '—')}</div>
-        ${unlocked ? renderContractBlock(w) : ''}
-        ${unlocked ? `
-        <textarea class="rel-q-input" id="wb-msg-${w.id}" rows="2" placeholder="A line on why you're a fit (optional)" onclick="event.stopPropagation()" style="margin-top:8px"></textarea>
-        <button class="wb-apply" onclick="event.stopPropagation();submitWorkApplication('${w.id}')">Post Bid</button>` : ''}
-      </div>`).join('');
+    bixAiHistory.push({ role: 'assistant', content: data.reply });
+    renderBixAiThread();
   } catch(e) {
     console.error(e);
-    const list = document.getElementById('wb-list');
-    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load the Work board. Run the unified system migration in Supabase if this is the first load.</div></div>';
+    document.getElementById(loadingId)?.remove();
+    bixAiHistory.push({ role: 'assistant', content: 'Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
+    renderBixAiThread();
   }
 }
 
 // The Who/What/When/Where/How/Budget contract — shown inside an expanded
 // Work card. Falls back to a plain note for scopes posted the old manual
 // way, which don't have contract fields filled in.
-function renderContractBlock(w) {
-  if (!w.contract_who && !w.contract_what) {
-    return `<div class="wb-desc">Post interest below to apply. The operator running this project still confirms the final assignee.</div>`;
-  }
-  const fundsLabel = w.funds_status === 'confirmed' ? 'Confirmed by client' : 'Pending';
-  const fundsColor = w.funds_status === 'confirmed' ? 'var(--green)' : 'var(--orange)';
-  return `
-    <div class="wb-desc">
-      <div class="wb-contract-row"><span>Who</span><span>${esc(w.contract_who || '—')}</span></div>
-      <div class="wb-contract-row"><span>What</span><span>${esc(w.contract_what || '—')}</span></div>
-      <div class="wb-contract-row"><span>When</span><span>${esc(w.contract_when || '—')}</span></div>
-      <div class="wb-contract-row"><span>Where</span><span>${esc(w.contract_where || '—')}</span></div>
-      <div class="wb-contract-row"><span>How</span><span>${esc(w.contract_how || '—')}</span></div>
-      <div class="wb-contract-row"><span>Budget</span><span style="color:var(--green);font-weight:700">$${Number(w.contract_budget || 0).toLocaleString()}</span></div>
-      <div class="wb-contract-row"><span>Funds</span><span style="color:${fundsColor}">${fundsLabel}</span></div>
-    </div>`;
-}
-
-function toggleWorkCard(id) {
-  document.getElementById('wb-' + id)?.classList.toggle('expanded');
-}
-
 // ── DECOMPOSITION TOOL ("D") — AI writes the contract, operator reviews and
 // confirms before anything posts. Nothing goes live without that click. ──
 async function openDecompTool() {
@@ -6921,22 +6931,6 @@ async function postDecompContract() {
   }
 }
 
-async function submitWorkApplication(scopeId) {
-  if (!operator) return;
-  const msg = document.getElementById('wb-msg-' + scopeId)?.value.trim() || null;
-  try {
-    const { error } = await sb.rpc('apply_to_scope', {
-      p_scope_id: scopeId, p_applicant_name: operator.peer_name, p_applicant_code: operator.email, p_message: msg,
-    });
-    if (error) throw error;
-    toast('Bid posted — the operator running this project has been notified.');
-    document.getElementById('wb-' + scopeId)?.classList.remove('expanded');
-  } catch(e) {
-    console.error(e);
-    toast('Could not post your bid.');
-  }
-}
-
 // ── SIDEKICK — closing the loop: documents, verification, payment.
 // For operators, this is also the personal command center (what used to be
 // the standalone Home dashboard) — stats, tasks, price calc, claim a block —
@@ -7072,7 +7066,7 @@ async function renderSidekickPersonalPanel(container) {
           <div class="dash-widget-title">Quick Actions</div>
           <div class="dash-actions">
             <div class="dash-action-btn" onclick="openLogWorkModal()"><div class="dash-action-lbl">+ Log Work</div></div>
-            <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">View Work Board</div></div>
+            <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">Open BIX AI</div></div>
             <div class="dash-action-btn" onclick="openAdminMode()"><div class="dash-action-lbl">Open Admin</div></div>
           </div>
         </div>

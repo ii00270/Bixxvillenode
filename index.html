@@ -355,12 +355,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .wb-card.expanded .wb-desc{display:block;}
 .wb-apply{margin-top:12px;width:100%;padding:11px;background:none;border:1px solid var(--green);color:var(--green);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;cursor:pointer;display:none;}
 .wb-card.expanded .wb-apply{display:block;}
-.wb-d-key{
-  width:26px;height:26px;border-radius:5px;background:var(--surface2);border:1px solid var(--line2);
-  color:var(--green);font-family:var(--mono);font-weight:700;font-size:12px;cursor:pointer;
-  box-shadow:0 2px 0 var(--line2);
-}
-.wb-d-key:active{transform:translateY(1px);box-shadow:0 1px 0 var(--line2);}
 .wb-ai-tag{font-family:var(--mono);font-size:8px;color:var(--orange);border:1px solid var(--orange);border-radius:2px;padding:1px 5px;letter-spacing:.06em;vertical-align:middle;}
 .wb-contract-row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;font-family:var(--sans);font-size:11px;color:var(--soft);border-bottom:1px solid #141414;}
 .wb-contract-row span:first-child{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);flex-shrink:0;padding-top:1px;}
@@ -6646,10 +6640,7 @@ async function renderWorkBoard(body) {
   body.innerHTML = `
     <div class="sig-title-row">
       <div class="sig-title">BIX AI</div>
-      <div style="display:flex;align-items:center;gap:10px">
-        <button class="wb-d-key" onclick="openDecompTool()" title="Decompose &amp; post to the network">D</button>
-        <div class="sig-note">Ask about open work, your projects, the network</div>
-      </div>
+      <div class="sig-note">Ask about open work, your projects, the network</div>
     </div>
     <div class="rel-section" style="padding-top:0">
       <div id="bixai-thread" style="max-height:52vh;overflow-y:auto;margin-bottom:12px"></div>
@@ -6720,217 +6711,6 @@ async function sendBixAiMessage() {
 // way, which don't have contract fields filled in.
 // ── DECOMPOSITION TOOL ("D") — AI writes the contract, operator reviews and
 // confirms before anything posts. Nothing goes live without that click. ──
-async function openDecompTool() {
-  if (!operator) {
-    console.warn('openDecompTool: operator is not set — session may be stale.');
-    toast('Session issue — try signing out and back in.');
-    return;
-  }
-  window._askInitialized = false;
-  openOverlay('D', async (body) => {
-    body.innerHTML = `
-      <div class="rel-section" style="padding-top:10px">
-        <div style="display:flex;gap:6px;margin-bottom:16px">
-          <button class="calc-mode-btn active" id="dt-tab-decompose" onclick="switchDTTab('decompose')">Decompose</button>
-          <button class="calc-mode-btn" id="dt-tab-ask" onclick="switchDTTab('ask')">Ask</button>
-        </div>
-      </div>
-      <div id="dt-decompose-pane"></div>
-      <div id="dt-ask-pane" style="display:none"></div>`;
-    renderDecomposePane();
-  }, null, null, false);
-}
-
-function switchDTTab(tab) {
-  document.getElementById('dt-tab-decompose').classList.toggle('active', tab === 'decompose');
-  document.getElementById('dt-tab-ask').classList.toggle('active', tab === 'ask');
-  document.getElementById('dt-decompose-pane').style.display = tab === 'decompose' ? '' : 'none';
-  document.getElementById('dt-ask-pane').style.display = tab === 'ask' ? '' : 'none';
-  if (tab === 'ask' && !window._askInitialized) {
-    renderAskPane();
-    window._askInitialized = true;
-  }
-}
-
-async function renderDecomposePane() {
-  const pane = document.getElementById('dt-decompose-pane');
-  if (!pane) return;
-  const { data: projects } = await sb.rpc('get_planning_projects');
-  const opts = (projects || []).map(p => `<option value="${esc(p.id)}">${esc(p.title || p.relation_name || 'Untitled')}</option>`).join('');
-
-  pane.innerHTML = `
-    <div class="rel-section" style="padding-top:0">
-      <div class="rel-q-lbl" style="margin-bottom:4px">Project</div>
-      <select class="rel-q-input" id="dt-project">${opts || '<option disabled>No active projects</option>'}</select>
-      <div class="rel-q-lbl" style="margin:14px 0 4px">What needs to happen</div>
-      <textarea class="rel-q-input" id="dt-context" rows="5" placeholder="Describe the work in plain language — what needs doing, any constraints, deadline, location. The AI breaks this into postable scopes."></textarea>
-      <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" id="dt-gen-btn" onclick="generateDecompContract()">Generate Contract</button>
-      <div id="dt-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
-    </div>
-    <div id="dt-review"></div>`;
-}
-
-// ── ASK — open-ended chat for math, physics, anything needing real
-// reasoning. Separate Edge Function from the contract generator; same
-// ANTHROPIC_API_KEY secret, no additional Supabase setup needed. ──
-let askHistory = [];
-function renderAskPane() {
-  const pane = document.getElementById('dt-ask-pane');
-  if (!pane) return;
-  pane.innerHTML = `
-    <div class="rel-section" style="padding-top:0">
-      <div id="ask-thread" style="max-height:340px;overflow-y:auto;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px">
-        <input class="rel-q-input" id="ask-input" placeholder="Ask anything — math, physics, whatever you're stuck on" style="flex:1" onkeydown="if(event.key==='Enter')sendAskMessage()"/>
-        <button class="sk-pay-btn" style="margin:0" onclick="sendAskMessage()">Send</button>
-      </div>
-    </div>`;
-  renderAskThread();
-}
-
-function renderAskThread() {
-  const el = document.getElementById('ask-thread');
-  if (!el) return;
-  if (!askHistory.length) {
-    el.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--soft);padding:10px 0">Ask a question — unit conversions, algebra, physics, whatever needs real reasoning rather than a formula.</div>';
-    return;
-  }
-  el.innerHTML = askHistory.map(m => `
-    <div style="margin-bottom:12px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:${m.role === 'user' ? 'var(--green)' : 'var(--grey)'};margin-bottom:3px">${m.role === 'user' ? 'You' : 'Ask'}</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.6;white-space:pre-wrap">${esc(m.content)}</div>
-    </div>`).join('');
-  el.scrollTop = el.scrollHeight;
-}
-
-async function sendAskMessage() {
-  const input = document.getElementById('ask-input');
-  const text = input?.value.trim();
-  if (!text) return;
-  input.value = '';
-
-  askHistory.push({ role: 'user', content: text });
-  renderAskThread();
-
-  const el = document.getElementById('ask-thread');
-  const loadingId = 'ask-loading-' + Date.now();
-  el.insertAdjacentHTML('beforeend', `<div id="${loadingId}" style="font-family:var(--mono);font-size:10px;color:var(--grey)">Thinking…</div>`);
-  el.scrollTop = el.scrollHeight;
-
-  try {
-    const res = await fetch(`${SB_URL}/functions/v1/ask-bixxville`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
-      body: JSON.stringify({ messages: askHistory }),
-    });
-    const data = await res.json();
-    document.getElementById(loadingId)?.remove();
-    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
-
-    askHistory.push({ role: 'assistant', content: data.reply });
-    renderAskThread();
-  } catch(e) {
-    console.error(e);
-    document.getElementById(loadingId)?.remove();
-    askHistory.push({ role: 'assistant', content: 'Could not reach the assistant — the ask-bixxville function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
-    renderAskThread();
-  }
-}
-
-async function generateDecompContract() {
-  const context = document.getElementById('dt-context')?.value.trim();
-  const errEl = document.getElementById('dt-error');
-  const btn = document.getElementById('dt-gen-btn');
-  if (errEl) errEl.style.display = 'none';
-  if (!context) { if (errEl) { errEl.textContent = 'Describe the work first.'; errEl.style.display = 'block'; } return; }
-
-  if (btn) { btn.disabled = true; btn.textContent = 'Generating…'; }
-  try {
-    const res = await fetch(`${SB_URL}/functions/v1/generate-contract`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
-      body: JSON.stringify({
-        project_context: context,
-        tier_rates: { Apprentice: 39, Wrangler: 65, Architect: 85, Operator: 100 },
-      }),
-    });
-    const data = await res.json();
-    if (!res.ok || data.error) throw new Error(data.error || 'Generation failed.');
-
-    window._dtScopes = data.scopes;
-    renderDecompReview();
-  } catch(e) {
-    console.error(e);
-    if (errEl) { errEl.textContent = e.message || 'Could not generate a contract. The generate-contract function may not be deployed yet.'; errEl.style.display = 'block'; }
-  } finally {
-    if (btn) { btn.disabled = false; btn.textContent = 'Generate Contract'; }
-  }
-}
-
-function renderDecompReview() {
-  const el = document.getElementById('dt-review');
-  if (!el) return;
-  const scopes = window._dtScopes || [];
-
-  el.innerHTML = `
-    <div class="rel-section" style="border-top:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Review before posting — edit anything that's off</div>
-      ${scopes.map((s, i) => `
-        <div class="sk-deal" style="margin:0 0 10px">
-          <input class="rel-q-input" style="font-weight:700;margin-bottom:8px" id="dt-title-${i}" value="${esc(s.title || '')}"/>
-          <div class="wb-contract-row"><span>LOG</span><input class="rel-q-input" id="dt-logs-${i}" type="number" style="width:80px;text-align:right" value="${esc(s.log_size || 0)}" oninput="recalcDtBudget(${i})"/></div>
-          <div class="wb-contract-row"><span>Who</span><input class="rel-q-input" id="dt-who-${i}" value="${esc(s.who || '')}"/></div>
-          <div class="wb-contract-row"><span>What</span><input class="rel-q-input" id="dt-what-${i}" value="${esc(s.what || '')}"/></div>
-          <div class="wb-contract-row"><span>When</span><input class="rel-q-input" id="dt-when-${i}" value="${esc(s.when || '')}"/></div>
-          <div class="wb-contract-row"><span>Where</span><input class="rel-q-input" id="dt-where-${i}" value="${esc(s.where || '')}"/></div>
-          <div class="wb-contract-row"><span>How</span><input class="rel-q-input" id="dt-how-${i}" value="${esc(s.how || '')}"/></div>
-          <div class="wb-contract-row"><span>Budget</span><input class="rel-q-input" id="dt-budget-${i}" type="number" style="width:100px;text-align:right;color:var(--green);font-weight:700" value="${esc(s.budget || 0)}"/></div>
-        </div>`).join('')}
-      <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center;border-color:var(--green);color:var(--green)" onclick="postDecompContract()">Post ${scopes.length} scope${scopes.length !== 1 ? 's' : ''} to the network</button>
-    </div>`;
-}
-
-function recalcDtBudget(i) {
-  const logs = Number(document.getElementById('dt-logs-' + i)?.value || 0);
-  const rate = 39; // Apprentice default — matches generate-contract's default; operator can hand-adjust if a higher tier applies
-  const budgetEl = document.getElementById('dt-budget-' + i);
-  // Budget = LOGs × rate (no ÷0.75) — this is the worker's payout shown on
-  // a Work Board contract, not the client-facing price. Must match the
-  // same formula the AI uses server-side, or editing LOGs after generation
-  // would silently produce a budget inconsistent with the other scopes in
-  // the same contract.
-  if (budgetEl) budgetEl.value = Math.round(logs * rate);
-}
-
-async function postDecompContract() {
-  const projectId = document.getElementById('dt-project')?.value;
-  if (!projectId) { toast('Pick a project first.'); return; }
-  const scopes = window._dtScopes || [];
-
-  const payload = scopes.map((s, i) => ({
-    title: document.getElementById('dt-title-' + i)?.value.trim() || 'Scope',
-    log_size: Number(document.getElementById('dt-logs-' + i)?.value || 0),
-    who: document.getElementById('dt-who-' + i)?.value.trim() || '',
-    what: document.getElementById('dt-what-' + i)?.value.trim() || '',
-    when: document.getElementById('dt-when-' + i)?.value.trim() || '',
-    where: document.getElementById('dt-where-' + i)?.value.trim() || '',
-    how: document.getElementById('dt-how-' + i)?.value.trim() || '',
-    budget: Number(document.getElementById('dt-budget-' + i)?.value || 0),
-  }));
-
-  try {
-    const { error } = await sb.rpc('post_ai_contract_scopes', { p_project_id: projectId, p_scopes: payload });
-    if (error) throw error;
-    toast(`${payload.length} scope${payload.length !== 1 ? 's' : ''} posted to the network.`);
-    closeOverlay();
-    window._dtScopes = null;
-    if (uniTab === 'work') showUniTab('work');
-  } catch(e) {
-    console.error(e);
-    toast('Could not post to the network.');
-  }
-}
-
 // ── SIDEKICK — closing the loop: documents, verification, payment.
 // For operators, this is also the personal command center (what used to be
 // the standalone Home dashboard) — stats, tasks, price calc, claim a block —
@@ -6987,16 +6767,12 @@ async function renderSidekickPersonalPanel(container) {
   const myRate = RATES[myTier] || 39;
 
   try {
-    const [opsRes, tasksRes, logsRes, claimsRes] = await Promise.all([
+    const [opsRes, logsRes] = await Promise.all([
       sb.from('relation_submissions').select('id,status').in('status', ['open', 'settling']),
-      sb.rpc('get_my_tasks', { p_operator_id: operator.id }),
       sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
-      sb.rpc('get_my_claims', { p_operator_id: operator.id }),
     ]);
 
     const activeProjects = (opsRes.data || []).length;
-    window._myTasks = tasksRes.data || [];
-    window._myClaims = claimsRes.data || [];
     const cycleHours = (logsRes.data || [])
       .filter(l => l.cycle_number === cycle.num)
       .reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
@@ -7030,16 +6806,7 @@ async function renderSidekickPersonalPanel(container) {
       </div>
 
       <div class="dash-widgets">
-        <div class="dash-widget">
-          <div class="dash-widget-title">Task Tracker</div>
-          <div id="dash-tasks-list">${renderDashTasks()}</div>
-          <div class="dash-task-add">
-            <input class="dash-task-input" id="dash-task-input" placeholder="Add a task…" onkeydown="if(event.key==='Enter')addDashTask()"/>
-            <button class="dash-task-add-btn" onclick="addDashTask()">Add</button>
-          </div>
-        </div>
-
-        <div class="dash-widget">
+        <div class="dash-widget full">
           <div class="dash-widget-title">Quick Price Calculator</div>
           <div class="dash-calc-row">
             <span class="dash-calc-lbl">LOGs</span>
@@ -7065,24 +6832,10 @@ async function renderSidekickPersonalPanel(container) {
         <div class="dash-widget full">
           <div class="dash-widget-title">Quick Actions</div>
           <div class="dash-actions">
-            <div class="dash-action-btn" onclick="openLogWorkModal()"><div class="dash-action-lbl">+ Log Work</div></div>
+            <div class="dash-action-btn" onclick="openStartProject()"><div class="dash-action-lbl">+ Create Project</div></div>
             <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">Open BIX AI</div></div>
             <div class="dash-action-btn" onclick="openAdminMode()"><div class="dash-action-lbl">Open Admin</div></div>
           </div>
-        </div>
-
-        <div class="dash-widget full">
-          <div class="dash-widget-title">Claim a Block</div>
-          <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:12px;line-height:1.5">Reserve a block ahead of time — the habit starts with committing before you start.</div>
-          <div class="dash-calc-row">
-            <span class="dash-calc-lbl">When</span>
-            <input class="form-input" id="claim-when" type="datetime-local" value="${new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}" style="max-width:220px"/>
-          </div>
-          <div style="margin-bottom:10px">
-            <input class="dash-task-input" id="claim-desc" placeholder="What will you work on?" style="width:100%"/>
-          </div>
-          <button class="dash-task-add-btn" style="width:100%;padding:10px" onclick="submitClaimBlock()">Claim Block</button>
-          <div id="dash-claims-list" style="margin-top:14px">${renderDashClaims()}</div>
         </div>
       </div>
 
@@ -7571,15 +7324,32 @@ function openUniProfile() {
     toast('Session issue — try signing out and back in.');
     return;
   }
+  // Preserve existing skills/credentials so saving this simpler form
+  // doesn't wipe out what's already on file from the full Admin editor.
+  window._profSkills = operator.skills ? (typeof operator.skills === 'string' ? JSON.parse(operator.skills || '[]') : operator.skills) : [];
+  window._profCreds  = operator.credentials ? (typeof operator.credentials === 'string' ? JSON.parse(operator.credentials || '[]') : operator.credentials) : [];
+
   openOverlay('Profile', (body) => {
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px;display:flex;align-items:center;gap:14px">
-        <div class="prof-avatar">${avatarHtml(operator.peer_name, operator.avatar_url, 16)}</div>
+        <div class="prof-avatar" style="cursor:pointer" onclick="document.getElementById('uprof-avatar-input').click()">${avatarHtml(operator.peer_name, operator.avatar_url, 16)}</div>
+        <input type="file" id="uprof-avatar-input" accept="image/*" style="display:none" onchange="uploadAvatarFile(this)"/>
         <div><div class="prof-peer">${esc(operator.peer_name)}</div><div class="prof-lane">${esc(tier(operator.total_logs))} · ${esc(operator.email)}</div></div>
       </div>
       <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:6px">Full profile editing, wallet, and ledger</div>
-        <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">Open Admin from the gear icon to edit your profile, wallet address, and view your payment ledger.</div>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Handle</div>
+        <input class="rel-q-input" id="prof-handle" placeholder="@handle" value="${esc(operator.handle || '')}" style="margin-bottom:12px"/>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Bio</div>
+        <textarea class="rel-q-input" id="prof-bio" rows="3" placeholder="A line about you or what you're working on." style="margin-bottom:12px">${esc(operator.bio || '')}</textarea>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Contact email</div>
+        <input class="rel-q-input" id="prof-contact-email" placeholder="you@example.com" value="${esc(operator.contact_email || '')}" style="margin-bottom:12px"/>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Phone</div>
+        <input class="rel-q-input" id="prof-phone" placeholder="Optional" value="${esc(operator.phone || '')}" style="margin-bottom:12px"/>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Wallet address</div>
+        <input class="rel-q-input" id="prof-wallet" placeholder="0x…" value="${esc(operator.wallet_address || '')}" style="margin-bottom:12px"/>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Desired bid size</div>
+        <input class="rel-q-input" id="prof-bid-size" placeholder="Optional" value="${esc(operator.desired_bid_size || '')}"/>
+        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="saveProfile()">Save Profile</button>
       </div>
       <button class="act-btn-sm" style="margin:20px 18px 0;width:calc(100% - 36px);padding:12px;text-align:center;border-color:var(--red);color:var(--red)" onclick="closeOverlay();doLogout()">Sign out</button>`;
   }, null, null, false);

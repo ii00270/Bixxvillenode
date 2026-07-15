@@ -2909,6 +2909,59 @@ function setMemberFilter(kind, val) {
   renderMembersList();
 }
 
+// ── CREATE PROJECT — explicit, always linked to a real client. Replaces
+// reliance on the older structured-intake flow, whose connection to a
+// specific business couldn't be confirmed from the client side. ──
+async function openCreateProjectModal() {
+  openOverlay('Create Project', async (body) => {
+    body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Loading clients…</div></div>';
+    try {
+      const { data, error } = await sb.rpc('get_client_list');
+      if (error) throw error;
+      const clients = data || [];
+      const opts = clients.map(c => `<option value="${esc(c.relation_code)}">${esc(c.name)}</option>`).join('');
+
+      body.innerHTML = `
+        <div class="rel-section" style="padding-top:10px">
+          ${!clients.length ? `<div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:14px;line-height:1.6">No clients yet — add one first.</div>` : ''}
+          <div class="rel-q-lbl" style="margin-bottom:4px">Client</div>
+          <select class="rel-q-input" id="cp-client" style="margin-bottom:12px">${opts || '<option disabled>No clients yet</option>'}</select>
+          <div class="rel-q-lbl" style="margin-bottom:4px">Project title</div>
+          <input class="rel-q-input" id="cp-title" placeholder="e.g. Phase 1 — Tenant Onboarding" style="margin-bottom:14px"/>
+          <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center" onclick="submitCreateProject()" ${!clients.length ? 'disabled' : ''}>Create Project</button>
+          <button class="sk-verify-btn" style="margin-top:10px" onclick="closeOverlay();openAddRelation()">+ Add a new client instead</button>
+          <div id="cp-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+        </div>`;
+    } catch(e) {
+      console.error(e);
+      body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load clients.</div></div>';
+    }
+  }, null, null, false);
+}
+
+async function submitCreateProject() {
+  const relationCode = document.getElementById('cp-client')?.value;
+  const title = document.getElementById('cp-title')?.value.trim();
+  const errEl = document.getElementById('cp-error');
+  if (errEl) errEl.style.display = 'none';
+
+  if (!relationCode) { if (errEl) { errEl.textContent = 'Pick a client.'; errEl.style.display = 'block'; } return; }
+  if (!title) { if (errEl) { errEl.textContent = 'Enter a project title.'; errEl.style.display = 'block'; } return; }
+
+  try {
+    const { error } = await sb.rpc('create_operator_project', {
+      p_relation_code: relationCode, p_title: title, p_created_by: operator?.peer_name || null,
+    });
+    if (error) throw error;
+    toast('Project created.');
+    closeOverlay();
+    renderSidekickPersonalPanel(document.getElementById('sk-personal'));
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = e.message || 'Could not create project.'; errEl.style.display = 'block'; }
+  }
+}
+
 function openAddRelation() {
   openOverlay('Add Relation', (body) => {
     body.innerHTML = `
@@ -6832,7 +6885,8 @@ async function renderSidekickPersonalPanel(container) {
         <div class="dash-widget full">
           <div class="dash-widget-title">Quick Actions</div>
           <div class="dash-actions">
-            <div class="dash-action-btn" onclick="openStartProject()"><div class="dash-action-lbl">+ Create Project</div></div>
+            <div class="dash-action-btn" onclick="openCreateProjectModal()"><div class="dash-action-lbl">+ Create Project</div></div>
+            <div class="dash-action-btn" onclick="openAddRelation()"><div class="dash-action-lbl">+ Add Client</div></div>
             <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">Open BIX AI</div></div>
             <div class="dash-action-btn" onclick="openAdminMode()"><div class="dash-action-lbl">Open Admin</div></div>
           </div>

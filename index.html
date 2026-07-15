@@ -5806,12 +5806,21 @@ async function uploadAvatarFile(inputEl) {
 }
 
 async function saveProfile() {
-  const handle       = document.getElementById('prof-handle')?.value.trim();
-  const bio          = document.getElementById('prof-bio')?.value.trim();
-  const contactEmail = document.getElementById('prof-contact-email')?.value.trim();
-  const phone        = document.getElementById('prof-phone')?.value.trim();
-  const wallet       = document.getElementById('prof-wallet')?.value.trim();
-  const bidSize      = document.getElementById('prof-bid-size')?.value.trim();
+  // Scoped to the open overlay if one exists — Admin Mode's own profile
+  // surface uses these same field IDs and never leaves the DOM (just
+  // hidden), so a plain document-wide getElementById can silently grab
+  // the wrong, stale set of inputs. Scoping to whichever container is
+  // actually active resolves that without needing two copies of this
+  // function for the two places it's called from.
+  const scope = document.querySelector('#overlay.open') || document;
+  const field = (id) => scope.querySelector('#' + id);
+
+  const handle       = field('prof-handle')?.value.trim();
+  const bio          = field('prof-bio')?.value.trim();
+  const contactEmail = field('prof-contact-email')?.value.trim();
+  const phone        = field('prof-phone')?.value.trim();
+  const wallet       = field('prof-wallet')?.value.trim();
+  const bidSize      = field('prof-bid-size')?.value.trim();
 
   try {
     const { error } = await sb.rpc('update_operator_profile', {

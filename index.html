@@ -288,7 +288,10 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
 /* ── OVERLAY BACKDROP BLUR ── */
 #overlay{
-  position:fixed;inset:0;z-index:80;
+  /* Must outrank #gate/#uni-shell (both z-index:100) and #uni-nav (105) —
+     otherwise every overlay opened from the uni-shell (Admin gate, Messages,
+     Profile record, etc.) renders fully hidden behind their opaque backgrounds. */
+  position:fixed;inset:0;z-index:150;
   display:flex;flex-direction:column;
   background:rgba(13,13,15,.98);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
@@ -6877,7 +6880,6 @@ async function renderSidekick(body) {
         <div class="prof-peer">${esc(operator.peer_name)}</div>
         <div class="prof-lane">${esc(operator.handle || '@'+(operator.peer_name||'').replace(/\s/g,'').toUpperCase())} · ${esc(tier(operator.total_logs))}</div>
       </div>
-      <button class="sk-verify-btn" style="width:auto;padding:8px 14px;margin:0" onclick="openUniProfile()">Edit</button>
     </div>
 
     <div class="section-lbl" style="position:relative;top:0">Wallet</div>

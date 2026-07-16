@@ -2054,6 +2054,7 @@ async function doLogin() {
     }
 
     operator = { ...op, email };
+    localStorage.setItem('bx_last_email', email);
     fireAndForget(sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${op.peer_name || email} signed in`,
       p_payload: 'Operator session started.', p_source_entity: 'Auth', p_source_id: op.id,
@@ -2080,6 +2081,15 @@ function gateShowGenesis() {
   document.getElementById('gate-op-pin').style.display = 'none';
   document.getElementById('gate-op-genesis').style.display = '';
   document.getElementById('gate-op-forgot').style.display = 'none';
+  // Remember the email locally so returning here only ever asks for the password.
+  const savedEmail = localStorage.getItem('bx_last_email');
+  const emailInput = document.getElementById('g-email');
+  if (savedEmail && emailInput) {
+    emailInput.value = savedEmail;
+    setTimeout(() => document.getElementById('g-pw')?.focus(), 50);
+  } else {
+    setTimeout(() => emailInput?.focus(), 50);
+  }
 }
 function gateShowForgotPin() {
   document.getElementById('gate-op-pin').style.display = 'none';

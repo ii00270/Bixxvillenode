@@ -388,14 +388,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .sk-verify-btn{margin-top:10px;width:100%;padding:10px;background:none;border:1px solid var(--line2);color:var(--soft);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;cursor:pointer;}
 .sk-verify-btn:hover{border-color:var(--green);color:var(--green);}
 
-/* ── ADMIN MODE BANNER (shown atop old #shell when entered via gear icon) ── */
-#admin-banner{
-  display:none;position:absolute;top:0;left:0;right:0;z-index:20;
-  background:rgba(232,136,74,.1);border-bottom:1px solid var(--orange);
-  padding:8px 18px;align-items:center;justify-content:space-between;
-}
-#admin-banner.show{display:flex;}
-#admin-banner span{font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.06em;text-transform:uppercase;}
 .rel-cap-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin:16px 18px;}
 .rel-cap-cell{
   aspect-ratio:1;border-radius:6px;background:var(--surface);border:1px solid var(--line2);
@@ -1329,7 +1321,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   background:rgba(0,0,0,.92);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--line);
-  display:grid;grid-template-columns:repeat(4,1fr);z-index:50;
+  display:grid;grid-template-columns:repeat(6,1fr);z-index:50;
 }
 
 /* ── NOTIFICATIONS ── */
@@ -1666,7 +1658,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
 <!-- ═══ SHELL ═══ -->
 <div id="shell">
-  <div id="admin-banner"><span>Admin Mode — Operator tools</span><span onclick="closeAdminMode()" style="cursor:pointer;font-family:var(--mono);font-size:9px;color:var(--orange);letter-spacing:.06em;text-transform:uppercase">← Back to Market</span></div>
   <!-- Operator sidebar toggle into Penpal view — added inside ds-peer block below via JS injection is avoided;
        button lives here so it never duplicates across re-renders. -->
 
@@ -1703,6 +1694,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <span class="ds-label">Events</span>
         <div class="ds-badge hidden" id="ds-events-badge">0</div>
+      </button>
+      <button class="ds-item" id="ds-projects" onclick="showSurface('projects')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 17V7a2 2 0 012-2h9M9 17H4a2 2 0 01-2-2V9a2 2 0 012-2h5m0 10v3a2 2 0 002 2h9a2 2 0 002-2V9a2 2 0 00-2-2h-9"/></svg>
+        <span class="ds-label">Projects</span>
+      </button>
+      <button class="ds-item" id="ds-market" onclick="closeAdminMode();showUniTab('signal')">
+        <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+        <span class="ds-label">Market</span>
       </button>
     </div>
     <div class="ds-peer">
@@ -1804,6 +1803,15 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         </div>
       </div>
 
+      <div class="surface" id="surface-projects">
+        <div class="s-head">
+          <div class="s-title">Projects</div>
+        </div>
+        <div id="projects-body">
+          <div class="empty"><div class="empty-line"></div><div class="empty-label">Projects</div><div class="empty-msg">Loading…</div></div>
+        </div>
+      </div>
+
     </div>
 
     <!-- Mobile bottom nav (4 tabs — Home retired, redirects to Members) -->
@@ -1826,6 +1834,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       <button class="nav-btn" id="nav-events" onclick="showSurface('events')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
         <div class="nav-label">Events</div>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-projects" onclick="showSurface('projects')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M9 17V7a2 2 0 012-2h9M9 17H4a2 2 0 01-2-2V9a2 2 0 012-2h5m0 10v3a2 2 0 002 2h9a2 2 0 002-2V9a2 2 0 00-2-2h-9"/></svg>
+        <div class="nav-label">Projects</div>
+        <div class="nav-dot"></div>
+      </button>
+      <button class="nav-btn" id="nav-market" onclick="closeAdminMode();showUniTab('signal')">
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
+        <div class="nav-label">Market</div>
         <div class="nav-dot"></div>
       </button>
     </nav>
@@ -2223,6 +2241,7 @@ function showSurface(name) {
   if (name === 'notifications') loadNotifications();
   if (name === 'members')       loadMembers();
   if (name === 'events')        loadEvents();
+  if (name === 'projects')      loadAdminProjects();
 }
 
 // ── OVERLAY ──
@@ -2960,7 +2979,7 @@ async function submitCreateProject() {
     if (error) throw error;
     toast('Project created.');
     closeOverlay();
-    renderSidekickPersonalPanel(document.getElementById('sk-personal'));
+    loadAdminProjects();
   } catch(e) {
     console.error(e);
     if (errEl) { errEl.textContent = e.message || 'Could not create project.'; errEl.style.display = 'block'; }
@@ -3073,6 +3092,49 @@ function timeAgo(dateStr) {
 
 let eventFilterStatus = 'all';
 let eventFilterType = 'all';
+
+// ── ADMIN PROJECTS — every project, with Create Project / Add Client
+// relocated here (moved out of Profile, which is now purely informational).
+async function loadAdminProjects() {
+  const body = document.getElementById('projects-body');
+  if (!body || !operator) return;
+  body.innerHTML = `
+    <div style="display:flex;gap:8px;padding:14px 18px 0">
+      <button class="act-btn-sm" onclick="openCreateProjectModal()">+ Create Project</button>
+      <button class="act-btn-sm" onclick="openAddRelation()">+ Add Client</button>
+    </div>
+    <div id="admin-projects-list" style="padding-top:10px"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+
+  try {
+    const { data, error } = await sb.rpc('get_all_projects');
+    if (error) throw error;
+    window._skProjects = data || [];
+    const list = document.getElementById('admin-projects-list');
+    if (!list) return;
+    if (!window._skProjects.length) { list.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No projects yet.</div></div>'; return; }
+
+    list.innerHTML = window._skProjects.map(p => `
+      <div class="sk-deal" id="skp-${p.id}" style="margin:0 18px 10px">
+        <div class="sk-head" style="cursor:pointer" onclick="toggleSkProject('${p.id}')">
+          <div class="sk-title">${esc(p.title || 'Untitled project')}</div>
+          <div class="sk-status ${p.status === 'settled' ? 'paid' : p.status === 'settling' ? 'verified' : 'pending'}">${esc(p.status)}</div>
+        </div>
+        <div class="sk-parties">${esc(p.relation_name || '—')}${p.settled_price != null ? ' · $' + Number(p.settled_price).toLocaleString() : ''}</div>
+        <div class="sk-project-detail" id="skp-detail-${p.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Execution Documents</div>
+          <div id="skp-docs-${p.id}">${renderSkDocs(p.execution_docs)}</div>
+          <input type="file" id="skp-file-${p.id}" accept=".pdf,.js,.ts,.py,.html,.htm,.json,.md" style="display:none" onchange="uploadExecutionDoc('${p.id}', this.files[0])"/>
+          <button class="sk-verify-btn" onclick="document.getElementById('skp-file-${p.id}').click()">+ Attach execution PDF/spec</button>
+          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 8px">Scopes</div>
+          <div id="skp-scopes-${p.id}"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+        </div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    const list = document.getElementById('admin-projects-list');
+    if (list) list.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Could not load projects. Run the admin projects/standing migration in Supabase if this is the first load.</div></div>';
+  }
+}
 
 async function loadEvents() {
   const body = document.getElementById('events-body');
@@ -5242,6 +5304,23 @@ function buildScopeRow(s, idx, projectCycle) {
     </div>`;
 }
 
+// Standing change — Genesis only (gated in the UI above; also worth
+// re-confirming here since this is a consequential, real action).
+async function setMemberStanding(memberId, standing) {
+  if (!operator?.is_genesis) return;
+  const ok = await osConfirm(`Set this member's standing to "${standing}"?`);
+  if (!ok) return;
+  try {
+    const { error } = await sb.rpc('set_member_standing', { p_operator_id: memberId, p_standing: standing });
+    if (error) throw error;
+    toast('Standing updated.');
+    openMemberRecord(memberId);
+  } catch(e) {
+    console.error(e);
+    toast('Could not update standing.');
+  }
+}
+
 function openMemberRecord(memberId, overrides) {
   openOverlay('Profile', async (body) => {
     const { data: allOps } = await sb.rpc('list_operators');
@@ -5343,6 +5422,18 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
       <div class="stat-cell"><div class="stat-val">${tier(op.total_logs)}</div><div class="stat-lbl">Tier</div></div>
       <div class="stat-cell"><div class="stat-val">${op.streak||0}</div><div class="stat-lbl">Streak</div></div>
     </div>
+
+    ${(operator?.is_genesis && !isSelf) ? `
+    <!-- Standing — Genesis only, never on your own record -->
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:8px">Standing — currently ${esc(op.standing || 'active')}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="calc-mode-btn ${(op.standing||'active')==='sovereign'?'active':''}" onclick="setMemberStanding('${op.id}','sovereign')">Sovereign</button>
+        <button class="calc-mode-btn ${(op.standing||'active')==='active'?'active':''}" onclick="setMemberStanding('${op.id}','active')">Active</button>
+        <button class="calc-mode-btn ${op.standing==='probation'?'active':''}" style="${op.standing==='probation'?'border-color:var(--orange);color:var(--orange)':''}" onclick="setMemberStanding('${op.id}','probation')">Probation</button>
+        <button class="calc-mode-btn ${op.standing==='suspended'?'active':''}" style="${op.standing==='suspended'?'border-color:var(--red);color:var(--red)':''}" onclick="setMemberStanding('${op.id}','suspended')">Suspend</button>
+      </div>
+    </div>` : ''}
 
     <!-- Bio -->
     ${op.bio ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line)">
@@ -6783,179 +6874,124 @@ async function sendBixAiMessage() {
 // the standalone Home dashboard) — stats, tasks, price calc, claim a block —
 // sitting right above the deals that need closing. Relations just see deals. ──
 async function renderSidekick(body) {
-  const assigneeName = currentIdentityLabel();
-  const isOp = !!operator && !relation;
+  if (relation) {
+    body.innerHTML = `
+      <div class="rel-section" style="padding-top:22px">
+        <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream)">Hi, ${esc((relation.name||'').split(' ')[0])}.</div>
+        <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px">Your work with the network lives here.</div>
+      </div>
+      <div class="rel-section" style="border-top:1px solid var(--line)">
+        <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center" onclick="openSubmitProjectModal()">+ Submit a Project</button>
+      </div>`;
+    return;
+  }
+  if (!operator) return;
 
   body.innerHTML = `
-    <div id="sk-personal"></div>
-    <div class="sig-title-row"><div class="sig-title">Sidekick</div><div class="sig-note">Closing the loop</div></div>
-    <div id="sk-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+    <div class="rel-section" style="padding-top:22px;display:flex;align-items:center;gap:14px">
+      <div class="prof-avatar" style="cursor:pointer" onclick="openUniProfile()">${avatarHtml(operator.peer_name, operator.avatar_url, 16)}</div>
+      <div style="flex:1">
+        <div class="prof-peer">${esc(operator.peer_name)}</div>
+        <div class="prof-lane">${esc(operator.handle || '@'+(operator.peer_name||'').replace(/\s/g,'').toUpperCase())} · ${esc(tier(operator.total_logs))}</div>
+      </div>
+      <button class="sk-verify-btn" style="width:auto;padding:8px 14px;margin:0" onclick="openUniProfile()">Edit</button>
+    </div>
 
-  if (isOp) {
-    await renderSidekickPersonalPanel(document.getElementById('sk-personal'));
-  } else if (relation) {
-    const el = document.getElementById('sk-personal');
-    if (el) {
-      el.innerHTML = `
-        <div class="rel-section" style="padding-top:22px">
-          <div style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream)">Hi, ${esc((relation.name||'').split(' ')[0])}.</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:4px">Your work with the network lives here.</div>
-        </div>
-        <div class="rel-section" style="border-top:1px solid var(--line)">
-          <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center" onclick="openSubmitProjectModal()">+ Submit a Project</button>
-        </div>`;
-    }
+    <div class="section-lbl" style="position:relative;top:0">Wallet</div>
+    <div class="rel-section" style="padding-top:0">
+      <div id="prof-wallet-body"><div class="empty" style="padding:8px 0"><div class="empty-msg">Checking…</div></div></div>
+    </div>
+
+    <div class="section-lbl" style="position:relative;top:0">Active Projects</div>
+    <div id="prof-projects-body"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>
+
+    <div class="section-lbl" style="position:relative;top:0">Transaction History</div>
+    <div id="prof-tx-body"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>`;
+
+  renderProfileWallet();
+  renderProfileProjects();
+  renderProfileTransactions();
+}
+
+async function renderProfileWallet() {
+  const el = document.getElementById('prof-wallet-body');
+  if (!el || !operator) return;
+
+  if (!operator.wallet_address) {
+    el.innerHTML = `
+      <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:10px">No wallet on file yet — connect one to see your balance and get paid.</div>
+      <button class="sk-verify-btn" onclick="connectSkWallet()">Connect Wallet</button>`;
+    return;
   }
 
+  el.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--grey)">Checking balance…</div>`;
   try {
-    const [dealsRes, opsRes] = await Promise.all([
-      sb.rpc('get_deals_for_member', { p_assignee: assigneeName }),
-      sb.rpc('list_operators'),
-    ]);
-    if (dealsRes.error) throw dealsRes.error;
-    window._sidekickDeals = dealsRes.data || [];
-    window._allOperators = opsRes.data || [];
-    renderSidekickList();
+    const bal = await fetchUsdcBalance(operator.wallet_address);
+    el.innerHTML = `
+      <div style="display:flex;align-items:baseline;justify-content:space-between">
+        <div>
+          <div style="font-family:var(--display);font-size:26px;font-weight:800;color:var(--green)">${bal != null ? '$' + bal.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:2px">USDC on Base · ${esc(operator.wallet_address.slice(0,6))}…${esc(operator.wallet_address.slice(-4))}</div>
+        </div>
+        <button class="sk-verify-btn" style="width:auto;padding:8px 14px;margin:0" onclick="connectSkWallet()">Update</button>
+      </div>`;
   } catch(e) {
     console.error(e);
-    const list = document.getElementById('sk-list');
-    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load deals. Run the unified system migration in Supabase if this is the first load.</div></div>';
+    el.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">Could not check balance right now.</div>`;
   }
 }
 
-async function renderSidekickPersonalPanel(container) {
-  if (!container || !operator) return;
-
-  const cycle = getActiveCycle();
-  const hourNow = new Date().getHours();
-  const greeting = hourNow < 12 ? 'Good morning' : hourNow < 18 ? 'Good afternoon' : 'Good evening';
-  const myTier = tier(operator.total_logs);
-  const RATES = { Operator: 100, Architect: 85, Wrangler: 65, Apprentice: 39 };
-  const myRate = RATES[myTier] || 39;
-
+// Active projects — the SAME relation_submissions data Admin's Members/
+// Projects views read. One source of truth, not a second list that can
+// drift out of sync with what's actually on the admin side.
+async function renderProfileProjects() {
+  const el = document.getElementById('prof-projects-body');
+  if (!el || !operator) return;
   try {
-    const [opsRes, logsRes] = await Promise.all([
-      sb.from('relation_submissions').select('id,status').in('status', ['open', 'settling']),
-      sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
-    ]);
+    const { data, error } = await sb.rpc('get_my_projects', { p_assignee: operator.peer_name });
+    if (error) throw error;
+    const projects = data || [];
+    if (!projects.length) { el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No projects with scopes assigned to you yet.</div></div>'; return; }
 
-    const activeProjects = (opsRes.data || []).length;
-    const cycleHours = (logsRes.data || [])
-      .filter(l => l.cycle_number === cycle.num)
-      .reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
-
-    container.innerHTML = `
-      <div class="rel-section" style="padding-top:22px;display:flex;align-items:center;gap:14px">
-        <div class="prof-avatar" style="cursor:pointer" onclick="openUniProfile()">${avatarHtml(operator.peer_name, operator.avatar_url, 16)}</div>
-        <div style="flex:1">
-          <div class="prof-peer">${esc(operator.peer_name)}</div>
-          <div class="prof-lane">${esc(operator.handle || '@'+(operator.peer_name||'').replace(/\s/g,'').toUpperCase())} · ${esc(myTier)}</div>
+    el.innerHTML = projects.map(p => `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(p.title || 'Untitled')}</div>
+          <div class="log-row-meta">${esc(p.relation_name || '—')} · ${esc(p.status)}</div>
         </div>
-        <button class="sk-verify-btn" style="width:auto;padding:8px 14px;margin:0" onclick="openUniProfile()">Edit</button>
-      </div>
-      ${operator.bio ? `<div class="rel-section" style="padding-top:0;padding-bottom:0"><div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">${esc(operator.bio)}</div></div>` : ''}
-
-      <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Wallet</div>
-        <div id="sk-wallet-body"><div class="empty" style="padding:8px 0"><div class="empty-msg">Checking…</div></div></div>
-      </div>
-
-      <div class="dash-greeting" style="padding-top:22px">
-        <div class="dash-greeting-text">${greeting}, ${esc(operator.peer_name || 'Operator')}.</div>
-        <div class="dash-greeting-sub">Cycle ${cycle.num} · Day ${cycle.day} of 28 · ${cycle.left}d left</div>
-      </div>
-
-      <div class="dash-stats-row">
-        <div class="dash-stat-chip"><div class="dash-stat-val">${activeProjects}</div><div class="dash-stat-lbl">Active</div></div>
-        <div class="dash-stat-chip"><div class="dash-stat-val">${cycleHours.toFixed(0)}</div><div class="dash-stat-lbl">Hrs this cycle</div></div>
-        <div class="dash-stat-chip"><div class="dash-stat-val">${esc(myTier)}</div><div class="dash-stat-lbl">Tier</div></div>
-        <div class="dash-stat-chip"><div class="dash-stat-val">$${myRate}</div><div class="dash-stat-lbl">Per LOG</div></div>
-      </div>
-
-      <div class="dash-widgets">
-        <div class="dash-widget full">
-          <div class="dash-widget-title">Quick Price Calculator</div>
-          <div class="dash-calc-row">
-            <span class="dash-calc-lbl">LOGs</span>
-            <input class="dash-calc-input" id="calc-logs" type="number" min="0" value="10" oninput="updateDashCalc()"/>
-          </div>
-          <div class="dash-calc-row">
-            <span class="dash-calc-lbl">Rate</span>
-            <select class="dash-calc-select" id="calc-rate" onchange="updateDashCalc()">
-              <option value="39" ${myRate===39?'selected':''}>Apprentice · $39/hr</option>
-              <option value="65" ${myRate===65?'selected':''}>Wrangler · $65/hr</option>
-              <option value="85" ${myRate===85?'selected':''}>Architect · $85/hr</option>
-              <option value="100" ${myRate===100?'selected':''}>Operator · $100/hr</option>
-            </select>
-          </div>
-          <div class="dash-calc-result">
-            <span class="dash-calc-lbl">Project price</span>
-            <span class="dash-calc-result-val" id="calc-result">$${((10*myRate)/0.75).toLocaleString(undefined,{maximumFractionDigits:0})}</span>
-          </div>
-          <div style="font-family:var(--mono);font-size:8px;color:var(--grey);margin-top:8px">LOGs × rate ÷ 0.75</div>
-          <button class="sk-verify-btn" style="margin-top:12px" onclick="openGeneralCalculator()">Open General Calculator →</button>
-        </div>
-
-        <div class="dash-widget full">
-          <div class="dash-widget-title">Quick Actions</div>
-          <div class="dash-actions">
-            <div class="dash-action-btn" onclick="openCreateProjectModal()"><div class="dash-action-lbl">+ Create Project</div></div>
-            <div class="dash-action-btn" onclick="openAddRelation()"><div class="dash-action-lbl">+ Add Client</div></div>
-            <div class="dash-action-btn" onclick="showUniTab('work')"><div class="dash-action-lbl">Open BIX AI</div></div>
-            <div class="dash-action-btn" onclick="openAdminMode()"><div class="dash-action-lbl">Open Admin</div></div>
-          </div>
-        </div>
-      </div>
-
-      <div class="section-lbl" style="position:relative;top:0">Projects</div>
-      <div id="sk-projects-body" style="padding-bottom:8px"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>
-
-      ${operator.is_genesis ? `
-      <div class="section-lbl" style="position:relative;top:0">Genesis Console</div>
-      <div class="rel-section" style="padding-top:0">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Invite a New Operator</div>
-        <input class="rel-q-input" id="gc-invite-name" placeholder="Name" style="margin-bottom:8px"/>
-        <select class="rel-q-input" id="gc-invite-tier" style="margin-bottom:8px">
-          <option value="Apprentice">Apprentice</option>
-          <option value="Wrangler">Wrangler</option>
-          <option value="Architect">Architect</option>
-        </select>
-        <button class="sk-verify-btn" onclick="genesisCreateInvite()">Generate Invite PIN</button>
-        <div id="gc-invite-result" style="margin-top:10px"></div>
-      </div>
-
-      <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">PIN Recovery Requests</div>
-        <div id="gc-recovery-list"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
-      </div>
-
-      <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Central Wallet</div>
-        <input class="rel-q-input" id="gc-central-wallet" placeholder="0x… central wallet address" value="${esc(operator.central_wallet_address || '')}" style="margin-bottom:8px"/>
-        <button class="sk-verify-btn" onclick="genesisSaveCentralWallet()">Save</button>
-        <div id="gc-central-balance" style="margin-top:10px"></div>
-      </div>
-
-      <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Payment Audit</div>
-        <div style="font-family:var(--sans);font-size:11px;color:var(--soft);margin-bottom:10px;line-height:1.5">Every real payment sent through Sidekick, network-wide — confirming delivery, not holding funds.</div>
-        <div id="gc-audit-list"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
-      </div>` : ''}
-
-      <div class="section-lbl" style="position:relative;top:0">Closing</div>`;
-
-    renderSkWallet();
-    renderSkProjects();
-    if (operator.is_genesis) {
-      renderGenesisRecoveryQueue();
-      renderGenesisAudit();
-      if (operator.central_wallet_address) renderGenesisCentralBalance();
-    }
+      </div>`).join('');
   } catch(e) {
     console.error(e);
-    container.innerHTML = '<div class="empty" style="padding:20px 18px"><div class="empty-msg">Could not load your dashboard.</div></div>';
+    el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Could not load projects.</div></div>';
   }
 }
+
+// Transaction history — every scope actually paid out to you, real tx
+// hashes, sourced from the exact same deals data (not a parallel record
+// that could disagree with what actually happened).
+async function renderProfileTransactions() {
+  const el = document.getElementById('prof-tx-body');
+  if (!el || !operator) return;
+  try {
+    const { data, error } = await sb.rpc('get_deals_for_member', { p_assignee: operator.peer_name });
+    if (error) throw error;
+    const paid = (data || []).filter(d => d.paid_at);
+    if (!paid.length) { el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No payments yet.</div></div>'; return; }
+
+    el.innerHTML = paid.map(d => `
+      <div class="log-row">
+        <div class="log-row-main">
+          <div class="log-row-title">${esc(d.title || 'Scope')} — ${esc(d.project_title || '—')}</div>
+          <div class="log-row-meta">${fmtDate(d.paid_at)} · tx ${esc((d.paid_tx_hash||'').slice(0,10))}…</div>
+        </div>
+        <div class="log-row-right"><div class="log-row-hours">${d.contract_budget != null ? '$'+Number(d.contract_budget).toLocaleString() : d.log_size+' LOG'}</div></div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Could not load transaction history.</div></div>';
+  }
+}
+
 
 // ── GENESIS CONSOLE — invite creation, PIN recovery, central wallet audit.
 // Visible only when operator.is_genesis is true (see the security note at
@@ -7085,33 +7121,6 @@ async function renderGenesisAudit() {
 }
 
 
-async function renderSkWallet() {
-  const el = document.getElementById('sk-wallet-body');
-  if (!el || !operator) return;
-
-  if (!operator.wallet_address) {
-    el.innerHTML = `
-      <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:10px">No wallet on file yet — connect one to see your balance and get paid through Sidekick.</div>
-      <button class="sk-verify-btn" onclick="connectSkWallet()">Connect Wallet</button>`;
-    return;
-  }
-
-  el.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--grey)">Checking balance…</div>`;
-  try {
-    const bal = await fetchUsdcBalance(operator.wallet_address);
-    el.innerHTML = `
-      <div style="display:flex;align-items:baseline;justify-content:space-between">
-        <div>
-          <div style="font-family:var(--display);font-size:24px;font-weight:800;color:var(--green)">${bal != null ? '$' + bal.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:2px">USDC on Base · ${esc(operator.wallet_address.slice(0,6))}…${esc(operator.wallet_address.slice(-4))}</div>
-        </div>
-        <button class="sk-verify-btn" style="width:auto;padding:8px 14px;margin:0" onclick="connectSkWallet()">Update</button>
-      </div>`;
-  } catch(e) {
-    console.error(e);
-    el.innerHTML = `<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">Could not check balance right now.</div>`;
-  }
-}
 
 async function connectSkWallet() {
   if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
@@ -7132,39 +7141,6 @@ async function connectSkWallet() {
 // ── SIDEKICK PROJECTS — the full breakdown, with execution documents
 // (specs/decomposition PDFs) attached at the project level — distinct from
 // the proof-of-completion docs attached to individual scopes at closing. ──
-async function renderSkProjects() {
-  const el = document.getElementById('sk-projects-body');
-  if (!el || !operator) return;
-  try {
-    const { data, error } = await sb.rpc('get_my_projects', { p_assignee: operator.peer_name });
-    if (error) throw error;
-    window._skProjects = data || [];
-    if (!window._skProjects.length) {
-      el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No projects with scopes assigned to you yet.</div></div>';
-      return;
-    }
-    el.innerHTML = window._skProjects.map(p => `
-      <div class="sk-deal" id="skp-${p.id}">
-        <div class="sk-head" style="cursor:pointer" onclick="toggleSkProject('${p.id}')">
-          <div class="sk-title">${esc(p.title || 'Untitled project')}</div>
-          <div class="sk-status ${p.status === 'settled' ? 'paid' : p.status === 'settling' ? 'verified' : 'pending'}">${esc(p.status)}</div>
-        </div>
-        <div class="sk-parties">${esc(p.relation_name || '—')}</div>
-        <div class="sk-project-detail" id="skp-detail-${p.id}" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line)">
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Execution Documents</div>
-          <div id="skp-docs-${p.id}">${renderSkDocs(p.execution_docs)}</div>
-          <input type="file" id="skp-file-${p.id}" accept=".pdf,.js,.ts,.py,.html,.htm,.json,.md" style="display:none" onchange="uploadExecutionDoc('${p.id}', this.files[0])"/>
-          <button class="sk-verify-btn" onclick="document.getElementById('skp-file-${p.id}').click()">+ Attach execution PDF/spec</button>
-          <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin:14px 0 8px">Scopes</div>
-          <div id="skp-scopes-${p.id}"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
-        </div>
-      </div>`).join('');
-  } catch(e) {
-    console.error(e);
-    el.innerHTML = '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Could not load projects. Run the unified system migration in Supabase if this is the first load.</div></div>';
-  }
-}
-
 async function toggleSkProject(projectId) {
   const detail = document.getElementById('skp-detail-' + projectId);
   if (!detail) return;
@@ -7369,15 +7345,11 @@ function openAdminMode() {
   if (!operator || relation) return;
   document.getElementById('uni-shell').classList.remove('in');
   document.getElementById('shell').classList.add('in');
-  const banner = document.getElementById('admin-banner');
-  if (banner) banner.classList.add('show');
 }
 
 function closeAdminMode() {
   document.getElementById('shell').classList.remove('in');
   document.getElementById('uni-shell').classList.add('in');
-  const banner = document.getElementById('admin-banner');
-  if (banner) banner.classList.remove('show');
 }
 
 // ── PROFILE — reuses the Penpal profile editor for relations; a lightweight

@@ -7,6 +7,7 @@
 <title>Bixxville OS</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#000000">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bixxville">
@@ -7350,7 +7351,11 @@ async function paySidekickDeal(scopeId, amountUsd) {
 // shell (Ops, decomposition, settlement, member registry, execution log,
 // cycle audit) rather than rebuilding any of it. ──
 function openAdminMode() {
-  if (!operator || relation) return;
+  if (!operator || relation) {
+    console.warn('openAdminMode: operator is not set, or a relation session is active.', { operator, relation });
+    toast('Session issue — try signing out and back in.');
+    return;
+  }
   openOverlay('Admin', (body) => {
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px">

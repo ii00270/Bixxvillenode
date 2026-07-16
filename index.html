@@ -4761,80 +4761,6 @@ async function refreshOwnStatsAfterSettlement() {
   }
 }
 
-// ── RECORD SURFACE ──
-async function loadProfile() {
-  const body = document.getElementById('profile-body');
-  const count = document.getElementById('profile-count');
-  if (!body) return;
-  if (!operator) return;
-
-  try {
-    const [logsRes, opsRes] = await Promise.all([
-      sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
-      sb.rpc('list_operators'),
-    ]);
-
-    const logs = logsRes.data || [];
-    const freshOp = (opsRes.data || []).find(o => o.id === operator.id) || operator;
-    window._profOp  = freshOp;
-    window._myLogs  = logs;
-    if (count) count.textContent = logs.length ? `${logs.length} logs` : '';
-
-    body.innerHTML = `
-      <div class="form-block" style="padding-top:20px">
-        <label class="form-lbl">Desired bid size</label>
-        <div style="display:flex;gap:8px">
-          <input class="form-input" id="my-bid-size" style="flex:1" value="${esc(freshOp.desired_bid_size || '')}" placeholder="e.g. 4-8 LOG projects, $500-2000 range"/>
-          <button class="prof-add-btn" onclick="saveMyBidSize()">Save</button>
-        </div>
-        <div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">Remembered so the system can match you to bids that fit.</div>
-      </div>
-
-      <div class="section-lbl" style="position:relative;top:0">Wallet</div>
-      <div class="prof-field" style="padding:0 18px 6px">
-        <div style="display:flex;gap:8px">
-          <input class="prof-field-input" id="prof-wallet" style="flex:1" value="${esc(freshOp.wallet_address || '')}"
-            placeholder="0x… — where payments to you are sent" onblur="checkProfileWalletBalance()"/>
-          <button class="prof-add-btn" style="white-space:nowrap" onclick="connectProfileWallet()">Connect</button>
-        </div>
-        <div id="prof-wallet-status" style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">
-          Or connect MetaMask to fill this in automatically.
-        </div>
-        <button class="act-btn-sm" style="margin-top:10px" onclick="saveMyWallet()">Save Wallet</button>
-      </div>
-
-      <div class="section-lbl" style="position:relative;top:0">Ledger</div>
-      <div id="ledger-body" style="padding:6px 18px 8px"><div class="empty" style="padding:16px 0"><div class="empty-msg">Loading ledger…</div></div></div>
-      <div style="padding:0 18px 8px">
-        <button class="act-btn-sm" onclick="openRecordPayment('${freshOp.id}','${esc(freshOp.peer_name || '').replace(/'/g,"\\'")}')">+ Record Payment</button>
-      </div>
-
-      <div class="section-lbl" style="position:relative;top:0">Execution Log</div>
-      <div style="padding:0 18px 10px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
-        Every block of real work — timestamped in UTC and numbered against the current 28-day cycle.
-      </div>
-      <div id="my-logs-body">${renderExecutionLogsList(logs)}</div>
-      <div style="display:flex;gap:10px;padding:14px 18px 24px">
-        <button class="act-btn" style="margin:0;flex:1" onclick="openLogWorkModal()">+ Log Work</button>
-        <button class="act-btn-sm" style="white-space:nowrap" onclick="downloadLogsCSV()">Download Logs</button>
-      </div>
-
-      <div class="section-lbl" style="position:relative;top:0">Cycle Audit</div>
-      <div style="padding:0 18px 10px;font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6">
-        The full month review — claimed vs. logged vs. missed, settlements, and payments for any cycle.
-      </div>
-      <div style="display:flex;gap:8px;padding:0 18px 24px">
-        <input class="form-input" id="audit-cycle-num" type="number" min="1" value="${getActiveCycle().num}" style="max-width:110px"/>
-        <button class="act-btn" style="margin:0;flex:1" onclick="openCycleAudit(parseInt(document.getElementById('audit-cycle-num').value))">Generate Audit</button>
-      </div>`;
-
-    loadMemberLedger(freshOp.id, freshOp.wallet_address, true);
-  } catch(e) {
-    console.error(e);
-    body.innerHTML = '<div class="empty"><div class="empty-msg">Could not load profile.</div></div>';
-  }
-}
-
 function renderExecutionLogsList(logs) {
   if (!logs.length) {
     return '<div class="empty" style="padding:20px 18px"><div class="empty-msg">No logs yet. Log your first block of work.</div></div>';
@@ -5332,6 +5258,35 @@ async function setMemberStanding(memberId, standing) {
   }
 }
 
+// Lets Genesis choose their own login PIN, so the main gate's existing PIN
+// path (already used by every other operator) works for Genesis too and
+// email+password stops being the only way in. Scoped server-side to the
+// caller's own signed-in account — see set_operator_pin_choice in Supabase.
+async function saveGenesisPin() {
+  const input = document.getElementById('genesis-pin-input');
+  const errEl = document.getElementById('genesis-pin-error');
+  const pin = (input?.value || '').trim();
+  if (errEl) errEl.style.display = 'none';
+
+  if (!/^\d{7}$/.test(pin)) {
+    if (errEl) { errEl.textContent = 'PIN must be exactly 7 digits.'; errEl.style.display = 'block'; }
+    return;
+  }
+
+  const ok = await osConfirm('Set this as your login PIN? You\'ll be able to sign in with it instead of your email and password.');
+  if (!ok) return;
+
+  try {
+    const { error } = await sb.rpc('set_operator_pin_choice', { p_pin: pin });
+    if (error) throw error;
+    toast('PIN saved — you can log in with it from now on.');
+    if (input) input.value = '';
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = e.message || 'Could not save PIN. Run the set_operator_pin_choice migration in Supabase if this is the first time.'; errEl.style.display = 'block'; }
+  }
+}
+
 function openMemberRecord(memberId, overrides) {
   openOverlay('Profile', async (body) => {
     const { data: allOps } = await sb.rpc('list_operators');
@@ -5446,6 +5401,20 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
       </div>
     </div>` : ''}
 
+    ${(isSelf && op.is_genesis) ? `
+    <!-- Login PIN — Genesis only, self only: lets Genesis log in without email+password -->
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:8px">Login PIN</div>
+      <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:10px">
+        Set a 7-digit PIN of your choosing so you can log in from the main gate without typing your email and password.
+      </div>
+      <div style="display:flex;gap:8px">
+        <input class="prof-field-input" id="genesis-pin-input" type="text" inputmode="numeric" maxlength="7" placeholder="7-digit PIN" style="flex:1"/>
+        <button class="prof-add-btn" onclick="saveGenesisPin()">Set PIN</button>
+      </div>
+      <div id="genesis-pin-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+    </div>` : ''}
+
     <!-- Bio -->
     ${op.bio ? `<div style="padding:14px 18px;border-bottom:1px solid var(--line)">
       <div class="prof-field-lbl" style="margin-bottom:6px">About</div>
@@ -5537,7 +5506,12 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
     <div class="export-row">
       <div class="export-lbl">Verified Work Record</div>
       <button class="export-btn" onclick="exportRecord('${memberId}')">Export PDF</button>
-    </div>`;
+    </div>
+    ${isSelf ? `
+    <div class="export-row">
+      <div class="export-lbl">Session</div>
+      <button class="export-btn" style="border-color:var(--red);color:var(--red)" onclick="closeOverlay();doLogout()">Sign out</button>
+    </div>` : ''}`;
 
   loadMemberLedger(op.id, op.wallet_address, isSelf);
   if (isSelf) loadOps();
@@ -7356,11 +7330,17 @@ function openAdminMode() {
     toast('Session issue — try signing out and back in.');
     return;
   }
+  // Genesis authenticates with a Supabase Auth email+password (doLogin) — every
+  // other operator authenticates with a PIN via the login_with_pin RPC (doPinLogin)
+  // and has no Supabase Auth password at all, so this gate must re-verify against
+  // whichever credential the operator actually has.
+  const isGenesis = !!operator.is_genesis;
   openOverlay('Admin', (body) => {
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px">
-        <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:14px;line-height:1.6">Enter your password to open Admin.</div>
-        <input class="rel-q-input" id="admin-pw-input" type="password" placeholder="Password" autocomplete="off" data-lpignore="true" data-1p-ignore onkeydown="if(event.key==='Enter')confirmAdminPassword()"/>
+        <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:14px;line-height:1.6">Enter your ${isGenesis ? 'password' : 'PIN'} to open Admin.</div>
+        <input class="rel-q-input" id="admin-pw-input" type="${isGenesis ? 'password' : 'text'}" ${isGenesis ? '' : 'inputmode="numeric" maxlength="7"'}
+          placeholder="${isGenesis ? 'Password' : '7-digit PIN'}" autocomplete="off" data-lpignore="true" data-1p-ignore onkeydown="if(event.key==='Enter')confirmAdminPassword()"/>
         <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="confirmAdminPassword()">Enter</button>
         <div id="admin-pw-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
       </div>`;
@@ -7369,23 +7349,32 @@ function openAdminMode() {
 }
 
 async function confirmAdminPassword() {
-  const pw = document.getElementById('admin-pw-input')?.value;
+  const val = document.getElementById('admin-pw-input')?.value;
   const errEl = document.getElementById('admin-pw-error');
+  const isGenesis = !!operator.is_genesis;
   if (errEl) errEl.style.display = 'none';
-  if (!pw) { if (errEl) { errEl.textContent = 'Enter your password.'; errEl.style.display = 'block'; } return; }
+  if (!val) { if (errEl) { errEl.textContent = isGenesis ? 'Enter your password.' : 'Enter your PIN.'; errEl.style.display = 'block'; } return; }
 
   try {
-    // Re-verify the already-known account — password only, email never
-    // re-asked since we already know who's logged in.
-    const { error } = await sb.auth.signInWithPassword({ email: operator.email, password: pw });
-    if (error) throw error;
+    if (isGenesis) {
+      // Re-verify the already-known account — password only, email never
+      // re-asked since we already know who's logged in.
+      const { error } = await sb.auth.signInWithPassword({ email: operator.email, password: val });
+      if (error) throw error;
+    } else {
+      // Same re-verification, but through the credential this operator actually
+      // has — mirrors doPinLogin, and confirms the PIN belongs to this account.
+      const { data, error } = await sb.rpc('login_with_pin', { p_pin: val.trim() });
+      const op = Array.isArray(data) ? data[0] : data;
+      if (error || !op || op.id !== operator.id) throw error || new Error('PIN did not match this account.');
+    }
 
     closeOverlay();
     document.getElementById('uni-shell').classList.remove('in');
     document.getElementById('shell').classList.add('in');
   } catch(e) {
     console.error(e);
-    if (errEl) { errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; }
+    if (errEl) { errEl.textContent = isGenesis ? 'Incorrect password.' : 'Incorrect PIN.'; errEl.style.display = 'block'; }
   }
 }
 
@@ -7406,35 +7395,10 @@ function openUniProfile() {
     toast('Session issue — try signing out and back in.');
     return;
   }
-  // Preserve existing skills/credentials so saving this simpler form
-  // doesn't wipe out what's already on file from the full Admin editor.
-  window._profSkills = operator.skills ? (typeof operator.skills === 'string' ? JSON.parse(operator.skills || '[]') : operator.skills) : [];
-  window._profCreds  = operator.credentials ? (typeof operator.credentials === 'string' ? JSON.parse(operator.credentials || '[]') : operator.credentials) : [];
-
-  openOverlay('Profile', (body) => {
-    body.innerHTML = `
-      <div class="rel-section" style="padding-top:10px;display:flex;align-items:center;gap:14px">
-        <div class="prof-avatar" style="cursor:pointer" onclick="document.getElementById('uprof-avatar-input').click()">${avatarHtml(operator.peer_name, operator.avatar_url, 16)}</div>
-        <input type="file" id="uprof-avatar-input" accept="image/*" style="display:none" onchange="uploadAvatarFile(this)"/>
-        <div><div class="prof-peer">${esc(operator.peer_name)}</div><div class="prof-lane">${esc(tier(operator.total_logs))} · ${esc(operator.email)}</div></div>
-      </div>
-      <div class="rel-section" style="border-top:1px solid var(--line)">
-        <div class="rel-q-lbl" style="margin-bottom:4px">Handle</div>
-        <input class="rel-q-input" id="prof-handle" placeholder="@handle" value="${esc(operator.handle || '')}" style="margin-bottom:12px"/>
-        <div class="rel-q-lbl" style="margin-bottom:4px">Bio</div>
-        <textarea class="rel-q-input" id="prof-bio" rows="3" placeholder="A line about you or what you're working on." style="margin-bottom:12px">${esc(operator.bio || '')}</textarea>
-        <div class="rel-q-lbl" style="margin-bottom:4px">Contact email</div>
-        <input class="rel-q-input" id="prof-contact-email" placeholder="you@example.com" value="${esc(operator.contact_email || '')}" style="margin-bottom:12px"/>
-        <div class="rel-q-lbl" style="margin-bottom:4px">Phone</div>
-        <input class="rel-q-input" id="prof-phone" placeholder="Optional" value="${esc(operator.phone || '')}" style="margin-bottom:12px"/>
-        <div class="rel-q-lbl" style="margin-bottom:4px">Wallet address</div>
-        <input class="rel-q-input" id="prof-wallet" placeholder="0x…" value="${esc(operator.wallet_address || '')}" style="margin-bottom:12px"/>
-        <div class="rel-q-lbl" style="margin-bottom:4px">Desired bid size</div>
-        <input class="rel-q-input" id="prof-bid-size" placeholder="Optional" value="${esc(operator.desired_bid_size || '')}"/>
-        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="saveProfile()">Save Profile</button>
-      </div>
-      <button class="act-btn-sm" style="margin:20px 18px 0;width:calc(100% - 36px);padding:12px;text-align:center;border-color:var(--red);color:var(--red)" onclick="closeOverlay();doLogout()">Sign out</button>`;
-  }, null, null, false);
+  // Operators get the exact same profile view/editor used from Admin's
+  // Members registry — one template for viewing and editing a profile,
+  // not a second hand-maintained copy that can drift out of sync.
+  openMemberRecord(operator.id);
 }
 
 // ── PENPAL TAB ROUTER ──

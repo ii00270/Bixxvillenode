@@ -5,6 +5,12 @@
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#000000"/>
 <title>Bixxville OS</title>
+<link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#000000">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Bixxville">
+<link rel="apple-touch-icon" href="icon-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -1628,9 +1634,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       <button id="uni-admin-btn" class="uni-chip-btn hidden" onclick="openAdminMode()" title="Admin tools">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
-      <div id="uni-avatar-chip" class="uni-chip-btn" onclick="openUniProfile()">
-        <div id="uni-avatar-mark" style="width:22px;height:22px;border-radius:50%;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2)"></div>
-      </div>
     </div>
   </div>
 
@@ -1905,6 +1908,13 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 <div id="toast"></div>
 
 <script>
+// PWA — register the service worker so this installs like a real app
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('sw.js').catch((e) => console.warn('Service worker registration failed:', e));
+  });
+}
+
 'use strict';
 
 // ── CONFIG ──
@@ -6537,8 +6547,6 @@ function enterUniShell() {
   document.getElementById('uni-shell').classList.add('in');
   const adminBtn = document.getElementById('uni-admin-btn');
   if (adminBtn) adminBtn.classList.toggle('hidden', !operator || !!relation);
-  const mark = document.getElementById('uni-avatar-mark');
-  if (mark) mark.innerHTML = avatarHtml(currentIdentityLabel(), currentAvatarUrl(), 11);
   showUniTab('signal');
 }
 
@@ -7343,8 +7351,37 @@ async function paySidekickDeal(scopeId, amountUsd) {
 // cycle audit) rather than rebuilding any of it. ──
 function openAdminMode() {
   if (!operator || relation) return;
-  document.getElementById('uni-shell').classList.remove('in');
-  document.getElementById('shell').classList.add('in');
+  openOverlay('Admin', (body) => {
+    body.innerHTML = `
+      <div class="rel-section" style="padding-top:10px">
+        <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:14px;line-height:1.6">Enter your password to open Admin.</div>
+        <input class="rel-q-input" id="admin-pw-input" type="password" placeholder="Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')confirmAdminPassword()"/>
+        <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="confirmAdminPassword()">Enter</button>
+        <div id="admin-pw-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+      </div>`;
+    setTimeout(() => document.getElementById('admin-pw-input')?.focus(), 50);
+  }, null, null, false);
+}
+
+async function confirmAdminPassword() {
+  const pw = document.getElementById('admin-pw-input')?.value;
+  const errEl = document.getElementById('admin-pw-error');
+  if (errEl) errEl.style.display = 'none';
+  if (!pw) { if (errEl) { errEl.textContent = 'Enter your password.'; errEl.style.display = 'block'; } return; }
+
+  try {
+    // Re-verify the already-known account — password only, email never
+    // re-asked since we already know who's logged in.
+    const { error } = await sb.auth.signInWithPassword({ email: operator.email, password: pw });
+    if (error) throw error;
+
+    closeOverlay();
+    document.getElementById('uni-shell').classList.remove('in');
+    document.getElementById('shell').classList.add('in');
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = 'Incorrect password.'; errEl.style.display = 'block'; }
+  }
 }
 
 function closeAdminMode() {
@@ -7625,27 +7662,18 @@ async function renderRelProfile(body) {
   const isProxy = !!relation.isOperatorProxy;
   body.innerHTML = `
     <div class="rel-section" style="padding-top:24px;display:flex;align-items:center;gap:14px">
-      <div class="prof-avatar" id="rel-prof-avatar" style="cursor:pointer" onclick="document.getElementById('rel-avatar-input').click()">${avatarHtml(relation.name, relation.avatarUrl, 16)}</div>
-      <input type="file" id="rel-avatar-input" accept="image/*" style="display:none" onchange="uploadPenpalAvatar(this.files[0])"/>
+      <div class="prof-avatar">${avatarHtml(relation.name, relation.avatarUrl, 16)}</div>
       <div>
         <div class="prof-peer">${esc(relation.name)}</div>
         <div class="prof-lane">${isProxy ? 'Operator · ' + esc(operator?.email||'') : 'Penpal'}</div>
       </div>
     </div>
 
+    ${relation.handle || relation.bio ? `
     <div class="rel-section" style="border-top:1px solid var(--line)">
-      <div style="font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-bottom:10px">Edit Profile</div>
-      <div class="rel-q-lbl" style="margin-bottom:4px">Handle</div>
-      <input class="rel-q-input" id="rel-prof-handle" placeholder="@handle" value="${esc(relation.handle || '')}" style="margin-bottom:12px"/>
-      <div class="rel-q-lbl" style="margin-bottom:4px">Bio</div>
-      <textarea class="rel-q-input" id="rel-prof-bio" rows="3" placeholder="A line about you or what you're working on.">${esc(relation.bio || '')}</textarea>
-      ${!isProxy ? `
-      <div class="rel-q-lbl" style="margin:12px 0 4px">Contact email</div>
-      <input class="rel-q-input" id="rel-prof-email" placeholder="you@example.com" value="${esc(relation.contactEmail || '')}" style="margin-bottom:12px"/>
-      <div class="rel-q-lbl" style="margin-bottom:4px">Phone</div>
-      <input class="rel-q-input" id="rel-prof-phone" placeholder="Optional" value="${esc(relation.phone || '')}"/>` : ''}
-      <button class="act-btn-sm" style="margin-top:14px;width:100%;padding:12px;text-align:center" onclick="savePenpalProfile()">Save Profile</button>
-    </div>
+      ${relation.handle ? `<div style="font-family:var(--mono);font-size:12px;color:var(--soft);margin-bottom:8px">${esc(relation.handle)}</div>` : ''}
+      ${relation.bio ? `<div style="font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6">${esc(relation.bio)}</div>` : ''}
+    </div>` : ''}
 
     <div class="rel-section" style="border-top:1px solid var(--line);padding-top:24px">
       <div style="font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);margin-bottom:8px">Your Requests</div>
@@ -7694,70 +7722,6 @@ async function renderRelMyWorkList() {
     if (workEl) workEl.innerHTML = '<div class="empty"><div class="empty-msg">Could not load your work.</div></div>';
   }
 }
-
-async function savePenpalProfile() {
-  const handle = document.getElementById('rel-prof-handle')?.value.trim() || null;
-  const bio    = document.getElementById('rel-prof-bio')?.value.trim() || null;
-  try {
-    if (relation.isOperatorProxy) {
-      const contactEmail = operator.contact_email || null;
-      const phone        = operator.phone || null;
-      const { error } = await sb.rpc('update_operator_profile', {
-        p_email: relation.operatorEmail, p_handle: handle, p_contact_email: contactEmail, p_phone: phone, p_bio: bio,
-      });
-      if (error) throw error;
-      operator.handle = handle; operator.bio = bio;
-    } else {
-      const contactEmail = document.getElementById('rel-prof-email')?.value.trim() || null;
-      const phone        = document.getElementById('rel-prof-phone')?.value.trim() || null;
-      const { error } = await sb.rpc('update_penpal_profile', {
-        p_code: relation.code, p_handle: handle, p_bio: bio, p_contact_email: contactEmail, p_phone: phone,
-      });
-      if (error) throw error;
-      relation.contactEmail = contactEmail; relation.phone = phone;
-    }
-    relation.handle = handle; relation.bio = bio;
-    renderRelPeerHeader();
-    toast('Profile saved.');
-  } catch(e) {
-    console.error(e);
-    toast('Could not save profile.');
-  }
-}
-
-async function uploadPenpalAvatar(file) {
-  if (!file) return;
-  if (file.size > 5 * 1024 * 1024) { toast('Image must be under 5MB.'); return; }
-  if (!file.type.startsWith('image/')) { toast('Please choose an image file.'); return; }
-
-  try {
-    const ext = file.name.split('.').pop();
-    const path = `penpal-${(relation.code||'x').replace(/[^a-zA-Z0-9]/g,'')}-${Date.now()}.${ext}`;
-    const { error: upErr } = await sb.storage.from('avatars').upload(path, file, { upsert: true });
-    if (upErr) throw upErr;
-    const { data: pub } = sb.storage.from('avatars').getPublicUrl(path);
-    const publicUrl = pub?.publicUrl;
-    if (!publicUrl) throw new Error('No public URL returned');
-
-    if (relation.isOperatorProxy) {
-      const { error: saveErr } = await sb.rpc('update_avatar_url', { p_operator_id: relation.operatorId, p_avatar_url: publicUrl });
-      if (saveErr) throw saveErr;
-      operator.avatar_url = publicUrl;
-    } else {
-      const { error: saveErr } = await sb.rpc('update_penpal_avatar', { p_code: relation.code, p_avatar_url: publicUrl });
-      if (saveErr) throw saveErr;
-    }
-    relation.avatarUrl = publicUrl;
-    renderRelPeerHeader();
-    const avEl = document.getElementById('rel-prof-avatar');
-    if (avEl) avEl.innerHTML = avatarHtml(relation.name, publicUrl, 16);
-    toast('Avatar updated.');
-  } catch(e) {
-    console.error(e);
-    toast('Could not upload avatar.');
-  }
-}
-
 
 async function openRelSubmissionDetail(id) {
   const body = document.getElementById('ov-body');

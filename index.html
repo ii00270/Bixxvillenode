@@ -1324,6 +1324,36 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   .feed-time{font-size:9px;}
 }
 
+/* ── NETWORK NAVIGATOR (Market → Network) ── */
+.ndash{margin:0 18px 16px;border:1px solid var(--line2);border-radius:14px;background:var(--surface);overflow:hidden;}
+.ndash-top{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);font-family:var(--mono);}
+.ndash-top b{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--cream);font-weight:600;}
+.ndash-top b i{color:var(--green);font-style:normal;}
+.ndash-live{display:flex;align-items:center;gap:7px;font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);}
+.ndash-live::before{content:'';width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;}
+.ndash-body{display:flex;flex-direction:column;}
+.ndash-graph{flex:1.35;padding:6px 4px 0;}
+.ndash-graph svg{width:100%;height:auto;display:block;}
+.ndash-side{flex:1;padding:14px 16px 16px;border-top:1px solid var(--line);}
+@media(min-width:760px){
+  .ndash-body{flex-direction:row;}
+  .ndash-side{border-top:none;border-left:1px solid var(--line);}
+}
+.ndash-t{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--green);font-weight:600;margin-bottom:6px;}
+.ndash-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-size:13px;cursor:pointer;}
+.ndash-row:last-child{border-bottom:none;}
+.ndash-row .dn{color:var(--cream);font-weight:600;font-family:var(--sans);}
+.ndash-row .df{color:var(--grey);font-family:var(--mono);font-size:10.5px;text-align:right;white-space:nowrap;}
+.ndash-node{cursor:pointer;}
+
+/* ── NETWORK LEDGER (OS · live rows) ── */
+.nl-sub{font-family:var(--mono);font-size:9px;letter-spacing:.18em;text-transform:uppercase;color:var(--grey);padding:14px 18px 4px;}
+.nl-row{display:flex;align-items:baseline;gap:10px;padding:10px 18px;border-bottom:1px solid var(--line);font-family:var(--mono);font-size:11.5px;}
+.nl-row .n{color:var(--cream);font-weight:600;flex-shrink:0;}
+.nl-row .e{color:var(--grey);flex:1;min-width:0;}
+.nl-row .v{color:var(--green);font-weight:700;white-space:nowrap;}
+.nl-row .v.gr{color:var(--grey);font-weight:400;}
+
 /* ── UPDATED BOTTOM NAV (5 tabs) ── */
 #bottom-nav{
   position:fixed;bottom:0;left:0;right:0;
@@ -6730,28 +6760,109 @@ async function renderMarketTape(el) {
 // no backfilled guesses — a business shows $0 until a real settlement
 // with a captured settled_price exists. Small and true beats big and guessed. ──
 async function renderMarketNetwork(el) {
-  el.innerHTML = `<div id="net-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
-  try {
-    const { data, error } = await sb.rpc('get_network_directory');
-    if (error) throw error;
-    window._networkDirectory = data || [];
-    const list = document.getElementById('net-list');
-    if (!list) return;
-    if (!window._networkDirectory.length) { list.innerHTML = '<div class="empty"><div class="empty-msg">No businesses in the network yet.</div></div>'; return; }
+  el.innerHTML = `
+    <div class="ndash">
+      <div class="ndash-top"><b>bixx<i>ville</i></b><span class="ndash-live">Network view</span></div>
+      <div class="ndash-body">
+        <div class="ndash-graph"><svg id="net-nav-svg" viewBox="0 0 560 380" aria-label="Network map"></svg></div>
+        <div class="ndash-side">
+          <div class="ndash-t">Lanes on the network</div>
+          <div id="net-nav-lanes"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+        </div>
+      </div>
+    </div>
+    <div class="nl-sub">Network — ledger events</div>
+    <div id="net-ledger"><div class="empty" style="padding:10px 18px"><div class="empty-msg">Loading…</div></div></div>`;
 
-    list.innerHTML = `
-      <div class="sig-col-head" style="grid-template-columns:1.6fr 1fr 0.8fr"><div>Business</div><div style="text-align:right">Generated</div><div style="text-align:right">Settled</div></div>
-      ${window._networkDirectory.map(b => `
-        <div class="sig-row" style="grid-template-columns:1.6fr 1fr 0.8fr;cursor:pointer" onclick="openBusinessDetail('${esc(b.relation_code)}')">
-          <div class="sig-id"><div class="sig-avatar">${esc((b.name||'?').charAt(0).toUpperCase())}</div><span class="sig-handle">${esc(b.name || b.relation_code)}</span></div>
-          <div class="sig-log">$${Number(b.total_generated||0).toLocaleString()}</div>
-          <div class="sig-total">${b.settled_count || 0}</div>
-        </div>`).join('')}`;
+  try {
+    const [dirRes, settledRes, opsRes] = await Promise.all([
+      sb.rpc('get_network_directory'),
+      sb.rpc('get_settled_projects'),
+      sb.rpc('list_operators'),
+    ]);
+    if (dirRes.error) throw dirRes.error;
+    window._networkDirectory = dirRes.data || [];
+    renderNetNavigator(window._networkDirectory);
+    renderNetLedger(settledRes.data || [], opsRes.data || []);
   } catch(e) {
     console.error(e);
-    const list = document.getElementById('net-list');
-    if (list) list.innerHTML = '<div class="empty"><div class="empty-msg">Could not load Network. Run the network page migration in Supabase if this is the first load.</div></div>';
+    const lanes = document.getElementById('net-nav-lanes');
+    if (lanes) lanes.innerHTML = '<div class="empty" style="padding:8px 0"><div class="empty-msg">Could not load Network. Run the network page migration in Supabase if this is the first load.</div></div>';
   }
+}
+
+// The Navigator — hub-and-spoke map of the network, drawn from the real
+// directory. Nodes are real businesses; the highlighted edge is the top
+// generator by settled revenue. Nothing decorative carries a number.
+function renderNetNavigator(dir) {
+  const svg = document.getElementById('net-nav-svg');
+  const lanes = document.getElementById('net-nav-lanes');
+  if (!svg || !lanes) return;
+
+  const palette = ['#8CF060', '#AA8C4E', '#E8884A', '#C8C6C2'];
+  const nodes = [...dir].sort((a, b) => (b.total_generated || 0) - (a.total_generated || 0)).slice(0, 7);
+  const hubX = 120, hubY = 190;
+
+  let paths = '', dots = '';
+  if (nodes.length) {
+    const gap = nodes.length > 1 ? Math.min(48, 300 / (nodes.length - 1)) : 0;
+    const y0 = hubY - gap * (nodes.length - 1) / 2;
+    nodes.forEach((b, i) => {
+      const y = y0 + gap * i;
+      const color = palette[i % palette.length];
+      const hot = i === 0 && (b.total_generated || 0) > 0;
+      paths += `<path d="M144,${hubY} C260,${hubY} 300,${y} 410,${y}" fill="none" stroke="${hot ? '#8CF060' : '#2C2C2C'}" stroke-width="${hot ? 1.6 : 1.3}"/>`;
+      const label = (b.name || b.relation_code || '—').slice(0, 22);
+      dots += `<g class="ndash-node" onclick="openBusinessDetail('${esc(b.relation_code)}')">` +
+        `<circle cx="418" cy="${y}" r="7" fill="${color}"/>` +
+        (hot ? `<circle cx="418" cy="${y}" r="12" fill="none" stroke="#FFFFFF" stroke-width="1.2"/>` : '') +
+        `<text x="${hot ? 437 : 434}" y="${y + 4}" fill="#FFFFFF" font-family="Inter,sans-serif" font-size="11">${esc(label)}</text></g>`;
+    });
+  }
+
+  svg.innerHTML = `
+    <circle cx="58" cy="72" r="3" fill="#2C2C2C"/><circle cx="42" cy="298" r="3" fill="#2C2C2C"/>
+    <circle cx="84" cy="338" r="2.5" fill="#2C2C2C"/><circle cx="200" cy="46" r="2.5" fill="#2C2C2C"/>
+    ${paths}
+    <circle cx="${hubX}" cy="${hubY}" r="24" fill="none" stroke="#8CF060" stroke-width="1.6"/>
+    <circle cx="${hubX}" cy="${hubY}" r="5" fill="#8CF060"/>
+    <text x="${hubX}" y="${hubY + 42}" text-anchor="middle" fill="#707070" font-family="IBM Plex Mono,monospace" font-size="10" letter-spacing=".08em">BIXXVILLE OS</text>
+    ${nodes.length ? '' : `<text x="418" y="${hubY + 4}" fill="#707070" font-family="Inter,sans-serif" font-size="11">No businesses yet</text>`}
+    ${dots}`;
+
+  lanes.innerHTML = nodes.length ? nodes.map(b => `
+    <div class="ndash-row" onclick="openBusinessDetail('${esc(b.relation_code)}')">
+      <span class="dn">${esc(b.name || b.relation_code)}</span>
+      <span class="df">$${Number(b.total_generated || 0).toLocaleString()} · ${b.settled_count || 0} settled</span>
+    </div>`).join('')
+    : '<div class="empty" style="padding:8px 0"><div class="empty-msg">No businesses in the network yet.</div></div>';
+}
+
+// Ledger events — same composition as the dashboard activity feed:
+// real settlements and real member joins only.
+function renderNetLedger(settled, operators) {
+  const el = document.getElementById('net-ledger');
+  if (!el) return;
+
+  const events = [];
+  settled.forEach(p => {
+    if (p.settled_at) events.push({
+      time: p.settled_at, n: p.relation_name || p.relation_code || '—',
+      e: `settled ${p.title || 'project'}`,
+      v: p.total_logs_confirmed ? `+${Math.round(p.total_logs_confirmed)} LOG` : 'settled', gr: false,
+    });
+  });
+  operators.forEach(op => {
+    if (op.invited_at) events.push({
+      time: op.invited_at, n: op.peer_name || '—',
+      e: 'joined the network', v: fmtDate(op.invited_at), gr: true,
+    });
+  });
+  events.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+  el.innerHTML = events.length ? events.slice(0, 12).map(ev => `
+    <div class="nl-row"><span class="n">${esc(ev.n)}</span><span class="e">${esc(ev.e)}</span><span class="v${ev.gr ? ' gr' : ''}">${esc(ev.v)}</span></div>`).join('')
+    : '<div class="empty" style="padding:10px 18px"><div class="empty-msg">No network activity yet. Work will appear here as it happens.</div></div>';
 }
 
 async function openBusinessDetail(relationCode) {

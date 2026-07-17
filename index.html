@@ -1505,6 +1505,128 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 
 /* ── UTIL ── */
 .hidden{display:none!important;}
+
+/* ═══ APPLE-INSPIRED POLISH — macOS treatment ≥768px, iOS treatment <768px.
+   Styling pass only: same structure, same brand system (near-black + Portal
+   green + Syne/mono/Inter). No window chrome, no dock, no menu bar. ═══ */
+
+/* Overlay scrim — animated dim behind the sheet, both breakpoints.
+   The 100vmax spread layer must exist in BOTH states (transparent when
+   closed) so box-shadow interpolates instead of snapping. */
+#overlay{
+  box-shadow:0 -8px 40px rgba(0,0,0,.7), 0 -1px 0 rgba(140,240,96,.06), 0 0 0 100vmax rgba(0,0,0,0);
+  transition:transform .32s cubic-bezier(.32,.72,0,1), box-shadow .32s ease;
+}
+#overlay.open{
+  box-shadow:0 -8px 40px rgba(0,0,0,.7), 0 -1px 0 rgba(140,240,96,.06), 0 0 0 100vmax rgba(0,0,0,.45);
+}
+
+/* ── iOS — touch layout only ── */
+@media (max-width:767px){
+  #topbar,#uni-topbar,#bottom-nav,#uni-nav{
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(20px) saturate(1.6);
+    -webkit-backdrop-filter:blur(20px) saturate(1.6);
+  }
+  /* Bottom sheet: leave a gap at the top like a native page sheet */
+  #overlay{
+    top:max(20px, env(safe-area-inset-top, 0px));
+    border-radius:20px 20px 0 0;
+  }
+  .ov-handle{width:40px;height:5px;margin:8px auto 2px;}
+}
+
+/* iOS press feedback — touch devices only (hover:none), fires on
+   touch-start via :active rather than waiting for release */
+@media (hover:none){
+  .nav-btn,.ds-item,.act-btn,.act-btn-sm,.gate-btn,.gate-enter-btn,.gate-choice-btn,
+  .sk-pay-btn,.sk-verify-btn,.calc-mode-btn,.dag-view-btn,.reg-fpill,.si-yn-btn,
+  .si-nav-next,.si-nav-back,.dash-action-btn,.dash-task-add-btn,.prof-add-btn,
+  .export-btn,.evt-ack-btn,.pay-btn,.confirm-ok,.confirm-cancel,.wb-apply,
+  .rel-wallet-btn,.rel-msg-send,.dag-approve,.dag-reject,.tb-exit-sm,.uni-chip-btn{
+    transition:transform .12s ease, opacity .12s ease;
+  }
+  .nav-btn:active,.ds-item:active,.act-btn:active,.act-btn-sm:active,.gate-btn:active,
+  .gate-enter-btn:active,.gate-choice-btn:active,.sk-pay-btn:active,.sk-verify-btn:active,
+  .calc-mode-btn:active,.dag-view-btn:active,.reg-fpill:active,.si-yn-btn:active,
+  .si-nav-next:active,.si-nav-back:active,.dash-action-btn:active,.dash-task-add-btn:active,
+  .prof-add-btn:active,.export-btn:active,.evt-ack-btn:active,.pay-btn:active,
+  .confirm-ok:active,.confirm-cancel:active,.wb-apply:active,.rel-wallet-btn:active,
+  .rel-msg-send:active,.dag-approve:active,.dag-reject:active,.tb-exit-sm:active,
+  .uni-chip-btn:active{
+    transform:scale(.96);opacity:.72;
+  }
+  .member-row:active,.proj-card:active,.rel-sub-item:active,.sig-row:active,
+  .wb-card.unlocked:active{opacity:.7;transition:opacity .12s ease;}
+}
+
+/* Segmented pills — one consistent iOS-style segmented control everywhere
+   the pattern appears (calculator, market tape/network, DAG text/visual) */
+.calc-mode-btn,.dag-view-btn{border-radius:9px;}
+.calc-mode-btn.active,.dag-view-btn.active{background:rgba(140,240,96,.14);}
+
+/* ── macOS — desktop layout only ── */
+@media (min-width:768px){
+  /* Frosted chrome: sidebar, right rail, uni-shell top/bottom bars.
+     Translucency reads against the ambient orbs behind the shell. */
+  #d-sidebar{
+    background:rgba(10,10,10,.68);
+    backdrop-filter:blur(28px) saturate(1.5);
+    -webkit-backdrop-filter:blur(28px) saturate(1.5);
+  }
+  #d-right{
+    background:rgba(10,10,10,.55);
+    backdrop-filter:blur(28px) saturate(1.5);
+    -webkit-backdrop-filter:blur(28px) saturate(1.5);
+  }
+  #uni-topbar,#uni-nav{
+    background:rgba(0,0,0,.72);
+    backdrop-filter:blur(24px) saturate(1.5);
+    -webkit-backdrop-filter:blur(24px) saturate(1.5);
+  }
+
+  /* Overlay: centered frosted sheet with macOS corner radius — same
+     slide-up interaction, just constrained instead of edge-to-edge */
+  #overlay{
+    left:50%;right:auto;width:min(680px,94vw);
+    top:max(48px, 6vh);
+    border-radius:16px 16px 0 0;
+    transform:translate(-50%,110%);
+    background:rgba(16,16,18,.92);
+    backdrop-filter:blur(28px) saturate(1.4);
+    -webkit-backdrop-filter:blur(28px) saturate(1.4);
+  }
+  #overlay.open{transform:translate(-50%,0);}
+
+  #confirm-dialog{backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);}
+  .confirm-box{
+    border-radius:14px;
+    box-shadow:0 1px 2px rgba(0,0,0,.6), 0 24px 60px rgba(0,0,0,.5);
+  }
+
+  /* Soft layered depth on card-shaped panels */
+  .dash-widget,.dash-stat-chip,.sk-deal,.wb-card,.planning-card,.rel-wallet-box,
+  .bstat-node,.si-friction{
+    border-radius:12px;
+    box-shadow:0 1px 1px rgba(0,0,0,.4), 0 6px 18px rgba(0,0,0,.35), 0 16px 40px rgba(0,0,0,.22);
+  }
+
+  /* macOS-convention corner radii on controls */
+  .act-btn,.gate-btn,.gate-enter-btn,.gate-choice-btn,.dag-approve,.dag-reject,
+  .si-nav-next,.si-nav-back,.confirm-ok,.confirm-cancel,.si-yn-btn{border-radius:8px;}
+  .act-btn-sm,.export-btn,.evt-ack-btn,.prof-add-btn,.pay-btn,.wr-scope-badge{border-radius:7px;}
+
+  /* Slightly more generous desktop type scale — sizes only, so nothing
+     shifts off the existing 18px padding grid */
+  .sig-title{font-size:26px;}
+  .dash-greeting-text{font-size:28px;}
+  .stat-val{font-size:28px;}
+  .s-title{font-size:17px;}
+  .empty-msg{font-size:15px;max-width:340px;line-height:1.7;}
+  .proj-name,.member-name,.rel-sub-title,.sk-title,.wb-title{font-size:15px;}
+  .form-input,.form-textarea,.form-select,.rel-q-input,.rel-q-textarea{font-size:15px;}
+  .evt-title,.log-row-title,.ledger-pay-title{font-size:15px;}
+}
 </style>
 </head>
 <body>
@@ -7895,6 +8017,45 @@ document.addEventListener('keydown', e => {
   const opMode = document.getElementById('gate-op');
   if (opMode && opMode.style.display !== 'none') { doLogin(); } else { doRelationLogin(); }
 });
+
+// ── SHEET SWIPE-TO-DISMISS (mobile only) ──
+// Drag starts from the handle or header — not the body, which needs to scroll.
+// Follows the finger live, then dismisses past the threshold or springs back.
+(function initSheetSwipe() {
+  const ov = document.getElementById('overlay');
+  if (!ov) return;
+  const grabZones = [ov.querySelector('.ov-handle'), ov.querySelector('.ov-head')].filter(Boolean);
+  let startY = null, curY = 0, dragging = false;
+
+  function onStart(e) {
+    if (window.innerWidth >= 768) return; // desktop keeps click-to-dismiss only
+    if (!ov.classList.contains('open')) return;
+    dragging = true;
+    startY = e.touches[0].clientY;
+    curY = 0;
+    ov.style.transition = 'none';
+  }
+  function onMove(e) {
+    if (!dragging) return;
+    curY = Math.max(0, e.touches[0].clientY - startY);
+    ov.style.transform = `translateY(${curY}px)`;
+  }
+  function onEnd() {
+    if (!dragging) return;
+    dragging = false;
+    ov.style.transition = '';
+    ov.style.transform = '';
+    if (curY > 110) closeOverlay(); // past threshold → animate the rest of the way down
+    curY = 0;
+  }
+
+  grabZones.forEach(el => {
+    el.addEventListener('touchstart', onStart, { passive: true });
+    el.addEventListener('touchmove', onMove, { passive: true });
+    el.addEventListener('touchend', onEnd);
+    el.addEventListener('touchcancel', onEnd);
+  });
+})();
 
 // ── ENTRY POINT ──
 window.addEventListener('load', async () => {

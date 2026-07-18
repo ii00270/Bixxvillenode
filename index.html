@@ -1533,6 +1533,77 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .si-nav-next:hover{background:rgba(140,240,96,.08);}
 
+/* ── DIRECT MESSAGES ── */
+.dm-new-btn{
+  width:32px;height:32px;border-radius:50%;flex-shrink:0;
+  background:rgba(140,240,96,.1);border:1px solid var(--green);color:var(--green);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.dm-new-btn:hover{background:rgba(140,240,96,.18);}
+
+.dm-conv-row{
+  display:flex;align-items:center;gap:12px;padding:12px 18px;
+  border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;
+}
+.dm-conv-row:hover,.dm-conv-row:active{background:var(--surface);}
+.dm-conv-avatar{
+  width:48px;height:48px;border-radius:50%;flex-shrink:0;overflow:hidden;
+  background:var(--surface2);border:1px solid var(--line2);
+  display:flex;align-items:center;justify-content:center;
+}
+.dm-conv-info{flex:1;min-width:0;}
+.dm-conv-name{font-family:var(--sans);font-size:14px;font-weight:600;color:#FFFFFF;}
+.dm-conv-preview{
+  font-family:var(--sans);font-size:12px;color:var(--grey);margin-top:2px;
+  white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+}
+.dm-conv-time{font-family:var(--mono);font-size:9px;color:var(--grey);flex-shrink:0;white-space:nowrap;}
+
+.dm-thread{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  padding:16px 18px;display:flex;flex-direction:column;gap:8px;
+  min-height:50vh;
+}
+.dm-bubble-row{display:flex;}
+.dm-bubble-row.mine{justify-content:flex-end;}
+.dm-bubble{
+  max-width:75%;padding:9px 13px;border-radius:16px;border-bottom-left-radius:4px;
+  background:var(--surface);border:1px solid var(--line2);color:var(--cream);
+  font-family:var(--sans);font-size:13px;line-height:1.45;
+}
+.dm-bubble.mine{
+  background:var(--green);color:#08110C;border:none;
+  border-bottom-left-radius:16px;border-bottom-right-radius:4px;
+}
+.dm-bubble-time{font-family:var(--mono);font-size:8px;opacity:.6;margin-top:4px;text-align:right;}
+.dm-voice-bubble audio{height:36px;width:220px;max-width:60vw;}
+.dm-voice-bubble audio::-webkit-media-controls-panel{background:transparent;}
+
+.dm-compose{
+  display:flex;align-items:center;gap:8px;padding:10px 14px;
+  border-top:1px solid var(--line);flex-shrink:0;background:var(--black);
+}
+.dm-input{
+  flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line2);border-radius:20px;
+  padding:10px 16px;color:var(--cream);font-family:var(--sans);font-size:13px;outline:none;
+  transition:border-color .15s;
+}
+.dm-input:focus{border-color:var(--green);}
+.dm-input::placeholder{color:var(--grey);}
+.dm-mic-btn,.dm-send-btn{
+  width:38px;height:38px;border-radius:50%;flex-shrink:0;
+  background:var(--surface2);border:1px solid var(--line2);color:var(--soft);
+  display:flex;align-items:center;justify-content:center;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.dm-send-btn{background:var(--green);border-color:var(--green);color:#08110C;padding-left:2px;}
+.dm-mic-btn.recording{
+  background:rgba(224,82,82,.15);border-color:var(--red);color:var(--red);
+  animation:dm-pulse 1s ease-in-out infinite;
+}
+@keyframes dm-pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 
@@ -2339,6 +2410,7 @@ function signOutFromTopbar() {
 
 async function doLogout() {
   clearInterval(window._marketsRefreshTimer);
+  clearInterval(dmPollTimer);
   if (operator) {
     fireAndForget(sb?.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} signed out`,
@@ -2399,6 +2471,11 @@ function showSurface(name) {
   // low-risk; Members is the first genuinely admin-specific tool.
   if (name === 'ops' || name === 'profile' || name === 'home') name = 'members';
 
+  // Messages is no longer its own admin-shell surface — it's the unified
+  // Messages tab (operators + relations, one inbox), reached the same way
+  // 'Market' already leaves Admin for the front-end.
+  if (name === 'messages') { closeAdminMode(); showUniTab('messages'); return; }
+
   document.querySelectorAll('.surface').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.remove('active');
@@ -2424,7 +2501,6 @@ function showSurface(name) {
 
   // Load surface content on first visit
   if (name === 'home')          loadHome();
-  if (name === 'messages')      loadMessages();
   if (name === 'notifications') loadNotifications();
   if (name === 'members')       loadMembers();
   if (name === 'events')        loadEvents();
@@ -3007,38 +3083,6 @@ async function loadDashRecentActivity() {
     </div>`).join('');
 }
 
-// ── MESSAGES SURFACE ──
-async function loadMessages() {
-  const body = document.getElementById('messages-body');
-  if (!body) return;
-
-  // Pull all active projects with message threads
-  const { data: projects } = await sb
-    .from('relation_submissions')
-    .select('id, relation_name, relation_code, status')
-    .in('status', ['accepted', 'active', 'pending'])
-    .order('created_at', { ascending: false });
-
-  if (!projects?.length) {
-    body.innerHTML = '<div class="empty"><div class="empty-line"></div><div class="empty-label">Threads</div><div class="empty-msg">No active message threads. Messages appear when a relation has an open project.</div></div>';
-    return;
-  }
-
-  body.innerHTML = projects.map(p => `
-    <div class="member-row" onclick="openMessages('${esc(p.relation_code)}', '${esc(p.relation_name || p.relation_code)}')">
-      <div class="member-avatar">
-        <svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
-        </svg>
-      </div>
-      <div class="member-info">
-        <div class="member-name">${esc(p.relation_name || p.relation_code || '—')}</div>
-        <div class="member-meta">${p.status}</div>
-      </div>
-      <div style="font-family:var(--mono);font-size:10px;color:var(--grey)">→</div>
-    </div>`).join('');
-}
-
 // ── NOTIFICATIONS SURFACE ──
 async function loadNotifications() {
   const body = document.getElementById('notif-body');
@@ -3470,78 +3514,6 @@ async function submitEmitEvent() {
   await loadEvents();
 }
 
-
-// ── OPEN MESSAGES THREAD ──
-let opMsgKey = null;
-let opMsgCode = null;
-
-function openMessages(relationCode, projectName) {
-  opMsgCode = relationCode;
-  opMsgKey = null;
-  openOverlay(projectName, (body) => {
-    body.innerHTML = `
-      <div class="rel-msg-lock" style="padding:16px 18px">
-        <div class="rel-msg-hint">Messages are end-to-end encrypted. Enter the shared password you gave this relation to read and reply.</div>
-        <label class="form-lbl">Shared message password</label>
-        <input class="form-input" type="password" id="op-msg-pw" placeholder="Password shared with this relation"
-          onkeydown="if(event.key==='Enter')unlockOpMsgs()"/>
-        <button class="act-btn" style="margin:16px 0 0" onclick="unlockOpMsgs()">Unlock messages</button>
-      </div>`;
-  });
-}
-
-async function unlockOpMsgs() {
-  const pw = document.getElementById('op-msg-pw')?.value;
-  if (!pw) { toast('Enter the password.'); return; }
-  opMsgKey = await deriveMsgKey(pw);
-  renderOpMsgThread();
-}
-
-function renderOpMsgThread() {
-  const body = document.getElementById('ov-body');
-  if (!body) return;
-  body.innerHTML = `
-    <div style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:8px;padding:14px 18px" id="msg-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
-    <div style="padding:14px 18px;border-top:1px solid var(--line);display:flex;gap:8px;flex-shrink:0;">
-      <input class="form-input" id="msg-input" placeholder="Send a message…" style="flex:1;" onkeydown="if(event.key==='Enter')sendMsg()"/>
-      <button class="act-btn" style="white-space:nowrap;margin:0;padding:0 16px;" onclick="sendMsg()">Send</button>
-    </div>`;
-  loadOpMsgs();
-}
-
-async function loadOpMsgs() {
-  const list = document.getElementById('msg-list');
-  if (!list || !opMsgKey) return;
-  const { data: msgs } = await sb.rpc('get_messages', { p_code: opMsgCode });
-  const messages = msgs || [];
-
-  if (!messages.length) {
-    list.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">No messages yet.</div></div>';
-    return;
-  }
-
-  const rendered = await Promise.all(messages.map(async m => {
-    const text = await decryptMsgText(m.ciphertext, opMsgKey);
-    const mine = m.sender === 'OPERATORS';
-    return `
-      <div style="align-self:${mine ? 'flex-end' : 'flex-start'};max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;font-family:var(--sans);${mine ? 'background:var(--green);color:#08110C' : 'background:var(--surface);border:1px solid var(--line2);color:var(--cream)'}">
-        <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:3px">${mine ? 'You' : esc(m.sender)}</div>
-        ${esc(text)}
-      </div>`;
-  }));
-  list.innerHTML = rendered.join('');
-  list.scrollTop = list.scrollHeight;
-}
-
-async function sendMsg() {
-  const inp = document.getElementById('msg-input');
-  const text = inp?.value.trim();
-  if (!text || !opMsgKey || !opMsgCode) return;
-  inp.value = '';
-  const ct = await encryptMsgText(text, opMsgKey);
-  await sb.rpc('send_message', { p_code: opMsgCode, p_ciphertext: ct });
-  await loadOpMsgs();
-}
 
 // ── INTAKE SURFACE ──
 async function loadIntake() {
@@ -6587,11 +6559,8 @@ function switchGate(mode) {
 
 // ── RELATION STATE ──
 let relation = null; // { code, name, projectId }
-let relMsgPoll = null;
 let relTab = 'home';
 let relWallet = { addr: null, usdc: null, confirmed: false };
-let relMsgKey = null;
-const REL_MSG_SALT = new TextEncoder().encode('bixxville-node-msg-v1');
 
 // ── RELATION LOGIN ──
 let relLogging = false;
@@ -6664,7 +6633,6 @@ function renderRelPeerHeader() {
 function enterRelationShell() {
   document.getElementById('gate').classList.add('out');
   relWallet = { addr: null, usdc: null, confirmed: false };
-  relMsgKey = null;
   enterUniShell();
 }
 
@@ -6676,9 +6644,8 @@ function doRelLogout() {
       p_recipients: [relation.name], p_critical: false,
     }));
   }
-  if (relMsgPoll) { clearInterval(relMsgPoll); relMsgPoll = null; }
+  clearInterval(dmPollTimer);
   relation = null;
-  relMsgKey = null;
   document.getElementById('uni-shell').classList.remove('in');
   document.getElementById('gate').classList.remove('out');
   document.getElementById('g-code').value = '';
@@ -6722,6 +6689,7 @@ function showUniTab(tab) {
   });
   const body = document.getElementById('uni-body');
   if (!body) return;
+  if (tab !== 'messages') clearInterval(dmPollTimer);
   if (tab === 'signal')   renderSignal(body);
   if (tab === 'messages') renderUniMessages(body);
   if (tab === 'work')     renderWorkBoard(body);
@@ -7016,33 +6984,252 @@ async function submitReview(relationCode) {
   }
 }
 
-// ── MESSAGES — real/proxy relation identity reuses the Penpal thread view;
-// a plain operator gets a lightweight inbox of active project threads ──
+// ── MESSAGES — unified inbox, real conversations you can start yourself.
+// Replaces the old per-project shared-password encrypted thread system.
+// Protection model now: RLS/access-control at the database layer (like most
+// messaging features, Slack/Discord included) rather than a manually-shared
+// password — the old scheme meant nobody could message someone new without
+// first arranging a password out of band, which is exactly what "no way to
+// create a message with someone" was about. Voice memos upload to Storage;
+// calling/video are a separate, later build (real-time streaming, not this).
+function myMessagingIdentity() {
+  if (operator) return { kind: 'operator', id: operator.id, name: operator.peer_name, avatar_url: operator.avatar_url };
+  if (relation) return { kind: 'relation', id: relation.code, name: relation.name, avatar_url: relation.avatarUrl };
+  return null;
+}
+
+let dmPollTimer = null;
+let dmActiveConversationId = null;
+let dmAllContacts = [];
+
 async function renderUniMessages(body) {
-  if (relation) { renderRelMessagesTab(body); return; }
-  if (!operator) return;
+  const me = myMessagingIdentity();
+  if (!me) return;
 
   body.innerHTML = `
-    <div class="sig-title-row"><div class="sig-title">Messages</div><div class="sig-note">Encrypted</div></div>
-    <div id="uni-msg-threads"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+    <div class="sig-title-row">
+      <div class="sig-title">Messages</div>
+      <button class="dm-new-btn" onclick="openContactPicker()" title="New message">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+    </div>
+    <div id="dm-conv-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
-  const { data: projects } = await sb
-    .from('relation_submissions')
-    .select('id, relation_name, relation_code, status')
-    .in('status', ['accepted', 'active', 'pending', 'open', 'settling'])
-    .order('created_at', { ascending: false });
+  await loadDmConversations();
+}
 
-  const el = document.getElementById('uni-msg-threads');
+async function loadDmConversations() {
+  const me = myMessagingIdentity();
+  const el = document.getElementById('dm-conv-list');
+  if (!el || !me) return;
+  try {
+    const { data, error } = await sb.rpc('list_my_conversations', { p_kind: me.kind, p_id: me.id });
+    if (error) throw error;
+    const conversations = data || [];
+    if (!conversations.length) {
+      el.innerHTML = `<div class="empty"><div class="empty-line"></div><div class="empty-label">Messages</div><div class="empty-msg">No conversations yet. Tap + to message someone.</div></div>`;
+      return;
+    }
+    el.innerHTML = conversations.map(c => `
+      <div class="dm-conv-row" onclick="openConversation('${esc(c.conversation_id)}','${esc(c.other_kind)}','${esc(c.other_id)}','${esc(c.other_name).replace(/'/g,"\\'")}','${esc(c.other_avatar_url||'')}')">
+        <div class="dm-conv-avatar">${avatarHtml(c.other_name, c.other_avatar_url)}</div>
+        <div class="dm-conv-info">
+          <div class="dm-conv-name">${esc(c.other_name)}</div>
+          <div class="dm-conv-preview">${c.last_voice_url ? '🎤 Voice memo' : esc(c.last_body || 'Say hello')}</div>
+        </div>
+        <div class="dm-conv-time">${c.last_message_at ? timeAgo(c.last_message_at) : ''}</div>
+      </div>`).join('');
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load conversations. Run the direct-messages migration in Supabase if this is the first load.</div></div>';
+  }
+}
+
+// ── NEW MESSAGE — contact picker ──
+function openContactPicker() {
+  const me = myMessagingIdentity();
+  if (!me) return;
+  openOverlay('New Message', (body) => {
+    body.innerHTML = `
+      <div style="padding:14px 18px 10px">
+        <input class="rel-q-input" id="dm-contact-search" placeholder="Search people…" oninput="filterDmContacts()"/>
+      </div>
+      <div id="dm-contact-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
+    loadDmContacts(me);
+  }, null, null, false);
+}
+
+async function loadDmContacts(me) {
+  const el = document.getElementById('dm-contact-list');
+  try {
+    const { data, error } = await sb.rpc('list_messageable_contacts', { p_caller_kind: me.kind, p_caller_id: me.id });
+    if (error) throw error;
+    dmAllContacts = data || [];
+    renderDmContactList(dmAllContacts);
+  } catch(e) {
+    console.error(e);
+    if (el) el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load contacts. Run the direct-messages migration in Supabase if this is the first load.</div></div>';
+  }
+}
+
+function renderDmContactList(list) {
+  const el = document.getElementById('dm-contact-list');
   if (!el) return;
-  if (!projects?.length) {
-    el.innerHTML = '<div class="empty"><div class="empty-msg">No active message threads yet.</div></div>';
+  if (!list.length) { el.innerHTML = '<div class="empty" style="padding:24px 18px"><div class="empty-msg">No one found.</div></div>'; return; }
+  el.innerHTML = list.map(c => `
+    <div class="member-row" onclick="startConversationWith('${esc(c.kind)}','${esc(c.id)}','${esc(c.name).replace(/'/g,"\\'")}','${esc(c.avatar_url||'')}')">
+      <div class="member-avatar">${avatarHtml(c.name, c.avatar_url)}</div>
+      <div class="member-info"><div class="member-name">${esc(c.name)}</div><div class="member-meta">${esc(c.subtitle||'')}</div></div>
+    </div>`).join('');
+}
+
+function filterDmContacts() {
+  const q = (document.getElementById('dm-contact-search')?.value || '').toLowerCase();
+  renderDmContactList(dmAllContacts.filter(c => c.name.toLowerCase().includes(q)));
+}
+
+async function startConversationWith(kind, id, name, avatarUrl) {
+  const me = myMessagingIdentity();
+  if (!me) return;
+  try {
+    const { data, error } = await sb.rpc('get_or_create_conversation', { p_a_kind: me.kind, p_a_id: me.id, p_b_kind: kind, p_b_id: id });
+    if (error) throw error;
+    closeOverlay();
+    setTimeout(() => openConversation(data, kind, id, name, avatarUrl), 320);
+  } catch(e) {
+    console.error(e);
+    toast('Could not start conversation.');
+  }
+}
+
+// ── CONVERSATION THREAD ──
+function openConversation(conversationId, otherKind, otherId, otherName, otherAvatarUrl) {
+  dmActiveConversationId = conversationId;
+  openOverlay(otherName, (body) => {
+    body.innerHTML = `
+      <div class="dm-thread" id="dm-thread"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
+      <div class="dm-compose">
+        <button class="dm-mic-btn" id="dm-mic-btn" onclick="toggleVoiceRecording()" title="Record voice memo">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"/></svg>
+        </button>
+        <input class="dm-input" id="dm-input" placeholder="Message…" onkeydown="if(event.key==='Enter')sendDmText()"/>
+        <button class="dm-send-btn" onclick="sendDmText()" title="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+      </div>`;
+  }, null, null, true);
+
+  loadDmMessages();
+  clearInterval(dmPollTimer);
+  dmPollTimer = setInterval(loadDmMessages, 5000);
+}
+
+async function loadDmMessages() {
+  const el = document.getElementById('dm-thread');
+  if (!el || !dmActiveConversationId || !document.getElementById('overlay').classList.contains('open')) {
+    clearInterval(dmPollTimer);
     return;
   }
-  el.innerHTML = projects.map(p => `
-    <div class="member-row" style="margin:0 18px" onclick="openMessages('${esc(p.relation_code)}', '${esc(p.relation_name || p.relation_code)}')">
-      <div class="member-avatar">${avatarHtml(p.relation_name || p.relation_code, null)}</div>
-      <div class="member-info"><div class="member-name">${esc(p.relation_name || p.relation_code || '—')}</div><div class="member-meta">${esc(p.status)}</div></div>
-    </div>`).join('');
+  const me = myMessagingIdentity();
+  if (!me) return;
+  try {
+    const { data, error } = await sb.rpc('get_conversation_messages', { p_conversation_id: dmActiveConversationId });
+    if (error) throw error;
+    const msgs = data || [];
+    if (!msgs.length) {
+      el.innerHTML = '<div class="empty" style="padding:24px 18px"><div class="empty-msg">Say hello 👋</div></div>';
+      return;
+    }
+    const atBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 40;
+    el.innerHTML = msgs.map(m => {
+      const mine = m.sender_kind === me.kind && String(m.sender_id) === String(me.id);
+      return `
+        <div class="dm-bubble-row ${mine ? 'mine' : ''}">
+          <div class="dm-bubble ${mine ? 'mine' : ''}">
+            ${m.voice_url
+              ? `<div class="dm-voice-bubble"><audio controls src="${esc(m.voice_url)}"></audio></div>`
+              : esc(m.body || '')}
+            <div class="dm-bubble-time">${new Date(m.created_at).toLocaleTimeString([], {hour:'numeric',minute:'2-digit'})}</div>
+          </div>
+        </div>`;
+    }).join('');
+    if (atBottom) el.scrollTop = el.scrollHeight;
+  } catch(e) { console.error(e); }
+}
+
+async function sendDmText() {
+  const inp = document.getElementById('dm-input');
+  const text = inp?.value.trim();
+  if (!text || !dmActiveConversationId) return;
+  const me = myMessagingIdentity();
+  if (!me) return;
+  inp.value = '';
+  try {
+    const { error } = await sb.rpc('send_direct_message', {
+      p_conversation_id: dmActiveConversationId, p_sender_kind: me.kind, p_sender_id: me.id,
+      p_sender_name: me.name, p_body: text, p_voice_url: null,
+    });
+    if (error) throw error;
+    await loadDmMessages();
+    await loadDmConversations();
+  } catch(e) { console.error(e); toast('Could not send message.'); }
+}
+
+// ── VOICE MEMOS ──
+let dmMediaRecorder = null;
+let dmAudioChunks = [];
+let dmRecordingStartedAt = null;
+
+async function toggleVoiceRecording() {
+  const btn = document.getElementById('dm-mic-btn');
+  if (dmMediaRecorder && dmMediaRecorder.state === 'recording') {
+    dmMediaRecorder.stop();
+    return;
+  }
+  if (!navigator.mediaDevices?.getUserMedia) { toast('Voice memos need microphone access, not available here.'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    dmAudioChunks = [];
+    dmMediaRecorder = new MediaRecorder(stream);
+    dmMediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) dmAudioChunks.push(e.data); };
+    dmMediaRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      btn?.classList.remove('recording');
+      const blob = new Blob(dmAudioChunks, { type: 'audio/webm' });
+      await uploadAndSendVoiceMemo(blob);
+    };
+    dmMediaRecorder.start();
+    dmRecordingStartedAt = Date.now();
+    btn?.classList.add('recording');
+    toast('Recording — tap the mic again to send.');
+  } catch(e) {
+    console.error(e);
+    toast('Could not access your microphone.');
+  }
+}
+
+async function uploadAndSendVoiceMemo(blob) {
+  const me = myMessagingIdentity();
+  if (!me || !dmActiveConversationId) return;
+  const durationSec = Math.round((Date.now() - dmRecordingStartedAt) / 1000);
+  if (durationSec < 1) { toast('Recording too short — try again.'); return; }
+  toast('Sending voice memo…');
+  try {
+    const path = `voice-${dmActiveConversationId}-${Date.now()}.webm`;
+    const { error: upErr } = await sb.storage.from('closing-docs').upload(path, blob, { contentType: 'audio/webm' });
+    if (upErr) throw upErr;
+    const { data: pub } = sb.storage.from('closing-docs').getPublicUrl(path);
+    const { error } = await sb.rpc('send_direct_message', {
+      p_conversation_id: dmActiveConversationId, p_sender_kind: me.kind, p_sender_id: me.id,
+      p_sender_name: me.name, p_body: null, p_voice_url: pub?.publicUrl,
+    });
+    if (error) throw error;
+    await loadDmMessages();
+    await loadDmConversations();
+  } catch(e) {
+    console.error(e);
+    toast('Could not send voice memo.');
+  }
 }
 
 // ── WORK BOARD — tier-gated (Architect+), operator-only. Relations see a
@@ -8338,108 +8525,6 @@ function setRelDagView(mode) {
   }
 }
 
-// ── MESSAGE ENCRYPTION (shared password, PBKDF2 + AES-GCM) ──
-// Both the relation portal and the operator's message thread use these same
-// functions with the same password, so messages actually stay unreadable to
-// anyone without it — including in transit through Supabase.
-async function deriveMsgKey(pw) {
-  const enc  = new TextEncoder();
-  const base = await crypto.subtle.importKey('raw', enc.encode(pw), 'PBKDF2', false, ['deriveKey']);
-  return crypto.subtle.deriveKey(
-    { name: 'PBKDF2', salt: REL_MSG_SALT, iterations: 100000, hash: 'SHA-256' },
-    base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']
-  );
-}
-async function encryptMsgText(text, key) {
-  const iv  = crypto.getRandomValues(new Uint8Array(12));
-  const ct  = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, new TextEncoder().encode(text));
-  const buf = new Uint8Array(iv.length + ct.byteLength);
-  buf.set(iv, 0); buf.set(new Uint8Array(ct), iv.length);
-  return btoa(String.fromCharCode(...buf));
-}
-async function decryptMsgText(b64, key) {
-  try {
-    const raw = Uint8Array.from(atob(b64), c => c.charCodeAt(0));
-    const iv = raw.slice(0, 12), data = raw.slice(12);
-    const pt = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, data);
-    return new TextDecoder().decode(pt);
-  } catch(e) { return '[locked — wrong password, can\'t decrypt this message]'; }
-}
-
-// ── MESSAGES TAB (relation side) ──
-function renderRelMessagesTab(body) {
-  if (relMsgKey) {
-    body.innerHTML = `
-      <div class="rel-msg-scroll" id="rel-msg-scroll"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
-      <div class="rel-msg-compose">
-        <input class="rel-msg-inp" id="rel-msg-inp" placeholder="Message your operator…"
-          onkeydown="if(event.key==='Enter')relSendMsg()"/>
-        <button class="rel-msg-send" onclick="relSendMsg()">Send</button>
-      </div>`;
-    relLoadMsgs();
-    if (relMsgPoll) clearInterval(relMsgPoll);
-    relMsgPoll = setInterval(relLoadMsgs, 8000);
-    return;
-  }
-
-  body.innerHTML = `
-    <div class="rel-msg-lock">
-      <div class="rel-msg-hint">Messages here are end-to-end encrypted. Enter the shared password your operator gave you — without it, messages can't be read by anyone, including us.</div>
-      <label class="rel-q-lbl">Shared message password</label>
-      <input class="rel-q-input" type="password" id="rel-msg-pw" placeholder="Password from your operator"
-        onkeydown="if(event.key==='Enter')relUnlockMsgs()"/>
-      <button class="act-btn" style="margin:16px 0 0" onclick="relUnlockMsgs()">Unlock messages</button>
-    </div>`;
-}
-
-async function relUnlockMsgs() {
-  const pw = document.getElementById('rel-msg-pw')?.value;
-  if (!pw) { toast('Enter the password.'); return; }
-  relMsgKey = await deriveMsgKey(pw);
-  renderRelMessagesTab(document.getElementById('uni-body'));
-}
-
-async function relLoadMsgs() {
-  const el = document.getElementById('rel-msg-scroll');
-  if (!el || !relMsgKey) return;
-
-  try {
-    const { data } = await sb.rpc('get_messages', { p_code: relation.code });
-    const msgs = data || [];
-
-    if (!msgs.length) {
-      el.innerHTML = '<div class="empty"><div class="empty-msg">No messages yet. Say hello below.</div></div>';
-      return;
-    }
-
-    const rendered = await Promise.all(msgs.map(async m => {
-      const mine = m.sender !== 'OPERATORS';
-      const text = await decryptMsgText(m.ciphertext, relMsgKey);
-      return `
-        <div class="rel-bubble ${mine ? 'me' : 'them'}">
-          <div class="rel-bubble-who">${mine ? 'You' : 'Operator'}</div>
-          ${esc(text)}
-        </div>`;
-    }));
-    el.innerHTML = rendered.join('');
-    el.scrollTop = el.scrollHeight;
-  } catch(e) { console.error(e); }
-}
-
-async function relSendMsg() {
-  const inp  = document.getElementById('rel-msg-inp');
-  const text = inp?.value.trim();
-  if (!text || !relMsgKey) return;
-
-  try {
-    const ct = await encryptMsgText(text, relMsgKey);
-    await sb.rpc('send_message', { p_code: relation.code, p_ciphertext: ct });
-    inp.value = '';
-    await relLoadMsgs();
-  } catch(e) {
-    toast('Could not send message.');
-  }
-}
 
 // ── KEYBOARD ──
 document.addEventListener('keydown', e => {

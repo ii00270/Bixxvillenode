@@ -7212,7 +7212,18 @@ function fmtPrice(n) {
   return n.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
 
-function tickerRow(label, value, change, tvSymbol) {
+// icon: either an image URL (CoinGecko's own logo for that coin) or a
+// plain string like flag emoji for forex pairs — never user input, so
+// it's safe to drop in unescaped alongside the escaped label text.
+function assetIconHtml(icon) {
+  if (!icon) return '';
+  if (icon.startsWith('http')) {
+    return `<img src="${esc(icon)}" alt="" style="width:16px;height:16px;border-radius:50%;object-fit:cover;vertical-align:-3px;margin-right:6px" onerror="this.style.display='none'"/>`;
+  }
+  return `<span style="margin-right:6px">${icon}</span>`;
+}
+
+function tickerRow(label, value, change, tvSymbol, icon) {
   const hasChange = change != null && !isNaN(change);
   const changeColor = hasChange ? (change >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--grey)';
   const changeStr = hasChange ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : '';
@@ -7220,7 +7231,7 @@ function tickerRow(label, value, change, tvSymbol) {
   const onclick = tvSymbol ? `onclick="openAssetChart('${esc(label)}','${esc(tvSymbol)}')"` : '';
   return `
     <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414;${clickable}" ${onclick}>
-      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(label)}${tvSymbol ? ' <span style="color:var(--grey);font-size:9px">↗</span>' : ''}</span>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft);display:inline-flex;align-items:center">${assetIconHtml(icon)}${esc(label)}${tvSymbol ? ' <span style="color:var(--grey);font-size:9px;margin-left:4px">↗</span>' : ''}</span>
       <span style="text-align:right">
         <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF">${esc(value)}</span>
         ${changeStr ? `<span style="font-family:var(--mono);font-size:9px;font-weight:600;color:${changeColor};margin-left:8px">${changeStr}</span>` : ''}
@@ -7288,8 +7299,13 @@ async function renderPortfolioAndMarkets() {
   let prices = null;
   try {
     const ids = 'bitcoin,ethereum,solana,hedera-hashgraph,ripple,stellar,usd-coin,pax-gold';
-    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
-    if (res.ok) prices = await res.json();
+    const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=${ids}`);
+    if (res.ok) {
+      prices = {};
+      (await res.json()).forEach(c => {
+        prices[c.id] = { usd: c.current_price, usd_24h_change: c.price_change_percentage_24h, image: c.image };
+      });
+    }
   } catch(e) { console.error('CoinGecko fetch failed:', e); }
 
   // ── Holdings (EVM only — what the address can actually hold) ──
@@ -7306,11 +7322,12 @@ async function renderPortfolioAndMarkets() {
           fetchErc20Balance(ETH_MAINNET_RPC, USDC_MAINNET_CONTRACT, addr, 6).catch(() => null),
         ]);
         const ethPrice = prices?.ethereum?.usd ?? null;
+        const ethIcon = prices?.ethereum?.image, usdcIcon = prices?.['usd-coin']?.image;
         const rows = [
-          { label: 'ETH · Ethereum', bal: ethMain, sym: 'ETH', usd: ethMain != null && ethPrice != null ? ethMain * ethPrice : null },
-          { label: 'ETH · Base',     bal: ethBase, sym: 'ETH', usd: ethBase != null && ethPrice != null ? ethBase * ethPrice : null },
-          { label: 'USDC · Base',    bal: usdcBase, sym: 'USDC', usd: usdcBase },
-          { label: 'USDC · Ethereum', bal: usdcMain, sym: 'USDC', usd: usdcMain },
+          { label: 'ETH · Ethereum', bal: ethMain, sym: 'ETH', usd: ethMain != null && ethPrice != null ? ethMain * ethPrice : null, icon: ethIcon },
+          { label: 'ETH · Base',     bal: ethBase, sym: 'ETH', usd: ethBase != null && ethPrice != null ? ethBase * ethPrice : null, icon: ethIcon },
+          { label: 'USDC · Base',    bal: usdcBase, sym: 'USDC', usd: usdcBase, icon: usdcIcon },
+          { label: 'USDC · Ethereum', bal: usdcMain, sym: 'USDC', usd: usdcMain, icon: usdcIcon },
         ].filter(r => r.bal != null);
 
         if (!rows.length) {
@@ -7319,7 +7336,7 @@ async function renderPortfolioAndMarkets() {
           const total = rows.reduce((n, r) => n + (r.usd || 0), 0);
           portEl.innerHTML = rows.map(r => `
             <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414">
-              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(r.label)}</span>
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft);display:inline-flex;align-items:center">${assetIconHtml(r.icon)}${esc(r.label)}</span>
               <span style="text-align:right">
                 <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF">${r.bal.toLocaleString(undefined,{maximumFractionDigits:r.sym==='ETH'?5:2})}</span>
                 <span style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-left:6px">${r.usd != null ? '$' + fmtPrice(r.usd) : ''}</span>
@@ -7365,12 +7382,12 @@ async function renderPortfolioAndMarkets() {
       ['USDC', p('usd-coin'),        'COINBASE:USDCUSD'],
       ['GOLD · PAXG', p('pax-gold'), 'TVC:GOLD'], // real spot gold chart, more useful than PAXG's own thin feed
     ].filter(([, d]) => d?.usd != null)
-     .map(([label, d, sym]) => tickerRow(label, '$' + fmtPrice(d.usd), d.usd_24h_change, sym));
+     .map(([label, d, sym]) => tickerRow(label, '$' + fmtPrice(d.usd), d.usd_24h_change, sym, d.image));
 
     const fxRows = forex ? [
-      tickerRow('EUR/USD', forex.eurusd.toFixed(4), null, 'FX:EURUSD'),
-      tickerRow('GBP/USD', forex.gbpusd.toFixed(4), null, 'FX:GBPUSD'),
-      tickerRow('DXY · calc', forex.dxy.toFixed(2), null, 'TVC:DXY'),
+      tickerRow('EUR/USD', forex.eurusd.toFixed(4), null, 'FX:EURUSD', '🇪🇺🇺🇸'),
+      tickerRow('GBP/USD', forex.gbpusd.toFixed(4), null, 'FX:GBPUSD', '🇬🇧🇺🇸'),
+      tickerRow('DXY · calc', forex.dxy.toFixed(2), null, 'TVC:DXY', '🇺🇸'),
     ] : [];
 
     if (!cryptoRows.length && !fxRows.length) {

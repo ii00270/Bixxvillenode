@@ -7130,6 +7130,16 @@ async function renderSidekick(body) {
       <div id="prof-wallet-body"><div class="empty" style="padding:8px 0"><div class="empty-msg">Checking…</div></div></div>
     </div>
 
+    <div class="section-lbl" style="position:relative;top:0">Portfolio</div>
+    <div class="rel-section" style="padding-top:0">
+      <div id="prof-portfolio-body"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading holdings…</div></div></div>
+    </div>
+
+    <div class="section-lbl" style="position:relative;top:0">Markets</div>
+    <div class="rel-section" style="padding-top:0">
+      <div id="prof-markets-body"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading prices…</div></div></div>
+    </div>
+
     <div class="section-lbl" style="position:relative;top:0">Active Projects</div>
     <div id="prof-projects-body"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>
 
@@ -7137,8 +7147,161 @@ async function renderSidekick(body) {
     <div id="prof-tx-body"><div class="empty" style="padding:16px 18px"><div class="empty-msg">Loading…</div></div></div>`;
 
   renderProfileWallet();
+  renderPortfolioAndMarkets();
   renderProfileProjects();
   renderProfileTransactions();
+}
+
+// ── PORTFOLIO & MARKETS — easy tier, no API keys ──
+// Holdings come from public chain RPCs against the wallet address on file
+// (MetaMask itself is only ever the address source). Non-EVM assets
+// (BTC/SOL/HBAR/XRP/XLM) can't live at an EVM address, so they appear as
+// price tickers only. Prices: CoinGecko free tier. Forex: ECB reference
+// rates via frankfurter.app (daily, not intraday). DXY: computed from
+// those rates with the official index formula. Gold: PAXG as spot proxy.
+const ETH_MAINNET_RPC = 'https://ethereum-rpc.publicnode.com'; // cloudflare-eth.com proved flaky under repeat calls
+const USDC_MAINNET_CONTRACT = '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48';
+
+async function portfolioRpc(url, method, params) {
+  const res = await fetch(url, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }),
+  });
+  const json = await res.json();
+  if (json.error) throw new Error(json.error.message || 'RPC error');
+  return json.result;
+}
+
+async function fetchNativeEthBalance(rpc, address) {
+  const result = await portfolioRpc(rpc, 'eth_getBalance', [address, 'latest']);
+  return result && result !== '0x' ? parseInt(result, 16) / 1e18 : 0;
+}
+
+async function fetchErc20Balance(rpc, contract, address, decimals) {
+  const data = '0x70a08231000000000000000000000000' + address.toLowerCase().replace(/^0x/, '');
+  const result = await portfolioRpc(rpc, 'eth_call', [{ to: contract, data }, 'latest']);
+  return result && result !== '0x' ? parseInt(result, 16) / Math.pow(10, decimals) : 0;
+}
+
+function fmtPrice(n) {
+  if (n == null || isNaN(n)) return '—';
+  if (n >= 1000) return n.toLocaleString(undefined, { maximumFractionDigits: 0 });
+  if (n >= 1)    return n.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  return n.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+}
+
+function tickerRow(label, value, change) {
+  const hasChange = change != null && !isNaN(change);
+  const changeColor = hasChange ? (change >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--grey)';
+  const changeStr = hasChange ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : '';
+  return `
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414">
+      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(label)}</span>
+      <span style="text-align:right">
+        <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF">${esc(value)}</span>
+        ${changeStr ? `<span style="font-family:var(--mono);font-size:9px;font-weight:600;color:${changeColor};margin-left:8px">${changeStr}</span>` : ''}
+      </span>
+    </div>`;
+}
+
+async function renderPortfolioAndMarkets() {
+  const portEl = document.getElementById('prof-portfolio-body');
+  const mktEl  = document.getElementById('prof-markets-body');
+  if (!portEl && !mktEl) return;
+
+  // Prices first — holdings valuation depends on them
+  let prices = null;
+  try {
+    const ids = 'bitcoin,ethereum,solana,hedera-hashgraph,ripple,stellar,usd-coin,pax-gold';
+    const res = await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`);
+    if (res.ok) prices = await res.json();
+  } catch(e) { console.error('CoinGecko fetch failed:', e); }
+
+  // ── Holdings (EVM only — what the address can actually hold) ──
+  if (portEl) {
+    const addr = operator?.wallet_address;
+    if (!addr) {
+      portEl.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--grey)">Connect a wallet above to see holdings.</div>';
+    } else {
+      try {
+        const [ethMain, ethBase, usdcBase, usdcMain] = await Promise.all([
+          fetchNativeEthBalance(ETH_MAINNET_RPC, addr).catch(() => null),
+          fetchNativeEthBalance('https://mainnet.base.org', addr).catch(() => null),
+          fetchUsdcBalance(addr).catch(() => null),
+          fetchErc20Balance(ETH_MAINNET_RPC, USDC_MAINNET_CONTRACT, addr, 6).catch(() => null),
+        ]);
+        const ethPrice = prices?.ethereum?.usd ?? null;
+        const rows = [
+          { label: 'ETH · Ethereum', bal: ethMain, sym: 'ETH', usd: ethMain != null && ethPrice != null ? ethMain * ethPrice : null },
+          { label: 'ETH · Base',     bal: ethBase, sym: 'ETH', usd: ethBase != null && ethPrice != null ? ethBase * ethPrice : null },
+          { label: 'USDC · Base',    bal: usdcBase, sym: 'USDC', usd: usdcBase },
+          { label: 'USDC · Ethereum', bal: usdcMain, sym: 'USDC', usd: usdcMain },
+        ].filter(r => r.bal != null);
+
+        if (!rows.length) {
+          portEl.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--orange)">Could not reach the networks right now.</div>';
+        } else {
+          const total = rows.reduce((n, r) => n + (r.usd || 0), 0);
+          portEl.innerHTML = rows.map(r => `
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414">
+              <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(r.label)}</span>
+              <span style="text-align:right">
+                <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF">${r.bal.toLocaleString(undefined,{maximumFractionDigits:r.sym==='ETH'?5:2})}</span>
+                <span style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-left:6px">${r.usd != null ? '$' + fmtPrice(r.usd) : ''}</span>
+              </span>
+            </div>`).join('') + `
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:10px 0 2px">
+              <span style="font-family:var(--mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--grey)">Total est.</span>
+              <span style="font-family:var(--display);font-size:20px;font-weight:800;color:var(--green)">$${fmtPrice(total)}</span>
+            </div>`;
+        }
+      } catch(e) {
+        console.error(e);
+        portEl.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--orange)">Could not load holdings right now.</div>';
+      }
+    }
+  }
+
+  // ── Markets: crypto tickers + forex + DXY ──
+  if (mktEl) {
+    let forex = null;
+    try {
+      const res = await fetch('https://api.frankfurter.dev/v1/latest?base=USD&symbols=EUR,GBP,JPY,CAD,SEK,CHF');
+      if (res.ok) {
+        const { rates } = await res.json();
+        const eurusd = 1 / rates.EUR, gbpusd = 1 / rates.GBP;
+        // Official ICE DXY weighting formula over ECB reference rates
+        const dxy = 50.14348112
+          * Math.pow(eurusd, -0.576) * Math.pow(rates.JPY, 0.136)
+          * Math.pow(gbpusd, -0.119) * Math.pow(rates.CAD, 0.091)
+          * Math.pow(rates.SEK, 0.042) * Math.pow(rates.CHF, 0.036);
+        forex = { eurusd, gbpusd, dxy };
+      }
+    } catch(e) { console.error('Forex fetch failed:', e); }
+
+    const p = (id) => prices?.[id];
+    const cryptoRows = [
+      ['BTC',  p('bitcoin')], ['ETH', p('ethereum')], ['SOL', p('solana')],
+      ['XRP',  p('ripple')],  ['HBAR', p('hedera-hashgraph')], ['XLM', p('stellar')],
+      ['USDC', p('usd-coin')], ['GOLD · PAXG', p('pax-gold')],
+    ].filter(([, d]) => d?.usd != null)
+     .map(([label, d]) => tickerRow(label, '$' + fmtPrice(d.usd), d.usd_24h_change));
+
+    const fxRows = forex ? [
+      tickerRow('EUR/USD', forex.eurusd.toFixed(4)),
+      tickerRow('GBP/USD', forex.gbpusd.toFixed(4)),
+      tickerRow('DXY · calc', forex.dxy.toFixed(2)),
+    ] : [];
+
+    if (!cryptoRows.length && !fxRows.length) {
+      mktEl.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--orange)">Could not load market data right now.</div>';
+    } else {
+      mktEl.innerHTML = cryptoRows.join('') + fxRows.join('') + `
+        <div style="font-family:var(--mono);font-size:8px;color:var(--grey);padding-top:10px;letter-spacing:.04em;line-height:1.6">
+          Crypto: CoinGecko, 24h change. Gold via PAXG spot proxy. Forex/DXY: ECB daily reference rates — not intraday.
+        </div>`;
+    }
+  }
 }
 
 async function renderProfileWallet() {

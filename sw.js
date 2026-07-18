@@ -1,18 +1,17 @@
 // sw.js — minimal service worker. Its only job is to satisfy PWA
-// installability requirements and cache the app shell so it opens even
-// with a spotty connection. It does NOT cache API/Supabase calls — those
-// always need to be live and current, never served stale.
+// installability requirements and keep the app usable offline.
+//
+// Strategy: NETWORK-FIRST for the app shell. The old cache-first approach
+// pinned every visitor to whatever index.html they first loaded — pushed
+// updates never arrived until sw.js itself changed. Now every load tries
+// the network for a fresh copy and only falls back to cache when offline.
+// External calls (Supabase, RPCs, price APIs) are never cached at all.
 
-const CACHE_NAME = 'bixxville-v1';
-const APP_SHELL = [
-  './',
-  './index.html',
-  './manifest.json',
-];
+const CACHE_NAME = 'bixxville-v2'; // bump busts every older cache on activate
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(APP_SHELL))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(['./', './index.html', './manifest.json']))
   );
   self.skipWaiting();
 });
@@ -29,22 +28,17 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // Never cache Supabase, Anthropic, or any external API call — those
-  // must always be live. Only cache same-origin app-shell requests.
+  // Never touch cross-origin requests — Supabase, chain RPCs, price APIs
+  // must always be live.
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      return (
-        cached ||
-        fetch(event.request)
-          .then((response) => {
-            const clone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-            return response;
-          })
-          .catch(() => cached)
-      );
-    })
+    fetch(event.request)
+      .then((response) => {
+        const clone = response.clone();
+        caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });

@@ -7494,6 +7494,10 @@ function openGenesisConsole() {
         <input class="prof-field-input" id="gc-invite-name" placeholder="Full name"/>
       </div>
       <div class="prof-field">
+        <div class="prof-field-lbl">Email</div>
+        <input class="prof-field-input" id="gc-invite-email" type="email" placeholder="For contact/records — login stays PIN-only"/>
+      </div>
+      <div class="prof-field">
         <div class="prof-field-lbl">Starting tier</div>
         <select class="prof-field-input" id="gc-invite-tier">
           <option value="Apprentice">Apprentice · $39/hr</option>
@@ -7531,12 +7535,14 @@ function openGenesisConsole() {
 
 async function genesisCreateInvite() {
   const name = document.getElementById('gc-invite-name')?.value.trim();
+  const email = document.getElementById('gc-invite-email')?.value.trim();
   const tier = document.getElementById('gc-invite-tier')?.value;
   const resultEl = document.getElementById('gc-invite-result');
   if (!name) { toast('Enter a name first.'); return; }
+  if (!email) { toast('Enter an email first.'); return; }
 
   try {
-    const { data, error } = await sb.rpc('create_operator_invite', { p_peer_name: name, p_tier: tier });
+    const { data, error } = await sb.rpc('create_operator_invite', { p_peer_name: name, p_email: email, p_tier: tier });
     const row = Array.isArray(data) ? data[0] : data;
     if (error || !row) throw error || new Error('No result');
 
@@ -7546,9 +7552,10 @@ async function genesisCreateInvite() {
         <div style="font-family:var(--display);font-size:28px;font-weight:800;color:var(--green);letter-spacing:.1em">${esc(row.pin)}</div>
       </div>`;
     document.getElementById('gc-invite-name').value = '';
+    document.getElementById('gc-invite-email').value = '';
   } catch(e) {
     console.error(e);
-    toast('Could not create the invite.');
+    toast(e.message || 'Could not create the invite.');
   }
 }
 

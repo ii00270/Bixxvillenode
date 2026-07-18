@@ -1790,6 +1790,9 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       <button id="uni-admin-btn" class="uni-chip-btn hidden" onclick="openAdminMode()" title="Admin tools">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
       </button>
+      <button id="uni-signout-btn" class="uni-chip-btn" onclick="signOutFromTopbar()" title="Sign out">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
+      </button>
     </div>
   </div>
 
@@ -2325,6 +2328,13 @@ async function submitPinRecovery() {
     btn.disabled = false;
     btn.textContent = 'Send Request';
   }
+}
+
+// Single always-visible sign-out entry point in the top bar — works for
+// either session type, so it doesn't matter whether Admin was ever opened.
+function signOutFromTopbar() {
+  if (relation) doRelLogout();
+  else if (operator) doLogout();
 }
 
 async function doLogout() {

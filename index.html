@@ -2328,6 +2328,7 @@ async function submitPinRecovery() {
 }
 
 async function doLogout() {
+  clearInterval(window._marketsRefreshTimer);
   if (operator) {
     fireAndForget(sb?.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} signed out`,
@@ -6704,6 +6705,16 @@ function showUniTab(tab) {
   if (tab === 'messages') renderUniMessages(body);
   if (tab === 'work')     renderWorkBoard(body);
   if (tab === 'sidekick') renderSidekick(body);
+
+  // Portfolio/Markets auto-refresh only runs while Profile is the tab
+  // actually on screen — stops the moment you leave it, so it's not
+  // burning API calls in the background.
+  clearInterval(window._marketsRefreshTimer);
+  if (tab === 'sidekick') {
+    window._marketsRefreshTimer = setInterval(() => {
+      if (uniTab === 'sidekick' && operator) renderPortfolioAndMarkets();
+    }, 60000);
+  }
 }
 
 // ── SIGNAL — raw, network-wide tape of signed LOGs ──
@@ -7190,18 +7201,71 @@ function fmtPrice(n) {
   return n.toLocaleString(undefined, { minimumFractionDigits: 4, maximumFractionDigits: 4 });
 }
 
-function tickerRow(label, value, change) {
+function tickerRow(label, value, change, tvSymbol) {
   const hasChange = change != null && !isNaN(change);
   const changeColor = hasChange ? (change >= 0 ? 'var(--green)' : 'var(--red)') : 'var(--grey)';
   const changeStr = hasChange ? `${change >= 0 ? '+' : ''}${change.toFixed(1)}%` : '';
+  const clickable = tvSymbol ? `cursor:pointer;` : '';
+  const onclick = tvSymbol ? `onclick="openAssetChart('${esc(label)}','${esc(tvSymbol)}')"` : '';
   return `
-    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414">
-      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(label)}</span>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;padding:8px 0;border-bottom:1px solid #141414;${clickable}" ${onclick}>
+      <span style="font-family:var(--mono);font-size:11px;font-weight:600;color:var(--soft)">${esc(label)}${tvSymbol ? ' <span style="color:var(--grey);font-size:9px">↗</span>' : ''}</span>
       <span style="text-align:right">
         <span style="font-family:var(--mono);font-size:12px;font-weight:700;color:#FFFFFF">${esc(value)}</span>
         ${changeStr ? `<span style="font-family:var(--mono);font-size:9px;font-weight:600;color:${changeColor};margin-left:8px">${changeStr}</span>` : ''}
       </span>
     </div>`;
+}
+
+// Tapping a ticker opens a live TradingView chart — real intraday data,
+// including for FX/DXY where our own numeric row is only a daily ECB
+// reference rate. No API key: this is TradingView's free embeddable
+// widget, not their (paid/broker-gated) data API.
+// style:"2" = line, per the current ask. Flip to "1" for candlesticks
+// later — that's the only change needed, the rest of the widget is the same.
+function openAssetChart(label, tvSymbol) {
+  openOverlay(label, (body) => {
+    body.innerHTML = `
+      <div style="height:70vh;min-height:360px;padding:10px 14px 14px">
+        <div id="tv-chart-mount" style="height:100%;width:100%;border-radius:8px;overflow:hidden;border:1px solid var(--line2)"></div>
+      </div>
+      <div style="font-family:var(--mono);font-size:8px;color:var(--grey);padding:0 18px 16px;letter-spacing:.04em">
+        Live chart via TradingView. Line view now — candlesticks are on the roadmap.
+      </div>`;
+
+    const mount = document.getElementById('tv-chart-mount');
+    const container = document.createElement('div');
+    container.className = 'tradingview-widget-container';
+    container.style.height = '100%';
+    container.style.width = '100%';
+    const widgetDiv = document.createElement('div');
+    widgetDiv.className = 'tradingview-widget-container__widget';
+    widgetDiv.style.height = '100%';
+    widgetDiv.style.width = '100%';
+    container.appendChild(widgetDiv);
+
+    const script = document.createElement('script');
+    script.type = 'text/javascript';
+    script.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+    script.async = true;
+    script.text = JSON.stringify({
+      autosize: true,
+      symbol: tvSymbol,
+      interval: '15',
+      timezone: 'Etc/UTC',
+      theme: 'dark',
+      style: '2',
+      locale: 'en',
+      backgroundColor: 'rgba(0,0,0,1)',
+      gridColor: 'rgba(255,255,255,0.06)',
+      hide_top_toolbar: false,
+      hide_legend: false,
+      allow_symbol_change: false,
+      support_host: 'https://www.tradingview.com',
+    });
+    container.appendChild(script);
+    mount.appendChild(container);
+  }, null, null, true);
 }
 
 async function renderPortfolioAndMarkets() {
@@ -7281,16 +7345,21 @@ async function renderPortfolioAndMarkets() {
 
     const p = (id) => prices?.[id];
     const cryptoRows = [
-      ['BTC',  p('bitcoin')], ['ETH', p('ethereum')], ['SOL', p('solana')],
-      ['XRP',  p('ripple')],  ['HBAR', p('hedera-hashgraph')], ['XLM', p('stellar')],
-      ['USDC', p('usd-coin')], ['GOLD · PAXG', p('pax-gold')],
+      ['BTC',  p('bitcoin'),         'BINANCE:BTCUSDT'],
+      ['ETH',  p('ethereum'),        'BINANCE:ETHUSDT'],
+      ['SOL',  p('solana'),          'BINANCE:SOLUSDT'],
+      ['XRP',  p('ripple'),          'BINANCE:XRPUSDT'],
+      ['HBAR', p('hedera-hashgraph'),'BINANCE:HBARUSDT'],
+      ['XLM',  p('stellar'),         'BINANCE:XLMUSDT'],
+      ['USDC', p('usd-coin'),        'COINBASE:USDCUSD'],
+      ['GOLD · PAXG', p('pax-gold'), 'TVC:GOLD'], // real spot gold chart, more useful than PAXG's own thin feed
     ].filter(([, d]) => d?.usd != null)
-     .map(([label, d]) => tickerRow(label, '$' + fmtPrice(d.usd), d.usd_24h_change));
+     .map(([label, d, sym]) => tickerRow(label, '$' + fmtPrice(d.usd), d.usd_24h_change, sym));
 
     const fxRows = forex ? [
-      tickerRow('EUR/USD', forex.eurusd.toFixed(4)),
-      tickerRow('GBP/USD', forex.gbpusd.toFixed(4)),
-      tickerRow('DXY · calc', forex.dxy.toFixed(2)),
+      tickerRow('EUR/USD', forex.eurusd.toFixed(4), null, 'FX:EURUSD'),
+      tickerRow('GBP/USD', forex.gbpusd.toFixed(4), null, 'FX:GBPUSD'),
+      tickerRow('DXY · calc', forex.dxy.toFixed(2), null, 'TVC:DXY'),
     ] : [];
 
     if (!cryptoRows.length && !fxRows.length) {
@@ -7298,7 +7367,7 @@ async function renderPortfolioAndMarkets() {
     } else {
       mktEl.innerHTML = cryptoRows.join('') + fxRows.join('') + `
         <div style="font-family:var(--mono);font-size:8px;color:var(--grey);padding-top:10px;letter-spacing:.04em;line-height:1.6">
-          Crypto: CoinGecko, 24h change. Gold via PAXG spot proxy. Forex/DXY: ECB daily reference rates — not intraday.
+          Numbers refresh every minute. Forex/DXY rows are the daily ECB reference rate — tap ↗ any row for a live intraday chart.
         </div>`;
     }
   }

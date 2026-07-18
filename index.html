@@ -1932,7 +1932,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M9 17V7a2 2 0 012-2h9M9 17H4a2 2 0 01-2-2V9a2 2 0 012-2h5m0 10v3a2 2 0 002 2h9a2 2 0 002-2V9a2 2 0 00-2-2h-9"/></svg>
         <span class="ds-label">Projects</span>
       </button>
-      <button class="ds-item" id="ds-market" onclick="closeAdminMode();showUniTab('signal')">
+      <button class="ds-item" id="ds-market" onclick="showSurface('market')">
         <svg class="ds-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
         <span class="ds-label">Market</span>
       </button>
@@ -1992,15 +1992,17 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
       </div>
 
       <!-- OPS -->
-      <!-- MESSAGES -->
+      <!-- MESSAGES — mounts the same unified Messages UI used on the front end
+           in place, so Admin never has to be left just to send a message. -->
       <div class="surface" id="surface-messages">
-        <div class="s-head">
-          <div class="s-title">Messages</div>
-          <div class="s-count" id="messages-count"></div>
-        </div>
-        <div id="messages-body">
-          <div class="empty"><div class="empty-line"></div><div class="empty-label">Threads</div><div class="empty-msg">No active message threads. Messages appear here when a relation has an open project.</div></div>
-        </div>
+        <div id="messages-body"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
+      </div>
+
+      <!-- MARKET — same idea, mounted in place instead of leaving Admin.
+           Note: renderSignal() creates its own internal #market-body for the
+           Tape/Network content, so this wrapper must use a different id. -->
+      <div class="surface" id="surface-market">
+        <div id="market-mount"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
       </div>
 
       <!-- NOTIFICATIONS -->
@@ -2074,7 +2076,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
         <div class="nav-label">Projects</div>
         <div class="nav-dot"></div>
       </button>
-      <button class="nav-btn" id="nav-market" onclick="closeAdminMode();showUniTab('signal')">
+      <button class="nav-btn" id="nav-market" onclick="showSurface('market')">
         <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#888888" stroke-width="1.5" stroke-linecap="round"><path d="M3 12h4l3 8 4-16 3 8h4"/></svg>
         <div class="nav-label">Market</div>
         <div class="nav-dot"></div>
@@ -2471,11 +2473,6 @@ function showSurface(name) {
   // low-risk; Members is the first genuinely admin-specific tool.
   if (name === 'ops' || name === 'profile' || name === 'home') name = 'members';
 
-  // Messages is no longer its own admin-shell surface — it's the unified
-  // Messages tab (operators + relations, one inbox), reached the same way
-  // 'Market' already leaves Admin for the front-end.
-  if (name === 'messages') { closeAdminMode(); showUniTab('messages'); return; }
-
   document.querySelectorAll('.surface').forEach(s => s.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b => {
     b.classList.remove('active');
@@ -2505,6 +2502,11 @@ function showSurface(name) {
   if (name === 'members')       loadMembers();
   if (name === 'events')        loadEvents();
   if (name === 'projects')      loadAdminProjects();
+  // Messages and Market mount the same real front-end views in place —
+  // no more leaving Admin (and no more landing back at Market/logged out
+  // feeling) just to check a message or a price.
+  if (name === 'messages')      renderUniMessages(document.getElementById('messages-body'));
+  if (name === 'market')        renderSignal(document.getElementById('market-mount'));
 }
 
 // ── OVERLAY ──

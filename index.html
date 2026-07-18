@@ -5579,6 +5579,17 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
         <button class="prof-add-btn" onclick="saveGenesisPin()">Set PIN</button>
       </div>
       <div id="genesis-pin-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>
+    </div>
+
+    <!-- Genesis Console entry point — the rest of this (invite creation,
+    PIN recovery queue, central wallet, payment audit) was already fully
+    built and backend-wired; it just never had a door. This is the door. -->
+    <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
+      <div class="prof-field-lbl" style="margin-bottom:8px">Genesis Console</div>
+      <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:10px">
+        Add operators, resolve forgotten-PIN requests, manage the central wallet, and review the payment audit trail.
+      </div>
+      <button class="act-btn-sm" onclick="openGenesisConsole()">Open Genesis Console</button>
     </div>` : ''}
 
     <!-- Bio -->
@@ -7456,6 +7467,51 @@ async function renderProfileTransactions() {
 // ── GENESIS CONSOLE — invite creation, PIN recovery, central wallet audit.
 // Visible only when operator.is_genesis is true (see the security note at
 // the top of the PIN system migration re: client-side gating). ──
+function openGenesisConsole() {
+  if (!operator?.is_genesis) return;
+  openOverlay('Genesis Console', (body) => {
+    body.innerHTML = `
+      <div class="section-lbl" style="position:relative;top:0">Add Operator</div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Name</div>
+        <input class="prof-field-input" id="gc-invite-name" placeholder="Full name"/>
+      </div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Starting tier</div>
+        <select class="prof-field-input" id="gc-invite-tier">
+          <option value="Apprentice">Apprentice · $39/hr</option>
+          <option value="Wrangler">Wrangler · $65/hr</option>
+          <option value="Architect">Architect · $85/hr</option>
+          <option value="Operator">Operator · $100/hr</option>
+        </select>
+      </div>
+      <div style="padding:0 18px 18px">
+        <button class="act-btn-sm" onclick="genesisCreateInvite()">Generate PIN</button>
+        <div id="gc-invite-result" style="margin-top:14px"></div>
+      </div>
+
+      <div class="section-lbl" style="position:relative;top:0">PIN Recovery Requests</div>
+      <div id="gc-recovery-list" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+
+      <div class="section-lbl" style="position:relative;top:0">Central Wallet</div>
+      <div class="prof-field">
+        <div class="prof-field-lbl">Wallet address</div>
+        <div style="display:flex;gap:8px">
+          <input class="prof-field-input" id="gc-central-wallet" style="flex:1" value="${esc(operator.central_wallet_address || '')}" placeholder="0x…"/>
+          <button class="prof-add-btn" onclick="genesisSaveCentralWallet()">Save</button>
+        </div>
+      </div>
+      <div id="gc-central-balance" style="padding:0 18px 18px"></div>
+
+      <div class="section-lbl" style="position:relative;top:0">Payment Audit</div>
+      <div id="gc-audit-list" style="padding:0 18px 24px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>`;
+
+    renderGenesisRecoveryQueue();
+    if (operator.central_wallet_address) renderGenesisCentralBalance();
+    renderGenesisAudit();
+  }, null, null, true);
+}
+
 async function genesisCreateInvite() {
   const name = document.getElementById('gc-invite-name')?.value.trim();
   const tier = document.getElementById('gc-invite-tier')?.value;

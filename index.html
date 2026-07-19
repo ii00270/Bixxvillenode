@@ -4002,6 +4002,32 @@ async function runDAGGeneration(projectId, title, market, doc) {
   return dag;
 }
 
+// BIX AI "Decompose" — same AI-then-fallback shape as runDAGGenerationFromAnswers,
+// but for raw pasted notes instead of the structured 20-question intake. Falls
+// back to the client-side rule-based generateDAG() (same one runDAGGeneration
+// already uses) if the edge function doesn't return a usable DAG for freeform
+// input — that fallback needs no backend at all, so this always produces
+// something even if generate-dag doesn't yet understand a "notes" field.
+async function runDAGGenerationFromFreeform(projectId, title, market, notes) {
+  let dag;
+  try {
+    const { data, error } = await sb.functions.invoke('generate-dag', {
+      body: { title, market, notes },
+    });
+    if (error) throw error;
+    if (!data || !Array.isArray(data.nodes) || !data.nodes.length) throw new Error('Malformed DAG returned');
+    dag = data;
+  } catch (e) {
+    console.error('AI decomposition failed, falling back to the rule-based generator:', e);
+    toast('AI decomposition unavailable right now — used the fallback generator instead.');
+    dag = generateDAG(title, market, notes);
+  }
+
+  const { error: saveError } = await sb.rpc('save_project_dag', { p_id: projectId, p_dag: dag });
+  if (saveError) { toast('Could not save DAG.'); console.error(saveError); return null; }
+  return dag;
+}
+
 // ── PLAIN-TEXT DAG FORMAT ──
 function letterFor(idx) {
   // A, B, C ... Z, then AA, AB...
@@ -4257,8 +4283,13 @@ async function handleGenerateDAG(id, title, market) {
   if (body && p) renderDagApproval(body, p, dag);
 }
 
-function renderDagApproval(body, p, dag) {
+// regenerateFn: optional override for what "Regenerate" does. Structured-
+// intake callers (Admin) omit it and get the original re-fetch-answers
+// behavior; BIX AI's freeform decompose passes its own so regeneration
+// re-runs against the pasted notes instead of nonexistent intake answers.
+function renderDagApproval(body, p, dag, regenerateFn) {
   window._dagApprovalData = dag;
+  window._dagRegenerateFn = regenerateFn || (() => rejectDAG(p.id, p.title, p.market));
   const textDag = renderDAGText(dag);
 
   body.innerHTML = `
@@ -4277,9 +4308,13 @@ function renderDagApproval(body, p, dag) {
       <button class="act-btn-sm" id="copy-dag-btn" style="margin-top:10px" onclick="copyDagText()">Copy DAG</button>
       <div class="dag-actions">
         <button class="dag-approve" onclick="approveDAG('${p.id}')">Approve</button>
-        <button class="dag-reject" id="regen-dag-btn" onclick="rejectDAG('${p.id}', '${esc(p.title).replace(/'/g,"\\'")}', '${esc(p.market).replace(/'/g,"\\'")}')">Regenerate</button>
+        <button class="dag-reject" id="regen-dag-btn" onclick="triggerDagRegenerate()">Regenerate</button>
       </div>
     </div>`;
+}
+
+function triggerDagRegenerate() {
+  if (typeof window._dagRegenerateFn === 'function') window._dagRegenerateFn();
 }
 
 function setDagView(mode) {
@@ -4362,9 +4397,16 @@ async function approveDAG(id) {
     }));
 
     closeOverlay();
-    await loadAll();
-    showSurface('members');
-    if (operator) openMemberRecord(operator.id);
+    if (document.getElementById('shell').classList.contains('in')) {
+      // Reached from Admin (structured intake) — same behavior as always.
+      await loadAll();
+      showSurface('members');
+      if (operator) openMemberRecord(operator.id);
+    } else if (uniTab === 'work') {
+      // Reached from BIX AI on the front end — refresh in place instead of
+      // silently trying to navigate a shell that isn't even showing.
+      renderWorkBoard(document.getElementById('uni-body'));
+    }
   } catch(e) {
     toast('Could not approve DAG.');
     console.error(e);
@@ -7248,16 +7290,129 @@ async function renderWorkBoard(body) {
   body.innerHTML = `
     <div class="sig-title-row">
       <div class="sig-title">BIX AI</div>
-      <div class="sig-note">Ask about open work, your projects, the network</div>
+      <div class="sig-note">Ask, or decompose new work into tasks</div>
     </div>
-    <div class="rel-section" style="padding-top:0">
+    <div id="bixai-toggle" style="display:flex;gap:6px;padding:0 18px 16px">
+      <button class="calc-mode-btn ${bixAiMode==='ask'?'active':''}" onclick="switchBixAiMode('ask')">Ask</button>
+      <button class="calc-mode-btn ${bixAiMode==='decompose'?'active':''}" onclick="switchBixAiMode('decompose')">Decompose</button>
+    </div>
+    <div class="rel-section" style="padding-top:0" id="bixai-mode-body"></div>`;
+  renderBixAiModeBody();
+}
+
+let bixAiMode = 'ask';
+function switchBixAiMode(mode) {
+  bixAiMode = mode;
+  document.querySelectorAll('#bixai-toggle .calc-mode-btn').forEach(b => b.classList.remove('active'));
+  event?.target?.classList.add('active');
+  renderBixAiModeBody();
+}
+
+function renderBixAiModeBody() {
+  const el = document.getElementById('bixai-mode-body');
+  if (!el) return;
+  if (bixAiMode === 'decompose') {
+    renderBixDecomposePanel(el);
+  } else {
+    el.innerHTML = `
       <div id="bixai-thread" style="max-height:52vh;overflow-y:auto;margin-bottom:12px"></div>
       <div style="display:flex;gap:8px">
         <input class="rel-q-input" id="bixai-input" placeholder="Ask about open work, your projects, a business…" style="flex:1" onkeydown="if(event.key==='Enter')sendBixAiMessage()"/>
         <button class="sk-pay-btn" style="margin:0" onclick="sendBixAiMessage()">Send</button>
+      </div>`;
+    renderBixAiThread();
+  }
+}
+
+// ── BIX AI: DECOMPOSE — paste/upload raw notes, BIX AI breaks them into a
+// dependency-ordered task map using the exact same review/approve screen
+// as the structured-intake flow in Admin. A real client project is created
+// first (via the same RPC Admin's "Create Project" already uses) so the
+// decomposition always lands somewhere real, never an orphaned draft. ──
+async function renderBixDecomposePanel(el) {
+  el.innerHTML = '<div class="empty" style="padding:16px 0"><div class="empty-msg">Loading clients…</div></div>';
+  try {
+    const { data, error } = await sb.rpc('get_client_list');
+    if (error) throw error;
+    const clients = data || [];
+    const opts = clients.map(c => `<option value="${esc(c.relation_code)}">${esc(c.name)}</option>`).join('');
+
+    el.innerHTML = `
+      <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:14px">
+        Paste notes, a transcript, requirements — anything describing the work. BIX AI breaks it into a dependency-ordered task map on the same review screen used everywhere else in Ops.
       </div>
-    </div>`;
-  renderBixAiThread();
+      ${!clients.length ? `<div style="font-family:var(--sans);font-size:12px;color:var(--orange);margin-bottom:12px">No clients yet — add one from Members first.</div>` : ''}
+      <div class="rel-q-lbl" style="margin-bottom:4px">Client</div>
+      <select class="rel-q-input" id="bd-client" style="margin-bottom:12px">${opts || '<option disabled>No clients yet</option>'}</select>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Project title</div>
+      <input class="rel-q-input" id="bd-title" placeholder="e.g. Q3 Warehouse Rollout" style="margin-bottom:12px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Market / category</div>
+      <input class="rel-q-input" id="bd-market" placeholder="e.g. Logistics" style="margin-bottom:12px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Notes to decompose</div>
+      <textarea class="rel-q-textarea" id="bd-notes" rows="8" placeholder="Paste anything — meeting notes, a requirements doc, a rough plan…" style="margin-bottom:14px"></textarea>
+      <button class="act-btn-sm" id="bd-submit-btn" style="width:100%;padding:12px;text-align:center" onclick="submitBixDecompose()" ${!clients.length ? 'disabled' : ''}>Decompose</button>
+      <div id="bd-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>`;
+  } catch(e) {
+    console.error(e);
+    el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load clients.</div></div>';
+  }
+}
+
+async function submitBixDecompose() {
+  const relationCode = document.getElementById('bd-client')?.value;
+  const title = document.getElementById('bd-title')?.value.trim();
+  const market = document.getElementById('bd-market')?.value.trim() || 'General';
+  const notes = document.getElementById('bd-notes')?.value.trim();
+  const errEl = document.getElementById('bd-error');
+  const btn = document.getElementById('bd-submit-btn');
+  if (errEl) errEl.style.display = 'none';
+
+  if (!relationCode) { if (errEl) { errEl.textContent = 'Pick a client.'; errEl.style.display = 'block'; } return; }
+  if (!title) { if (errEl) { errEl.textContent = 'Enter a project title.'; errEl.style.display = 'block'; } return; }
+  if (!notes || notes.length < 20) { if (errEl) { errEl.textContent = 'Paste more detail to decompose — a sentence or two isn\'t enough to work with.'; errEl.style.display = 'block'; } return; }
+
+  if (btn) { btn.textContent = 'Creating project…'; btn.disabled = true; }
+
+  try {
+    const { data: newId, error } = await sb.rpc('create_operator_project', {
+      p_relation_code: relationCode, p_title: title, p_created_by: operator?.peer_name || null,
+    });
+    if (error) throw error;
+
+    // create_operator_project's return shape isn't proven by any existing
+    // caller (Admin's Create Project ignores it) — fall back to a fresh
+    // lookup by relation+title if it didn't come back as a usable id.
+    let projectId = (typeof newId === 'string' && newId.length > 10) ? newId : null;
+    if (!projectId) {
+      const { data: rows } = await sb.from('relation_submissions')
+        .select('id').eq('relation_code', relationCode).eq('title', title)
+        .order('created_at', { ascending: false }).limit(1);
+      projectId = rows?.[0]?.id;
+    }
+    if (!projectId) throw new Error('Project was created, but could not be found to decompose. Open it from Projects instead.');
+
+    if (btn) btn.textContent = 'Decomposing…';
+    const dag = await runDAGGenerationFromFreeform(projectId, title, market, notes);
+    if (!dag) { if (btn) { btn.textContent = 'Decompose'; btn.disabled = false; } return; }
+
+    openOverlay('Review Decomposition', (body) => {
+      renderDagApproval(body, { id: projectId, title, market }, dag, () => regenerateBixDecompose(projectId, title, market, notes));
+    }, null, null, false);
+  } catch(e) {
+    console.error(e);
+    if (errEl) { errEl.textContent = e.message || 'Could not decompose.'; errEl.style.display = 'block'; }
+  } finally {
+    if (btn) { btn.textContent = 'Decompose'; btn.disabled = false; }
+  }
+}
+
+async function regenerateBixDecompose(projectId, title, market, notes) {
+  const btn = document.getElementById('regen-dag-btn');
+  if (btn) { btn.textContent = 'Regenerating…'; btn.disabled = true; }
+  const dag = await runDAGGenerationFromFreeform(projectId, title, market, notes);
+  if (!dag) { if (btn) { btn.textContent = 'Regenerate'; btn.disabled = false; } return; }
+  const body = document.getElementById('ov-body');
+  if (body) renderDagApproval(body, { id: projectId, title, market }, dag, () => regenerateBixDecompose(projectId, title, market, notes));
 }
 
 let bixAiHistory = [];

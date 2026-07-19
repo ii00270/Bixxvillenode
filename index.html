@@ -17,6 +17,8 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
 <style>
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
@@ -1604,6 +1606,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 @keyframes dm-pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
 
+/* ── BIX AI DECOMPOSE — file dropzone ── */
+.bd-dropzone{
+  border:1.5px dashed var(--line2);border-radius:8px;padding:20px;text-align:center;
+  cursor:pointer;font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:6px;
+  transition:border-color .15s,background .15s;
+}
+.bd-dropzone:hover,.bd-dropzone.drag-over{border-color:var(--green);background:rgba(140,240,96,.06);color:var(--cream);}
+
 /* ── UTIL ── */
 .hidden{display:none!important;}
 
@@ -2152,6 +2162,12 @@ if ('serviceWorker' in navigator) {
 // ── CONFIG ──
 const SB_URL = 'https://deotcopartijomfveakr.supabase.co';
 const SB_KEY = 'sb_publishable_yi4AJEt5MLMafDBgTgXnBg_1gvB4gtz';
+
+// pdf.js needs its worker script pointed at explicitly, or PDF text
+// extraction silently hangs instead of erroring.
+if (window.pdfjsLib) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
 
 // ── LUNAR CYCLES ──
 const LUNAR_NM = [
@@ -7339,7 +7355,7 @@ async function renderBixDecomposePanel(el) {
 
     el.innerHTML = `
       <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:14px">
-        Paste notes, a transcript, requirements — anything describing the work. BIX AI breaks it into a dependency-ordered task map on the same review screen used everywhere else in Ops.
+        Upload a contract, or paste notes/a transcript/requirements — anything describing the work. BIX AI breaks it into a dependency-ordered task map on the same review screen used everywhere else in Ops.
       </div>
       ${!clients.length ? `<div style="font-family:var(--sans);font-size:12px;color:var(--orange);margin-bottom:12px">No clients yet — add one from Members first.</div>` : ''}
       <div class="rel-q-lbl" style="margin-bottom:4px">Client</div>
@@ -7348,14 +7364,106 @@ async function renderBixDecomposePanel(el) {
       <input class="rel-q-input" id="bd-title" placeholder="e.g. Q3 Warehouse Rollout" style="margin-bottom:12px"/>
       <div class="rel-q-lbl" style="margin-bottom:4px">Market / category</div>
       <input class="rel-q-input" id="bd-market" placeholder="e.g. Logistics" style="margin-bottom:12px"/>
+      <div class="rel-q-lbl" style="margin-bottom:4px">Upload a document (optional)</div>
+      <div class="bd-dropzone" id="bd-dropzone" onclick="document.getElementById('bd-file-input').click()"
+        ondragover="event.preventDefault();this.classList.add('drag-over')"
+        ondragleave="this.classList.remove('drag-over')"
+        ondrop="handleBdFileDrop(event)">
+        📎 Tap to upload, or drag a PDF / DOCX / TXT here
+      </div>
+      <input type="file" id="bd-file-input" accept=".pdf,.docx,.txt" style="display:none" onchange="handleBdFileSelect(event)"/>
+      <div id="bd-file-status" style="font-family:var(--mono);font-size:9px;margin:6px 0 14px;display:none"></div>
       <div class="rel-q-lbl" style="margin-bottom:4px">Notes to decompose</div>
-      <textarea class="rel-q-textarea" id="bd-notes" rows="8" placeholder="Paste anything — meeting notes, a requirements doc, a rough plan…" style="margin-bottom:14px"></textarea>
+      <textarea class="rel-q-textarea" id="bd-notes" rows="8" placeholder="Paste anything — meeting notes, a requirements doc, a rough plan… (or upload above and review the extracted text here)" style="margin-bottom:14px"></textarea>
       <button class="act-btn-sm" id="bd-submit-btn" style="width:100%;padding:12px;text-align:center" onclick="submitBixDecompose()" ${!clients.length ? 'disabled' : ''}>Decompose</button>
       <div id="bd-error" style="font-family:var(--mono);font-size:10px;color:var(--red);margin-top:8px;display:none"></div>`;
   } catch(e) {
     console.error(e);
     el.innerHTML = '<div class="empty"><div class="empty-msg">Could not load clients.</div></div>';
   }
+}
+
+// ── FILE UPLOAD → TEXT EXTRACTION (PDF/DOCX/TXT) ──
+// Purely client-side — pdf.js and mammoth.js both run in-browser, nothing
+// uploaded anywhere just to read it. Extracted text lands in the notes
+// textarea for review/edit before decomposing, since extraction quality
+// varies (and a scanned contract with no text layer won't extract at all —
+// that needs OCR, a separate, bigger thing).
+async function handleBdFileSelect(e) {
+  const file = e.target.files?.[0];
+  if (file) await extractBdFile(file);
+  e.target.value = '';
+}
+
+async function handleBdFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('bd-dropzone')?.classList.remove('drag-over');
+  const file = e.dataTransfer?.files?.[0];
+  if (file) await extractBdFile(file);
+}
+
+async function extractBdFile(file) {
+  const statusEl = document.getElementById('bd-file-status');
+  const notesEl = document.getElementById('bd-notes');
+  if (!statusEl || !notesEl) return;
+
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  if (!['pdf', 'docx', 'txt'].includes(ext)) {
+    statusEl.style.display = 'block';
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = 'Unsupported file type — use PDF, DOCX, or TXT.';
+    return;
+  }
+
+  statusEl.style.display = 'block';
+  statusEl.style.color = 'var(--grey)';
+  statusEl.textContent = `Extracting text from ${file.name}…`;
+
+  try {
+    let text = '';
+    if (ext === 'txt') {
+      text = await file.text();
+    } else if (ext === 'pdf') {
+      text = await extractPdfText(file);
+    } else if (ext === 'docx') {
+      text = await extractDocxText(file);
+    }
+
+    text = (text || '').trim();
+    if (!text) {
+      statusEl.style.color = 'var(--orange)';
+      statusEl.textContent = `No text found in ${file.name} — likely a scanned document with no text layer. Paste the contents manually instead.`;
+      return;
+    }
+
+    notesEl.value = notesEl.value.trim() ? notesEl.value.trim() + '\n\n' + text : text;
+    statusEl.style.color = 'var(--green)';
+    statusEl.textContent = `✓ Extracted ${text.length.toLocaleString()} characters from ${file.name} — review below before decomposing.`;
+  } catch(e) {
+    console.error(e);
+    statusEl.style.color = 'var(--red)';
+    statusEl.textContent = `Could not read ${file.name} — ${e.message || 'unknown error'}.`;
+  }
+}
+
+async function extractPdfText(file) {
+  if (!window.pdfjsLib) throw new Error('PDF reader failed to load.');
+  const buf = await file.arrayBuffer();
+  const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+  let text = '';
+  for (let i = 1; i <= pdf.numPages; i++) {
+    const page = await pdf.getPage(i);
+    const content = await page.getTextContent();
+    text += content.items.map(it => it.str).join(' ') + '\n\n';
+  }
+  return text;
+}
+
+async function extractDocxText(file) {
+  if (!window.mammoth) throw new Error('DOCX reader failed to load.');
+  const buf = await file.arrayBuffer();
+  const result = await mammoth.extractRawText({ arrayBuffer: buf });
+  return result.value || '';
 }
 
 async function submitBixDecompose() {

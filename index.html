@@ -1668,6 +1668,21 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .dm2-dur{font-family:var(--mono);font-size:11px;color:var(--soft);flex-shrink:0;}
 .dm2-time{font-family:var(--mono);font-size:8px;color:var(--grey);opacity:.6;margin-top:7px;text-align:right;}
 
+/* Inline structured-choice buttons — a message can offer a small set of
+   options instead of (or alongside) plain text; clicking one sends it as
+   the next message, same convention as the Glyph's bixchat interface. */
+.dm2-opts{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px;}
+.dm2-opt-btn{
+  background:none;border:1px solid rgba(140,240,96,.4);color:var(--green);
+  font-family:var(--mono);font-size:12.5px;padding:7px 13px;border-radius:6px;
+  cursor:pointer;transition:all .12s ease;
+}
+.dm2-opt-btn::before{content:'[';color:var(--grey);margin-right:5px;}
+.dm2-opt-btn::after{content:']';color:var(--grey);margin-left:5px;}
+.dm2-opt-btn:hover{background:rgba(140,240,96,.1);border-color:var(--green);}
+.dm2-opt-btn:active{transform:scale(.97);}
+.dm2-opt-btn:disabled{opacity:.35;cursor:default;}
+
 .dm2-compose{
   flex-shrink:0;display:flex;align-items:center;gap:10px;
   padding:14px 18px;border-top:1px solid var(--line);
@@ -7821,11 +7836,18 @@ async function loadDmMessages() {
       const label = mine ? 'YOU' : `${initial} — ${kindLabel}`;
       const time = new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
       if (m.voice_url) return renderVoiceMemoBubble(m.voice_url, i, mine, label, time);
+      const { text: cleanText, options } = extractOptions(m.body || '');
+      const optsHtml = options && options.length
+        ? `<div class="dm2-opts">${options.map(o =>
+            `<button class="dm2-opt-btn" onclick="chooseDmOption(this,'${esc(o).replace(/'/g,"&#39;")}')">${esc(o)}</button>`
+          ).join('')}</div>`
+        : '';
       return `
         <div class="dm2-row ${mine ? 'mine' : ''}">
           <div class="dm2-bubble ${mine ? 'mine' : ''}">
             <div class="dm2-sender">${esc(label)}</div>
-            <div class="dm2-text">${esc(m.body || '')}</div>
+            <div class="dm2-text">${esc(cleanText)}</div>
+            ${optsHtml}
             <div class="dm2-time">${esc(time)}</div>
           </div>
         </div>`;
@@ -7834,13 +7856,38 @@ async function loadDmMessages() {
   } catch(e) { console.error(e); }
 }
 
+// Pulls a fenced ```options block (a JSON array of short strings) out of a
+// message and returns the display text separately — same convention the
+// Glyph's bixchat interface uses, so a message can offer structured choices
+// instead of (or alongside) an open question. No current sender in this app
+// emits one yet; this makes the app ready to render it the moment Genesis
+// (or anyone) does, without another UI change later.
+function extractOptions(text) {
+  const m = text.match(/```options\s*([\s\S]*?)```/);
+  if (!m) return { text, options: null };
+  let options = null;
+  try { options = JSON.parse(m[1].trim()); } catch(e) { options = null; }
+  return { text: text.replace(m[0], '').trim(), options };
+}
+
+function chooseDmOption(btn, label) {
+  const wrap = btn.closest('.dm2-opts');
+  if (wrap) wrap.querySelectorAll('.dm2-opt-btn').forEach(b => b.disabled = true);
+  sendDmTextValue(label);
+}
+
 async function sendDmText() {
   const inp = document.getElementById('dm-input');
   const text = inp?.value.trim();
+  if (!text) return;
+  inp.value = '';
+  await sendDmTextValue(text);
+}
+
+async function sendDmTextValue(text) {
   if (!text || !dmActiveConversationId) return;
   const me = myMessagingIdentity();
   if (!me) return;
-  inp.value = '';
   try {
     const { error } = await sb.rpc('send_direct_message', {
       p_conversation_id: dmActiveConversationId, p_sender_kind: me.kind, p_sender_id: me.id,

@@ -1719,7 +1719,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .dm-input:focus{border-color:var(--green);}
 .dm-input::placeholder{color:var(--grey);}
-.dm-mic-btn,.dm-send-btn{
+.dm-mic-btn,.dm-send-btn,.dm-plus-btn{
   width:38px;height:38px;border-radius:50%;flex-shrink:0;
   background:var(--surface2);border:1px solid var(--line2);color:var(--soft);
   display:flex;align-items:center;justify-content:center;cursor:pointer;
@@ -1730,7 +1730,24 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   background:rgba(224,82,82,.15);border-color:var(--red);color:var(--red);
   animation:dm-pulse 1s ease-in-out infinite;
 }
+.dm-plus-btn:hover{border-color:var(--green);color:var(--green);}
 @keyframes dm-pulse{0%,100%{opacity:1;}50%{opacity:.45;}}
+
+/* ── "+" quick-actions popover — Decompose, and whatever joins it later ── */
+.dm-actions-menu{
+  position:absolute;bottom:56px;left:14px;min-width:200px;
+  background:var(--surface);border:1px solid var(--line2);border-radius:12px;
+  box-shadow:0 12px 32px rgba(0,0,0,.5);overflow:hidden;z-index:20;
+}
+.dm-action-item{
+  display:flex;align-items:center;gap:10px;width:100%;padding:12px 14px;
+  background:none;border:none;border-bottom:1px solid var(--line);color:var(--cream);
+  font-family:var(--sans);font-size:13px;text-align:left;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.dm-action-item:last-child{border-bottom:none;}
+.dm-action-item:hover,.dm-action-item:active{background:var(--surface2);}
+.dm-action-item svg{flex-shrink:0;color:var(--green);}
 
 /* ── BIX AI DECOMPOSE — file dropzone ── */
 .bd-dropzone{
@@ -2125,7 +2142,6 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
     <nav id="uni-tabs">
       <button class="uni-tab active" id="unav-home" onclick="showUniTab('home')">Home</button>
       <button class="uni-tab" id="unav-messages" onclick="showUniTab('messages')">Messages</button>
-      <button class="uni-tab" id="unav-work" onclick="showUniTab('work')">BIX AI</button>
       <button class="uni-tab" id="unav-sidekick" onclick="showUniTab('sidekick')">Profile</button>
     </nav>
 
@@ -4652,11 +4668,10 @@ async function approveDAG(id) {
       await loadAll();
       showSurface('members');
       if (operator) openMemberRecord(operator.id);
-    } else if (uniTab === 'work') {
-      // Reached from BIX AI on the front end — refresh in place instead of
-      // silently trying to navigate a shell that isn't even showing.
-      renderWorkBoard(document.getElementById('uni-body'));
     }
+    // Reached from Messages' "+" → Decompose: closeOverlay() alone is
+    // enough — it returns to the conversation underneath, which has
+    // nothing decompose-related left to refresh.
   } catch(e) {
     toast('Could not approve DAG.');
     console.error(e);
@@ -6978,7 +6993,7 @@ function showUniTab(tab) {
   // surface and behind Profile's Market button. Redirect stragglers Home.
   if (tab === 'signal') tab = 'home';
   uniTab = tab;
-  ['home', 'messages', 'work', 'sidekick'].forEach(t => {
+  ['home', 'messages', 'sidekick'].forEach(t => {
     const btn = document.getElementById('unav-' + t);
     btn?.classList.toggle('active', t === tab);
     const icon = btn?.querySelector('.nav-icon');
@@ -6989,7 +7004,6 @@ function showUniTab(tab) {
   if (tab !== 'messages') clearInterval(dmPollTimer);
   if (tab === 'home')     renderHomeHud(body);
   if (tab === 'messages') renderUniMessages(body);
-  if (tab === 'work')     renderWorkBoard(body);
   if (tab === 'sidekick') renderSidekick(body);
 
   // Portfolio/Markets auto-refresh only runs while Profile is the tab
@@ -7654,9 +7668,31 @@ async function renderUniMessages(body) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
+    <div id="dm-pinned-row"></div>
     <div id="dm-conv-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
+  renderBixAiPinnedRow();
   await loadDmConversations();
+}
+
+// BIX AI is always reachable from Messages — it isn't a real Supabase
+// conversation, so it's a client-side pinned row, not a list_my_conversations
+// row. Ask ("BIX AI" as it worked before) and Decompose (via the "+" menu
+// once inside) both live here now; there's no separate BIX AI tab anymore.
+function renderBixAiPinnedRow() {
+  const el = document.getElementById('dm-pinned-row');
+  if (!el || relation) { if (el) el.innerHTML = ''; return; }  // operators only, same as before
+  const preview = bixAiHistory.length
+    ? esc((bixAiHistory[bixAiHistory.length - 1].content || '').slice(0, 60))
+    : 'Ask about live work, or decompose a new project';
+  el.innerHTML = `
+    <div class="dm-conv-row" onclick="openBixAiConversation()">
+      <div class="dm-conv-avatar" style="background:rgba(140,240,96,.12);border-color:rgba(140,240,96,.4);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700">AI</div>
+      <div class="dm-conv-info">
+        <div class="dm-conv-name">BIX AI</div>
+        <div class="dm-conv-preview">${preview}</div>
+      </div>
+    </div>`;
 }
 
 async function loadDmConversations() {
@@ -7748,6 +7784,7 @@ async function startConversationWith(kind, id, name, avatarUrl) {
 // matching the reference design — not as a popup overlay.
 function openConversation(conversationId, otherKind, otherId, otherName, otherAvatarUrl) {
   dmActiveConversationId = conversationId;
+  dmThreadMode = 'human';
   uniTab = 'messages';
   document.querySelectorAll('.uni-tab').forEach(b => b.classList.toggle('active', b.id === 'unav-messages'));
   const body = document.getElementById('uni-body');
@@ -7763,6 +7800,9 @@ function openConversation(conversationId, otherKind, otherId, otherName, otherAv
       </div>
       <div class="dm2-thread" id="dm-thread"><div class="empty"><div class="empty-msg">Loading…</div></div></div>
       <div class="dm2-compose">
+        <button class="dm-plus-btn" id="dm-plus-btn" onclick="toggleDmActionsMenu()" title="More">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
         <button class="dm-mic-btn" id="dm-mic-btn" onclick="toggleVoiceRecording()" title="Record voice memo">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4"/></svg>
         </button>
@@ -7873,7 +7913,7 @@ function extractOptions(text) {
 function chooseDmOption(btn, label) {
   const wrap = btn.closest('.dm2-opts');
   if (wrap) wrap.querySelectorAll('.dm2-opt-btn').forEach(b => b.disabled = true);
-  sendDmTextValue(label);
+  sendActiveThreadText(label);
 }
 
 async function sendDmText() {
@@ -7881,7 +7921,17 @@ async function sendDmText() {
   const text = inp?.value.trim();
   if (!text) return;
   inp.value = '';
-  await sendDmTextValue(text);
+  await sendActiveThreadText(text);
+}
+
+// One entry point for "send this text in whatever thread is currently
+// open" — a real human DM, or the BIX AI conversation. Everything upstream
+// (the compose bar, Enter key, inline option buttons) calls this without
+// needing to know which kind of thread it's talking to.
+let dmThreadMode = 'human';   // 'human' | 'bixai'
+async function sendActiveThreadText(text) {
+  if (dmThreadMode === 'bixai') return sendBixAiThreadMessage(text);
+  return sendDmTextValue(text);
 }
 
 async function sendDmTextValue(text) {
@@ -7897,6 +7947,138 @@ async function sendDmTextValue(text) {
     await loadDmMessages();
     await loadDmConversations();
   } catch(e) { console.error(e); toast('Could not send message.'); }
+}
+
+// ── BIX AI, inside Messages — no separate tab anymore. Same bix-ai edge
+// function and history array that already worked; only the rendering
+// (dm2 bubbles instead of a plain thread) and entry point changed. ──
+function openBixAiConversation() {
+  dmActiveConversationId = null;
+  dmThreadMode = 'bixai';
+  uniTab = 'messages';
+  document.querySelectorAll('.uni-tab').forEach(b => b.classList.toggle('active', b.id === 'unav-messages'));
+  const body = document.getElementById('uni-body');
+  if (!body) return;
+  body.innerHTML = `
+    <div class="dm2-view">
+      <div class="dm2-head">
+        <button class="dm2-back" onclick="showUniTab('messages')" aria-label="Back">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+        </button>
+        <div class="dm2-head-avatar" style="background:rgba(140,240,96,.12);border-color:rgba(140,240,96,.4);color:var(--green);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700">AI</div>
+        <div class="dm2-head-name">BIX AI</div>
+      </div>
+      <div class="dm2-thread" id="dm-thread"></div>
+      <div class="dm2-compose">
+        <button class="dm-plus-btn" id="dm-plus-btn" onclick="toggleDmActionsMenu()" title="More">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <input class="dm-input" id="dm-input" placeholder="Ask BIX AI…" onkeydown="if(event.key==='Enter')sendDmText()"/>
+        <button class="dm-send-btn" onclick="sendDmText()" title="Send">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+        </button>
+      </div>
+    </div>`;
+  clearInterval(dmPollTimer);   // no polling — this thread isn't Supabase-backed
+  renderBixAiThreadBubbles();
+}
+
+let bixAiHistory = [];
+function renderBixAiThreadBubbles() {
+  const el = document.getElementById('dm-thread');
+  if (!el) return;
+  if (!bixAiHistory.length) {
+    el.innerHTML = `<div class="empty" style="padding:24px 18px"><div class="empty-msg">Ask about open work, your projects, a business… this reads real, live data, not guesses. Try: "what am I working on?"</div></div>`;
+    return;
+  }
+  el.innerHTML = bixAiHistory.map(m => {
+    const mine = m.role === 'user';
+    const { text, options } = extractOptions(m.content || '');
+    const optsHtml = options && options.length
+      ? `<div class="dm2-opts">${options.map(o =>
+          `<button class="dm2-opt-btn" onclick="chooseDmOption(this,'${esc(o).replace(/'/g,"&#39;")}')">${esc(o)}</button>`
+        ).join('')}</div>`
+      : '';
+    return `
+      <div class="dm2-row ${mine ? 'mine' : ''}">
+        <div class="dm2-bubble ${mine ? 'mine' : ''}">
+          <div class="dm2-sender">${mine ? 'YOU' : 'BIX AI'}</div>
+          <div class="dm2-text">${esc(text)}</div>
+          ${optsHtml}
+        </div>
+      </div>`;
+  }).join('');
+  el.scrollTop = el.scrollHeight;
+}
+
+async function sendBixAiThreadMessage(text) {
+  if (!text || !operator) return;
+  bixAiHistory.push({ role: 'user', content: text });
+  renderBixAiThreadBubbles();
+  renderBixAiPinnedRow();
+
+  const el = document.getElementById('dm-thread');
+  const loadingId = 'bixai-loading-' + Date.now();
+  el?.insertAdjacentHTML('beforeend', `
+    <div class="dm2-row" id="${loadingId}">
+      <div class="dm2-bubble"><div class="dm2-sender">BIX AI</div><div class="dm2-text" style="opacity:.55">Thinking…</div></div>
+    </div>`);
+  if (el) el.scrollTop = el.scrollHeight;
+
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
+      body: JSON.stringify({
+        messages: bixAiHistory,
+        operator_context: `${operator.peer_name}, tier ${tier(operator.total_logs)}, ${operator.total_logs || 0} total LOGs.`,
+        caller_tier: tier(operator.total_logs),
+      }),
+    });
+    const data = await res.json();
+    document.getElementById(loadingId)?.remove();
+    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
+    bixAiHistory.push({ role: 'assistant', content: data.reply });
+  } catch(e) {
+    console.error(e);
+    document.getElementById(loadingId)?.remove();
+    bixAiHistory.push({ role: 'assistant', content: 'Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
+  }
+  renderBixAiThreadBubbles();
+  renderBixAiPinnedRow();
+}
+
+// ── "+" quick actions — Decompose today, room for more later without
+// another UI change (the popover just grows a row). ──
+function toggleDmActionsMenu() {
+  const existing = document.getElementById('dm-actions-menu');
+  if (existing) { existing.remove(); return; }
+  const anchor = document.getElementById('dm-plus-btn')?.closest('.dm2-compose');
+  if (!anchor) return;
+  const menu = document.createElement('div');
+  menu.id = 'dm-actions-menu';
+  menu.className = 'dm-actions-menu';
+  menu.innerHTML = `
+    <button class="dm-action-item" onclick="closeDmActionsMenu();openDecomposeOverlay()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M4.9 4.9l2.8 2.8M16.3 16.3l2.8 2.8M2 12h4M18 12h4M4.9 19.1l2.8-2.8M16.3 7.7l2.8-2.8"/></svg>
+      <span>Decompose a project</span>
+    </button>`;
+  anchor.appendChild(menu);
+  setTimeout(() => document.addEventListener('click', _dmActionsOutsideClick), 0);
+}
+function _dmActionsOutsideClick(ev) {
+  const menu = document.getElementById('dm-actions-menu');
+  if (menu && !menu.contains(ev.target) && ev.target.id !== 'dm-plus-btn' && !ev.target.closest('#dm-plus-btn')) {
+    closeDmActionsMenu();
+  }
+}
+function closeDmActionsMenu() {
+  document.getElementById('dm-actions-menu')?.remove();
+  document.removeEventListener('click', _dmActionsOutsideClick);
+}
+
+function openDecomposeOverlay() {
+  openOverlay('Decompose a Project', (body) => { renderBixDecomposePanel(body); }, null, null, false);
 }
 
 // ── VOICE MEMOS ──
@@ -7953,54 +8135,6 @@ async function uploadAndSendVoiceMemo(blob) {
   } catch(e) {
     console.error(e);
     toast('Could not send voice memo.');
-  }
-}
-
-// ── WORK BOARD — tier-gated (Architect+), operator-only. Relations see a
-// plain explanation rather than locked cards, since it isn't their surface. ──
-async function renderWorkBoard(body) {
-  if (relation) {
-    body.innerHTML = `
-      <div class="sig-title-row"><div class="sig-title">BIX AI</div><div class="sig-note">Operators only</div></div>
-      <div class="empty" style="padding:30px 18px"><div class="empty-msg">BIX AI is where network operators work. Submit a project instead, and an operator will scope it from here.</div></div>`;
-    return;
-  }
-  if (!operator) return;
-
-  body.innerHTML = `
-    <div class="sig-title-row">
-      <div class="sig-title">BIX AI</div>
-      <div class="sig-note">Ask, or decompose new work into tasks</div>
-    </div>
-    <div id="bixai-toggle" style="display:flex;gap:6px;padding:0 18px 16px">
-      <button class="calc-mode-btn ${bixAiMode==='ask'?'active':''}" onclick="switchBixAiMode('ask')">Ask</button>
-      <button class="calc-mode-btn ${bixAiMode==='decompose'?'active':''}" onclick="switchBixAiMode('decompose')">Decompose</button>
-    </div>
-    <div class="rel-section" style="padding-top:0" id="bixai-mode-body"></div>`;
-  renderBixAiModeBody();
-}
-
-let bixAiMode = 'ask';
-function switchBixAiMode(mode) {
-  bixAiMode = mode;
-  document.querySelectorAll('#bixai-toggle .calc-mode-btn').forEach(b => b.classList.remove('active'));
-  event?.target?.classList.add('active');
-  renderBixAiModeBody();
-}
-
-function renderBixAiModeBody() {
-  const el = document.getElementById('bixai-mode-body');
-  if (!el) return;
-  if (bixAiMode === 'decompose') {
-    renderBixDecomposePanel(el);
-  } else {
-    el.innerHTML = `
-      <div id="bixai-thread" style="max-height:52vh;overflow-y:auto;margin-bottom:12px"></div>
-      <div style="display:flex;gap:8px">
-        <input class="rel-q-input" id="bixai-input" placeholder="Ask about open work, your projects, a business…" style="flex:1" onkeydown="if(event.key==='Enter')sendBixAiMessage()"/>
-        <button class="sk-pay-btn" style="margin:0" onclick="sendBixAiMessage()">Send</button>
-      </div>`;
-    renderBixAiThread();
   }
 }
 
@@ -8187,59 +8321,6 @@ async function regenerateBixDecompose(projectId, title, market, notes) {
   if (body) renderDagApproval(body, { id: projectId, title, market }, dag, () => regenerateBixDecompose(projectId, title, market, notes));
 }
 
-let bixAiHistory = [];
-function renderBixAiThread() {
-  const el = document.getElementById('bixai-thread');
-  if (!el) return;
-  if (!bixAiHistory.length) {
-    el.innerHTML = `<div style="font-family:var(--sans);font-size:12px;color:var(--soft);padding:10px 0">Try: "what open work is available?", "what am I working on?", or "how much has Constitution Hill generated?" — this reads real, live data, not guesses.</div>`;
-    return;
-  }
-  el.innerHTML = bixAiHistory.map(m => `
-    <div style="margin-bottom:12px">
-      <div style="font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;color:${m.role === 'user' ? 'var(--green)' : 'var(--grey)'};margin-bottom:3px">${m.role === 'user' ? 'You' : 'BIX AI'}</div>
-      <div style="font-family:var(--sans);font-size:13px;color:var(--cream);line-height:1.6;white-space:pre-wrap">${esc(m.content)}</div>
-    </div>`).join('');
-  el.scrollTop = el.scrollHeight;
-}
-
-async function sendBixAiMessage() {
-  const input = document.getElementById('bixai-input');
-  const text = input?.value.trim();
-  if (!text || !operator) return;
-  input.value = '';
-
-  bixAiHistory.push({ role: 'user', content: text });
-  renderBixAiThread();
-
-  const el = document.getElementById('bixai-thread');
-  const loadingId = 'bixai-loading-' + Date.now();
-  el.insertAdjacentHTML('beforeend', `<div id="${loadingId}" style="font-family:var(--mono);font-size:10px;color:var(--grey)">Thinking…</div>`);
-  el.scrollTop = el.scrollHeight;
-
-  try {
-    const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
-      body: JSON.stringify({
-        messages: bixAiHistory,
-        operator_context: `${operator.peer_name}, tier ${tier(operator.total_logs)}, ${operator.total_logs || 0} total LOGs.`,
-        caller_tier: tier(operator.total_logs),
-      }),
-    });
-    const data = await res.json();
-    document.getElementById(loadingId)?.remove();
-    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
-
-    bixAiHistory.push({ role: 'assistant', content: data.reply });
-    renderBixAiThread();
-  } catch(e) {
-    console.error(e);
-    document.getElementById(loadingId)?.remove();
-    bixAiHistory.push({ role: 'assistant', content: 'Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
-    renderBixAiThread();
-  }
-}
 
 // The Who/What/When/Where/How/Budget contract — shown inside an expanded
 // Work card. Falls back to a plain note for scopes posted the old manual

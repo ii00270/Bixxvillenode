@@ -1152,7 +1152,11 @@ html.theme-light{
   font-family:var(--mono);font-size:11px;letter-spacing:.06em;
   color:var(--soft);padding:10px 18px;
   opacity:0;transition:all .25s;pointer-events:none;
-  white-space:nowrap;z-index:200;
+  z-index:200;
+  /* Was nowrap — fine for "Saved.", useless for a database error, which ran
+     off both edges of the screen unread. */
+  max-width:min(560px,calc(100vw - 32px));
+  white-space:normal;overflow-wrap:anywhere;line-height:1.55;text-align:center;
 }
 #toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
 
@@ -5317,7 +5321,16 @@ async function settleProject(projectId) {
     p_total_logs: totalLogs,
   });
 
-  if (error) { toast('Settlement failed.'); console.error(error); return; }
+  // Say what actually went wrong. Settlement is permanent and rare, so a bare
+  // "failed" leaves you with nothing to act on and no way to report it without
+  // opening DevTools — surface Postgres's own message instead.
+  if (error) {
+    console.error('settle_submission failed:', error);
+    const detail = error.message || error.hint || error.details || error.code || 'unknown error';
+    toast(`Settlement failed — ${detail}`);
+    window._lastSettlementError = error;   // inspectable later if the toast scrolls past
+    return;
+  }
 
   // Reputation, total_logs, and the Signal ledger entry are now all
   // handled atomically inside settle_submission itself, correctly
@@ -6974,7 +6987,10 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+  // 2.8s is right for "Saved."; a database error needs long enough to read
+  // and write down. Scale with length, capped so it never sticks around.
+  const ms = Math.min(12000, Math.max(2800, msg.length * 90));
+  toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
 
 // ── THEME ── light mode is opt-in; no stored preference means dark, exactly

@@ -12,6 +12,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Bixxville">
 <link rel="apple-touch-icon" href="icon-192.png">
+<script>
+// Applied synchronously, before the stylesheet paints anything, so a saved
+// light-mode preference never flashes dark first. Default (no stored value)
+// stays exactly the app's original dark-only look.
+try {
+  if (localStorage.getItem('bixx-theme') === 'light') document.documentElement.classList.add('theme-light');
+} catch(e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
@@ -22,7 +30,7 @@
 <style>
 /* ── RESET ── */
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
-html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
+html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
 
 /* ── TOKENS ── */
 :root{
@@ -43,6 +51,22 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
   --nav-h:    56px; /* must match #bottom-nav height — spacing calcs depend on it */
   --top-h:    56px;
   --safe-b:   env(safe-area-inset-bottom, 0px);
+}
+
+/* ── LIGHT THEME — same tokens, inverted lightness, hues kept close so
+   status/accent colors (green/orange/red) still read the same way ── */
+html.theme-light{
+  --black:    #FAFAF8;
+  --surface:  #F2F2EF;
+  --surface2: #EAEAE6;
+  --line:     #DDDDD7;
+  --line2:    #C7C7C0;
+  --cream:    #14140F;
+  --soft:     #3D3D37;
+  --grey:     #6B6B65;
+  --green:    #2E8B3D;
+  --orange:   #B85F1E;
+  --red:      #C4342F;
 }
 
 /* ── AUTH GATE ── */
@@ -74,7 +98,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .gate-input{
   width:100%;background:transparent;border:none;
   border-bottom:1px solid var(--line2);
-  color:var(--cream);font-family:var(--mono);font-size:14px;
+  color:var(--cream);font-family:var(--mono);font-size:16px;
   padding:10px 0;outline:none;transition:border-color .2s,box-shadow .2s;
   -webkit-appearance:none;border-radius:0;
 }
@@ -498,7 +522,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .rel-q-lbl{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);display:block;margin-bottom:10px;}
 .rel-q-input,.rel-q-textarea{
   width:100%;background:transparent;border:none;border-bottom:1px solid var(--line2);
-  color:var(--cream);font-family:var(--sans);font-size:14px;
+  color:var(--cream);font-family:var(--sans);font-size:16px;
   padding:10px 0;outline:none;transition:border-color .2s;-webkit-appearance:none;border-radius:0;
 }
 .rel-q-input:focus,.rel-q-textarea:focus{border-bottom-color:var(--green);}
@@ -1089,7 +1113,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .form-input,.form-textarea,.form-select{
   width:100%;background:transparent;border:none;
   border-bottom:1px solid var(--line2);
-  color:var(--cream);font-family:var(--mono);font-size:14px;
+  color:var(--cream);font-family:var(--mono);font-size:16px;
   padding:10px 0;outline:none;
   transition:border-color .2s;
   -webkit-appearance:none;border-radius:0;
@@ -1216,7 +1240,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .prof-field-input{
   width:100%;background:transparent;border:none;
   border-bottom:1px solid var(--line2);
-  color:var(--cream);font-family:var(--mono);font-size:13px;
+  color:var(--cream);font-family:var(--mono);font-size:16px;
   padding:6px 0;outline:none;transition:border-color .2s;
   -webkit-appearance:none;
 }
@@ -1225,7 +1249,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 .prof-field-textarea{
   width:100%;background:transparent;border:none;
   border-bottom:1px solid var(--line2);
-  color:var(--cream);font-family:var(--sans);font-size:13px;
+  color:var(--cream);font-family:var(--sans);font-size:16px;
   padding:6px 0;outline:none;resize:none;min-height:60px;
   line-height:1.6;transition:border-color .2s;
 }
@@ -1714,7 +1738,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000000;}
 }
 .dm-input{
   flex:1;min-width:0;background:var(--surface2);border:1px solid var(--line2);border-radius:20px;
-  padding:10px 16px;color:var(--cream);font-family:var(--sans);font-size:13px;outline:none;
+  padding:10px 16px;color:var(--cream);font-family:var(--sans);font-size:16px;outline:none;
   transition:border-color .15s;
 }
 .dm-input:focus{border-color:var(--green);}
@@ -5977,6 +6001,10 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
     </div>
     ${isSelf ? `
     <div class="export-row">
+      <div class="export-lbl">Appearance</div>
+      <button class="export-btn" id="theme-toggle-btn" onclick="toggleTheme()">${currentTheme() === 'light' ? 'Light' : 'Dark'}</button>
+    </div>
+    <div class="export-row">
       <div class="export-lbl">Session</div>
       <button class="export-btn" style="border-color:var(--red);color:var(--red)" onclick="closeOverlay();doLogout()">Sign out</button>
     </div>` : ''}`;
@@ -6831,6 +6859,22 @@ function toast(msg) {
   el.classList.add('show');
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// ── THEME ── light mode is opt-in; no stored preference means dark, exactly
+// the app's original look.
+function currentTheme() {
+  return document.documentElement.classList.contains('theme-light') ? 'light' : 'dark';
+}
+function setTheme(theme) {
+  document.documentElement.classList.toggle('theme-light', theme === 'light');
+  try { localStorage.setItem('bixx-theme', theme); } catch(e) {}
+  const btn = document.getElementById('theme-toggle-btn');
+  if (btn) btn.textContent = theme === 'light' ? 'Light' : 'Dark';
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', theme === 'light' ? '#FAFAF8' : '#000000'));
+}
+function toggleTheme() {
+  setTheme(currentTheme() === 'light' ? 'dark' : 'light');
 }
 
 // ── GATE MODE SWITCH ──

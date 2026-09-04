@@ -65,6 +65,14 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
   --green-rgb:  140,240,96;
   --orange-rgb: 232,136,74;
   --red-rgb:    224,82,82;
+  /* Chrome surfaces — bars, sheets, dialogs. Translucent, so they need
+     their own tokens rather than reusing the opaque ones. */
+  --chrome:     rgba(0,0,0,.92);
+  --chrome-2:   rgba(10,10,10,.68);
+  --chrome-3:   rgba(10,10,10,.55);
+  --overlay-bg: rgba(13,13,15,.98);
+  --overlay-bg-desktop: rgba(16,16,18,.92);
+  --dialog-bg:  rgba(0,0,0,.85);
 }
 
 /* ── LIGHT THEME — RealSkills brand system (a Bixxville initiative):
@@ -93,6 +101,12 @@ html.theme-light{
   --green-rgb:  14,136,134;
   --orange-rgb: 168,115,11;
   --red-rgb:    217,58,43;
+  --chrome:     rgba(250,245,236,.94);
+  --chrome-2:   rgba(250,245,236,.78);
+  --chrome-3:   rgba(250,245,236,.66);
+  --overlay-bg: rgba(252,249,242,.985);
+  --overlay-bg-desktop: rgba(252,249,242,.95);
+  --dialog-bg:  rgba(250,245,236,.92);
 }
 
 /* ── AUTH GATE ── */
@@ -297,7 +311,7 @@ html.theme-light{
 /* ── TOPBAR ENHANCEMENTS ── */
 #topbar{
   height:var(--top-h);flex-shrink:0;
-  background:rgba(0,0,0,.92);
+  background:var(--chrome);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-bottom:1px solid var(--line);
   display:flex;align-items:center;
@@ -345,7 +359,7 @@ html.theme-light{
      Profile record, etc.) renders fully hidden behind their opaque backgrounds. */
   position:fixed;inset:0;z-index:150;
   display:flex;flex-direction:column;
-  background:rgba(13,13,15,.98);
+  background:var(--overlay-bg);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid rgba(var(--green-rgb),.12);
   border-left:1px solid var(--hairline);
@@ -378,11 +392,13 @@ html.theme-light{
   width:100%;height:100%;background:var(--shell);overflow:hidden;
 }
 @media(min-width:768px){
-  #uni-shell{padding:24px;}
+  /* Full-bleed on desktop — the OS is the whole window, not a card
+     floating in the middle of it. */
+  #uni-shell{padding:0;}
   .uni-card{
-    width:min(1000px,96vw);height:min(860px,92vh);
-    border:1px solid var(--line2);border-radius:20px;
-    box-shadow:0 40px 100px rgba(0,0,0,.6);
+    width:100%;height:100%;
+    border:none;border-radius:0;
+    box-shadow:none;
   }
 }
 
@@ -396,6 +412,50 @@ html.theme-light{
   color:var(--green);letter-spacing:.06em;
 }
 .uni-topbar-right{display:flex;align-items:center;gap:14px;}
+
+/* ── RIGHT SHOULDER ──
+   Flat rail pinned to the right edge, holding the non-navigation controls.
+   The surface itself is flat (no shadow, one hairline); the controls inside
+   stay round the way they are everywhere else in the OS. */
+#uni-shoulder{
+  position:absolute;top:0;right:0;bottom:0;z-index:120;
+  width:56px;display:flex;flex-direction:column;align-items:center;gap:12px;
+  padding:14px 0;
+  background:var(--chrome-3);
+  border-left:1px solid var(--line);
+  transition:right .28s cubic-bezier(.32,.72,0,1);
+}
+/* Slides on `right` rather than a transform: the arrow is a child pinned to
+   the rail's leading edge, and offsetting the box keeps it reachable at the
+   screen edge when tucked away. */
+#uni-shoulder.closed{right:-56px;}
+.shoulder-items{display:flex;flex-direction:column;align-items:center;gap:12px;}
+#uni-shoulder.closed .shoulder-items{opacity:0;pointer-events:none;}
+.shoulder-items{transition:opacity .18s;}
+
+/* The arrow rides on the rail's leading edge so it stays reachable when the
+   rail is tucked away. Points left to close, right to open. */
+#shoulder-arrow{
+  position:absolute;left:-13px;top:16px;
+  width:26px;height:26px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--surface2);border:1px solid var(--line2);color:var(--soft);
+  cursor:pointer;transition:color .15s,border-color .15s,left .28s cubic-bezier(.32,.72,0,1);
+}
+/* Tucked away, the rail's own box is off-card, so pull the arrow further in
+   to keep the whole button on screen instead of half-clipped at the edge. */
+#uni-shoulder.closed #shoulder-arrow{left:-34px;}
+#shoulder-arrow:hover{color:var(--green);border-color:var(--green);}
+#uni-shoulder:not(.closed) #shoulder-arrow svg{transform:rotate(180deg);}
+#shoulder-arrow svg{transition:transform .28s;}
+
+/* Give the chrome and the scrolling body room so the rail never sits on top
+   of content. Both shed the inset when the rail tucks away. */
+#uni-body,#uni-topbar,#uni-tabs{padding-right:78px;} /* 56px rail + 22px gutter */
+.uni-card:has(#uni-shoulder.closed) #uni-body,
+.uni-card:has(#uni-shoulder.closed) #uni-topbar,
+.uni-card:has(#uni-shoulder.closed) #uni-tabs{padding-right:46px;} /* still clears the tucked arrow */
+#uni-body,#uni-topbar,#uni-tabs{transition:padding-right .28s cubic-bezier(.32,.72,0,1);}
 .uni-live{
   font-family:var(--mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
   color:var(--soft);display:flex;align-items:center;gap:8px;
@@ -1193,7 +1253,7 @@ html.theme-light{
 #confirm-dialog{
   position:fixed;inset:0;z-index:300;
   display:flex;align-items:center;justify-content:center;
-  background:rgba(0,0,0,.85);
+  background:var(--dialog-bg);
   opacity:0;pointer-events:none;transition:opacity .2s;
 }
 #confirm-dialog.open{opacity:1;pointer-events:all;}
@@ -1459,7 +1519,7 @@ html.theme-light{
 #bottom-nav{
   position:fixed;bottom:0;left:0;right:0;
   height:calc(56px + var(--safe-b));padding-bottom:var(--safe-b);
-  background:rgba(0,0,0,.92);
+  background:var(--chrome);
   backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-top:1px solid var(--line);
   display:grid;grid-template-columns:repeat(6,1fr);z-index:50;
@@ -1648,6 +1708,29 @@ html.theme-light{
   border-bottom:1px solid var(--line);cursor:pointer;transition:background .1s;
 }
 .dm-conv-row:hover,.dm-conv-row:active{background:var(--surface);}
+
+/* Inbox / Archived switch — flat segmented control, pill buttons. */
+.dm-seg{display:flex;gap:8px;padding:0 18px 12px;}
+.dm-seg-btn{
+  font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+  padding:7px 14px;border-radius:14px;cursor:pointer;
+  background:transparent;border:1px solid var(--line2);color:var(--grey);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.dm-seg-btn:hover{color:var(--soft);}
+.dm-seg-btn.active{color:var(--green);border-color:var(--green);background:rgba(var(--green-rgb),.07);}
+
+/* Archive control sits on the row without stealing the row's own tap. */
+.dm-arch-btn{
+  flex-shrink:0;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid transparent;color:var(--grey);
+  cursor:pointer;opacity:0;transition:opacity .15s,color .15s,border-color .15s;
+}
+.dm-conv-row:hover .dm-arch-btn{opacity:1;}
+.dm-arch-btn:hover{color:var(--green);border-color:var(--green);}
+/* Touch has no hover — keep it permanently visible there. */
+@media (hover:none){ .dm-arch-btn{opacity:1;} }
 .dm-conv-avatar{
   width:48px;height:48px;border-radius:50%;flex-shrink:0;overflow:hidden;
   background:var(--surface2);border:1px solid var(--line2);
@@ -1950,7 +2033,7 @@ html.theme-light{
 /* ── iOS — touch layout only ── */
 @media (max-width:767px){
   #topbar,#bottom-nav{
-    background:rgba(0,0,0,.78);
+    background:var(--chrome);
     backdrop-filter:blur(20px) saturate(1.6);
     -webkit-backdrop-filter:blur(20px) saturate(1.6);
   }
@@ -1996,12 +2079,12 @@ html.theme-light{
   /* Frosted chrome: sidebar, right rail, uni-shell top/bottom bars.
      Translucency reads against the ambient orbs behind the shell. */
   #d-sidebar{
-    background:rgba(10,10,10,.68);
+    background:var(--chrome-2);
     backdrop-filter:blur(28px) saturate(1.5);
     -webkit-backdrop-filter:blur(28px) saturate(1.5);
   }
   #d-right{
-    background:rgba(10,10,10,.55);
+    background:var(--chrome-3);
     backdrop-filter:blur(28px) saturate(1.5);
     -webkit-backdrop-filter:blur(28px) saturate(1.5);
   }
@@ -2013,7 +2096,7 @@ html.theme-light{
     top:max(48px, 6vh);
     border-radius:16px 16px 0 0;
     transform:translate(-50%,110%);
-    background:rgba(16,16,18,.92);
+    background:var(--overlay-bg-desktop);
     backdrop-filter:blur(28px) saturate(1.4);
     -webkit-backdrop-filter:blur(28px) saturate(1.4);
   }
@@ -2180,6 +2263,16 @@ html.theme-light{
       <div class="uni-wordmark">BIXXVILLE</div>
       <div class="uni-topbar-right">
         <div class="uni-live"><span class="uni-live-dot"></span>THE OS · LIVE</div>
+      </div>
+    </div>
+
+    <!-- Right shoulder — the controls that aren't navigation live here, so
+         the topbar stays just identity + status. Collapses to a thin arrow. -->
+    <aside id="uni-shoulder" aria-label="Controls">
+      <button id="shoulder-arrow" onclick="toggleShoulder()" title="Hide controls" aria-expanded="true">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+      </button>
+      <div class="shoulder-items">
         <button id="uni-theme-btn" class="uni-chip-btn" onclick="toggleTheme()" title="Switch theme"></button>
         <button id="uni-admin-btn" class="uni-chip-btn hidden" onclick="openAdminMode()" title="Admin tools">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -2188,7 +2281,7 @@ html.theme-light{
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>
         </button>
       </div>
-    </div>
+    </aside>
 
     <nav id="uni-tabs">
       <button class="uni-tab active" id="unav-home" onclick="showUniTab('home')">Home</button>
@@ -6912,6 +7005,28 @@ function setTheme(theme) {
 function toggleTheme() {
   setTheme(currentTheme() === 'light' ? 'dark' : 'light');
 }
+
+// ── RIGHT SHOULDER ── open/closed persists, same as the theme choice.
+function setShoulder(open) {
+  const rail = document.getElementById('uni-shoulder');
+  if (!rail) return;
+  rail.classList.toggle('closed', !open);
+  const arrow = document.getElementById('shoulder-arrow');
+  if (arrow) {
+    arrow.title = open ? 'Hide controls' : 'Show controls';
+    arrow.setAttribute('aria-expanded', String(open));
+  }
+  try { localStorage.setItem('bixx-shoulder', open ? 'open' : 'closed'); } catch(e) {}
+}
+function toggleShoulder() {
+  const rail = document.getElementById('uni-shoulder');
+  setShoulder(rail ? rail.classList.contains('closed') : true);
+}
+function restoreShoulder() {
+  let open = true;
+  try { open = localStorage.getItem('bixx-shoulder') !== 'closed'; } catch(e) {}
+  setShoulder(open);
+}
 // Sun while light is active, moon while dark is — the icon shows the state
 // you're in, not the one you'd switch to.
 function renderThemeToggleIcon() {
@@ -7077,6 +7192,7 @@ function enterUniShell() {
   const adminBtn = document.getElementById('uni-admin-btn');
   if (adminBtn) adminBtn.classList.toggle('hidden', !operator || !!relation);
   renderThemeToggleIcon();
+  restoreShoulder();
   showUniTab('home');
 }
 
@@ -7760,11 +7876,53 @@ async function renderUniMessages(body) {
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
       </button>
     </div>
+    <div class="dm-seg">
+      <button class="dm-seg-btn ${dmListView === 'inbox' ? 'active' : ''}" onclick="setDmListView('inbox')">Inbox</button>
+      <button class="dm-seg-btn ${dmListView === 'archive' ? 'active' : ''}" onclick="setDmListView('archive')">Archived</button>
+    </div>
     <div id="dm-pinned-row"></div>
     <div id="dm-conv-list"><div class="empty"><div class="empty-msg">Loading…</div></div></div>`;
 
   renderBixAiPinnedRow();
   await loadDmConversations();
+}
+
+// ── ARCHIVE ──
+// Archiving is a per-viewer view preference, kept in localStorage. It's
+// deliberately not a server write: there's no archived column on the
+// conversations table, and adding one means a migration against live data.
+// Consequence to know about — an archive made here doesn't follow you to
+// another device or browser.
+let dmListView = 'inbox';
+function archivedConvIds() {
+  try { return new Set(JSON.parse(localStorage.getItem('bixx-archived-convs') || '[]')); }
+  catch(e) { return new Set(); }
+}
+function saveArchivedConvIds(set) {
+  try { localStorage.setItem('bixx-archived-convs', JSON.stringify([...set])); } catch(e) {}
+}
+function setDmListView(view) {
+  dmListView = view;
+  document.querySelectorAll('.dm-seg-btn').forEach(b => b.classList.toggle('active', b.textContent.trim().toLowerCase().startsWith(view === 'inbox' ? 'inbox' : 'arch')));
+  const pinned = document.getElementById('dm-pinned-row');
+  if (pinned) pinned.style.display = view === 'inbox' ? '' : 'none';  // BIX AI stays an inbox fixture
+  loadDmConversations();
+}
+function archiveConversation(ev, id) {
+  ev.stopPropagation();               // the row itself opens the thread
+  const set = archivedConvIds();
+  set.add(id);
+  saveArchivedConvIds(set);
+  toast('Archived.');
+  loadDmConversations();
+}
+function unarchiveConversation(ev, id) {
+  ev.stopPropagation();
+  const set = archivedConvIds();
+  set.delete(id);
+  saveArchivedConvIds(set);
+  toast('Moved back to inbox.');
+  loadDmConversations();
 }
 
 // BIX AI is always reachable from Messages — it isn't a real Supabase
@@ -7794,9 +7952,13 @@ async function loadDmConversations() {
   try {
     const { data, error } = await sb.rpc('list_my_conversations', { p_kind: me.kind, p_id: me.id });
     if (error) throw error;
-    const conversations = data || [];
+    const archived = archivedConvIds();
+    const showingArchive = dmListView === 'archive';
+    const conversations = (data || []).filter(c => archived.has(c.conversation_id) === showingArchive);
     if (!conversations.length) {
-      el.innerHTML = `<div class="empty"><div class="empty-line"></div><div class="empty-label">Messages</div><div class="empty-msg">No conversations yet. Tap + to message someone.</div></div>`;
+      el.innerHTML = showingArchive
+        ? `<div class="empty"><div class="empty-line"></div><div class="empty-label">Archived</div><div class="empty-msg">Nothing archived yet.</div></div>`
+        : `<div class="empty"><div class="empty-line"></div><div class="empty-label">Messages</div><div class="empty-msg">No conversations yet. Tap + to message someone.</div></div>`;
       return;
     }
     el.innerHTML = conversations.map(c => `
@@ -7807,6 +7969,12 @@ async function loadDmConversations() {
           <div class="dm-conv-preview">${c.last_voice_url ? '🎤 Voice memo' : esc(c.last_body || 'Say hello')}</div>
         </div>
         <div class="dm-conv-time">${c.last_message_at ? timeAgo(c.last_message_at) : ''}</div>
+        <button class="dm-arch-btn" title="${showingArchive ? 'Move back to inbox' : 'Archive'}"
+          onclick="${showingArchive ? 'unarchiveConversation' : 'archiveConversation'}(event,'${esc(c.conversation_id)}')">
+          ${showingArchive
+            ? `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h13M9 6l-6 6 6 6"/><path d="M21 5v14"/></svg>`
+            : `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8v11a1 1 0 01-1 1H4a1 1 0 01-1-1V8"/><path d="M1 4h22v4H1zM10 12h4"/></svg>`}
+        </button>
       </div>`).join('');
   } catch(e) {
     console.error(e);

@@ -1253,6 +1253,36 @@ html.theme-light{
 }
 .export-btn:hover{border-color:var(--green);color:var(--green);}
 
+/* ── DOWNLOADS — one row per cycle, toggles open to reveal its statement.
+   Reuses the existing Cycle Audit data/PDF; this just gives it a real
+   home instead of a hidden "type a cycle number" field in Profile. ── */
+.dl-row{border-bottom:1px solid var(--line);}
+.dl-head{
+  display:flex;align-items:center;gap:12px;padding:16px 18px;cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+}
+.dl-head:hover{background:var(--tint);}
+.dl-chevron{
+  width:16px;height:16px;flex-shrink:0;color:var(--grey);
+  transition:transform .2s;display:flex;align-items:center;justify-content:center;
+}
+.dl-row.open .dl-chevron{transform:rotate(90deg);color:var(--green);}
+.dl-head-main{flex:1;min-width:0;}
+.dl-cycle-title{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--cream);}
+.dl-cycle-range{font-family:var(--mono);font-size:10px;color:var(--grey);margin-top:3px;}
+.dl-cycle-badge{
+  font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;
+  padding:3px 8px;border-radius:8px;border:1px solid rgba(var(--green-rgb),.4);color:var(--green);
+}
+.dl-body{padding:0 18px 20px;display:none;}
+.dl-row.open .dl-body{display:block;}
+.dl-mini-stats{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.dl-mini-stat{
+  flex:1;min-width:80px;padding:10px 12px;border:1px solid var(--line2);border-radius:10px;background:var(--surface);
+}
+.dl-mini-v{font-family:var(--display);font-size:18px;font-weight:800;color:var(--cream);}
+.dl-mini-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
+
 /* ── CUSTOM CONFIRM DIALOG ── */
 #confirm-dialog{
   position:fixed;inset:0;z-index:300;
@@ -2291,6 +2321,7 @@ html.theme-light{
       <button class="uni-tab active" id="unav-home" onclick="showUniTab('home')">Home</button>
       <button class="uni-tab" id="unav-messages" onclick="showUniTab('messages')">Messages</button>
       <button class="uni-tab" id="unav-sidekick" onclick="showUniTab('sidekick')">Profile</button>
+      <button class="uni-tab" id="unav-downloads" onclick="showUniTab('downloads')">Downloads</button>
     </nav>
 
     <div id="uni-body"></div>
@@ -5728,6 +5759,87 @@ function downloadCycleAuditPDF() {
   doc.save(`bixxville-cycle-${report.cycleNum}-audit.pdf`);
 }
 
+// ═══ DOWNLOADS ═══
+// One row per cycle, most recent first, toggles open on tap. Self-only —
+// your own statements, same scope as Execution Log / Download Logs already
+// have in Profile. Each statement is the existing Cycle Audit, generated
+// and exported by the same generateCycleAudit()/downloadCycleAuditPDF()
+// used from Profile — this tab is a real home for it, not a second copy.
+window._downloadsCache = {};  // cycleNum -> report, so re-opening a row doesn't re-fetch
+
+function renderDownloadsTab(body) {
+  if (!operator) {
+    body.innerHTML = '<div class="empty" style="padding:30px 18px"><div class="empty-msg">Sign in as an operator to see your statements.</div></div>';
+    return;
+  }
+  const current = getActiveCycle();
+  // Most recent first — reading top-to-bottom like a bank's statement list.
+  const cycles = [...LUNAR_NM].reverse();
+
+  body.innerHTML = `
+    <div class="sig-title-row">
+      <div class="sig-title">Downloads</div>
+      <div class="sig-note">Your LOG statement, one per cycle</div>
+    </div>
+    <div id="dl-list">
+      ${cycles.map(c => {
+        const range = getCycleDateRange(c.cycle);
+        const isCurrent = c.cycle === current.num;
+        return `
+        <div class="dl-row" id="dl-row-${c.cycle}">
+          <div class="dl-head" onclick="toggleDownloadCycle(${c.cycle})">
+            <div class="dl-chevron">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+            </div>
+            <div class="dl-head-main">
+              <div class="dl-cycle-title">Cycle ${c.cycle}</div>
+              <div class="dl-cycle-range">${range.start.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} – ${new Date(range.end - 86400000).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})}</div>
+            </div>
+            ${isCurrent ? '<span class="dl-cycle-badge">Current</span>' : ''}
+          </div>
+          <div class="dl-body" id="dl-body-${c.cycle}"></div>
+        </div>`;
+      }).join('')}
+    </div>`;
+}
+
+async function toggleDownloadCycle(cycleNum) {
+  const row  = document.getElementById(`dl-row-${cycleNum}`);
+  const body = document.getElementById(`dl-body-${cycleNum}`);
+  if (!row || !body) return;
+
+  const wasOpen = row.classList.contains('open');
+  row.classList.toggle('open', !wasOpen);
+  if (wasOpen) return;              // collapsing — nothing to load
+  if (body.dataset.loaded) return;  // already fetched this cycle this session
+
+  body.innerHTML = '<div class="empty" style="padding:14px 0"><div class="empty-msg">Loading…</div></div>';
+  const report = window._downloadsCache[cycleNum] || await generateCycleAudit(cycleNum);
+  window._downloadsCache[cycleNum] = report;
+
+  if (!report || (!report.logs.length && !report.settled.length && !report.payments.length)) {
+    body.innerHTML = '<div class="empty" style="padding:14px 0"><div class="empty-msg">Nothing recorded this cycle.</div></div>';
+    body.dataset.loaded = '1';
+    return;
+  }
+
+  body.innerHTML = `
+    <div class="dl-mini-stats">
+      <div class="dl-mini-stat"><div class="dl-mini-v">${report.totalHours.toFixed(0)}</div><div class="dl-mini-l">Hours Logged</div></div>
+      <div class="dl-mini-stat"><div class="dl-mini-v">${report.settled.length}</div><div class="dl-mini-l">Settled</div></div>
+      <div class="dl-mini-stat"><div class="dl-mini-v">${report.payments.length}</div><div class="dl-mini-l">Payments</div></div>
+      <div class="dl-mini-stat"><div class="dl-mini-v ${report.missed.length ? 'green' : ''}" style="color:${report.missed.length ? 'var(--orange)' : 'var(--green)'}">${report.missed.length}</div><div class="dl-mini-l">Missed</div></div>
+    </div>
+    <button class="export-btn" style="width:100%;padding:10px;text-align:center" onclick="downloadStatementForCycle(${cycleNum})">Download Statement (PDF)</button>`;
+  body.dataset.loaded = '1';
+}
+
+function downloadStatementForCycle(cycleNum) {
+  const report = window._downloadsCache[cycleNum];
+  if (!report) { toast('Still loading that cycle — try again in a moment.'); return; }
+  window._lastAudit = report;      // downloadCycleAuditPDF reads from here
+  downloadCycleAuditPDF();
+}
 
 function downloadLogsCSV() {
   const logs = window._myLogs || [];
@@ -7255,7 +7367,7 @@ function showUniTab(tab) {
   // surface and behind Profile's Market button. Redirect stragglers Home.
   if (tab === 'signal') tab = 'home';
   uniTab = tab;
-  ['home', 'messages', 'sidekick'].forEach(t => {
+  ['home', 'messages', 'sidekick', 'downloads'].forEach(t => {
     const btn = document.getElementById('unav-' + t);
     btn?.classList.toggle('active', t === tab);
     const icon = btn?.querySelector('.nav-icon');
@@ -7264,9 +7376,10 @@ function showUniTab(tab) {
   const body = document.getElementById('uni-body');
   if (!body) return;
   if (tab !== 'messages') clearInterval(dmPollTimer);
-  if (tab === 'home')     renderHomeHud(body);
-  if (tab === 'messages') renderUniMessages(body);
-  if (tab === 'sidekick') renderSidekick(body);
+  if (tab === 'home')      renderHomeHud(body);
+  if (tab === 'messages')  renderUniMessages(body);
+  if (tab === 'sidekick')  renderSidekick(body);
+  if (tab === 'downloads') renderDownloadsTab(body);
 
   // Portfolio/Markets auto-refresh only runs while Profile is the tab
   // actually on screen — stops the moment you leave it, so it's not

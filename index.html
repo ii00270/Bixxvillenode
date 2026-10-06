@@ -2591,6 +2591,45 @@ function getActiveCycle(now = new Date()) {
   return { num: 1, day: 1, left: 28, end: new Date() };
 }
 
+// A "block" is a fixed 4-hour slot of the 28-day cycle (168 of them) — that's
+// the only granularity claim_block actually stores. The old "When" picker let
+// you choose any minute, then silently rounded down to the block it fell in,
+// so two claims anywhere in the same 4 hours showed the identical time. This
+// picker shows the real blocks instead, so what you pick is what gets saved.
+const DAY_BLOCKS = [
+  { h: 0,  label: '12:00 AM – 4:00 AM' },
+  { h: 4,  label: '4:00 AM – 8:00 AM' },
+  { h: 8,  label: '8:00 AM – 12:00 PM' },
+  { h: 12, label: '12:00 PM – 4:00 PM' },
+  { h: 16, label: '4:00 PM – 8:00 PM' },
+  { h: 20, label: '8:00 PM – 12:00 AM' },
+];
+
+function blockPickerHtml(prefix, inputCls) {
+  const now = new Date();
+  const dateStr = new Date(now.getTime() - now.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  let defaultIdx = DAY_BLOCKS.length - 1;
+  for (let i = 0; i < DAY_BLOCKS.length; i++) {
+    if (now.getHours() < (DAY_BLOCKS[i + 1]?.h ?? 24)) { defaultIdx = i; break; }
+  }
+  return `
+    <input class="${inputCls}" id="${prefix}-date" type="date" value="${dateStr}" style="margin-bottom:10px"/>
+    <select class="${inputCls}" id="${prefix}-block" style="margin-bottom:14px">
+      ${DAY_BLOCKS.map((b, i) => `<option value="${i}" ${i === defaultIdx ? 'selected' : ''}>${b.label}</option>`).join('')}
+    </select>`;
+}
+
+// Reads the date + block select back into the exact block-start Date —
+// matches getCycleAndBlock exactly, so there's no rounding surprise.
+function readPickedBlockDate(prefix) {
+  const dateVal = document.getElementById(`${prefix}-date`)?.value;
+  const blockIdx = parseInt(document.getElementById(`${prefix}-block`)?.value, 10);
+  if (!dateVal || Number.isNaN(blockIdx)) return null;
+  const d = new Date(dateVal + 'T00:00:00');
+  d.setHours(DAY_BLOCKS[blockIdx].h, 0, 0, 0);
+  return d;
+}
+
 function getCycleAndBlock(date) {
   for (let i = LUNAR_NM.length - 1; i >= 0; i--) {
     const s = new Date(LUNAR_NM[i].date + 'T00:00:00');
@@ -3118,9 +3157,9 @@ async function _retiredLoadHome() {
         <div class="dash-widget full">
           <div class="dash-widget-title">Claim a Block</div>
           <div style="font-family:var(--sans);font-size:12px;color:var(--soft);margin-bottom:12px;line-height:1.5">Reserve a block ahead of time — the habit starts with committing before you start.</div>
-          <div class="dash-calc-row">
-            <span class="dash-calc-lbl">When</span>
-            <input class="form-input" id="claim-when" type="datetime-local" value="${new Date(Date.now() - new Date().getTimezoneOffset()*60000).toISOString().slice(0,16)}" style="max-width:220px"/>
+          <div class="dash-calc-row" style="align-items:flex-start">
+            <span class="dash-calc-lbl" style="padding-top:10px">When</span>
+            <div style="flex:1;max-width:260px">${blockPickerHtml('claim', 'form-input')}</div>
           </div>
           <div style="margin-bottom:10px">
             <input class="dash-task-input" id="claim-desc" placeholder="What will you work on?" style="width:100%"/>
@@ -3413,11 +3452,10 @@ function renderDashClaims() {
 }
 
 async function submitClaimBlock() {
-  const whenVal = document.getElementById('claim-when')?.value;
-  const desc    = document.getElementById('claim-desc')?.value.trim();
-  if (!whenVal || !desc) { toast('Pick a time and describe the work.'); return; }
+  const date = readPickedBlockDate('claim');
+  const desc = document.getElementById('claim-desc')?.value.trim();
+  if (!date || !desc) { toast('Pick a day and block, and describe the work.'); return; }
 
-  const date = new Date(whenVal);
   const { cycle, block } = getCycleAndBlock(date);
 
   const { error } = await sb.rpc('claim_block', {
@@ -7545,16 +7583,15 @@ async function submitCalendarEvent() {
 function openClaimBlockModal() {
   if (!operator) { toast('Only operators claim cycle time.'); return; }
   openOverlay('Claim Time', (body) => {
-    const nowLocal = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 16);
     body.innerHTML = `
       <div class="rel-section" style="padding-top:10px">
         <div style="font-family:var(--sans);font-size:12px;color:var(--soft);line-height:1.6;margin-bottom:14px">
-          Claiming time puts your name on a block of this cycle — the commitment comes before the work.
+          Claiming time puts your name on a 4-hour block of this cycle — the commitment comes before the work.
         </div>
         <div class="rel-q-lbl" style="margin-bottom:4px">What will you work on</div>
         <input class="rel-q-input" id="cb-desc" placeholder="Description" style="margin-bottom:12px"/>
-        <div class="rel-q-lbl" style="margin-bottom:4px">When</div>
-        <input class="rel-q-input" id="cb-when" type="datetime-local" value="${nowLocal}" style="margin-bottom:14px"/>
+        <div class="rel-q-lbl" style="margin-bottom:4px">Day and block</div>
+        ${blockPickerHtml('cb', 'rel-q-input')}
         <button class="act-btn-sm" style="width:100%;padding:12px;text-align:center" onclick="submitHudClaim()">Claim It</button>
       </div>`;
   }, null, null, false);
@@ -7562,9 +7599,8 @@ function openClaimBlockModal() {
 
 async function submitHudClaim() {
   const desc = document.getElementById('cb-desc')?.value.trim();
-  const when = document.getElementById('cb-when')?.value;
-  if (!desc || !when) { toast('Describe the work and pick a time.'); return; }
-  const date = new Date(when);
+  const date = readPickedBlockDate('cb');
+  if (!desc || !date) { toast('Describe the work and pick a day and block.'); return; }
   const { cycle, block } = getCycleAndBlock(date);
   try {
     const { error } = await sb.rpc('claim_block', {

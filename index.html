@@ -2183,6 +2183,99 @@ html.theme-light{
   .form-input,.form-textarea,.form-select,.rel-q-input,.rel-q-textarea{font-size:15px;}
   .evt-title,.log-row-title,.ledger-pay-title{font-size:15px;}
 }
+/* ══ TRACKER — P-03 The Map, P-04 Leaf Cards ══
+   Genesis at the top, branches beneath, Outcome last. The vertical rule
+   down the left is the dependency order the form asks you to read:
+   nothing lower starts until what is above it is delivered. */
+.tk-head{padding:18px 18px 6px;display:flex;align-items:baseline;gap:12px;flex-wrap:wrap;}
+.tk-goal{font-family:var(--display);font-size:22px;font-weight:800;color:var(--cream);line-height:1.15;}
+.tk-sub{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);}
+
+.tk-totals{display:flex;gap:10px;flex-wrap:wrap;padding:6px 18px 14px;}
+.tk-stat{
+  flex:1 1 90px;min-width:90px;padding:10px 12px;
+  border:1px solid var(--line);border-radius:10px;background:var(--surface);
+}
+.tk-stat-v{font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream);line-height:1;}
+.tk-stat-l{font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-top:5px;}
+
+.tk-node{margin:0 18px 10px;padding:12px 14px;border:1px solid var(--line2);border-radius:12px;background:var(--surface);}
+.tk-node.genesis{border-color:rgba(var(--green-rgb),.5);}
+.tk-node.outcome{border-color:var(--gold);}
+.tk-node-kind{font-family:var(--mono);font-size:9px;letter-spacing:.16em;text-transform:uppercase;color:var(--grey);margin-bottom:5px;}
+.tk-node-task{font-family:var(--sans);font-size:14px;font-weight:600;color:var(--cream);line-height:1.4;}
+
+.tk-branch{margin:16px 18px 8px;}
+.tk-branch-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding-bottom:8px;}
+.tk-branch-name{font-family:var(--sans);font-size:14px;font-weight:700;color:var(--cream);}
+/* Branches are never priced — only their LOG sum is shown, per LOG 3. */
+.tk-branch-sum{font-family:var(--mono);font-size:10px;color:var(--grey);white-space:nowrap;}
+
+.tk-leaves{border-left:2px solid var(--line2);padding-left:12px;display:flex;flex-direction:column;gap:8px;}
+
+.tk-leaf{
+  border:1px solid var(--line);border-radius:10px;background:var(--surface2);
+  padding:11px 12px;transition:border-color .15s;
+}
+.tk-leaf.claimable{border-color:rgba(var(--green-rgb),.55);}
+.tk-leaf.mine{border-color:var(--green);background:rgba(var(--green-rgb),.06);}
+.tk-leaf.delivered{opacity:.62;}
+.tk-leaf-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+.tk-code{font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;color:var(--soft);}
+.tk-key{font-family:var(--mono);font-size:9px;color:var(--gold);letter-spacing:.1em;}
+.tk-leaf-task{font-family:var(--sans);font-size:13.5px;color:var(--cream);line-height:1.45;}
+.tk-leaf-meta{font-family:var(--mono);font-size:9.5px;color:var(--grey);margin-top:6px;line-height:1.7;}
+.tk-crit{color:var(--soft);}
+
+.tk-badge{
+  font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:.1em;
+  padding:3px 7px;border-radius:9px;border:1px solid var(--line2);color:var(--grey);
+}
+.tk-badge.ap{color:var(--grey);}
+.tk-badge.wr{color:var(--cream);}
+.tk-badge.ar{color:var(--orange);border-color:rgba(var(--orange-rgb),.45);}
+.tk-badge.op{color:var(--green);border-color:rgba(var(--green-rgb),.45);}
+.tk-badge.logs{color:var(--soft);}
+.tk-status{margin-left:auto;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);}
+.tk-status.inprogress{color:var(--orange);}
+.tk-status.delivered{color:var(--green);}
+
+.tk-actions{display:flex;gap:7px;margin-top:9px;flex-wrap:wrap;}
+.tk-btn{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;
+  padding:6px 13px;border-radius:13px;cursor:pointer;
+  background:transparent;border:1px solid var(--line2);color:var(--soft);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.tk-btn:hover{color:var(--green);border-color:var(--green);}
+.tk-btn.primary{color:var(--green);border-color:rgba(var(--green-rgb),.5);background:rgba(var(--green-rgb),.08);}
+.tk-blocked{font-family:var(--mono);font-size:9.5px;color:var(--grey);margin-top:8px;font-style:italic;}
+
+/* Work prompts — the packet, addressed to the tier you're actually in. */
+.tk-prompt{
+  margin:0 18px 8px;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
+  background:var(--surface);
+}
+.tk-prompt-top{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap;}
+.tk-prompt-id{font-family:var(--mono);font-size:10px;font-weight:700;color:var(--green);letter-spacing:.08em;}
+.tk-prompt-title{font-family:var(--sans);font-size:13px;font-weight:600;color:var(--cream);}
+.tk-prompt-cadence{margin-left:auto;font-family:var(--mono);font-size:9px;color:var(--grey);text-transform:uppercase;letter-spacing:.1em;}
+.tk-prompt-body{font-family:var(--sans);font-size:12.5px;color:var(--soft);line-height:1.6;margin-top:6px;}
+/* Reused on the Home calendar's day rows, so both lists read as one system. */
+.tk-prompt.today{border-color:var(--green);background:rgba(var(--green-rgb),.05);}
+.tk-prompt.past{opacity:.55;}
+.tk-prompt-item{display:flex;align-items:center;gap:7px;padding:2px 0;}
+.tk-prompt-item .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0;}
+/* An unratified rule is marked, never silently enforced. */
+.tk-proposed{
+  display:inline-block;margin-top:7px;font-family:var(--mono);font-size:9px;
+  letter-spacing:.08em;color:var(--orange);border:1px solid rgba(var(--orange-rgb),.4);
+  border-radius:8px;padding:2px 7px;
+}
+.tk-note{
+  margin:0 18px 14px;font-family:var(--sans);font-size:12px;color:var(--soft);
+  line-height:1.6;padding:11px 13px;border-left:2px solid var(--line2);background:var(--surface);
+}
 </style>
 </head>
 <body>
@@ -2337,6 +2430,7 @@ html.theme-light{
 
     <nav id="uni-tabs">
       <button class="uni-tab active" id="unav-home" onclick="showUniTab('home')">Home</button>
+      <button class="uni-tab" id="unav-tracker" onclick="showUniTab('tracker')">Tracker</button>
       <button class="uni-tab" id="unav-messages" onclick="showUniTab('messages')">Messages</button>
       <button class="uni-tab" id="unav-sidekick" onclick="showUniTab('sidekick')">Profile</button>
       <button class="uni-tab" id="unav-downloads" onclick="showUniTab('downloads')">Downloads</button>
@@ -2597,6 +2691,234 @@ html.theme-light{
 <div id="toast"></div>
 
 <script>
+const CANON = (() => {
+  // ---------- LOG 3 — units ----------
+  const GENESIS_DATE = new Date('2025-02-27T00:00:00Z');
+  const EXECUTION_CLASSES = { Mini: 1, Micro: 4, Minor: 8, Medium: 16, Major: 32 };
+  const MAX_LEAF_LOGS = EXECUTION_CLASSES.Major;
+
+  const bsizes = logs => logs / 4;
+  const cycleNumber = date =>
+    Math.floor(Math.floor((date - GENESIS_DATE) / 86400000) / 28) + 1;
+
+  // ---------- LOG 4 — tiers and money (whole cents throughout) ----------
+  const TIERS = ['apprentice', 'wrangler', 'architect', 'operator'];
+  const TIER_RATES = { apprentice: 39, wrangler: 65, architect: 85, operator: 100 };
+  const TIER_CODES = { apprentice: 'AP', wrangler: 'WR', architect: 'AR', operator: 'OP' };
+
+  const laborSumCents = leaves => leaves.reduce((sum, leaf) => {
+    const rateCents = leaf.rateCents ?? TIER_RATES[leaf.tier] * 100;
+    return sum + Math.round(leaf.logs * rateCents);
+  }, 0);
+
+  // Price rounds UP — the remainder always favours the Reserve.
+  const priceCents = laborSum => Math.ceil(laborSum / 0.75);
+  const reserveCents = (price, laborSum) => price - laborSum;
+
+  // Named buckets floor; Remainder absorbs the rounding, so the
+  // settlement audit reconciles exactly (Errata F2).
+  function distributionCents(grossCents, reserve) {
+    const completion = Math.floor(grossCents * 0.05);
+    const foundation = Math.floor(grossCents * 0.05);
+    const eo         = Math.floor(grossCents * 0.02);
+    const continuity = Math.floor(grossCents * 0.03);
+    return { completion, foundation, eo, continuity,
+             remainder: reserve - completion - foundation - eo - continuity };
+  }
+
+  // ---------- LOG 4 §6 — capacity, and the two-gate refusal ----------
+  const capacity   = (W, M) => W * M;
+  const slack      = (cap, E) => cap - E;
+  const slackRatio = (s, cap) => s / cap;
+  const refusalGate = ({ E, cap, criticalPathLOGs, W }) =>
+    E > cap || criticalPathLOGs > W;
+
+  // ---------- LOG 6 — integrity ----------
+  const toNumericString = body => body.replace(/[-\s]/g, '').split('')
+    .map(ch => /[0-9]/.test(ch) ? ch : String(ch.toUpperCase().charCodeAt(0) - 55)).join('');
+  function mod97(numStr) {
+    let rem = 0;
+    for (const d of numStr) rem = (rem * 10 + Number(d)) % 97;
+    return rem;
+  }
+  const computeCheckDigits = body => String(98 - mod97(toNumericString(body) + '00')).padStart(2, '0');
+  const makeId   = body => `${body}-${computeCheckDigits(body)}`;
+  function verifyId(fullId) {
+    const parts = String(fullId).split('-');
+    const check = parts.pop();
+    return mod97(toNumericString(parts.join('-')) + check) === 1;
+  }
+  function digitalRoot(n) {
+    n = Math.abs(Math.round(n));
+    if (n === 0) return 0;
+    const r = n % 9;
+    return r === 0 ? 9 : r;
+  }
+  // The exact sum is the real test; matching roots corroborate, never prove.
+  function auditSettlement(grossCents, partsCents) {
+    const sumCents = partsCents.reduce((a, b) => a + b, 0);
+    const exact = sumCents === grossCents;
+    const rootGross = digitalRoot(grossCents);
+    const rootParts = digitalRoot(partsCents.reduce((a, b) => a + digitalRoot(b), 0));
+    return { exact, grossCents, sumCents, differenceCents: sumCents - grossCents,
+             rootGross, rootParts, rootsMatch: rootGross === rootParts,
+             verdict: exact ? 'PASS — parts reconcile to gross exactly.'
+                            : 'FAIL — parts do not sum to gross.' };
+  }
+
+  // ---------- LOG 5 — standing ----------
+  // Bands come from Amendment III §11, which is PROPOSED. Shown, not enforced.
+  function standing({ delivery, timeliness, streakCycles, disputesPerSixCycles }) {
+    const streak = Math.min(streakCycles, 9) / 9;
+    const disputeRate = Math.min(disputesPerSixCycles, 5) / 5;
+    return 0.5 * delivery + 0.25 * timeliness + 0.15 * streak - 0.1 * disputeRate;
+  }
+  const STANDING_BANDS = [
+    { min: 0.765, name: 'Sovereign' }, { min: 0.585, name: 'Active' },
+    { min: 0.405, name: 'Probation' }, { min: -Infinity, name: 'Suspended' },
+  ];
+  const standingBand = (R, scored = Infinity) =>
+    scored < 8 ? 'Provisional' : STANDING_BANDS.find(b => R >= b.min).name;
+
+  // ---------- Amendments ----------
+  const AMENDMENTS = {
+    I:   { title: 'Government Contracting', status: 'proposed' },
+    II:  { title: 'The Hardship Ladder', status: 'proposed' },
+    III: { title: 'Delivery, Timeliness & Visual Identity', status: 'proposed' },
+    IV:  { title: 'The Name in Public', status: 'proposed' },
+    V:   { title: 'Sealing at Checkpoints', status: 'proposed' },
+  };
+  const isRatified = n => AMENDMENTS[n]?.status === 'ratified';
+
+  // ---------- LOG 9 §2 — the vocabulary wall ----------
+  // Relations are clients. Internal terms must not reach them.
+  const INTERNAL_VOCABULARY = ['LOG', 'LOGs', 'BSize', 'BSizes', 'Decomposition',
+    'Node', 'Standing', 'tier', 'leaf', 'leaves', 'branch', 'Genesis', 'Reserve'];
+  function leaksInternalVocabulary(text) {
+    const found = INTERNAL_VOCABULARY.filter(t => new RegExp(`\\b${t}\\b`, 'i').test(text));
+    return { clean: found.length === 0, found };
+  }
+
+  // ---------- The map (P-03 / P-04) ----------
+  const LEAF_STATUS = ['to-do', 'in progress', 'delivered'];
+  const branchLogs = leaves => leaves.reduce((n, l) => n + (l.logs || 0), 0);
+
+  function validateMap({ leaves }) {
+    const problems = [];
+    const ids = new Set(leaves.map(l => l.leaf_code));
+    for (const l of leaves) {
+      if (l.logs > MAX_LEAF_LOGS)
+        problems.push(`${l.leaf_code}: ${l.logs} LOGs exceeds Major (32) — split into a branch, LOG 3 §5`);
+      if (!l.done_criterion || !String(l.done_criterion).trim())
+        problems.push(`${l.leaf_code}: no done criterion — P-04 requires a binary one`);
+      if (!l.tier) problems.push(`${l.leaf_code}: no tier assigned`);
+      for (const dep of l.requires || [])
+        if (!ids.has(dep)) problems.push(`${l.leaf_code}: requires ${dep}, which is not on the map`);
+    }
+    return { ok: problems.length === 0, problems };
+  }
+
+  // ---------- The gate ----------
+  // "Everyone enters at the gate written on P-10. Clearing a checkpoint opens
+  //  eligibility for the next tier's leaves for the rest of this contract.
+  //  Eligibility is not availability."
+  function eligibleTiers(entryTier, checkpointsCleared = 0) {
+    const i = TIERS.indexOf(entryTier);
+    if (i < 0) throw new Error(`Unknown tier: ${entryTier}`);
+    return TIERS.slice(0, Math.min(i + checkpointsCleared, TIERS.length - 1) + 1);
+  }
+
+  function claimableLeaves({ leaves, member }) {
+    const allowed = new Set(eligibleTiers(member.entryTier, member.checkpointsCleared));
+    const delivered = new Set(leaves.filter(l => l.status === 'delivered').map(l => l.leaf_code));
+    return leaves.filter(l =>
+      l.status === 'to-do' && !l.claimed_by && allowed.has(l.tier) &&
+      (l.requires || []).every(dep => delivered.has(dep)));
+  }
+
+  // Why a given leaf is not claimable — so the UI can say so plainly.
+  function blockedReason(leaf, member, leaves) {
+    if (leaf.status === 'delivered') return 'Delivered.';
+    if (leaf.claimed_by) return 'Already claimed.';
+    const allowed = new Set(eligibleTiers(member.entryTier, member.checkpointsCleared));
+    if (!allowed.has(leaf.tier))
+      return `Your gate does not reach ${TIER_CODES[leaf.tier]} work yet.`;
+    const delivered = new Set(leaves.filter(l => l.status === 'delivered').map(l => l.leaf_code));
+    const waiting = (leaf.requires || []).filter(d => !delivered.has(d));
+    if (waiting.length) return `Waiting on ${waiting.join(', ')}.`;
+    return null;
+  }
+
+  // ---------- The form register ----------
+  const PHASES = { 0: 'Before anything', 1: 'Pre-cycle', 2: 'During', 3: 'Close' };
+  const FORMS = [
+    { id:'R-00', phase:0, title:'Read First — How This Packet Runs', owners:['everyone'], cadence:'once', prompt:'Read the packet through once before filling anything in.' },
+    { id:'P-00', phase:1, title:'Cycle Boot Sheet', owners:['executive_operator'], cadence:'per cycle', prompt:'Open the cycle: set its identity and walk the boot steps in order.' },
+    { id:'P-01', phase:1, title:'Intake Card', owners:['executive_operator'], cadence:'per contract', prompt:'Record what was asked for — scope before price, always.' },
+    { id:'P-02', phase:1, title:'Discovery Meeting Record', owners:['executive_operator'], cadence:'per contract', prompt:'Write up the discovery meeting against the six beats.' },
+    { id:'P-03', phase:1, title:'The Map — Genesis · Branches · Leaves', owners:['architect'], cadence:'per contract', prompt:'Decompose the goal: one Genesis, branches, leaves, one Outcome. No leaf over 32 LOGs.' },
+    { id:'P-04', phase:1, title:'Leaf Cards', owners:['architect'], cadence:'per leaf', prompt:'Give every leaf a card: tier, LOGs, requires, target date, and a binary done criterion.' },
+    { id:'P-05', phase:1, title:'Pricing Worksheet', owners:['architect'], cadence:'per contract', prompt:'Price the leaves in whole cents. Price rounds up, buckets round down, Reserve comes from subtraction.' },
+    { id:'P-06', phase:1, title:'Capacity & Refusal Gate', owners:['architect','operator'], cadence:'per contract', prompt:'Test both gates: work over Capacity, or critical path over one window. Either fires, the network does not quote.' },
+    { id:'P-07', phase:1, title:'Hardship Reading & Contract Rate', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Observe infrastructure, economic and safety conditions — look them up, never guess. Worst of three sets the band.' },
+    { id:'P-08', phase:1, title:'Checkpoints — Worksheet B', owners:['architect'], cadence:'per contract', proposed:'III', prompt:'Set the checkpoints. This is the Standing View — the only structure reputation is scored against.' },
+    { id:'P-09', phase:1, title:'Proposal Sign-off', owners:['executive_operator'], cadence:'per contract', prompt:'File the internal record of the signed proposal. The client copy carries no internal vocabulary.' },
+    { id:'P-10', phase:1, title:'Member Roster & ID Issuance', owners:['operator'], cadence:'per cycle', prompt:'Register who is in this cycle and issue their IDs with check digits.' },
+    { id:'P-10A', phase:1, title:'Payee Setup & Payment Election', owners:['executive_operator'], cadence:'per member', confidential:true, prompt:'Set up the payee and their rail. The only page holding full account numbers — file it locked.' },
+    { id:'P-10B.1', phase:1, title:'MAPPS 1 — Title & Status', owners:['executive_operator'], cadence:'per cycle', prompt:'Head the MAPPS: number it, set IFR/IFC, open the revision block.' },
+    { id:'P-10B.2', phase:1, title:'MAPPS 2 — Personnel Register', owners:['operator'], cadence:'per cycle', prompt:'Tag every person: tier, gate, zone, rail, masked payee. Never a full account number here.' },
+    { id:'P-10B.3', phase:1, title:'MAPPS 3 — Emergency Contacts', owners:['operator'], cadence:'per cycle', confidential:true, prompt:'Master copy only. Contacts only where the member agreed. No health details, ever.' },
+    { id:'P-10B.4', phase:1, title:'MAPPS 4 — Regional Schematic', owners:['operator','architect'], cadence:'per cycle', prompt:'Draw the region: every tag here must also be a row on Sheet 2, 5 or 6.' },
+    { id:'P-10B.5', phase:1, title:'MAPPS 5 — Utilities & Infrastructure', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Status every utility UP/INT/DN with a backup tag or NONE. A NONE on power or internet is a gap.' },
+    { id:'P-10B.6', phase:1, title:'MAPPS 6 — Tools & Equipment', owners:['architect'], cadence:'per cycle', prompt:'Register every tool a leaf cannot be done without. Needed but not on hand is a gap.' },
+    { id:'P-10B.7', phase:1, title:'MAPPS 7 — Region & Conditions', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Copy conditions from P-07 — do not re-score. On an island, lead time is often the critical path.' },
+    { id:'P-10B.8', phase:1, title:'MAPPS 8 — Settlement Readiness', owners:['executive_operator'], cadence:'per cycle', prompt:'Money available by rail against what will be paid out. Every payee-readiness box must read YES.' },
+    { id:'P-10B.9', phase:1, title:'MAPPS 9 — Gap List & Go / No-Go', owners:['executive_operator'], cadence:'per cycle', prompt:'Pull every NONE, DOWN, short balance and missing tool onto one list. Any open gap on the critical path is NO-GO.' },
+    { id:'P-11', phase:1, title:'Leaf Assignment Board', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Run the board: To-do, In progress, Complete — one balance per tier.' },
+    { id:'D-00', phase:2, title:'Cycle Clock — 28 Days', owners:['operator'], cadence:'per cycle', prompt:'Keep the 28-day clock.' },
+    { id:'D-01', phase:2, title:'Apprentice Daily Record', owners:['apprentice'], cadence:'per day', prompt:'Record today: what you worked on, and have your supervisor countersign it.' },
+    { id:'D-02', phase:2, title:'Wrangler Daily Record', owners:['wrangler'], cadence:'per day', prompt:'Record today against the leaves you hold.' },
+    { id:'D-03', phase:2, title:'Architect Daily Record', owners:['architect'], cadence:'per day', prompt:'Record today, and any change to the map or a leaf card.' },
+    { id:'D-04', phase:2, title:'Operator Daily Record', owners:['operator'], cadence:'per day', proposed:'III', prompt:'Record today, including anything only an Operator may decide.' },
+    { id:'D-05', phase:2, title:'Checkpoint Close Record', owners:['operator'], cadence:'per checkpoint', proposed:'III', prompt:'Close the checkpoint and score it. This is where Standing is actually earned.' },
+    { id:'D-06', phase:2, title:'Gate Opening Log', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Log each gate opened: who, which checkpoint cleared it, and cycle days left.' },
+    { id:'D-07', phase:2, title:'Dispute Record', owners:['operator'], cadence:'per dispute', prompt:'Record the dispute as it happened.' },
+    { id:'D-08', phase:2, title:'Weekly Review', owners:['operator'], cadence:'per cycle', prompt:'Walk the map and the board once a week.' },
+    { id:'C-01', phase:3, title:'Settlement Worksheet', owners:['operator'], cadence:'per cycle', proposed:'II', prompt:'Settle the cycle. Parts must sum to gross exactly — the digital root corroborates, never proves.' },
+    { id:'C-02', phase:3, title:'Standing Record', owners:['operator'], cadence:'per member', proposed:'III', prompt:'Record each member’s Standing. Under 8 scored checkpoints they stay Provisional.' },
+    { id:'C-03', phase:3, title:'Payment Record', owners:['executive_operator'], cadence:'per cycle', prompt:'Record every payment made this cycle.' },
+    { id:'C-03A', phase:3, title:'Bank Transfer Slip', owners:['executive_operator'], cadence:'per payment', prompt:'One slip per bank payment.' },
+    { id:'C-03B', phase:3, title:'Crypto Transfer Slip — 1099 only', owners:['executive_operator'], cadence:'per payment', prompt:'One slip per crypto payment. Never on a W-2 member. Obligations stay in US dollars.' },
+    { id:'C-04', phase:3, title:'The Four Stamps', owners:['executive_operator'], cadence:'per checkpoint', proposed:'V', prompt:'Stamp the checkpoint closed.' },
+    { id:'C-05', phase:3, title:'Ledger Entry', owners:['executive_operator'], cadence:'per cycle', prompt:'Write the cycle into the ledger. Permanent.' },
+    { id:'C-06', phase:3, title:'Retrospective', owners:['everyone'], cadence:'per cycle', prompt:'Say what actually happened this cycle.' },
+  ];
+
+  const formsForRole = (role, phase) => FORMS.filter(f =>
+    (f.owners.includes(role) || f.owners.includes('everyone')) &&
+    (phase == null || f.phase === phase));
+
+  const workPrompts = (role, { phase = null } = {}) =>
+    formsForRole(role, phase).map(f => ({
+      id: f.id, title: f.title, phase: PHASES[f.phase], cadence: f.cadence,
+      prompt: f.prompt, confidential: !!f.confidential,
+      restsOnProposedAmendment: f.proposed ? `Amendment ${f.proposed}` : null,
+    }));
+
+  return {
+    GENESIS_DATE, EXECUTION_CLASSES, MAX_LEAF_LOGS, bsizes, cycleNumber,
+    TIERS, TIER_RATES, TIER_CODES, laborSumCents, priceCents, reserveCents, distributionCents,
+    capacity, slack, slackRatio, refusalGate,
+    makeId, verifyId, computeCheckDigits, digitalRoot, auditSettlement,
+    standing, standingBand, AMENDMENTS, isRatified,
+    INTERNAL_VOCABULARY, leaksInternalVocabulary,
+    LEAF_STATUS, branchLogs, validateMap,
+    eligibleTiers, claimableLeaves, blockedReason,
+    PHASES, FORMS, formsForRole, workPrompts,
+  };
+})();
+</script>
+<script>
 // PWA — register the service worker so this installs like a real app
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
@@ -2616,57 +2938,46 @@ if (window.pdfjsLib) {
   pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 }
 
-// ── LUNAR CYCLES ──
-// Cycles 1-21 below are the network's actual recorded history — real dates,
-// never touched by the extension logic underneath. Their gaps are 29-30
-// days, not a flat 28 — this was built from real lunar dates, not from
-// canon_engine.js's own cycleNumber() formula (a flat 28 days from Genesis,
-// 2025-02-27). By cycle 21 the two are already ~30 days apart in absolute
-// date — a real divergence, flagged in SESSION_HANDOFF-style rather than
-// silently picked. Every claim/settlement/ledger entry to date was made
-// against THIS table, so auto-extension below continues its real pattern
-// instead of jumping to canon's formula and retroactively conflicting with
-// live history.
-const LUNAR_NM = [
-  {date:'2025-02-28',cycle:1},{date:'2025-03-29',cycle:2},{date:'2025-04-27',cycle:3},
-  {date:'2025-05-26',cycle:4},{date:'2025-06-25',cycle:5},{date:'2025-07-24',cycle:6},
-  {date:'2025-08-23',cycle:7},{date:'2025-09-21',cycle:8},{date:'2025-10-21',cycle:9},
-  {date:'2025-11-20',cycle:10},{date:'2025-12-19',cycle:11},{date:'2026-01-18',cycle:12},
-  {date:'2026-02-17',cycle:13},{date:'2026-03-18',cycle:14},{date:'2026-04-17',cycle:15},
-  {date:'2026-05-16',cycle:16},{date:'2026-06-14',cycle:17},{date:'2026-07-13',cycle:18},
-  {date:'2026-08-12',cycle:19},{date:'2026-09-10',cycle:20},{date:'2026-10-10',cycle:21},
-];
+// ── CYCLES ──
+// Per Amendment VI (proposed — see supabase/migrations/ or the amendment
+// doc alongside this file): cycles are a flat 28 days from Genesis, exactly
+// canon_engine.js's own cycleNumber() formula (23/23 self-tested). This
+// replaces a hand-maintained table of real lunar new-moon dates (29-30 day
+// gaps) that had drifted ~30 days from this formula by cycle 21 — a real
+// divergence, not a cosmetic one, flagged to the Executive Operator before
+// this change and made on direct instruction. A closed-form formula also
+// means cycles never again stop appearing because a row wasn't added.
+//
+// Historical note: cycle numbers already stamped on claims, settlements and
+// ledger entries are untouched by this — they're stored as plain integers,
+// never as dates. What changes is only which real calendar dates "Cycle N"
+// is defined to span, going forward.
+const GENESIS_DATE = new Date('2025-02-27T00:00:00Z');
+const CYCLE_DAYS = 28;
 
-// Auto-extends LUNAR_NM forward from its last real entry using the true
-// mean synodic month (29.530589 days), so new cycles keep appearing on
-// their own instead of needing a hand-added row every ~29 days. Runs once
-// at load, covers a few years ahead — cheap, and re-extends itself on every
-// future load so it never actually runs out.
-(function extendLunarCycles(yearsAhead) {
-  const SYNODIC_DAYS = 29.530588861;
-  const last = LUNAR_NM[LUNAR_NM.length - 1];
-  let t = new Date(last.date + 'T00:00:00Z').getTime();
-  let cycle = last.cycle;
-  const horizon = t + (yearsAhead || 3) * 365.25 * 86400000;
-  while (t < horizon) {
-    t += SYNODIC_DAYS * 86400000;
-    cycle += 1;
-    const dayMs = Math.round(t / 86400000) * 86400000;
-    LUNAR_NM.push({ date: new Date(dayMs).toISOString().slice(0, 10), cycle });
-  }
-})(3);
+function cycleStartDate(cycleNum) {
+  return new Date(GENESIS_DATE.getTime() + (cycleNum - 1) * CYCLE_DAYS * 86400000);
+}
+function cycleNumberForDate(date) {
+  const days = Math.floor((date - GENESIS_DATE) / 86400000);
+  return Math.max(1, Math.floor(days / CYCLE_DAYS) + 1);
+}
+// Enumerates cycle numbers from 1 through a few cycles past "now", most
+// recent first — what the Downloads list needs. No table to run out of.
+function listCyclesSoFar(bufferAhead = 2) {
+  const total = cycleNumberForDate(new Date()) + bufferAhead;
+  const arr = [];
+  for (let n = total; n >= 1; n--) arr.push({ cycle: n });
+  return arr;
+}
 
 function getActiveCycle(now = new Date()) {
-  for (let i = LUNAR_NM.length - 1; i >= 0; i--) {
-    const s = new Date(LUNAR_NM[i].date + 'T00:00:00');
-    if (s <= now) {
-      const e = new Date(s); e.setDate(e.getDate() + 28);
-      const day = Math.floor((now - s) / 86400000) + 1;
-      const left = 28 - day; // days remaining after today — Day 28 shows 0d left (closes today)
-      return { num: LUNAR_NM[i].cycle, day, left, end: e };
-    }
-  }
-  return { num: 1, day: 1, left: 28, end: new Date() };
+  const numVal = cycleNumberForDate(now);
+  const s = cycleStartDate(numVal);
+  const e = new Date(s); e.setDate(e.getDate() + CYCLE_DAYS);
+  const day = Math.floor((now - s) / 86400000) + 1;
+  const left = CYCLE_DAYS - day; // days remaining after today — Day 28 shows 0d left (closes today)
+  return { num: numVal, day, left, end: e };
 }
 
 // A "block" is a fixed 4-hour slot of the 28-day cycle (168 of them) — that's
@@ -2709,22 +3020,16 @@ function readPickedBlockDate(prefix) {
 }
 
 function getCycleAndBlock(date) {
-  for (let i = LUNAR_NM.length - 1; i >= 0; i--) {
-    const s = new Date(LUNAR_NM[i].date + 'T00:00:00');
-    if (s <= date) {
-      const msPerBlock = 4 * 60 * 60 * 1000;
-      const block = Math.floor((date - s) / msPerBlock) + 1;
-      return { cycle: LUNAR_NM[i].cycle, block: Math.max(1, Math.min(168, block)) };
-    }
-  }
-  return { cycle: 1, block: 1 };
+  const cycle = cycleNumberForDate(date);
+  const s = cycleStartDate(cycle);
+  const msPerBlock = 4 * 60 * 60 * 1000;
+  const block = Math.floor((date - s) / msPerBlock) + 1;
+  return { cycle, block: Math.max(1, Math.min(168, block)) };
 }
 
 function getCycleDateRange(cycleNum) {
-  const entry = LUNAR_NM.find(c => c.cycle === cycleNum);
-  if (!entry) return null;
-  const start = new Date(entry.date + 'T00:00:00');
-  const end = new Date(start); end.setDate(end.getDate() + 28);
+  const start = cycleStartDate(cycleNum);
+  const end = new Date(start); end.setDate(end.getDate() + CYCLE_DAYS);
   return { start, end };
 }
 
@@ -5821,7 +6126,7 @@ function renderDownloadsTab(body) {
   }
   const current = getActiveCycle();
   // Most recent first — reading top-to-bottom like a bank's statement list.
-  const cycles = [...LUNAR_NM].reverse();
+  const cycles = listCyclesSoFar(2);
 
   body.innerHTML = `
     <div class="sig-title-row">
@@ -7476,7 +7781,7 @@ function showUniTab(tab) {
   // surface and behind Profile's Market button. Redirect stragglers Home.
   if (tab === 'signal') tab = 'home';
   uniTab = tab;
-  ['home', 'messages', 'sidekick', 'downloads'].forEach(t => {
+  ['home', 'tracker', 'messages', 'sidekick', 'downloads'].forEach(t => {
     const btn = document.getElementById('unav-' + t);
     btn?.classList.toggle('active', t === tab);
     const icon = btn?.querySelector('.nav-icon');
@@ -7486,6 +7791,7 @@ function showUniTab(tab) {
   if (!body) return;
   if (tab !== 'messages') clearInterval(dmPollTimer);
   if (tab === 'home')      renderHomeHud(body);
+  if (tab === 'tracker')   renderTracker(body);
   if (tab === 'messages')  renderUniMessages(body);
   if (tab === 'sidekick')  renderSidekick(body);
   if (tab === 'downloads') renderDownloadsTab(body);
@@ -7562,7 +7868,7 @@ async function renderHomeHud(body) {
           <button class="act-btn-sm" style="border-color:var(--orange);color:var(--orange)" onclick="openClaimBlockModal()">+ Claim Time</button>
         </div>
       </div>
-      <div class="hud-cal" id="hud-cal"></div>
+      <div id="hud-cal"></div>
       <div class="hud-lbl" style="padding-top:18px">Coming Up</div>
       <div id="hud-upcoming"><div class="empty" style="padding:10px 18px"><div class="empty-msg">Loading…</div></div></div>
     </div>`;
@@ -7736,16 +8042,30 @@ async function loadHudCalendar() {
     push(d, { kind: 'claim', at, title: c.description, who: c.peer_name, status: c.status });
   });
 
+  // One row per day, same card the Tracker uses for its forms — rows and
+  // statements now read as one visual system instead of three different
+  // ones. Empty days stay short (just "Nothing scheduled"); days with
+  // items grow to fit, same as a Tracker form with a longer prompt body.
   calEl.innerHTML = Array.from({ length: 28 }, (_, i) => {
     const day = i + 1;
-    const items = dayItems[day] || [];
+    const items = (dayItems[day] || []).sort((a, b) => a.at - b.at);
     const isToday = day === cycle.day;
     const isPast = day < cycle.day;
+    const dayDate = new Date(range.start.getTime() + (day - 1) * 86400000);
     return `
-      <div class="hud-cal-day ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}">
-        <div class="hud-cal-num">${day}</div>
-        <div class="hud-cal-dots">
-          ${items.slice(0, 3).map(it => `<span class="hud-cal-dot" style="background:${it.kind === 'event' ? 'var(--orange)' : 'var(--green)'}"></span>`).join('')}
+      <div class="tk-prompt ${isToday ? 'today' : ''} ${isPast ? 'past' : ''}">
+        <div class="tk-prompt-top">
+          <span class="tk-prompt-id">DAY ${day}</span>
+          <span class="tk-prompt-title">${dayDate.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}</span>
+          ${isToday ? '<span class="tk-prompt-cadence" style="color:var(--green)">TODAY</span>'
+            : items.length ? `<span class="tk-prompt-cadence">${items.length} ITEM${items.length > 1 ? 'S' : ''}</span>` : ''}
+        </div>
+        <div class="tk-prompt-body">
+          ${items.length ? items.map(it => `
+            <div class="tk-prompt-item">
+              <span class="dot" style="background:${it.kind === 'event' ? 'var(--orange)' : 'var(--green)'}"></span>
+              ${esc(it.title || '—')} · ${it.at.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}${it.who ? ' · ' + esc(it.who) : ''}
+            </div>`).join('') : '<span style="opacity:.55">Nothing scheduled.</span>'}
         </div>
       </div>`;
   }).join('');
@@ -10179,6 +10499,301 @@ window.addEventListener('load', async () => {
   }
   // No session — gate stays up, starting at the splash screen
 });
+// TRACKER — P-03 The Map and P-04 Leaf Cards, on screen.
+//
+// Two halves:
+//   1. Your work — the packet addressed to the tier you are in
+//   2. The Map   — Genesis, branches, leaves, Outcome
+//
+// Claiming is gated exactly the way the packet gates it: your gate must
+// reach the leaf's tier, nobody else may hold it, and everything it
+// requires must already be delivered. The same three tests run server
+// side in claim_leaf() so a client can't talk its way past them.
+// ══════════════════════════════════════════════════════════════
+
+let trackerState = { map: null, leaves: [], branches: [], source: null, mapId: null };
+
+// A member's canon role. The gate is the canon answer; total_logs is a
+// fallback so the surface still works before the migration lands, and it
+// says so on screen rather than passing itself off as the gate.
+function myCanonRole() {
+  if (operator?.is_genesis) return 'executive_operator';
+  const gate = trackerState.gate;
+  if (gate?.entry_tier) {
+    const reached = CANON.eligibleTiers(gate.entry_tier, gate.checkpoints_cleared || 0);
+    return reached[reached.length - 1];
+  }
+  return (typeof tier === 'function' ? tier(operator?.total_logs).toLowerCase() : 'apprentice');
+}
+
+function myGate() {
+  const g = trackerState.gate;
+  return {
+    entryTier: g?.entry_tier || (typeof tier === 'function' ? tier(operator?.total_logs).toLowerCase() : 'apprentice'),
+    checkpointsCleared: g?.checkpoints_cleared || 0,
+    derived: !g,   // true when we fell back to the LOG ladder
+  };
+}
+
+async function renderTracker(body) {
+  body.innerHTML = '<div class="empty" style="padding:24px 18px"><div class="empty-msg">Loading the map…</div></div>';
+  await loadWorkMap();
+  renderTrackerBody(body);
+}
+
+// Reads the map through get_work_map. If the migration hasn't been run the
+// RPC won't exist — that's not an error state worth hiding, so the surface
+// says so plainly and shows the canon worked example instead, marked as such.
+async function loadWorkMap() {
+  trackerState = { map: null, leaves: [], branches: [], source: null, mapId: null, gate: null };
+  try {
+    const { data: maps, error: mErr } = await sb.from('work_maps').select('id,goal,genesis_task,outcome_task,date_mapped').order('created_at', { ascending: false }).limit(1);
+    if (mErr) throw mErr;
+    if (!maps || !maps.length) { trackerState.source = 'empty'; return; }
+
+    const mapId = maps[0].id;
+    const { data, error } = await sb.rpc('get_work_map', { p_map: mapId });
+    if (error) throw error;
+
+    trackerState.map      = data.map;
+    trackerState.branches = data.branches || [];
+    trackerState.leaves   = data.leaves || [];
+    trackerState.mapId    = mapId;
+    trackerState.source   = 'live';
+
+    if (operator) {
+      const { data: g } = await sb.from('member_gates')
+        .select('entry_tier,checkpoints_cleared')
+        .eq('member_id', operator.id).eq('map_id', mapId).maybeSingle();
+      trackerState.gate = g || null;
+    }
+  } catch (e) {
+    console.warn('work map unavailable:', e.message || e);
+    trackerState.source = 'nodb';
+    Object.assign(trackerState, sampleMap());
+  }
+}
+
+// The sanitation contract from LOG 4 §3 — the packet's own worked example.
+// Its six leaves total 33 LOGs and price to $3,360, which is exactly what
+// the canon engine's self-test asserts. Shown so the surface is legible
+// before any real map exists; never written anywhere.
+function sampleMap() {
+  const leaves = [
+    { leaf_code:'1A', branch:'1', task:'Survey the route and confirm access',     tier:'architect',  logs:4, requires:[],             done_criterion:'Route walked and access confirmed in writing', status:'delivered', is_key:true },
+    { leaf_code:'1B', branch:'1', task:'Schedule crews against the route',        tier:'wrangler',   logs:6, requires:['1A'],         done_criterion:'Every stop has a named crew and a date',       status:'to-do',     is_key:false },
+    { leaf_code:'2A', branch:'2', task:'Run the collection rounds',               tier:'wrangler',   logs:8, requires:['1B'],         done_criterion:'All scheduled stops serviced',                 status:'to-do',     is_key:false },
+    { leaf_code:'2B', branch:'2', task:'Verify disposal and weigh-in records',    tier:'architect',  logs:6, requires:['2A'],         done_criterion:'Weigh-in tickets reconcile to the rounds',     status:'to-do',     is_key:true },
+    { leaf_code:'3A', branch:'3', task:'Close the contract with the client',      tier:'operator',   logs:5, requires:['2B'],         done_criterion:'Client sign-off received',                     status:'to-do',     is_key:false },
+    { leaf_code:'3B', branch:'3', task:'File the route notes for the next cycle', tier:'wrangler',   logs:4, requires:['2B'],         done_criterion:'Notes filed against the route record',         status:'to-do',     is_key:false },
+  ];
+  return {
+    map: { goal:'Sanitation contract (worked example)', genesis_task:'Contract awarded', outcome_task:'Contract closed and filed', date_mapped:null },
+    branches: [
+      { code:'1', title:'Survey & schedule', total_logs: 10, leaf_count:2 },
+      { code:'2', title:'Collection & disposal', total_logs: 14, leaf_count:2 },
+      { code:'3', title:'Close out', total_logs: 9, leaf_count:2 },
+    ],
+    leaves, mapId: null, source:'nodb', gate: null,
+  };
+}
+
+function renderTrackerBody(bodyEl) {
+  const body = bodyEl || document.getElementById('uni-body');
+  if (!body) return;
+
+  if (trackerState.source === 'empty') {
+    body.innerHTML = `
+      <div class="sig-title-row"><div class="sig-title">Tracker</div></div>
+      <div class="empty" style="padding:20px 18px">
+        <div class="empty-line"></div>
+        <div class="empty-label">No map yet</div>
+        <div class="empty-msg">Nothing has been decomposed into a map. An Architect fills P-03 first — one Genesis, branches, leaves, one Outcome.</div>
+      </div>
+      ${renderWorkPrompts()}`;
+    return;
+  }
+
+  const gate   = myGate();
+  const leaves = trackerState.leaves;
+  const totalLogs  = leaves.reduce((n, l) => n + (l.logs || 0), 0);
+  const delivered  = leaves.filter(l => l.status === 'delivered').length;
+  const claimable  = CANON.claimableLeaves({ leaves, member: gate });
+  const check      = CANON.validateMap({ leaves });
+
+  const srcNote = trackerState.source === 'nodb'
+    ? `<div class="tk-note">Showing the packet's own worked example — the sanitation contract from LOG 4 §3. The map tables aren't in the database yet, so nothing here is saved. Run <code>supabase/migrations/0001_work_map.sql</code> to store real maps.</div>`
+    : '';
+
+  const gateNote = gate.derived
+    ? `<div class="tk-note">Your gate isn't recorded for this contract, so this is falling back to the LOG ladder in the old app (${esc(gate.entryTier)}). Canon sets the gate on P-10 and opens it by clearing checkpoints — those two don't agree, so treat this as provisional.</div>`
+    : '';
+
+  const problems = check.ok ? '' : `
+    <div class="tk-note" style="border-left-color:var(--orange)">
+      <strong>The map doesn't pass P-03/P-04 yet:</strong><br/>${check.problems.map(esc).join('<br/>')}
+    </div>`;
+
+  body.innerHTML = `
+    <div class="tk-head">
+      <div class="tk-goal">${esc(trackerState.map?.goal || 'The Map')}</div>
+      <div class="tk-sub">${CANON.TIER_CODES[gate.entryTier] || ''} · gate reaches ${esc(CANON.eligibleTiers(gate.entryTier, gate.checkpointsCleared).slice(-1)[0])}</div>
+    </div>
+    ${srcNote}${gateNote}${problems}
+    <div class="tk-totals">
+      <div class="tk-stat"><div class="tk-stat-v">${totalLogs}</div><div class="tk-stat-l">Total LOGs</div></div>
+      <div class="tk-stat"><div class="tk-stat-v">${CANON.bsizes(totalLogs)}</div><div class="tk-stat-l">BSizes</div></div>
+      <div class="tk-stat"><div class="tk-stat-v">${leaves.length}</div><div class="tk-stat-l">Leaves</div></div>
+      <div class="tk-stat"><div class="tk-stat-v">${delivered}</div><div class="tk-stat-l">Delivered</div></div>
+      <div class="tk-stat"><div class="tk-stat-v">${claimable.length}</div><div class="tk-stat-l">You can claim</div></div>
+    </div>
+
+    <div class="tk-node genesis">
+      <div class="tk-node-kind">◆ Genesis — nothing comes before it</div>
+      <div class="tk-node-task">${esc(trackerState.map?.genesis_task || '—')}</div>
+    </div>
+
+    ${trackerState.branches.map(b => renderBranch(b, gate)).join('')}
+
+    <div class="tk-node outcome">
+      <div class="tk-node-kind">● Outcome — always last</div>
+      <div class="tk-node-task">${esc(trackerState.map?.outcome_task || '—')}</div>
+    </div>
+
+    ${renderWorkPrompts()}`;
+}
+
+function renderBranch(branch, gate) {
+  const leaves = trackerState.leaves.filter(l =>
+    String(l.branch ?? l.branch_code ?? '') === String(branch.code));
+  if (!leaves.length) return '';
+  // Branch LOGs are the sum of their leaves and are never priced (LOG 3).
+  const sum = CANON.branchLogs(leaves);
+  return `
+    <div class="tk-branch">
+      <div class="tk-branch-head">
+        <div class="tk-branch-name">Branch ${esc(branch.code)} · ${esc(branch.title || '')}</div>
+        <div class="tk-branch-sum">Σ ${sum} LOGs · not priced</div>
+      </div>
+      <div class="tk-leaves">${leaves.map(l => renderLeaf(l, gate)).join('')}</div>
+    </div>`;
+}
+
+function renderLeaf(leaf, gate) {
+  const mine      = operator && leaf.claimed_by === operator.id;
+  const blocked   = CANON.blockedReason(leaf, gate, trackerState.leaves);
+  const claimable = !blocked;
+  const code      = CANON.TIER_CODES[leaf.tier] || '??';
+  const rate      = leaf.scoped_rate_cents
+    ? `$${(leaf.scoped_rate_cents / 100).toFixed(0)}/LOG scoped`
+    : `$${CANON.TIER_RATES[leaf.tier] ?? '—'}/LOG`;
+
+  const statusCls = leaf.status === 'delivered' ? 'delivered'
+                  : leaf.status === 'in progress' ? 'inprogress' : '';
+
+  let actions = '';
+  if (trackerState.source === 'live' && operator) {
+    if (mine && leaf.status === 'in progress') {
+      actions = `<div class="tk-actions">
+        <button class="tk-btn primary" onclick="deliverLeafUI('${esc(leaf.id)}')">Mark delivered</button>
+        <button class="tk-btn" onclick="releaseLeafUI('${esc(leaf.id)}')">Release</button>
+      </div>`;
+    } else if (claimable && leaf.status === 'to-do') {
+      actions = `<div class="tk-actions">
+        <button class="tk-btn primary" onclick="claimLeafUI('${esc(leaf.id)}')">Claim</button>
+      </div>`;
+    }
+  }
+
+  return `
+    <div class="tk-leaf ${mine ? 'mine' : claimable ? 'claimable' : ''} ${leaf.status === 'delivered' ? 'delivered' : ''}">
+      <div class="tk-leaf-top">
+        <span class="tk-code">${esc(leaf.leaf_code)}</span>
+        ${leaf.is_key ? '<span class="tk-key">▲ KEY</span>' : ''}
+        <span class="tk-badge ${code.toLowerCase()}">${code}</span>
+        <span class="tk-badge logs">${leaf.logs} LOG${leaf.logs === 1 ? '' : 's'}</span>
+        <span class="tk-status ${statusCls}">${esc(leaf.status)}</span>
+      </div>
+      <div class="tk-leaf-task">${esc(leaf.task)}</div>
+      <div class="tk-leaf-meta">
+        ${rate}${(leaf.requires || []).length ? ' · requires ' + (leaf.requires || []).map(esc).join(', ') : ''}${leaf.target_date ? ' · target ' + esc(leaf.target_date) : ''}<br/>
+        <span class="tk-crit">Done when: ${esc(leaf.done_criterion || '—')}</span>
+      </div>
+      ${actions}
+      ${blocked && leaf.status !== 'delivered' ? `<div class="tk-blocked">${esc(blocked)}</div>` : ''}
+    </div>`;
+}
+
+// ---- the packet, addressed to your tier ----
+function renderWorkPrompts() {
+  const role = myCanonRole();
+  const prompts = CANON.workPrompts(role);
+  const label = role.replace('_', ' ');
+  return `
+    <div class="sig-title-row" style="margin-top:22px">
+      <div class="sig-title">Your work</div>
+    </div>
+    <div class="tk-note">The packet, addressed to a ${esc(label)} — ${prompts.length} form${prompts.length === 1 ? '' : 's'}. Anything resting on an unratified amendment is marked; none of the five have been ratified.</div>
+    ${prompts.map(p => `
+      <div class="tk-prompt">
+        <div class="tk-prompt-top">
+          <span class="tk-prompt-id">${esc(p.id)}</span>
+          <span class="tk-prompt-title">${esc(p.title)}</span>
+          <span class="tk-prompt-cadence">${esc(p.cadence)}</span>
+        </div>
+        <div class="tk-prompt-body">${esc(p.prompt)}</div>
+        ${p.confidential ? '<span class="tk-proposed" style="color:var(--red);border-color:rgba(var(--red-rgb),.4)">Confidential — file locked</span>' : ''}
+        ${p.restsOnProposedAmendment ? `<span class="tk-proposed">Rests on ${esc(p.restsOnProposedAmendment)} · proposed, not ratified</span>` : ''}
+      </div>`).join('')}`;
+}
+
+// ---- claim / release / deliver ----
+async function claimLeafUI(leafId) {
+  if (!operator) return;
+  try {
+    const { error } = await sb.rpc('claim_leaf', { p_leaf: leafId, p_member: operator.id });
+    if (error) throw error;
+    toast('Claimed.');
+    await loadWorkMap();
+    renderTrackerBody();
+  } catch (e) {
+    console.error(e);
+    toast(`Could not claim — ${e.message || 'unknown error'}`);
+  }
+}
+
+async function releaseLeafUI(leafId) {
+  if (!operator) return;
+  const ok = await osConfirm('Release this leaf back to the board?');
+  if (!ok) return;
+  try {
+    const { error } = await sb.rpc('release_leaf', { p_leaf: leafId, p_member: operator.id });
+    if (error) throw error;
+    toast('Released.');
+    await loadWorkMap();
+    renderTrackerBody();
+  } catch (e) {
+    console.error(e);
+    toast(`Could not release — ${e.message || 'unknown error'}`);
+  }
+}
+
+async function deliverLeafUI(leafId) {
+  if (!operator) return;
+  const leaf = trackerState.leaves.find(l => l.id === leafId);
+  const ok = await osConfirm(`Done criterion — "${leaf?.done_criterion || ''}". Is that met?`);
+  if (!ok) return;
+  try {
+    const { error } = await sb.rpc('deliver_leaf', { p_leaf: leafId, p_member: operator.id });
+    if (error) throw error;
+    toast('Delivered.');
+    await loadWorkMap();
+    renderTrackerBody();
+  } catch (e) {
+    console.error(e);
+    toast(`Could not deliver — ${e.message || 'unknown error'}`);
+  }
+}
 </script>
 </body>
 </html>

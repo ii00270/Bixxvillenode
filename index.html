@@ -3866,7 +3866,13 @@ function logClaimedBlock(claimId, cycle, block, description) {
 }
 
 async function deleteDashClaim(id) {
+  const claim = (window._myClaims || []).find(c => c.id === id);
   await sb.rpc('delete_claim', { p_id: id, p_operator_id: operator.id });
+  if (claim) fireAndForget(sb.rpc('emit_event', {
+    p_type: 'LOG', p_title: `${operator?.peer_name || 'An operator'} released a claimed block`,
+    p_payload: `Cycle ${claim.cycle_number}, Block ${claim.block_number} — ${claim.description || ''}`,
+    p_source_entity: 'Claim', p_source_id: id, p_recipients: null, p_critical: false,
+  }));
   window._myClaims = (window._myClaims || []).filter(c => c.id !== id);
   const list = document.getElementById('dash-claims-list');
   if (list) list.innerHTML = renderDashClaims();
@@ -4427,6 +4433,11 @@ function openIntake(id) {
 async function acceptIntake(id) {
   const { error } = await sb.rpc('update_submission_status', { p_id: id, p_status: 'open' });
   if (error) { toast('Could not accept intake.'); console.error(error); return; }
+  fireAndForget(sb.rpc('emit_event', {
+    p_type: 'SYSTEM', p_title: 'An intake was accepted — project opened',
+    p_payload: `Accepted by ${operator?.peer_name || 'an operator'}.`,
+    p_source_entity: 'Project', p_source_id: id, p_recipients: null, p_critical: false,
+  }));
   closeOverlay();
   toast('Intake accepted — project is now open.');
   await loadAll();
@@ -4439,6 +4450,11 @@ async function declineIntake(id) {
   if (!ok) return;
   const { error } = await sb.rpc('update_submission_status', { p_id: id, p_status: 'declined' });
   if (error) { toast('Could not decline intake.'); console.error(error); return; }
+  fireAndForget(sb.rpc('emit_event', {
+    p_type: 'SYSTEM', p_title: 'An intake was declined',
+    p_payload: `Declined by ${operator?.peer_name || 'an operator'}.`,
+    p_source_entity: 'Project', p_source_id: id, p_recipients: null, p_critical: false,
+  }));
   closeOverlay();
   toast('Intake declined.');
   await loadAll();
@@ -5192,6 +5208,13 @@ async function approveDAG(id) {
     const { error } = await sb.rpc('approve_project_dag', { p_id: id });
     if (error) throw error;
 
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${projRow?.title || 'A project'}'s decomposition was approved`,
+      p_payload: `Approved by ${operator?.peer_name || 'an operator'}.`,
+      p_source_entity: 'Project', p_source_id: id,
+      p_recipients: operator?.peer_name ? [operator.peer_name] : null, p_critical: false,
+    }));
+
     // Save this approved DAG as a wisdom key for this market
     if (projRow?.dag && projRow?.market) {
       await sb.rpc('add_library_entry', {
@@ -5929,7 +5952,18 @@ async function generateCycleAudit(cycleNum) {
     if (c.status === 'fulfilled') return;
     if (c.status === 'missed' || isBlockPast(range.start, c.block_number)) {
       missed.push(c);
-      if (c.status !== 'missed') fireAndForget(sb.rpc('mark_claim_missed', { p_id: c.id }));
+      if (c.status !== 'missed') {
+        fireAndForget(sb.rpc('mark_claim_missed', { p_id: c.id }));
+        // System-detected, not a person's action — a claimed block whose
+        // window passed with nothing logged against it. Still audit-worthy:
+        // it's the gap between a commitment and the work actually happening.
+        fireAndForget(sb.rpc('emit_event', {
+          p_type: 'LOG', p_title: `A claimed block went unfulfilled — ${c.peer_name || 'member'}`,
+          p_payload: `Cycle ${c.cycle_number}, Block ${c.block_number} — ${c.description || ''}. Window closed with no log against it.`,
+          p_source_entity: 'Claim', p_source_id: c.id,
+          p_recipients: c.peer_name ? [c.peer_name] : null, p_critical: false,
+        }));
+      }
     } else {
       stillOpen.push(c);
     }
@@ -6420,14 +6454,23 @@ function buildScopeRow(s, idx, projectCycle) {
 }
 
 // Standing change — Genesis only (gated in the UI above; also worth
-// re-confirming here since this is a consequential, real action).
-async function setMemberStanding(memberId, standing) {
+// re-confirming here since this is a consequential, real action). LOG 5
+// governs Standing directly, so who changed it and to what is exactly the
+// kind of thing a governance audit trail exists for — critical:true means
+// it won't get silently missed in a notification list.
+async function setMemberStanding(memberId, standing, memberName) {
   if (!operator?.is_genesis) return;
   const ok = await osConfirm(`Set this member's standing to "${standing}"?`);
   if (!ok) return;
   try {
     const { error } = await sb.rpc('set_member_standing', { p_operator_id: memberId, p_standing: standing });
     if (error) throw error;
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${memberName || 'A member'}'s standing set to ${standing}`,
+      p_payload: `Changed by ${operator?.peer_name || 'Genesis'}.`,
+      p_source_entity: 'Standing', p_source_id: memberId,
+      p_recipients: memberName ? [memberName] : null, p_critical: true,
+    }));
     toast('Standing updated.');
     openMemberRecord(memberId);
   } catch(e) {
@@ -6572,10 +6615,10 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
     <div style="padding:14px 18px;border-bottom:1px solid var(--line)">
       <div class="prof-field-lbl" style="margin-bottom:8px">Standing — currently ${esc(op.standing || 'active')}</div>
       <div style="display:flex;gap:6px;flex-wrap:wrap">
-        <button class="calc-mode-btn ${(op.standing||'active')==='sovereign'?'active':''}" onclick="setMemberStanding('${op.id}','sovereign')">Sovereign</button>
-        <button class="calc-mode-btn ${(op.standing||'active')==='active'?'active':''}" onclick="setMemberStanding('${op.id}','active')">Active</button>
-        <button class="calc-mode-btn ${op.standing==='probation'?'active':''}" style="${op.standing==='probation'?'border-color:var(--orange);color:var(--orange)':''}" onclick="setMemberStanding('${op.id}','probation')">Probation</button>
-        <button class="calc-mode-btn ${op.standing==='suspended'?'active':''}" style="${op.standing==='suspended'?'border-color:var(--red);color:var(--red)':''}" onclick="setMemberStanding('${op.id}','suspended')">Suspend</button>
+        <button class="calc-mode-btn ${(op.standing||'active')==='sovereign'?'active':''}" onclick="setMemberStanding('${op.id}','sovereign','${esc(op.peer_name).replace(/'/g,"\\'")}')">Sovereign</button>
+        <button class="calc-mode-btn ${(op.standing||'active')==='active'?'active':''}" onclick="setMemberStanding('${op.id}','active','${esc(op.peer_name).replace(/'/g,"\\'")}')">Active</button>
+        <button class="calc-mode-btn ${op.standing==='probation'?'active':''}" style="${op.standing==='probation'?'border-color:var(--orange);color:var(--orange)':''}" onclick="setMemberStanding('${op.id}','probation','${esc(op.peer_name).replace(/'/g,"\\'")}')">Probation</button>
+        <button class="calc-mode-btn ${op.standing==='suspended'?'active':''}" style="${op.standing==='suspended'?'border-color:var(--red);color:var(--red)':''}" onclick="setMemberStanding('${op.id}','suspended','${esc(op.peer_name).replace(/'/g,"\\'")}')">Suspend</button>
       </div>
     </div>` : ''}
 
@@ -9659,6 +9702,15 @@ async function genesisCreateInvite() {
       </div>`;
     document.getElementById('gc-invite-name').value = '';
     document.getElementById('gc-invite-email').value = '';
+
+    // The PIN never goes in the event, same rule as a PIN reset — only that
+    // the invite happened, who issued it, and at what tier.
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'MEMBER_JOINED', p_title: `${name} was invited at ${tier} tier`,
+      p_payload: `Issued by ${operator?.peer_name || 'Genesis'}.`,
+      p_source_entity: 'Invite', p_source_id: row.id || null,
+      p_recipients: null, p_critical: false,
+    }));
   } catch(e) {
     console.error(e);
     toast(e.message || 'Could not create the invite.');
@@ -9710,6 +9762,15 @@ async function genesisPromptResetPin(requestId) {
   try {
     const { data: newPin, error } = await sb.rpc('reset_operator_pin', { p_operator_id: match.id });
     if (error) throw error;
+    // The PIN itself never goes in the event — only that a reset happened,
+    // by whom, and for whom. A security action with no audit trail at all
+    // was the actual gap; the record must not also leak the new secret.
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${match.peer_name}'s login PIN was reset`,
+      p_payload: `Reset by ${operator?.peer_name || 'Genesis'} after identity verification.`,
+      p_source_entity: 'PIN Recovery', p_source_id: match.id,
+      p_recipients: [match.peer_name], p_critical: true,
+    }));
     await sb.rpc('dismiss_pin_recovery_request', { p_id: requestId, p_status: 'resolved' });
     alert(`New PIN for ${match.peer_name}: ${newPin}\n\nShown once — hand it off now.`);
     renderGenesisRecoveryQueue();
@@ -9930,6 +9991,14 @@ async function markDealVerified(scopeId) {
   try {
     const { error } = await sb.rpc('mark_scope_verified', { p_scope_id: scopeId, p_by: currentIdentityLabel() });
     if (error) throw error;
+    // This is what unlocks payment — a real governance gate, not a status
+    // label, so it belongs in the audit trail same as settlement does.
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: 'A deal was marked verified — payment unlocked',
+      p_payload: `Verified by ${currentIdentityLabel()}.`,
+      p_source_entity: 'Scope', p_source_id: scopeId,
+      p_recipients: null, p_critical: false,
+    }));
     toast('Marked verified.');
     await renderSidekick(document.getElementById('uni-body'));
   } catch(e) {

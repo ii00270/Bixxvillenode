@@ -1283,6 +1283,24 @@ html.theme-light{
 .dl-mini-v{font-family:var(--display);font-size:18px;font-weight:800;color:var(--cream);}
 .dl-mini-l{font-family:var(--mono);font-size:8.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey);margin-top:3px;}
 
+/* Filters on the log list — window (full/half cycle) and LOG class, the
+   same five sizes LOG 3 defines: Mini 1 · Micro 4 · Minor 8 · Medium 16 ·
+   Major 32. Filters narrow the line-item list only — the mini-stats above
+   and the PDF both stay whole-cycle, so the statement of record never
+   quietly disagrees with what's on screen. */
+.dl-filter-group{margin-bottom:10px;}
+.dl-filter-lbl{font-family:var(--mono);font-size:8.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);margin-bottom:6px;}
+.dl-filter-row{display:flex;gap:6px;flex-wrap:wrap;}
+.dl-filter-btn{
+  font-family:var(--mono);font-size:9.5px;letter-spacing:.06em;
+  padding:6px 11px;border-radius:12px;cursor:pointer;
+  background:transparent;border:1px solid var(--line2);color:var(--grey);
+  transition:color .15s,border-color .15s,background .15s;
+}
+.dl-filter-btn:hover{color:var(--soft);}
+.dl-filter-btn.active{color:var(--green);border-color:var(--green);background:rgba(var(--green-rgb),.07);}
+.dl-loglist{margin-top:12px;border:1px solid var(--line);border-radius:10px;overflow:hidden;}
+
 /* ── CUSTOM CONFIRM DIALOG ── */
 #confirm-dialog{
   position:fixed;inset:0;z-index:300;
@@ -2599,6 +2617,16 @@ if (window.pdfjsLib) {
 }
 
 // ── LUNAR CYCLES ──
+// Cycles 1-21 below are the network's actual recorded history — real dates,
+// never touched by the extension logic underneath. Their gaps are 29-30
+// days, not a flat 28 — this was built from real lunar dates, not from
+// canon_engine.js's own cycleNumber() formula (a flat 28 days from Genesis,
+// 2025-02-27). By cycle 21 the two are already ~30 days apart in absolute
+// date — a real divergence, flagged in SESSION_HANDOFF-style rather than
+// silently picked. Every claim/settlement/ledger entry to date was made
+// against THIS table, so auto-extension below continues its real pattern
+// instead of jumping to canon's formula and retroactively conflicting with
+// live history.
 const LUNAR_NM = [
   {date:'2025-02-28',cycle:1},{date:'2025-03-29',cycle:2},{date:'2025-04-27',cycle:3},
   {date:'2025-05-26',cycle:4},{date:'2025-06-25',cycle:5},{date:'2025-07-24',cycle:6},
@@ -2608,6 +2636,25 @@ const LUNAR_NM = [
   {date:'2026-05-16',cycle:16},{date:'2026-06-14',cycle:17},{date:'2026-07-13',cycle:18},
   {date:'2026-08-12',cycle:19},{date:'2026-09-10',cycle:20},{date:'2026-10-10',cycle:21},
 ];
+
+// Auto-extends LUNAR_NM forward from its last real entry using the true
+// mean synodic month (29.530589 days), so new cycles keep appearing on
+// their own instead of needing a hand-added row every ~29 days. Runs once
+// at load, covers a few years ahead — cheap, and re-extends itself on every
+// future load so it never actually runs out.
+(function extendLunarCycles(yearsAhead) {
+  const SYNODIC_DAYS = 29.530588861;
+  const last = LUNAR_NM[LUNAR_NM.length - 1];
+  let t = new Date(last.date + 'T00:00:00Z').getTime();
+  let cycle = last.cycle;
+  const horizon = t + (yearsAhead || 3) * 365.25 * 86400000;
+  while (t < horizon) {
+    t += SYNODIC_DAYS * 86400000;
+    cycle += 1;
+    const dayMs = Math.round(t / 86400000) * 86400000;
+    LUNAR_NM.push({ date: new Date(dayMs).toISOString().slice(0, 10), cycle });
+  }
+})(3);
 
 function getActiveCycle(now = new Date()) {
   for (let i = LUNAR_NM.length - 1; i >= 0; i--) {
@@ -5823,6 +5870,14 @@ async function toggleDownloadCycle(cycleNum) {
     return;
   }
 
+  window._dlFilters = window._dlFilters || {};
+  window._dlFilters[cycleNum] = { half: 'full', cls: 'all' };
+
+  // The five canon execution classes (LOG 3): Mini 1 · Micro 4 · Minor 8 ·
+  // Medium 16 · Major 32. "All" shows every entry, including ones that
+  // don't land exactly on a class.
+  const classChips = ['all', 32, 16, 8, 4, 1];
+
   body.innerHTML = `
     <div class="dl-mini-stats">
       <div class="dl-mini-stat"><div class="dl-mini-v">${report.totalHours.toFixed(0)}</div><div class="dl-mini-l">Hours Logged</div></div>
@@ -5830,15 +5885,69 @@ async function toggleDownloadCycle(cycleNum) {
       <div class="dl-mini-stat"><div class="dl-mini-v">${report.payments.length}</div><div class="dl-mini-l">Payments</div></div>
       <div class="dl-mini-stat"><div class="dl-mini-v ${report.missed.length ? 'green' : ''}" style="color:${report.missed.length ? 'var(--orange)' : 'var(--green)'}">${report.missed.length}</div><div class="dl-mini-l">Missed</div></div>
     </div>
-    <button class="export-btn" style="width:100%;padding:10px;text-align:center" onclick="downloadStatementForCycle(${cycleNum})">Download Statement (PDF)</button>`;
+    <button class="export-btn" style="width:100%;padding:10px;text-align:center;margin-bottom:16px" onclick="downloadStatementForCycle(${cycleNum})">Download Statement (PDF)</button>
+
+    <div class="dl-filter-group">
+      <div class="dl-filter-lbl">Window</div>
+      <div class="dl-filter-row" id="dl-half-${cycleNum}">
+        <button class="dl-filter-btn active" data-v="full" onclick="setDownloadFilter(${cycleNum},'half','full')">Full cycle</button>
+        <button class="dl-filter-btn" data-v="first" onclick="setDownloadFilter(${cycleNum},'half','first')">1st half</button>
+        <button class="dl-filter-btn" data-v="second" onclick="setDownloadFilter(${cycleNum},'half','second')">2nd half</button>
+      </div>
+    </div>
+    <div class="dl-filter-group">
+      <div class="dl-filter-lbl">LOG class</div>
+      <div class="dl-filter-row" id="dl-cls-${cycleNum}">
+        ${classChips.map(c => `<button class="dl-filter-btn ${c === 'all' ? 'active' : ''}" data-v="${c}" onclick="setDownloadFilter(${cycleNum},'cls','${c}')">${c === 'all' ? 'All' : c}</button>`).join('')}
+      </div>
+    </div>
+    <div class="dl-loglist" id="dl-loglist-${cycleNum}"></div>`;
+
+  renderDownloadLogList(cycleNum);
   body.dataset.loaded = '1';
+}
+
+// Narrows report.logs by the cycle's own date range split at its midpoint
+// (half) and by exact match against a canon execution class (cls) — a log
+// of, say, 12 hours matches no specific class and only shows under "All".
+function filterDownloadLogs(report, cycleNum, half, cls) {
+  const range = getCycleDateRange(cycleNum);
+  let logs = report.logs;
+  if (half !== 'full') {
+    const mid = new Date(range.start.getTime() + 14 * 86400000);
+    logs = logs.filter(l => (new Date(l.start_utc) < mid) === (half === 'first'));
+  }
+  if (cls !== 'all') {
+    const n = Number(cls);
+    logs = logs.filter(l => Math.round(Number(l.actual_hours || 0)) === n);
+  }
+  return logs;
+}
+
+function setDownloadFilter(cycleNum, kind, value) {
+  const state = window._dlFilters?.[cycleNum];
+  if (!state) return;
+  state[kind] = value;
+  const groupId = kind === 'half' ? `dl-half-${cycleNum}` : `dl-cls-${cycleNum}`;
+  document.getElementById(groupId)?.querySelectorAll('.dl-filter-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.v === String(value)));
+  renderDownloadLogList(cycleNum);
+}
+
+function renderDownloadLogList(cycleNum) {
+  const el = document.getElementById(`dl-loglist-${cycleNum}`);
+  const report = window._downloadsCache[cycleNum];
+  const state = window._dlFilters?.[cycleNum];
+  if (!el || !report || !state) return;
+  const filtered = filterDownloadLogs(report, cycleNum, state.half, state.cls);
+  el.innerHTML = renderExecutionLogsList(filtered);
 }
 
 function downloadStatementForCycle(cycleNum) {
   const report = window._downloadsCache[cycleNum];
   if (!report) { toast('Still loading that cycle — try again in a moment.'); return; }
-  window._lastAudit = report;      // downloadCycleAuditPDF reads from here
-  downloadCycleAuditPDF();
+  window._lastAudit = report;      // downloadCycleAuditPDF reads from here —
+  downloadCycleAuditPDF();         // always the whole cycle, filters or not.
 }
 
 function downloadLogsCSV() {

@@ -8062,7 +8062,10 @@ async function termAskAgent(text) {
   } catch(e) {
     console.error(e);
     thinkingEl?.remove();
-    termPrint('Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.', 'err');
+    // The real reason, not a guess — "not deployed" and "key is wrong"
+    // are different problems with different fixes, and the function's
+    // own error message already says which one it is.
+    termPrint(`Could not reach BIX AI — ${e.message || 'unknown error'}`, 'err');
   }
 }
 
@@ -9224,7 +9227,7 @@ async function sendBixAiThreadMessage(text) {
   } catch(e) {
     console.error(e);
     document.getElementById(loadingId)?.remove();
-    bixAiHistory.push({ role: 'assistant', content: 'Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
+    bixAiHistory.push({ role: 'assistant', content: `Could not reach BIX AI — ${e.message || 'unknown error'}` });
   }
   renderBixAiThreadBubbles();
   renderBixAiPinnedRow();

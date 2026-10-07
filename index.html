@@ -8942,7 +8942,7 @@ async function sendBixAiThreadMessage(text) {
   } catch(e) {
     console.error(e);
     document.getElementById(loadingId)?.remove();
-    bixAiHistory.push({ role: 'assistant', content: 'Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.' });
+    bixAiHistory.push({ role: 'assistant', content: `Could not reach BIX AI — ${e.message || 'unknown error'}` });
   }
   renderBixAiThreadBubbles();
   renderBixAiPinnedRow();

@@ -2276,6 +2276,84 @@ html.theme-light{
   margin:0 18px 14px;font-family:var(--sans);font-size:12px;color:var(--soft);
   line-height:1.6;padding:11px 13px;border-left:2px solid var(--line2);background:var(--surface);
 }
+
+/* ══════════════════════════════════════════════════════════════
+   TERMINAL — the whole app is this now. Scrollback above, a single
+   prompt line below it, a thin status strip under that. Everything
+   else (Tracker, Downloads, Messages, Profile) still exists as logic
+   and data underneath — it grows back in as commands from here, not
+   as separate screens. Modeled directly on a real terminal (VS
+   Code's integrated one), not on the card/dashboard look this
+   replaces.
+   ══════════════════════════════════════════════════════════════ */
+:root{
+  --term-bg:     #161616;
+  --term-fg:     #E4E4E2;
+  --term-dim:    #7A7A78;
+  --term-line:   #2A2A28;
+}
+html.theme-light{
+  --term-bg:     #F5F3EC;
+  --term-fg:     #1A161E;
+  --term-dim:    #6E6676;
+  --term-line:   #DED3BC;
+}
+
+#terminal-shell{
+  position:fixed;inset:0;z-index:40;
+  display:none;flex-direction:column;
+  background:var(--term-bg);color:var(--term-fg);
+  font-family:var(--mono);
+}
+#terminal-shell.in{display:flex;}
+
+#term-scroll{
+  flex:1;min-height:0;overflow-y:auto;
+  padding:18px 20px 10px;
+  font-size:13.5px;line-height:1.75;
+  -webkit-overflow-scrolling:touch;
+}
+.term-line{white-space:pre-wrap;word-break:break-word;margin-bottom:2px;}
+.term-line.in{color:var(--term-fg);}
+.term-line.in .term-prompt-sym{color:var(--green);margin-right:8px;}
+.term-line.out{color:var(--term-fg);margin-bottom:10px;}
+.term-line.system{color:var(--term-dim);font-style:italic;}
+.term-line.err{color:var(--red);}
+.term-line.agent-tag{color:var(--green);font-weight:600;margin-right:8px;}
+
+#term-inputrow{
+  flex-shrink:0;display:flex;align-items:center;gap:8px;
+  padding:4px 20px 12px;
+}
+#term-prompt-sym{color:var(--green);font-size:14px;flex-shrink:0;}
+#term-input{
+  flex:1;background:transparent;border:none;outline:none;
+  color:var(--term-fg);font-family:var(--mono);font-size:13.5px;
+  caret-color:var(--green);
+}
+#term-input::placeholder{color:var(--term-dim);}
+
+/* The footer — "nested smooth... kind of a tag," never a button. Plain
+   inline segments separated by a soft dot, no borders, no boxes. */
+#term-footer{
+  flex-shrink:0;display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+  padding:8px 20px calc(10px + env(safe-area-inset-bottom, 0px));
+  border-top:1px solid var(--term-line);
+  font-family:var(--mono);font-size:10px;letter-spacing:.04em;color:var(--term-dim);
+}
+#term-footer .seg{display:inline-flex;align-items:center;gap:10px;}
+#term-footer .seg::after{content:'·';color:var(--term-line);margin-left:10px;}
+#term-footer .seg:last-child::after{content:none;}
+#term-footer .live-dot{
+  width:5px;height:5px;border-radius:50%;background:var(--green);
+  box-shadow:0 0 5px rgba(var(--green-rgb),.7);flex-shrink:0;
+}
+
+@media (min-width:768px){
+  #term-scroll{padding:28px 48px 14px;font-size:14px;}
+  #term-inputrow{padding:6px 48px 16px;}
+  #term-footer{padding:9px 48px 11px;}
+}
 </style>
 </head>
 <body>
@@ -2402,6 +2480,23 @@ html.theme-light{
 
 <!-- ═══ RELATION SHELL ═══ -->
 <!-- ═══ UNIFIED SHELL — Market / Messages / Work / Sidekick ═══ -->
+<!-- ══ TERMINAL — the app itself. Everything below #uni-shell still exists
+     as logic (Tracker, Downloads, Messages, canon) for terminal commands
+     to call into as they're built out; it's just not shown as screens. ══ -->
+<div id="terminal-shell">
+  <div id="term-scroll"></div>
+  <div id="term-inputrow">
+    <span id="term-prompt-sym">❯</span>
+    <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
+  </div>
+  <div id="term-footer">
+    <span class="seg"><span class="live-dot"></span><span id="term-time">—</span></span>
+    <span class="seg" id="term-cycle">—</span>
+    <span class="seg" id="term-balance">—</span>
+    <span class="seg" id="term-id">—</span>
+  </div>
+</div>
+
 <div id="uni-shell">
   <div class="uni-card">
     <div id="uni-topbar">
@@ -7810,13 +7905,200 @@ function currentAvatarUrl() {
   return null;
 }
 
+// The single hook every login path already calls. Its body now launches
+// the terminal instead of the tabbed shell — #uni-shell stays in the DOM,
+// unshown, holding the logic (Tracker, Downloads, canon) that grows back
+// in as terminal commands rather than screens.
 function enterUniShell() {
-  document.getElementById('uni-shell').classList.add('in');
-  const adminBtn = document.getElementById('uni-admin-btn');
-  if (adminBtn) adminBtn.classList.toggle('hidden', !operator || !!relation);
-  renderThemeToggleIcon();
-  restoreShoulder();
-  showUniTab('home');
+  enterTerminal();
+}
+
+// ══════════════════════════════════════════════════════════════
+// TERMINAL — the whole app, as a prompt. Scrollback above, one input
+// line, a footer that's a status tag, never buttons. Typed input is
+// either a local command or gets handed to BIX AI — the same already-
+// deployed edge function and bixAiHistory the old Messages thread used,
+// reused rather than rebuilt.
+// ══════════════════════════════════════════════════════════════
+let termFooterTimer = null;
+let termBalanceCache = null;
+
+function enterTerminal() {
+  const shell = document.getElementById('terminal-shell');
+  if (!shell) return;
+  shell.classList.add('in');
+  document.getElementById('uni-shell')?.classList.remove('in');
+
+  const scroll = document.getElementById('term-scroll');
+  if (scroll && !scroll.dataset.booted) {
+    scroll.dataset.booted = '1';
+    const who = operator?.peer_name || relation?.name || 'there';
+    termPrint(`BIXXVILLE — signed in as ${who}.`, 'system');
+    termPrint(`Type a question for BIX AI, or 'help' for commands.`, 'system');
+  }
+
+  updateTermFooter();
+  clearInterval(termFooterTimer);
+  termFooterTimer = setInterval(updateTermFooter, 1000);
+
+  const input = document.getElementById('term-input');
+  if (input && !input.dataset.wired) {
+    input.dataset.wired = '1';
+    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleTermInput(); });
+  }
+  input?.focus();
+  document.getElementById('term-scroll')?.addEventListener('click', () => input?.focus());
+}
+
+function termPrint(text, cls) {
+  const scroll = document.getElementById('term-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 'term-line ' + (cls || 'out');
+  div.textContent = text;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function termEcho(text) {
+  const scroll = document.getElementById('term-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 'term-line in';
+  div.innerHTML = `<span class="term-prompt-sym">❯</span>${esc(text)}`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+function termPrintAgentTagged(text) {
+  const scroll = document.getElementById('term-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 'term-line out';
+  div.innerHTML = `<span class="agent-tag">BIX AI ·</span>${esc(text)}`;
+  scroll.appendChild(div);
+  scroll.scrollTop = scroll.scrollHeight;
+}
+
+async function handleTermInput() {
+  const input = document.getElementById('term-input');
+  const raw = input?.value.trim();
+  if (!raw) return;
+  input.value = '';
+  termEcho(raw);
+  await termDispatch(raw);
+}
+
+// Local commands first; anything unrecognized goes to the agent. This is
+// the seam "growing features from the center" happens through later —
+// a new command here is a new feature, no new screen required.
+async function termDispatch(raw) {
+  const cmd = raw.trim().toLowerCase();
+
+  if (cmd === 'help') {
+    termPrint('Commands: help · clear · whoami · cycle · balance · logout', 'system');
+    termPrint('Anything else is sent to BIX AI.', 'system');
+    return;
+  }
+  if (cmd === 'clear') {
+    const scroll = document.getElementById('term-scroll');
+    if (scroll) scroll.innerHTML = '';
+    return;
+  }
+  if (cmd === 'whoami') {
+    if (operator) {
+      termPrint(`${operator.peer_name} · ${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs · ${operator.standing || 'active'}`, 'system');
+    } else if (relation) {
+      termPrint(`${relation.name} · Relation`, 'system');
+    } else {
+      termPrint('Not signed in.', 'system');
+    }
+    return;
+  }
+  if (cmd === 'cycle') {
+    const c = getActiveCycle();
+    termPrint(`Cycle ${c.num} · Day ${c.day} of 28 · ${c.left}d left`, 'system');
+    return;
+  }
+  if (cmd === 'balance') {
+    if (!operator?.wallet_address) { termPrint('No wallet on file.', 'system'); return; }
+    termPrint('Checking…', 'system');
+    try {
+      const bal = await fetchUsdcBalance(operator.wallet_address);
+      termPrint(bal != null ? `$${bal.toLocaleString(undefined,{maximumFractionDigits:2})} USDC on Base` : 'Could not verify balance right now.', 'system');
+    } catch(e) { termPrint('Could not verify balance right now.', 'system'); }
+    return;
+  }
+  if (cmd === 'logout') {
+    doLogout();
+    return;
+  }
+
+  await termAskAgent(raw);
+}
+
+async function termAskAgent(text) {
+  if (!operator) { termPrint('Sign in as an operator to talk to BIX AI.', 'err'); return; }
+  bixAiHistory.push({ role: 'user', content: text });
+  termPrint('Thinking…', 'system');
+  const scroll = document.getElementById('term-scroll');
+  const thinkingEl = scroll?.lastElementChild;
+
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}` },
+      body: JSON.stringify({
+        messages: bixAiHistory,
+        operator_context: `${operator.peer_name}, tier ${tier(operator.total_logs)}, ${operator.total_logs || 0} total LOGs.`,
+        caller_tier: tier(operator.total_logs),
+      }),
+    });
+    const data = await res.json();
+    thinkingEl?.remove();
+    if (!res.ok || data.error) throw new Error(data.error || 'No response.');
+    bixAiHistory.push({ role: 'assistant', content: data.reply });
+    termPrintAgentTagged(data.reply);
+  } catch(e) {
+    console.error(e);
+    thinkingEl?.remove();
+    termPrint('Could not reach BIX AI — the bix-ai function may not be deployed yet, or ANTHROPIC_API_KEY may not be set.', 'err');
+  }
+}
+
+// The footer — live clock, cycle/day, wallet balance, member ID. Plain
+// text segments, never buttons; balance is cached and only re-fetched
+// every 60s so the clock ticking doesn't hammer the RPC.
+function updateTermFooter() {
+  const now = new Date();
+  const timeEl = document.getElementById('term-time');
+  if (timeEl) timeEl.textContent = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', second: '2-digit' });
+
+  const cycleEl = document.getElementById('term-cycle');
+  if (cycleEl) {
+    const c = getActiveCycle();
+    cycleEl.textContent = `C${c.num} · DAY ${c.day}/28`;
+  }
+
+  const idEl = document.getElementById('term-id');
+  if (idEl) {
+    const label = operator?.handle || (operator?.peer_name ? '@' + operator.peer_name.toUpperCase().replace(/\s/g,'') : null) || relation?.name || '—';
+    idEl.textContent = label;
+  }
+
+  const balEl = document.getElementById('term-balance');
+  if (balEl && operator?.wallet_address) {
+    if (termBalanceCache == null) {
+      balEl.textContent = '$—';
+      fetchUsdcBalance(operator.wallet_address).then(b => {
+        termBalanceCache = b;
+        setTimeout(() => { termBalanceCache = null; }, 60000); // refresh at most once a minute
+        if (balEl) balEl.textContent = b != null ? `$${b.toLocaleString(undefined,{maximumFractionDigits:2})}` : '$—';
+      }).catch(() => {});
+    }
+  } else if (balEl) {
+    balEl.textContent = '—';
+  }
 }
 
 function showUniTab(tab) {

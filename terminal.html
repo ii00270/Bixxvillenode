@@ -2371,7 +2371,8 @@ html.theme-light{
 }
 
 /* ── Tracker board / Statements timeline — swap in for #term-scroll ── */
-#term-panel{flex:1;min-height:0;overflow-y:auto;padding:18px 20px;}
+#term-panel{flex:1;min-height:0;overflow-y:auto;padding:18px 20px;position:relative;}
+#term-panel > *:not(#term-browser-art){position:relative;z-index:1;}
 .term-panel-head{font-size:13px;color:var(--term-dim);margin-bottom:14px;}
 .term-panel-empty{color:var(--term-dim);font-style:italic;font-size:12.5px;}
 
@@ -2397,6 +2398,33 @@ html.theme-light{
 .term-timeline-title{color:var(--term-fg);font-size:13px;}
 .term-timeline-due{color:var(--term-dim);font-size:11px;}
 .term-timeline-meta{color:var(--term-dim);font-size:11px;}
+
+/* Folders — every past decomposition, literally folder-shaped, click to
+   open. Only one map exists yet so this stays hidden until a second one
+   does; the row grows on its own as real history accumulates. */
+.term-folders{display:flex;gap:10px;overflow-x:auto;margin-bottom:18px;padding-bottom:2px;}
+.term-folder{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  flex:0 0 120px;display:flex;flex-direction:column;align-items:center;gap:4px;
+  background:transparent;border:none;cursor:pointer;color:var(--term-dim);
+  font-family:var(--mono);padding:8px 6px;border-radius:7px;transition:background .12s,color .12s;
+}
+.term-folder:hover{background:var(--term-line);color:var(--term-fg);}
+.term-folder.active{color:var(--green);}
+.term-folder-label{font-size:10.5px;text-align:center;line-height:1.3;max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.term-folder-date{font-size:9.5px;color:var(--term-dim);}
+
+/* ── Browser panel — a visible upload target + a quiet animated backdrop ── */
+#term-browser-art{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;opacity:.5;}
+.term-browser-upload{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  display:flex;align-items:center;gap:8px;width:100%;
+  background:transparent;border:1.5px dashed var(--term-line);border-radius:8px;
+  color:var(--term-dim);font-family:var(--mono);font-size:12.5px;padding:14px 16px;
+  cursor:pointer;margin-bottom:18px;transition:border-color .15s,color .15s;position:relative;z-index:1;
+}
+.term-browser-upload:hover{border-color:var(--green);color:var(--green);}
+.term-browser-upload .term-browser-upload-icon{font-size:16px;}
 
 #term-scroll{
   flex:1;min-height:0;overflow-y:auto;
@@ -8145,6 +8173,7 @@ function setTermView(view) {
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
   const scroll = document.getElementById('term-scroll');
   const panel = document.getElementById('term-panel');
+  if (view !== 'browser') stopBrowserArt();
   if (view === 'terminal') {
     scroll.style.display = '';
     panel.style.display = 'none';
@@ -8202,18 +8231,30 @@ async function renderBrowserPanel() {
     .not('source_html', 'is', null)
     .order('created_at', { ascending: false });
 
+  const uploadRow = `
+    <button class="term-browser-upload" onclick="document.getElementById('term-upload-file').click()">
+      <span class="term-browser-upload-icon">+</span>
+      <span>Upload a decomposition worksheet (.html)</span>
+    </button>`;
+
   if (error || !maps?.length) {
-    panel.innerHTML = `<div class="term-panel-head">Browser</div>
-      <div class="term-panel-empty">No uploaded files yet. Decomposition worksheets you upload with + are kept here.</div>`;
+    panel.innerHTML = `
+      <canvas id="term-browser-art"></canvas>
+      <div class="term-panel-head">Browser</div>
+      ${uploadRow}
+      <div class="term-panel-empty">No uploaded files yet — they'll show up here once you upload one.</div>`;
     const sub = document.getElementById('term-sb-browser-sub');
     if (sub) sub.innerHTML = '';
+    startBrowserArt();
     return;
   }
 
   panel.innerHTML = `
+    <canvas id="term-browser-art"></canvas>
     <div class="term-panel-head">Browser — uploaded decomposition worksheets</div>
+    ${uploadRow}
     ${maps.map(m => `
-      <div class="term-timeline-cp">
+      <div class="term-timeline-cp" style="position:relative;z-index:1;">
         <div class="term-timeline-head">
           <span class="term-timeline-title">${esc(m.source_filename || 'worksheet.html')}</span>
           <span class="term-timeline-due">${fmtDate(m.created_at)}</span>
@@ -8227,6 +8268,75 @@ async function renderBrowserPanel() {
     sub.innerHTML = maps.map(m => `<button class="term-sb-subitem" onclick="setTermView('browser')"><span>${esc(m.source_filename || 'worksheet.html')}</span></button>`).join('');
   }
   window._browserFiles = maps;
+  startBrowserArt();
+}
+
+// Quiet, interactive generative backdrop — overlapping sine/cosine waves,
+// phase nudged by pointer position. Decorative only: pointer-events:none
+// on the canvas itself, so it never steals a click from the real controls
+// drawn on top of it.
+let _browserArtRAF = null;
+let _browserArtRO = null;
+function stopBrowserArt() {
+  cancelAnimationFrame(_browserArtRAF);
+  _browserArtRAF = null;
+  _browserArtRO?.disconnect();
+  _browserArtRO = null;
+  const panel = document.getElementById('term-panel');
+  if (panel) panel.onpointermove = null;
+}
+function startBrowserArt() {
+  stopBrowserArt();
+  const canvas = document.getElementById('term-browser-art');
+  if (!canvas) return;
+  const panel = document.getElementById('term-panel');
+  const ctx = canvas.getContext('2d');
+  let mx = 0.5, my = 0.5;
+
+  function resize() {
+    canvas.width = panel.clientWidth;
+    canvas.height = panel.scrollHeight;
+  }
+  resize();
+  _browserArtRO = new ResizeObserver(resize);
+  _browserArtRO.observe(panel);
+
+  panel.onpointermove = (e) => {
+    const r = panel.getBoundingClientRect();
+    mx = (e.clientX - r.left) / r.width;
+    my = (e.clientY - r.top) / r.height;
+  };
+
+  const colors = ['rgba(14,136,134,.35)', 'rgba(168,115,11,.28)', 'rgba(217,58,43,.22)'];
+  // Dark theme uses the lime/orange/red trio instead — read live so a
+  // theme toggle mid-view still looks right next render.
+  const colorsLive = () => currentTheme() === 'light'
+    ? ['rgba(14,136,134,.35)', 'rgba(168,115,11,.28)', 'rgba(217,58,43,.22)']
+    : ['rgba(140,240,96,.22)', 'rgba(232,136,74,.18)', 'rgba(224,82,82,.14)'];
+
+  let t = 0;
+  function frame() {
+    t += 0.01;
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    const cols = colorsLive();
+    for (let i = 0; i < 3; i++) {
+      ctx.beginPath();
+      const amp = h * (0.06 + i * 0.03) * (0.6 + mx * 0.8);
+      const freq = 0.004 + i * 0.0015 + my * 0.002;
+      const yBase = h * (0.25 + i * 0.28);
+      for (let x = 0; x <= w; x += 6) {
+        const y = yBase + Math.sin(x * freq + t * (1 + i * 0.4)) * amp
+                         + Math.cos(x * freq * 0.6 + t * 0.7) * amp * 0.4;
+        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.strokeStyle = cols[i];
+      ctx.lineWidth = 1.4;
+      ctx.stroke();
+    }
+    _browserArtRAF = requestAnimationFrame(frame);
+  }
+  frame();
 }
 
 async function openBrowserFile(mapId) {
@@ -8261,8 +8371,10 @@ async function renderTrackerBoard() {
     { key: 'in progress', label: 'In progress' },
     { key: 'delivered', label: 'Delivered' },
   ];
+  const foldersHtml = await renderMapFolders();
   panel.innerHTML = `
     <div class="term-panel-head">Tracker — ${esc(trackerState.map?.goal || '')}</div>
+    ${foldersHtml}
     <div class="term-board">
       ${cols.map(c => {
         const items = trackerState.leaves.filter(l => l.status === c.key);
@@ -8302,6 +8414,33 @@ async function renderTrackerBoard() {
       }).join('')}
     </div>`;
   updateSidebarCounts();
+}
+
+// Every decomposition the OS has ever mapped, as real folders you can open
+// — not just whichever one happens to be newest. Only shows when there's
+// more than one, so a single-map network doesn't get a row of one folder.
+async function renderMapFolders() {
+  const { data: maps } = await sb.from('work_maps')
+    .select('id,goal,created_at')
+    .order('created_at', { ascending: false });
+  if (!maps || maps.length < 2) return '';
+
+  const folderSvg = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>`;
+
+  return `
+    <div class="term-folders">
+      ${maps.map(m => `
+        <button class="term-folder ${m.id === trackerState.mapId ? 'active' : ''}" onclick="switchToMap('${esc(m.id)}')" title="${esc(m.goal)}">
+          ${folderSvg}
+          <span class="term-folder-label">${esc(m.goal)}</span>
+          <span class="term-folder-date">${fmtDate(m.created_at)}</span>
+        </button>`).join('')}
+    </div>`;
+}
+
+async function switchToMap(mapId) {
+  await loadWorkMap(mapId);
+  await renderTrackerBoard();
 }
 
 function toggleTermCard(leafId) {
@@ -11510,14 +11649,17 @@ async function renderTracker(body) {
 // Reads the map through get_work_map. If the migration hasn't been run the
 // RPC won't exist — that's not an error state worth hiding, so the surface
 // says so plainly and shows the canon worked example instead, marked as such.
-async function loadWorkMap() {
+async function loadWorkMap(requestedMapId) {
   trackerState = { map: null, leaves: [], branches: [], source: null, mapId: null, gate: null };
   try {
-    const { data: maps, error: mErr } = await sb.from('work_maps').select('id,goal,genesis_task,outcome_task,date_mapped').order('created_at', { ascending: false }).limit(1);
-    if (mErr) throw mErr;
-    if (!maps || !maps.length) { trackerState.source = 'empty'; return; }
+    let mapId = requestedMapId;
+    if (!mapId) {
+      const { data: maps, error: mErr } = await sb.from('work_maps').select('id').order('created_at', { ascending: false }).limit(1);
+      if (mErr) throw mErr;
+      if (!maps || !maps.length) { trackerState.source = 'empty'; return; }
+      mapId = maps[0].id;
+    }
 
-    const mapId = maps[0].id;
     const { data, error } = await sb.rpc('get_work_map', { p_map: mapId });
     if (error) throw error;
 

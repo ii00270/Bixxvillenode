@@ -6,8 +6,14 @@
 // updates never arrived until sw.js itself changed. Now every load tries
 // the network for a fresh copy and only falls back to cache when offline.
 // External calls (Supabase, RPCs, price APIs) are never cached at all.
+//
+// { cache: 'no-store' } on the fetch below matters — without it, "network
+// first" still isn't actually first: fetch() can be silently satisfied by
+// the browser's own HTTP cache before it ever reaches the network, which
+// is exactly how an update shipped and still didn't show up for installed
+// PWA users. no-store forces a real round trip every time.
 
-const CACHE_NAME = 'bixxville-v2'; // bump busts every older cache on activate
+const CACHE_NAME = 'bixxville-v3'; // bump busts every older cache on activate
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -33,7 +39,7 @@ self.addEventListener('fetch', (event) => {
   if (url.origin !== self.location.origin) return;
 
   event.respondWith(
-    fetch(event.request)
+    fetch(event.request, { cache: 'no-store' })
       .then((response) => {
         const clone = response.clone();
         caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));

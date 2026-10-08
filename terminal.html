@@ -2320,6 +2320,11 @@ html.theme-light{
 .term-line.system{color:var(--term-dim);font-style:italic;}
 .term-line.err{color:var(--red);}
 .term-line.agent-tag{color:var(--green);font-weight:600;margin-right:8px;}
+/* BIX AI's quick-reply choices — nothing to click in a terminal, so they're
+   numbered and you type the number. */
+.term-options{margin:2px 0 2px 2px;}
+.term-opt{color:var(--term-fg);padding:1px 0;}
+.term-opt-num{color:var(--green);margin-right:9px;}
 
 #term-inputrow{
   flex-shrink:0;display:flex;align-items:center;gap:8px;
@@ -7980,6 +7985,22 @@ function termPrintAgentTagged(text) {
   scroll.scrollTop = scroll.scrollHeight;
 }
 
+// BIX AI's quick-reply choices, numbered instead of buttoned — there's
+// nothing to click here. Stored on window so termDispatch can resolve a
+// bare number against them on the next input.
+let termPendingOptions = null;
+function termPrintOptions(options) {
+  if (!options || !options.length) { termPendingOptions = null; return; }
+  termPendingOptions = options;
+  const scroll = document.getElementById('term-scroll');
+  if (!scroll) return;
+  const div = document.createElement('div');
+  div.className = 'term-line system term-options';
+  div.innerHTML = options.map((o, i) => `<div class="term-opt"><span class="term-opt-num">${i + 1}</span>${esc(o)}</div>`).join('');
+  scroll.appendChild(div);
+  termPrint('Type a number to choose, or just keep typing.', 'system');
+}
+
 async function handleTermInput() {
   const input = document.getElementById('term-input');
   const raw = input?.value.trim();
@@ -7994,6 +8015,18 @@ async function handleTermInput() {
 // a new command here is a new feature, no new screen required.
 async function termDispatch(raw) {
   const cmd = raw.trim().toLowerCase();
+
+  // A bare number resolves against the last set of BIX AI quick-reply
+  // options, if any are still pending — the terminal's stand-in for
+  // tapping one of the inline buttons.
+  if (termPendingOptions && /^\d+$/.test(cmd)) {
+    const chosen = termPendingOptions[parseInt(cmd, 10) - 1];
+    termPendingOptions = null;
+    if (chosen) { await termAskAgent(chosen); return; }
+    termPrint(`No option ${cmd} — type a number from the list, or just ask something new.`, 'system');
+    return;
+  }
+  termPendingOptions = null; // any other input leaves stale options behind
 
   if (cmd === 'help') {
     termPrint('Commands: help · clear · whoami · cycle · balance · logout', 'system');
@@ -8058,7 +8091,11 @@ async function termAskAgent(text) {
     thinkingEl?.remove();
     if (!res.ok || data.error) throw new Error(data.error || 'No response.');
     bixAiHistory.push({ role: 'assistant', content: data.reply });
-    termPrintAgentTagged(data.reply);
+    // The raw reply (fenced block and all) stays in history so the model
+    // keeps seeing its own convention; only the on-screen print is cleaned.
+    const { text: cleanText, options } = extractOptions(data.reply);
+    termPrintAgentTagged(cleanText || data.reply);
+    termPrintOptions(options);
   } catch(e) {
     console.error(e);
     thinkingEl?.remove();

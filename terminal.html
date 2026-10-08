@@ -2324,11 +2324,12 @@ html.theme-light{
   appearance:none;-webkit-appearance:none;-moz-appearance:none;
   width:100%;text-align:left;background:transparent;border:none;border-radius:6px;
   color:var(--term-fg);font-family:var(--mono);font-size:12.5px;padding:8px 10px;
-  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  cursor:pointer;display:flex;align-items:center;gap:9px;
   transition:background .12s;
 }
 .term-sb-item:hover{background:var(--term-line);}
 .term-sb-item.active{background:var(--term-line);color:var(--green);}
+.term-sb-icon{width:15px;height:15px;flex-shrink:0;opacity:.8;}
 .term-sb-sub{
   display:flex;flex-direction:column;margin:2px 0 8px 14px;
   border-left:1px solid var(--term-line);padding-left:10px;
@@ -2673,10 +2674,16 @@ html.theme-light{
   <nav id="term-sidebar">
     <div class="term-sb-head">BIXXVILLE</div>
     <div class="term-sb-group">
-      <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">Terminal</button>
+      <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <span>Terminal</span>
+      </button>
     </div>
     <div class="term-sb-group">
-      <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">Tracker</button>
+      <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>
+        <span>Tracker</span>
+      </button>
       <div class="term-sb-sub" id="term-sb-tracker-sub">
         <button class="term-sb-subitem" onclick="setTrackerFilter('to-do'); setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('in progress'); setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
@@ -2686,11 +2693,17 @@ html.theme-light{
       </div>
     </div>
     <div class="term-sb-group">
-      <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">Statements</button>
+      <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+        <span>Statements</span>
+      </button>
       <div class="term-sb-sub" id="term-sb-statements-sub"></div>
     </div>
     <div class="term-sb-group">
-      <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">Browser</button>
+      <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <span>Browser</span>
+      </button>
       <div class="term-sb-sub" id="term-sb-browser-sub"></div>
     </div>
   </nav>

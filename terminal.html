@@ -8029,8 +8029,17 @@ async function termDispatch(raw) {
   termPendingOptions = null; // any other input leaves stale options behind
 
   if (cmd === 'help') {
-    termPrint('Commands: help · clear · whoami · cycle · balance · logout', 'system');
+    termPrint('Commands: help · clear · whoami · cycle · balance · theme · logout', 'system');
     termPrint('Anything else is sent to BIX AI.', 'system');
+    return;
+  }
+  // theme = toggle; theme light / theme dark = set explicitly. The terminal
+  // has no button chrome at all, so this is the only way in or out of light
+  // mode here — the CSS tokens already supported both, nothing to switch it.
+  if (cmd === 'theme' || cmd === 'theme light' || cmd === 'theme dark') {
+    const next = cmd === 'theme light' ? 'light' : cmd === 'theme dark' ? 'dark' : (currentTheme() === 'light' ? 'dark' : 'light');
+    setTheme(next);
+    termPrint(`Theme: ${next}.`, 'system');
     return;
   }
   if (cmd === 'clear') {

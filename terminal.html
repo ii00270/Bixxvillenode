@@ -2643,11 +2643,16 @@ html.theme-light{
         <button class="term-sb-subitem" onclick="setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
         <button class="term-sb-subitem" onclick="setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
         <button class="term-sb-subitem" onclick="setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
+        <button class="term-sb-subitem" onclick="openCurrentMapFile()">Map <span class="term-sb-count" id="term-sb-map-mark">—</span></button>
       </div>
     </div>
     <div class="term-sb-group">
       <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">Statements</button>
       <div class="term-sb-sub" id="term-sb-statements-sub"></div>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">Browser</button>
+      <div class="term-sb-sub" id="term-sb-browser-sub"></div>
     </div>
   </nav>
   <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu">☰</button>
@@ -8148,6 +8153,7 @@ function setTermView(view) {
     panel.style.display = 'block';
     if (view === 'tracker') renderTrackerBoard();
     else if (view === 'statements') renderStatementsTimeline();
+    else if (view === 'browser') renderBrowserPanel();
   }
   toggleTermSidebar(false);
 }
@@ -8163,6 +8169,70 @@ function updateSidebarCounts() {
       ? trackerState.branches.map(b => `<button class="term-sb-subitem" onclick="setTermView('statements')"><span>${esc(b.code)}</span><span class="term-sb-count">${b.leaf_count}</span></button>`).join('')
       : '';
   }
+  const mapMark = document.getElementById('term-sb-map-mark');
+  if (mapMark) mapMark.textContent = (live && trackerState.map?.source_html) ? '●' : '—';
+}
+
+// ── Opening an uploaded worksheet back up — a real file, a real tab ─────
+function openSourceHtml(html, filename) {
+  const blob = new Blob([html], { type: 'text/html' });
+  const url = URL.createObjectURL(blob);
+  window.open(url, '_blank');
+  setTimeout(() => URL.revokeObjectURL(url), 30000);
+}
+
+function openCurrentMapFile() {
+  if (trackerState?.source !== 'live' || !trackerState.map) {
+    toast('No map loaded yet.'); return;
+  }
+  if (!trackerState.map.source_html) {
+    toast('This map has no source file on record — it wasn’t created from an upload.');
+    return;
+  }
+  openSourceHtml(trackerState.map.source_html, trackerState.map.source_filename || 'worksheet.html');
+}
+
+// ── Browser — every uploaded decomposition worksheet, listed and openable ──
+async function renderBrowserPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+
+  const { data: maps, error } = await sb.from('work_maps')
+    .select('id,goal,source_filename,created_at')
+    .not('source_html', 'is', null)
+    .order('created_at', { ascending: false });
+
+  if (error || !maps?.length) {
+    panel.innerHTML = `<div class="term-panel-head">Browser</div>
+      <div class="term-panel-empty">No uploaded files yet. Decomposition worksheets you upload with + are kept here.</div>`;
+    const sub = document.getElementById('term-sb-browser-sub');
+    if (sub) sub.innerHTML = '';
+    return;
+  }
+
+  panel.innerHTML = `
+    <div class="term-panel-head">Browser — uploaded decomposition worksheets</div>
+    ${maps.map(m => `
+      <div class="term-timeline-cp">
+        <div class="term-timeline-head">
+          <span class="term-timeline-title">${esc(m.source_filename || 'worksheet.html')}</span>
+          <span class="term-timeline-due">${fmtDate(m.created_at)}</span>
+        </div>
+        <div class="term-timeline-meta">${esc(m.goal)}</div>
+        <button class="term-timeline-dl" onclick="openBrowserFile('${esc(m.id)}')">Open</button>
+      </div>`).join('')}`;
+
+  const sub = document.getElementById('term-sb-browser-sub');
+  if (sub) {
+    sub.innerHTML = maps.map(m => `<button class="term-sb-subitem" onclick="setTermView('browser')"><span>${esc(m.source_filename || 'worksheet.html')}</span></button>`).join('');
+  }
+  window._browserFiles = maps;
+}
+
+async function openBrowserFile(mapId) {
+  const { data, error } = await sb.from('work_maps').select('source_html,source_filename').eq('id', mapId).maybeSingle();
+  if (error || !data?.source_html) { toast('Could not load that file.'); return; }
+  openSourceHtml(data.source_html, data.source_filename || 'worksheet.html');
 }
 
 // ── Tracker board — Worksheet A's nodes, grouped by real status ─────────
@@ -8216,9 +8286,13 @@ async function renderTrackerBoard() {
               <div class="term-card-detail" hidden>
                 <div>Owner — ${esc(owner)}</div>
                 ${l.status === 'delivered' && l.delivered_at ? (() => {
-                  const d = new Date(l.delivered_at);
-                  const when = d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
-                  return `<div>Settled — ${when} · Cycle ${cycleNumberForDate(d)}</div>`;
+                  // The real settlement's own cycle_number, when this map is
+                  // linked to one — not a client-side guess from a timestamp.
+                  const sub = trackerState.settlement;
+                  const whenSrc = sub?.settled_at || l.delivered_at;
+                  const when = new Date(whenSrc).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+                  const cyc = sub?.cycle_number ?? cycleNumberForDate(new Date(l.delivered_at));
+                  return `<div>Settled — ${when} · Cycle ${cyc}${sub?.cycle_number ? '' : ' (estimated)'}</div>`;
                 })() : `<div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>`}
                 <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
               </div>
@@ -8257,11 +8331,13 @@ async function renderStatementsTimeline() {
   panel.innerHTML = `
     <div class="term-panel-head">Statements — ${esc(trackerState.map?.goal || '')}</div>
     ${sorted.map(b => {
-      // A checkpoint's statement is its due date's cycle statement — the
-      // same document the old Downloads tab produces. No due date yet
-      // (true for checkpoints created before due_date existed) falls back
-      // to the current cycle rather than refusing to download anything.
-      const cycleNum = b.due_date ? cycleNumberForDate(new Date(b.due_date + 'T00:00:00')) : getActiveCycle().num;
+      // A checkpoint's statement is its settlement cycle statement — the
+      // same document the old Downloads tab produces. Prefer the real
+      // recorded cycle_number (when this map is linked to a settled
+      // submission) over a due_date guess, and only fall back to the
+      // current cycle when neither exists yet.
+      const cycleNum = trackerState.settlement?.cycle_number
+        ?? (b.due_date ? cycleNumberForDate(new Date(b.due_date + 'T00:00:00')) : getActiveCycle().num);
       return `
       <div class="term-timeline-cp">
         <div class="term-timeline-head">
@@ -8322,6 +8398,8 @@ async function handleTermUpload(event) {
       p_mapped_by: operator.id,
       p_nodes: data.nodes,
       p_checkpoints: data.checkpoints,
+      p_source_html: text,
+      p_source_filename: file.name,
     });
     if (error) throw new Error(error.message);
 
@@ -11448,6 +11526,19 @@ async function loadWorkMap() {
     trackerState.leaves   = data.leaves || [];
     trackerState.mapId    = mapId;
     trackerState.source   = 'live';
+    trackerState.settlement = null;
+
+    // relation_submissions carries the REAL cycle a contract settled in —
+    // computing it client-side from a leaf's delivered_at can disagree
+    // with the authoritative number by a cycle (confirmed: Just Nutz
+    // delivered_at implied Cycle 19, the real recorded cycle is 18).
+    // Prefer this whenever a map is linked to a real submission.
+    if (trackerState.map?.submission_id) {
+      const { data: sub } = await sb.from('relation_submissions')
+        .select('cycle_number,settled_at,status')
+        .eq('id', trackerState.map.submission_id).maybeSingle();
+      trackerState.settlement = sub || null;
+    }
 
     if (operator) {
       const { data: g } = await sb.from('member_gates')

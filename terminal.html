@@ -2376,15 +2376,25 @@ html.theme-light{
 .term-panel-head{font-size:13px;color:var(--term-dim);margin-bottom:14px;}
 .term-panel-empty{color:var(--term-dim);font-style:italic;font-size:12.5px;}
 
-.term-board{display:flex;gap:14px;overflow-x:auto;align-items:flex-start;}
-.term-board-col{flex:1;min-width:200px;}
-.term-board-col-head{
-  font-size:11px;color:var(--term-dim);text-transform:uppercase;letter-spacing:.05em;
-  margin-bottom:8px;display:flex;justify-content:space-between;
+/* Tabs — one status at a time, "All" shows everything. Replaced the old
+   three-column board: the columns always showed every status at once,
+   which wasn't actually what a filter is supposed to do. */
+.term-tabs{display:flex;gap:4px;margin-bottom:16px;border-bottom:1px solid var(--term-line);flex-wrap:wrap;}
+.term-tab{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background:transparent;border:none;border-bottom:2px solid transparent;
+  color:var(--term-dim);font-family:var(--mono);font-size:12px;cursor:pointer;
+  padding:8px 4px;margin-bottom:-1px;display:flex;align-items:center;gap:6px;
 }
+.term-tab + .term-tab{margin-left:14px;}
+.term-tab:hover{color:var(--term-fg);}
+.term-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.term-tab-count{color:var(--term-dim);font-size:10.5px;}
+
+.term-board-flat{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
 .term-card{
-  border:1px solid var(--term-line);border-radius:7px;padding:10px;margin-bottom:8px;
-  font-size:12px;
+  border:1px solid var(--term-line);border-radius:7px;padding:10px;
+  font-size:12px;flex:0 0 240px;
 }
 .term-card-task{color:var(--term-fg);margin-bottom:6px;line-height:1.4;}
 .term-card-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--term-dim);font-size:10.5px;}
@@ -2668,9 +2678,10 @@ html.theme-light{
     <div class="term-sb-group">
       <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">Tracker</button>
       <div class="term-sb-sub" id="term-sb-tracker-sub">
-        <button class="term-sb-subitem" onclick="setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
-        <button class="term-sb-subitem" onclick="setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
-        <button class="term-sb-subitem" onclick="setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
+        <button class="term-sb-subitem" onclick="setTrackerFilter('to-do'); setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
+        <button class="term-sb-subitem" onclick="setTrackerFilter('in progress'); setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
+        <button class="term-sb-subitem" onclick="setTrackerFilter('delivered'); setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
+        <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
         <button class="term-sb-subitem" onclick="openCurrentMapFile()">Map <span class="term-sb-count" id="term-sb-map-mark">—</span></button>
       </div>
     </div>
@@ -8190,7 +8201,8 @@ function setTermView(view) {
 function updateSidebarCounts() {
   const live = trackerState?.source === 'live';
   document.querySelectorAll('#term-sb-tracker-sub [data-count]').forEach(el => {
-    el.textContent = live ? trackerState.leaves.filter(l => l.status === el.dataset.count).length : '—';
+    if (!live) { el.textContent = '—'; return; }
+    el.textContent = el.dataset.count === 'all' ? trackerState.leaves.length : trackerState.leaves.filter(l => l.status === el.dataset.count).length;
   });
   const sub = document.getElementById('term-sb-statements-sub');
   if (sub) {
@@ -8366,54 +8378,67 @@ async function renderTrackerBoard() {
     (ops || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
   }
 
-  const cols = [
+  const tabs = [
     { key: 'to-do', label: 'To-do' },
     { key: 'in progress', label: 'In progress' },
     { key: 'delivered', label: 'Delivered' },
+    { key: 'all', label: 'All' },
   ];
+  if (!window._trackerFilter) window._trackerFilter = 'all';
+  const active = window._trackerFilter;
+  const items = active === 'all' ? trackerState.leaves : trackerState.leaves.filter(l => l.status === active);
+
   const foldersHtml = await renderMapFolders();
   panel.innerHTML = `
     <div class="term-panel-head">Tracker — ${esc(trackerState.map?.goal || '')}</div>
     ${foldersHtml}
-    <div class="term-board">
-      ${cols.map(c => {
-        const items = trackerState.leaves.filter(l => l.status === c.key);
-        return `<div class="term-board-col">
-          <div class="term-board-col-head"><span>${c.label}</span><span>${items.length}</span></div>
-          ${items.map(l => {
-            const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
-            const payout = ((rateCents / 100) * l.logs).toFixed(2);
-            const owner = l.claimed_by ? (window._opNameCache[l.claimed_by] || 'Unknown member') : 'Unclaimed';
-            return `
-            <div class="term-card" data-leaf="${esc(l.id)}">
-              <div class="term-card-top" onclick="toggleTermCard('${esc(l.id)}')">
-                <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
-                <button class="term-card-toggle" aria-label="Details">+</button>
-              </div>
-              <div class="term-card-meta">
-                <span class="term-card-tag">${esc(l.tier)}</span>
-                <span class="term-card-tag">${l.logs} LOGs</span>
-                ${l.is_key ? '<span class="term-card-tag key">Key</span>' : ''}
-              </div>
-              <div class="term-card-detail" hidden>
-                <div>Owner — ${esc(owner)}</div>
-                ${l.status === 'delivered' && l.delivered_at ? (() => {
-                  // The real settlement's own cycle_number, when this map is
-                  // linked to one — not a client-side guess from a timestamp.
-                  const sub = trackerState.settlement;
-                  const whenSrc = sub?.settled_at || l.delivered_at;
-                  const when = new Date(whenSrc).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
-                  const cyc = sub?.cycle_number ?? cycleNumberForDate(new Date(l.delivered_at));
-                  return `<div>Settled — ${when} · Cycle ${cyc}${sub?.cycle_number ? '' : ' (estimated)'}</div>`;
-                })() : `<div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>`}
-                <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
-              </div>
-            </div>`;
-          }).join('') || '<div class="term-panel-empty">—</div>'}
-        </div>`;
+    <div class="term-tabs">
+      ${tabs.map(t => {
+        const n = t.key === 'all' ? trackerState.leaves.length : trackerState.leaves.filter(l => l.status === t.key).length;
+        return `<button class="term-tab ${t.key === active ? 'active' : ''}" onclick="setTrackerFilter('${t.key}')">${t.label} <span class="term-tab-count">${n}</span></button>`;
       }).join('')}
+    </div>
+    <div class="term-board-flat">
+      ${items.map(renderLeafCard).join('') || '<div class="term-panel-empty">Nothing here.</div>'}
     </div>`;
   updateSidebarCounts();
+}
+
+function renderLeafCard(l) {
+  const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
+  const payout = ((rateCents / 100) * l.logs).toFixed(2);
+  const owner = l.claimed_by ? (window._opNameCache[l.claimed_by] || 'Unknown member') : 'Unclaimed';
+  return `
+    <div class="term-card" data-leaf="${esc(l.id)}">
+      <div class="term-card-top" onclick="toggleTermCard('${esc(l.id)}')">
+        <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+        <button class="term-card-toggle" aria-label="Details">+</button>
+      </div>
+      <div class="term-card-meta">
+        <span class="term-card-tag">${esc(l.tier)}</span>
+        <span class="term-card-tag">${l.logs} LOGs</span>
+        <span class="term-card-tag">${esc(l.status)}</span>
+        ${l.is_key ? '<span class="term-card-tag key">Key</span>' : ''}
+      </div>
+      <div class="term-card-detail" hidden>
+        <div>Owner — ${esc(owner)}</div>
+        ${l.status === 'delivered' && l.delivered_at ? (() => {
+          // The real settlement's own cycle_number, when this map is
+          // linked to one — not a client-side guess from a timestamp.
+          const sub = trackerState.settlement;
+          const whenSrc = sub?.settled_at || l.delivered_at;
+          const when = new Date(whenSrc).toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+          const cyc = sub?.cycle_number ?? cycleNumberForDate(new Date(l.delivered_at));
+          return `<div>Settled — ${when} · Cycle ${cyc}${sub?.cycle_number ? '' : ' (estimated)'}</div>`;
+        })() : `<div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>`}
+        <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
+      </div>
+    </div>`;
+}
+
+function setTrackerFilter(key) {
+  window._trackerFilter = key;
+  renderTrackerBoard();
 }
 
 // Every decomposition the OS has ever mapped, as real folders you can open

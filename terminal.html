@@ -2464,18 +2464,44 @@ html.theme-light{
   #term-footer{padding:9px 48px 11px;}
 }
 
-/* "+" upload button — same treatment as the send button, same lesson
-   learned: appearance:none up front, not patched in after the fact. */
+/* "+" upload button — SOLID, same as the send button. An outline-only
+   circle reads as the same unfilled-ring look the send button had as a
+   bug; this one is deliberately filled so there's no ring anywhere. */
 #term-plus-sym{
   appearance:none;-webkit-appearance:none;-moz-appearance:none;
   flex-shrink:0;width:30px;height:30px;border-radius:50%;
   display:flex;align-items:center;justify-content:center;
-  background:transparent;border:1px solid var(--term-line);color:var(--term-dim);
+  background:var(--term-line);border:1px solid var(--term-line);color:var(--term-fg);
   font-family:var(--mono);font-size:16px;font-weight:600;cursor:pointer;
-  transition:border-color .12s,color .12s,transform .1s;
+  transition:background .12s,color .12s,transform .1s;
 }
-#term-plus-sym:hover{border-color:var(--green);color:var(--green);}
+#term-plus-sym:hover{background:var(--green);border-color:var(--green);color:#08110C;}
 #term-plus-sym:active{transform:scale(.92);}
+
+/* Tracker cards — click to expand a detail strip, minus to retract */
+.term-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;cursor:pointer;}
+.term-card-toggle{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  flex-shrink:0;width:18px;height:18px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--term-line);border:none;color:var(--term-fg);
+  font-family:var(--mono);font-size:12px;line-height:1;cursor:pointer;
+}
+.term-card-toggle:hover{background:var(--green);color:#08110C;}
+.term-card-detail{
+  margin-top:8px;padding-top:8px;border-top:1px solid var(--term-line);
+  display:flex;flex-direction:column;gap:3px;color:var(--term-dim);font-size:11px;
+}
+.term-card-detail[hidden]{display:none;}
+
+.term-timeline-dl{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  margin-top:10px;background:transparent;border:1px solid var(--green);color:var(--green);
+  font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:5px;cursor:pointer;
+  transition:background .12s,color .12s;
+}
+.term-timeline-dl:hover{background:var(--green);color:#08110C;}
+.term-timeline-dl:disabled{opacity:.5;cursor:default;background:transparent;color:var(--term-dim);border-color:var(--term-line);}
 </style>
 </head>
 <body>
@@ -8153,6 +8179,12 @@ async function renderTrackerBoard() {
     return;
   }
 
+  if (!window._opNameCache) {
+    const { data: ops } = await sb.rpc('list_operators');
+    window._opNameCache = {};
+    (ops || []).forEach(o => { window._opNameCache[o.id] = o.peer_name; });
+  }
+
   const cols = [
     { key: 'to-do', label: 'To-do' },
     { key: 'in progress', label: 'In progress' },
@@ -8165,19 +8197,42 @@ async function renderTrackerBoard() {
         const items = trackerState.leaves.filter(l => l.status === c.key);
         return `<div class="term-board-col">
           <div class="term-board-col-head"><span>${c.label}</span><span>${items.length}</span></div>
-          ${items.map(l => `
-            <div class="term-card">
-              <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+          ${items.map(l => {
+            const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
+            const payout = ((rateCents / 100) * l.logs).toFixed(2);
+            const owner = l.claimed_by ? (window._opNameCache[l.claimed_by] || 'Unknown member') : 'Unclaimed';
+            return `
+            <div class="term-card" data-leaf="${esc(l.id)}">
+              <div class="term-card-top" onclick="toggleTermCard('${esc(l.id)}')">
+                <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+                <button class="term-card-toggle" aria-label="Details">+</button>
+              </div>
               <div class="term-card-meta">
                 <span class="term-card-tag">${esc(l.tier)}</span>
                 <span class="term-card-tag">${l.logs} LOGs</span>
                 ${l.is_key ? '<span class="term-card-tag key">Key</span>' : ''}
               </div>
-            </div>`).join('') || '<div class="term-panel-empty">—</div>'}
+              <div class="term-card-detail" hidden>
+                <div>Owner — ${esc(owner)}</div>
+                <div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>
+                <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
+              </div>
+            </div>`;
+          }).join('') || '<div class="term-panel-empty">—</div>'}
         </div>`;
       }).join('')}
     </div>`;
   updateSidebarCounts();
+}
+
+function toggleTermCard(leafId) {
+  const card = document.querySelector(`.term-card[data-leaf="${CSS.escape(leafId)}"]`);
+  if (!card) return;
+  const detail = card.querySelector('.term-card-detail');
+  const btn = card.querySelector('.term-card-toggle');
+  const opening = detail.hidden;
+  detail.hidden = !opening;
+  btn.textContent = opening ? '−' : '+';
 }
 
 // ── Statements timeline — Worksheet B's checkpoints, dated ──────────────
@@ -8196,15 +8251,47 @@ async function renderStatementsTimeline() {
   const sorted = [...trackerState.branches].sort((a, b) => (a.due_date || '9999-99-99') < (b.due_date || '9999-99-99') ? -1 : 1);
   panel.innerHTML = `
     <div class="term-panel-head">Statements — ${esc(trackerState.map?.goal || '')}</div>
-    ${sorted.map(b => `
+    ${sorted.map(b => {
+      // A checkpoint's statement is its due date's cycle statement — the
+      // same document the old Downloads tab produces. No due date yet
+      // (true for checkpoints created before due_date existed) falls back
+      // to the current cycle rather than refusing to download anything.
+      const cycleNum = b.due_date ? cycleNumberForDate(new Date(b.due_date + 'T00:00:00')) : getActiveCycle().num;
+      return `
       <div class="term-timeline-cp">
         <div class="term-timeline-head">
           <span class="term-timeline-title">${esc(b.code)} — ${esc(b.title)}</span>
           <span class="term-timeline-due">${b.due_date ? fmtDate(b.due_date) : 'No due date set'}</span>
         </div>
         <div class="term-timeline-meta">${b.leaf_count} node${b.leaf_count === 1 ? '' : 's'} · ${b.total_logs} LOGs</div>
-      </div>`).join('')}`;
+        <button class="term-timeline-dl" onclick="downloadCheckpointStatement(${cycleNum}, this)">Download statement (PDF) — Cycle ${cycleNum}</button>
+      </div>`;
+    }).join('')}`;
   updateSidebarCounts();
+}
+
+// Reuses the exact same report + PDF pipeline as the old Downloads tab —
+// this isn't a new, checkpoint-scoped document, it's the operator's real
+// cycle statement for the cycle this checkpoint falls in.
+async function downloadCheckpointStatement(cycleNum, btnEl) {
+  if (!operator) { termPrint('Sign in as an operator to download a statement.', 'err'); return; }
+  const original = btnEl.textContent;
+  btnEl.disabled = true;
+  btnEl.textContent = 'Preparing…';
+  try {
+    window._downloadsCache = window._downloadsCache || {};
+    const report = window._downloadsCache[cycleNum] || await generateCycleAudit(cycleNum);
+    if (!report) { toast('Could not load that cycle.'); return; }
+    window._downloadsCache[cycleNum] = report;
+    window._lastAudit = report;
+    downloadCycleAuditPDF();
+  } catch (e) {
+    console.error(e);
+    toast('Could not generate the statement — try again.');
+  } finally {
+    btnEl.disabled = false;
+    btnEl.textContent = original;
+  }
 }
 
 // ── Upload: a decomposition worksheet export becomes a real work_map ────

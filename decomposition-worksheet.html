@@ -1,0 +1,332 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>Decomposition &amp; Checkpoint Worksheet — Bixxville</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#161616; --fg:#E4E4E2; --dim:#7A7A78; --line:#2A2A28;
+  --green:#8CF060; --orange:#E8884A; --red:#E05252; --mono:'IBM Plex Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{
+  background:var(--bg);color:var(--fg);font-family:var(--mono);font-size:13.5px;
+  line-height:1.6;padding:24px 20px 80px;max-width:880px;margin:0 auto;
+}
+h1{font-size:18px;font-weight:600;margin-bottom:4px;}
+.sub{color:var(--dim);font-size:12px;margin-bottom:24px;}
+section{border:1px solid var(--line);border-radius:8px;padding:16px;margin-bottom:16px;}
+section h2{font-size:13px;color:var(--green);text-transform:uppercase;letter-spacing:.04em;margin-bottom:12px;}
+label{display:block;font-size:11px;color:var(--dim);margin-bottom:3px;}
+input[type=text],input[type=number],input[type=date],select,textarea{
+  width:100%;background:#0D0D0D;border:1px solid var(--line);border-radius:5px;
+  color:var(--fg);font-family:var(--mono);font-size:13px;padding:6px 8px;outline:none;
+}
+input:focus,select:focus,textarea:focus{border-color:var(--green);}
+.row{display:flex;gap:8px;align-items:flex-start;}
+.field{flex:1;margin-bottom:8px;}
+.field-sm{flex:0 0 90px;}
+.node-card{border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:10px;position:relative;}
+.node-card.genesis{border-color:var(--red);}
+.node-card.outcome{border-color:var(--green);}
+.node-card.key{border-color:var(--orange);}
+.node-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.node-code{font-weight:600;color:var(--green);}
+.tag{font-size:10px;padding:2px 6px;border-radius:3px;margin-left:6px;}
+.tag.genesis{background:rgba(224,82,82,.15);color:var(--red);}
+.tag.outcome{background:rgba(140,240,96,.15);color:var(--green);}
+.tag.key{background:rgba(232,136,74,.15);color:var(--orange);}
+button{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  font-family:var(--mono);font-size:12px;cursor:pointer;border-radius:5px;
+  border:1px solid var(--line);background:#0D0D0D;color:var(--fg);padding:7px 12px;
+}
+button:hover{border-color:var(--green);}
+button.primary{background:var(--green);color:#08110C;border-color:var(--green);font-weight:600;}
+button.danger{color:var(--red);}
+.checks{display:flex;gap:14px;align-items:center;font-size:12px;color:var(--dim);}
+.checks label{display:flex;align-items:center;gap:5px;color:var(--fg);margin:0;}
+.total{color:var(--dim);font-size:12px;margin-top:8px;}
+.cp-card{border:1px solid var(--line);border-radius:6px;padding:10px;margin-bottom:10px;}
+.cp-nodes{color:var(--dim);font-size:12px;margin-top:4px;}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+.hint{color:var(--dim);font-size:11px;margin-top:8px;}
+.err{color:var(--red);font-size:12px;margin-top:8px;}
+select[multiple]{height:72px;}
+</style>
+</head>
+<body>
+
+<h1>Decomposition &amp; Checkpoint Worksheet</h1>
+<div class="sub">Fill Worksheet A, run the collapse, check Worksheet B, download. Upload the result into the terminal with <strong>+</strong> to populate the Tracker and Statements for real.</div>
+
+<section>
+  <h2>Project</h2>
+  <div class="row">
+    <div class="field"><label>Project / Job name</label><input type="text" id="goal" placeholder="e.g. Sanitation contract — Route 4"></div>
+    <div class="field field-sm"><label>Date</label><input type="date" id="jobdate"></div>
+    <div class="field field-sm"><label>Threshold (LOGs/checkpoint)</label><input type="number" id="threshold" value="4" min="1"></div>
+  </div>
+</section>
+
+<section>
+  <h2>Worksheet A — every real node</h2>
+  <div id="nodes"></div>
+  <div class="actions">
+    <button id="addNode">+ Add node</button>
+  </div>
+  <div class="total" id="nodeTotal"></div>
+</section>
+
+<section>
+  <h2>Collapse into checkpoints</h2>
+  <div class="hint">Groups consecutive nodes, starting from Genesis, until the running LOG total reaches your threshold — same rule every time.</div>
+  <div class="actions"><button id="runCollapse" class="primary">Run collapse</button></div>
+  <div id="checkpoints" style="margin-top:12px;"></div>
+</section>
+
+<section>
+  <h2>Export</h2>
+  <div class="actions">
+    <button id="downloadBtn" class="primary">Download completed worksheet</button>
+    <label style="display:inline-flex;align-items:center;">
+      <input type="file" id="loadFile" accept=".html" style="display:none;">
+      <button id="loadBtn" type="button">Load a saved worksheet</button>
+    </label>
+  </div>
+  <div class="err" id="exportErr"></div>
+  <div class="hint">The downloaded file is self-contained — open it later to keep editing, or upload it as-is into the terminal.</div>
+</section>
+
+<script type="application/json" id="logg-data">__LOGG_DATA__</script>
+
+<script>
+let nodes = [];   // {code, task, logs, tier, kind, is_key, requires:[], done_criterion, checkpoint}
+let checkpoints = []; // {code, title, due_date, position}
+let nextCode = 0; // 0->A, 1->B, ...
+
+function codeFor(i){ return String.fromCharCode(65 + i); }
+
+function render(){
+  const wrap = document.getElementById('nodes');
+  wrap.innerHTML = '';
+  nodes.forEach((n, idx) => {
+    const cls = ['node-card'];
+    if (n.kind === 'genesis') cls.push('genesis');
+    if (n.kind === 'outcome') cls.push('outcome');
+    if (n.is_key) cls.push('key');
+    const card = document.createElement('div');
+    card.className = cls.join(' ');
+    const reqOptions = nodes.filter(x => x.code !== n.code)
+      .map(x => `<option value="${x.code}" ${n.requires.includes(x.code) ? 'selected' : ''}>${x.code} — ${esc(x.task || '(untitled)')}</option>`).join('');
+    card.innerHTML = `
+      <div class="node-head">
+        <div><span class="node-code">${n.code}</span>
+          ${n.kind === 'genesis' ? '<span class="tag genesis">Genesis</span>' : ''}
+          ${n.kind === 'outcome' ? '<span class="tag outcome">Outcome</span>' : ''}
+          ${n.is_key ? '<span class="tag key">Key</span>' : ''}
+        </div>
+        <button data-act="remove" data-idx="${idx}" class="danger">Remove</button>
+      </div>
+      <div class="field"><label>Task</label><input type="text" data-field="task" data-idx="${idx}" value="${escAttr(n.task)}"></div>
+      <div class="row">
+        <div class="field field-sm"><label>LOGs</label><input type="number" min="1" max="32" data-field="logs" data-idx="${idx}" value="${n.logs}"></div>
+        <div class="field"><label>Tier</label>
+          <select data-field="tier" data-idx="${idx}">
+            ${['apprentice','wrangler','architect','operator'].map(t => `<option value="${t}" ${n.tier===t?'selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="field"><label>Kind</label>
+          <select data-field="kind" data-idx="${idx}">
+            <option value="leaf" ${n.kind==='leaf'?'selected':''}>— ordinary node —</option>
+            <option value="genesis" ${n.kind==='genesis'?'selected':''}>Genesis (the start)</option>
+            <option value="outcome" ${n.kind==='outcome'?'selected':''}>Outcome (the finish)</option>
+          </select>
+        </div>
+      </div>
+      <div class="field"><label>Depends on</label><select multiple data-field="requires" data-idx="${idx}">${reqOptions}</select></div>
+      <div class="field"><label>Done criterion — binary, done or not done</label><input type="text" data-field="done_criterion" data-idx="${idx}" value="${escAttr(n.done_criterion)}" placeholder="e.g. Client sign-off received"></div>
+      <div class="checks"><label><input type="checkbox" data-field="is_key" data-idx="${idx}" ${n.is_key?'checked':''}> Key node — the rest of the project depends on it</label></div>
+    `;
+    wrap.appendChild(card);
+  });
+
+  const total = nodes.reduce((s, n) => s + (parseInt(n.logs, 10) || 0), 0);
+  document.getElementById('nodeTotal').textContent = `Total LOGs, all nodes: ${total}`;
+}
+
+function esc(s){ return String(s ?? '').replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c])); }
+function escAttr(s){ return esc(s).replace(/"/g, '&quot;'); }
+
+document.getElementById('nodes').addEventListener('input', (e) => {
+  const idx = e.target.dataset.idx;
+  if (idx == null) return;
+  const field = e.target.dataset.field;
+  const n = nodes[idx];
+  if (!n) return;
+  if (field === 'logs') n.logs = parseInt(e.target.value, 10) || 0;
+  else if (field === 'is_key') n.is_key = e.target.checked;
+  else if (field === 'requires') n.requires = [...e.target.selectedOptions].map(o => o.value);
+  else if (field === 'kind') {
+    if (e.target.value === 'genesis') nodes.forEach(x => { if (x !== n && x.kind === 'genesis') x.kind = 'leaf'; });
+    if (e.target.value === 'outcome') nodes.forEach(x => { if (x !== n && x.kind === 'outcome') x.kind = 'leaf'; });
+    n.kind = e.target.value;
+    render();
+    return;
+  }
+  else n[field] = e.target.value;
+  if (field !== 'requires') render();
+  else document.getElementById('nodeTotal').textContent = document.getElementById('nodeTotal').textContent; // no-op, avoid losing focus
+});
+
+document.getElementById('nodes').addEventListener('click', (e) => {
+  if (e.target.dataset.act === 'remove') {
+    const idx = parseInt(e.target.dataset.idx, 10);
+    const removedCode = nodes[idx].code;
+    nodes.splice(idx, 1);
+    nodes.forEach(n => { n.requires = n.requires.filter(c => c !== removedCode); });
+    render();
+  }
+});
+
+document.getElementById('addNode').addEventListener('click', () => {
+  const code = codeFor(nextCode++);
+  nodes.push({ code, task:'', logs:1, tier:'apprentice', kind: nodes.length === 0 ? 'genesis' : 'leaf', is_key:false, requires: nodes.length ? [nodes[nodes.length-1].code] : [], done_criterion:'', checkpoint:null });
+  render();
+});
+
+document.getElementById('runCollapse').addEventListener('click', () => {
+  const err = document.getElementById('exportErr');
+  err.textContent = '';
+  if (!nodes.length) { err.textContent = 'Add at least one node first.'; return; }
+  if (!nodes.some(n => n.kind === 'genesis')) { err.textContent = 'Mark exactly one node as Genesis first.'; return; }
+  if (!nodes.some(n => n.kind === 'outcome')) { err.textContent = 'Mark exactly one node as Outcome first.'; return; }
+
+  const threshold = parseInt(document.getElementById('threshold').value, 10) || 4;
+  checkpoints = [];
+  let group = [];
+  let running = 0;
+  let cpNum = 1;
+
+  // "Outcome forces it" (per the worked example): Outcome is never left to
+  // start a checkpoint of its own. If closing here would strand Outcome
+  // alone next, keep the group open and fold Outcome in instead.
+  nodes.forEach((n, i) => {
+    group.push(n.code);
+    running += (parseInt(n.logs, 10) || 0);
+    n.checkpoint = `CP${cpNum}`;
+    const isOutcome = n.kind === 'outcome';
+    const isLast = i === nodes.length - 1;
+    const nextIsOutcome = nodes[i + 1] && nodes[i + 1].kind === 'outcome';
+    if (isOutcome || isLast || (running >= threshold && !nextIsOutcome)) {
+      checkpoints.push({ code: `CP${cpNum}`, title: `Checkpoint ${cpNum}`, due_date: '', position: cpNum - 1, node_codes: [...group] });
+      group = [];
+      running = 0;
+      cpNum++;
+    }
+  });
+
+  renderCheckpoints();
+});
+
+function renderCheckpoints(){
+  const wrap = document.getElementById('checkpoints');
+  if (!checkpoints.length) { wrap.innerHTML = '<div class="hint">Run the collapse to see Worksheet B.</div>'; return; }
+  wrap.innerHTML = checkpoints.map((cp, i) => `
+    <div class="cp-card">
+      <div class="row">
+        <div class="field"><label>Title</label><input type="text" data-cp="${i}" data-cpfield="title" value="${escAttr(cp.title)}"></div>
+        <div class="field field-sm"><label>Due</label><input type="date" data-cp="${i}" data-cpfield="due_date" value="${cp.due_date || ''}"></div>
+      </div>
+      <div class="cp-nodes">Nodes: ${cp.node_codes.join(', ')} — ${cp.node_codes.reduce((s,c)=>s+(nodes.find(n=>n.code===c)?.logs||0),0)} LOGs</div>
+    </div>
+  `).join('');
+}
+
+document.getElementById('checkpoints').addEventListener('input', (e) => {
+  const i = e.target.dataset.cp;
+  if (i == null) return;
+  checkpoints[i][e.target.dataset.cpfield] = e.target.value;
+});
+
+document.getElementById('downloadBtn').addEventListener('click', () => {
+  const err = document.getElementById('exportErr');
+  err.textContent = '';
+  const goal = document.getElementById('goal').value.trim();
+  if (!goal) { err.textContent = 'Project / job name is required.'; return; }
+  if (!checkpoints.length) { err.textContent = 'Run the collapse before downloading — Worksheet B is empty.'; return; }
+  if (nodes.some(n => !n.task.trim())) { err.textContent = 'Every node needs a task name.'; return; }
+  if (nodes.some(n => !n.done_criterion.trim())) { err.textContent = 'Every node needs a done criterion.'; return; }
+  if (nodes.some(n => n.checkpoint == null)) { err.textContent = 'Re-run the collapse — some nodes changed since the last run.'; return; }
+
+  const payload = {
+    goal,
+    date: document.getElementById('jobdate').value,
+    threshold: parseInt(document.getElementById('threshold').value, 10) || 4,
+    nodes: nodes.map(({code,task,logs,tier,kind,is_key,requires,done_criterion,checkpoint}) => ({code,task,logs,tier,kind,is_key,requires,done_criterion,checkpoint})),
+    checkpoints: checkpoints.map(({code,title,due_date,position}) => ({code,title,due_date,position})),
+  };
+
+  const html = document.documentElement.outerHTML.replace(
+    /<script type="application\/json" id="logg-data">[\s\S]*?<\/script>/,
+    `<script type="application/json" id="logg-data">${JSON.stringify(payload)}<\/script>`
+  );
+  const blob = new Blob(['<!doctype html>\n' + html], { type: 'text/html' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  const safeName = goal.replace(/[^a-z0-9]+/gi, '-').toLowerCase().slice(0, 60) || 'worksheet';
+  a.download = `decomposition-${safeName}.html`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+});
+
+document.getElementById('loadBtn').addEventListener('click', () => document.getElementById('loadFile').click());
+document.getElementById('loadFile').addEventListener('change', (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const match = reader.result.match(/<script type="application\/json" id="logg-data">([\s\S]*?)<\/script>/);
+    if (!match) { document.getElementById('exportErr').textContent = 'Could not find worksheet data in that file.'; return; }
+    try {
+      const data = JSON.parse(match[1]);
+      hydrate(data);
+    } catch (err) {
+      document.getElementById('exportErr').textContent = 'That file is not a valid saved worksheet.';
+    }
+  };
+  reader.readAsText(file);
+});
+
+function hydrate(data){
+  document.getElementById('goal').value = data.goal || '';
+  document.getElementById('jobdate').value = data.date || '';
+  document.getElementById('threshold').value = data.threshold || 4;
+  nodes = (data.nodes || []).map(n => ({ requires: [], is_key: false, ...n }));
+  nextCode = nodes.length;
+  checkpoints = (data.checkpoints || []).map(cp => ({
+    ...cp,
+    node_codes: nodes.filter(n => n.checkpoint === cp.code).map(n => n.code),
+  }));
+  render();
+  renderCheckpoints();
+}
+
+// Boot: if this file was opened after being downloaded, it carries real
+// data in #logg-data — load it. A fresh copy of the form has "__LOGG_DATA__"
+// there, which isn't valid JSON, so it starts empty instead.
+(function boot(){
+  const raw = document.getElementById('logg-data').textContent;
+  try {
+    const data = JSON.parse(raw);
+    if (data && data.nodes) { hydrate(data); return; }
+  } catch (e) { /* fresh form, not a loaded save */ }
+  render();
+  renderCheckpoints();
+})();
+</script>
+</body>
+</html>

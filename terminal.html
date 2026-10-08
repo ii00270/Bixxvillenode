@@ -2301,11 +2301,102 @@ html.theme-light{
 
 #terminal-shell{
   position:fixed;inset:0;z-index:40;
-  display:none;flex-direction:column;
+  display:none;flex-direction:row;
   background:var(--term-bg);color:var(--term-fg);
   font-family:var(--mono);
 }
 #terminal-shell.in{display:flex;}
+
+#term-main{flex:1;min-width:0;display:flex;flex-direction:column;height:100%;}
+
+/* ── Sidebar — nested groups, smooth hover, no heavy chrome ── */
+#term-sidebar{
+  width:220px;flex-shrink:0;overflow-y:auto;
+  border-right:1px solid var(--term-line);
+  display:flex;flex-direction:column;padding:16px 10px;gap:2px;
+}
+.term-sb-head{
+  font-family:var(--display);font-weight:800;font-size:12.5px;
+  letter-spacing:.06em;color:var(--term-fg);padding:4px 10px 16px;
+}
+.term-sb-group{margin-bottom:2px;}
+.term-sb-item{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  width:100%;text-align:left;background:transparent;border:none;border-radius:6px;
+  color:var(--term-fg);font-family:var(--mono);font-size:12.5px;padding:8px 10px;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;
+  transition:background .12s;
+}
+.term-sb-item:hover{background:var(--term-line);}
+.term-sb-item.active{background:var(--term-line);color:var(--green);}
+.term-sb-sub{
+  display:flex;flex-direction:column;margin:2px 0 8px 14px;
+  border-left:1px solid var(--term-line);padding-left:10px;
+}
+.term-sb-subitem{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background:transparent;border:none;text-align:left;color:var(--term-dim);
+  font-family:var(--mono);font-size:11.5px;padding:6px 8px;border-radius:5px;
+  cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:8px;
+  transition:background .12s,color .12s;
+}
+.term-sb-subitem:hover{background:var(--term-line);color:var(--term-fg);}
+.term-sb-count{color:var(--term-dim);font-size:10.5px;}
+
+#term-sidebar-backdrop{display:none;}
+
+/* ── Mobile: sidebar becomes a floating drawer, opened by a FAB ── */
+#term-fab{display:none;}
+@media (max-width:767px){
+  #term-sidebar{
+    position:fixed;top:0;bottom:0;left:0;width:78%;max-width:260px;z-index:60;
+    transform:translateX(-100%);transition:transform .22s ease;
+    box-shadow:2px 0 24px rgba(0,0,0,.4);
+  }
+  #terminal-shell.sidebar-open #term-sidebar{transform:translateX(0);}
+  #term-sidebar-backdrop{
+    display:block;position:fixed;inset:0;z-index:59;
+    background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s;
+  }
+  #terminal-shell.sidebar-open #term-sidebar-backdrop{opacity:1;pointer-events:auto;}
+  #term-fab{
+    display:flex;appearance:none;-webkit-appearance:none;-moz-appearance:none;
+    position:fixed;left:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:61;
+    width:46px;height:46px;border-radius:50%;align-items:center;justify-content:center;
+    background:var(--green);color:#08110C;border:1px solid var(--green);
+    font-size:17px;cursor:pointer;box-shadow:0 2px 14px rgba(0,0,0,.4);
+    transition:transform .1s;
+  }
+  #term-fab:active{transform:scale(.92);}
+}
+
+/* ── Tracker board / Statements timeline — swap in for #term-scroll ── */
+#term-panel{flex:1;min-height:0;overflow-y:auto;padding:18px 20px;}
+.term-panel-head{font-size:13px;color:var(--term-dim);margin-bottom:14px;}
+.term-panel-empty{color:var(--term-dim);font-style:italic;font-size:12.5px;}
+
+.term-board{display:flex;gap:14px;overflow-x:auto;align-items:flex-start;}
+.term-board-col{flex:1;min-width:200px;}
+.term-board-col-head{
+  font-size:11px;color:var(--term-dim);text-transform:uppercase;letter-spacing:.05em;
+  margin-bottom:8px;display:flex;justify-content:space-between;
+}
+.term-card{
+  border:1px solid var(--term-line);border-radius:7px;padding:10px;margin-bottom:8px;
+  font-size:12px;
+}
+.term-card-task{color:var(--term-fg);margin-bottom:6px;line-height:1.4;}
+.term-card-meta{display:flex;gap:8px;flex-wrap:wrap;color:var(--term-dim);font-size:10.5px;}
+.term-card-tag{padding:1px 6px;border-radius:3px;border:1px solid var(--term-line);}
+.term-card-tag.key{color:var(--orange);border-color:var(--orange);}
+
+.term-timeline-cp{
+  border:1px solid var(--term-line);border-radius:7px;padding:12px 14px;margin-bottom:10px;
+}
+.term-timeline-head{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:4px;}
+.term-timeline-title{color:var(--term-fg);font-size:13px;}
+.term-timeline-due{color:var(--term-dim);font-size:11px;}
+.term-timeline-meta{color:var(--term-dim);font-size:11px;}
 
 #term-scroll{
   flex:1;min-height:0;overflow-y:auto;
@@ -2368,9 +2459,23 @@ html.theme-light{
 
 @media (min-width:768px){
   #term-scroll{padding:28px 48px 14px;font-size:14px;}
+  #term-panel{padding:28px 48px;}
   #term-inputrow{padding:6px 48px 16px;}
   #term-footer{padding:9px 48px 11px;}
 }
+
+/* "+" upload button — same treatment as the send button, same lesson
+   learned: appearance:none up front, not patched in after the fact. */
+#term-plus-sym{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  flex-shrink:0;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:transparent;border:1px solid var(--term-line);color:var(--term-dim);
+  font-family:var(--mono);font-size:16px;font-weight:600;cursor:pointer;
+  transition:border-color .12s,color .12s,transform .1s;
+}
+#term-plus-sym:hover{border-color:var(--green);color:var(--green);}
+#term-plus-sym:active{transform:scale(.92);}
 </style>
 </head>
 <body>
@@ -2501,16 +2606,41 @@ html.theme-light{
      as logic (Tracker, Downloads, Messages, canon) for terminal commands
      to call into as they're built out; it's just not shown as screens. ══ -->
 <div id="terminal-shell">
-  <div id="term-scroll"></div>
-  <div id="term-inputrow">
-    <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send">❯</button>
-    <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
-  </div>
-  <div id="term-footer">
-    <span class="seg"><span class="live-dot"></span><span id="term-time">—</span></span>
-    <span class="seg" id="term-cycle">—</span>
-    <span class="seg" id="term-balance">—</span>
-    <span class="seg" id="term-id">—</span>
+  <div id="term-sidebar-backdrop" onclick="toggleTermSidebar(false)"></div>
+  <nav id="term-sidebar">
+    <div class="term-sb-head">BIXXVILLE</div>
+    <div class="term-sb-group">
+      <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">Terminal</button>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">Tracker</button>
+      <div class="term-sb-sub" id="term-sb-tracker-sub">
+        <button class="term-sb-subitem" onclick="setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
+        <button class="term-sb-subitem" onclick="setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
+        <button class="term-sb-subitem" onclick="setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
+      </div>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">Statements</button>
+      <div class="term-sb-sub" id="term-sb-statements-sub"></div>
+    </div>
+  </nav>
+  <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu">☰</button>
+  <div id="term-main">
+    <div id="term-scroll"></div>
+    <div id="term-panel" hidden></div>
+    <div id="term-inputrow">
+      <button id="term-plus-sym" onclick="document.getElementById('term-upload-file').click()" title="Upload a decomposition worksheet" aria-label="Upload">+</button>
+      <input id="term-upload-file" type="file" accept=".html" hidden onchange="handleTermUpload(event)"/>
+      <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send">❯</button>
+      <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
+    </div>
+    <div id="term-footer">
+      <span class="seg"><span class="live-dot"></span><span id="term-time">—</span></span>
+      <span class="seg" id="term-cycle">—</span>
+      <span class="seg" id="term-balance">—</span>
+      <span class="seg" id="term-id">—</span>
+    </div>
   </div>
 </div>
 
@@ -7965,6 +8095,152 @@ function enterTerminal() {
   }
   input?.focus();
   document.getElementById('term-scroll')?.addEventListener('click', () => input?.focus());
+
+  if (!shell.dataset.sidebarBooted) {
+    shell.dataset.sidebarBooted = '1';
+    setTermView('terminal');
+    loadWorkMap().then(updateSidebarCounts);
+  }
+}
+
+// ── Sidebar: nested nav, mobile drawer ──────────────────────────────────
+function toggleTermSidebar(force) {
+  const shell = document.getElementById('terminal-shell');
+  if (!shell) return;
+  const open = typeof force === 'boolean' ? force : !shell.classList.contains('sidebar-open');
+  shell.classList.toggle('sidebar-open', open);
+}
+
+function setTermView(view) {
+  document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  const scroll = document.getElementById('term-scroll');
+  const panel = document.getElementById('term-panel');
+  if (view === 'terminal') {
+    scroll.style.display = '';
+    panel.style.display = 'none';
+  } else {
+    scroll.style.display = 'none';
+    panel.style.display = 'block';
+    if (view === 'tracker') renderTrackerBoard();
+    else if (view === 'statements') renderStatementsTimeline();
+  }
+  toggleTermSidebar(false);
+}
+
+function updateSidebarCounts() {
+  const live = trackerState?.source === 'live';
+  document.querySelectorAll('#term-sb-tracker-sub [data-count]').forEach(el => {
+    el.textContent = live ? trackerState.leaves.filter(l => l.status === el.dataset.count).length : '—';
+  });
+  const sub = document.getElementById('term-sb-statements-sub');
+  if (sub) {
+    sub.innerHTML = live
+      ? trackerState.branches.map(b => `<button class="term-sb-subitem" onclick="setTermView('statements')"><span>${esc(b.code)}</span><span class="term-sb-count">${b.leaf_count}</span></button>`).join('')
+      : '';
+  }
+}
+
+// ── Tracker board — Worksheet A's nodes, grouped by real status ─────────
+async function renderTrackerBoard() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  if (!trackerState || trackerState.source == null) await loadWorkMap();
+
+  if (trackerState.source !== 'live' || !trackerState.leaves?.length) {
+    panel.innerHTML = `<div class="term-panel-head">Tracker</div>
+      <div class="term-panel-empty">No live work map yet. Upload a decomposition worksheet with + to populate it.</div>`;
+    updateSidebarCounts();
+    return;
+  }
+
+  const cols = [
+    { key: 'to-do', label: 'To-do' },
+    { key: 'in progress', label: 'In progress' },
+    { key: 'delivered', label: 'Delivered' },
+  ];
+  panel.innerHTML = `
+    <div class="term-panel-head">Tracker — ${esc(trackerState.map?.goal || '')}</div>
+    <div class="term-board">
+      ${cols.map(c => {
+        const items = trackerState.leaves.filter(l => l.status === c.key);
+        return `<div class="term-board-col">
+          <div class="term-board-col-head"><span>${c.label}</span><span>${items.length}</span></div>
+          ${items.map(l => `
+            <div class="term-card">
+              <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+              <div class="term-card-meta">
+                <span class="term-card-tag">${esc(l.tier)}</span>
+                <span class="term-card-tag">${l.logs} LOGs</span>
+                ${l.is_key ? '<span class="term-card-tag key">Key</span>' : ''}
+              </div>
+            </div>`).join('') || '<div class="term-panel-empty">—</div>'}
+        </div>`;
+      }).join('')}
+    </div>`;
+  updateSidebarCounts();
+}
+
+// ── Statements timeline — Worksheet B's checkpoints, dated ──────────────
+async function renderStatementsTimeline() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  if (!trackerState || trackerState.source == null) await loadWorkMap();
+
+  if (trackerState.source !== 'live' || !trackerState.branches?.length) {
+    panel.innerHTML = `<div class="term-panel-head">Statements</div>
+      <div class="term-panel-empty">No checkpoints yet. Upload a decomposition worksheet with + to populate it.</div>`;
+    updateSidebarCounts();
+    return;
+  }
+
+  const sorted = [...trackerState.branches].sort((a, b) => (a.due_date || '9999-99-99') < (b.due_date || '9999-99-99') ? -1 : 1);
+  panel.innerHTML = `
+    <div class="term-panel-head">Statements — ${esc(trackerState.map?.goal || '')}</div>
+    ${sorted.map(b => `
+      <div class="term-timeline-cp">
+        <div class="term-timeline-head">
+          <span class="term-timeline-title">${esc(b.code)} — ${esc(b.title)}</span>
+          <span class="term-timeline-due">${b.due_date ? fmtDate(b.due_date) : 'No due date set'}</span>
+        </div>
+        <div class="term-timeline-meta">${b.leaf_count} node${b.leaf_count === 1 ? '' : 's'} · ${b.total_logs} LOGs</div>
+      </div>`).join('')}`;
+  updateSidebarCounts();
+}
+
+// ── Upload: a decomposition worksheet export becomes a real work_map ────
+async function handleTermUpload(event) {
+  const file = event.target.files[0];
+  event.target.value = '';
+  if (!file) return;
+  if (!operator) { setTermView('terminal'); termPrint('Sign in as an operator to upload a decomposition.', 'err'); return; }
+
+  setTermView('terminal');
+  termPrint(`Uploading ${file.name}…`, 'system');
+  try {
+    const text = await file.text();
+    const match = text.match(/<script type="application\/json" id="logg-data">([\s\S]*?)<\/script>/);
+    if (!match) throw new Error('Not a decomposition worksheet — no data found in the file.');
+    const data = JSON.parse(match[1]);
+    if (!data.goal || !data.nodes?.length || !data.checkpoints?.length) {
+      throw new Error('Worksheet is incomplete — fill it out and run the collapse before downloading.');
+    }
+
+    const { error } = await sb.rpc('create_work_map_from_decomposition', {
+      p_goal: data.goal,
+      p_mapped_by: operator.id,
+      p_nodes: data.nodes,
+      p_checkpoints: data.checkpoints,
+    });
+    if (error) throw new Error(error.message);
+
+    termPrint(`Map created: ${data.goal} — ${data.nodes.length} nodes, ${data.checkpoints.length} checkpoints.`, 'system');
+    trackerState = { map: null, leaves: [], branches: [], source: null, mapId: null, gate: null };
+    await loadWorkMap();
+    updateSidebarCounts();
+  } catch (e) {
+    console.error(e);
+    termPrint(`Upload failed — ${e.message}`, 'err');
+  }
 }
 
 function termPrint(text, cls) {

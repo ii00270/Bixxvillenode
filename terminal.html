@@ -2422,17 +2422,18 @@ html.theme-light{
   padding:4px 20px 12px;
 }
 /* Was static colored text — Enter was the only way to send, meaning
-   nothing to actually press on a touch device. Now a real filled-green
-   button, same treatment as .dm-send-btn elsewhere in the app. */
+   nothing to actually press on a touch device. A circular filled button
+   turned out to read as chrome, not an icon — just the glyph itself,
+   colored, sized for a real tap target, no shape drawn around it. */
 #term-prompt-sym{
   appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  flex-shrink:0;width:30px;height:30px;border-radius:50%;
+  flex-shrink:0;width:30px;height:30px;
   display:flex;align-items:center;justify-content:center;
-  background:var(--green);border:1px solid var(--green);color:#08110C;
-  font-family:var(--mono);font-size:14px;font-weight:700;cursor:pointer;
+  background:transparent;border:none;color:var(--green);
+  font-family:var(--mono);font-size:18px;font-weight:700;cursor:pointer;
   transition:transform .1s,opacity .15s;
 }
-#term-prompt-sym:hover{opacity:.88;}
+#term-prompt-sym:hover{opacity:.7;}
 #term-prompt-sym:active{transform:scale(.92);}
 #term-input{
   flex:1;background:transparent;border:none;outline:none;
@@ -2464,18 +2465,16 @@ html.theme-light{
   #term-footer{padding:9px 48px 11px;}
 }
 
-/* "+" upload button — SOLID, same as the send button. An outline-only
-   circle reads as the same unfilled-ring look the send button had as a
-   bug; this one is deliberately filled so there's no ring anywhere. */
+/* "+" upload — same bare-icon treatment as the send glyph, no circle. */
 #term-plus-sym{
   appearance:none;-webkit-appearance:none;-moz-appearance:none;
-  flex-shrink:0;width:30px;height:30px;border-radius:50%;
+  flex-shrink:0;width:30px;height:30px;
   display:flex;align-items:center;justify-content:center;
-  background:var(--term-line);border:1px solid var(--term-line);color:var(--term-fg);
-  font-family:var(--mono);font-size:16px;font-weight:600;cursor:pointer;
-  transition:background .12s,color .12s,transform .1s;
+  background:transparent;border:none;color:var(--term-dim);
+  font-family:var(--mono);font-size:18px;font-weight:600;cursor:pointer;
+  transition:color .12s,transform .1s;
 }
-#term-plus-sym:hover{background:var(--green);border-color:var(--green);color:#08110C;}
+#term-plus-sym:hover{color:var(--green);}
 #term-plus-sym:active{transform:scale(.92);}
 
 /* Tracker cards — click to expand a detail strip, minus to retract */
@@ -8182,7 +8181,9 @@ async function renderTrackerBoard() {
   if (!window._opNameCache) {
     const { data: ops } = await sb.rpc('list_operators');
     window._opNameCache = {};
-    (ops || []).forEach(o => { window._opNameCache[o.id] = o.peer_name; });
+    // Member ID (handle), the same @HANDLE convention used everywhere else
+    // in the app — not the display name.
+    (ops || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
   }
 
   const cols = [
@@ -8214,7 +8215,11 @@ async function renderTrackerBoard() {
               </div>
               <div class="term-card-detail" hidden>
                 <div>Owner — ${esc(owner)}</div>
-                <div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>
+                ${l.status === 'delivered' && l.delivered_at ? (() => {
+                  const d = new Date(l.delivered_at);
+                  const when = d.toLocaleString('en-US', { month:'short', day:'numeric', year:'numeric', hour:'numeric', minute:'2-digit' });
+                  return `<div>Settled — ${when} · Cycle ${cycleNumberForDate(d)}</div>`;
+                })() : `<div>Due — ${l.target_date ? fmtDate(l.target_date) : 'No due date set'}</div>`}
                 <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
               </div>
             </div>`;

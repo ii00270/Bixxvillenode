@@ -2330,7 +2330,18 @@ html.theme-light{
   flex-shrink:0;display:flex;align-items:center;gap:8px;
   padding:4px 20px 12px;
 }
-#term-prompt-sym{color:var(--green);font-size:14px;flex-shrink:0;}
+/* Was static colored text — Enter was the only way to send, meaning
+   nothing to actually press on a touch device. Now a real filled-green
+   button, same treatment as .dm-send-btn elsewhere in the app. */
+#term-prompt-sym{
+  flex-shrink:0;width:30px;height:30px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--green);border:1px solid var(--green);color:#08110C;
+  font-family:var(--mono);font-size:14px;font-weight:700;cursor:pointer;
+  transition:transform .1s,opacity .15s;
+}
+#term-prompt-sym:hover{opacity:.88;}
+#term-prompt-sym:active{transform:scale(.92);}
 #term-input{
   flex:1;background:transparent;border:none;outline:none;
   color:var(--term-fg);font-family:var(--mono);font-size:13.5px;
@@ -2491,7 +2502,7 @@ html.theme-light{
 <div id="terminal-shell">
   <div id="term-scroll"></div>
   <div id="term-inputrow">
-    <span id="term-prompt-sym">❯</span>
+    <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send">❯</button>
     <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
   </div>
   <div id="term-footer">
@@ -3039,7 +3050,7 @@ if (window.pdfjsLib) {
 }
 
 // ── CYCLES ──
-// Per Amendment VI (proposed — see supabase/migrations/ or the amendment
+// Per Amendment VII (proposed — see supabase/migrations/ or the amendment
 // doc alongside this file): cycles are a flat 28 days from Genesis, exactly
 // canon_engine.js's own cycleNumber() formula (23/23 self-tested). This
 // replaces a hand-maintained table of real lunar new-moon dates (29-30 day

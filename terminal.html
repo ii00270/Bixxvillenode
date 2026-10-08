@@ -8021,6 +8021,98 @@ async function handleTermInput() {
   await termDispatch(raw);
 }
 
+// ---- LOGG ----------------------------------------------------------------
+// The LOG language's interpreter, wired live into the terminal. Grammar and
+// vocabulary mirror the standalone reference build in the Desktop/LOGG
+// folder (canon/GRAMMAR.md, canon/vocabulary.json) exactly — the difference
+// is this copy acts on real app data instead of a local placeholder file.
+// Only the curated, promoted words below are recognized; anything else
+// falls through to the normal command chain below, unchanged.
+const LOGG_VOCAB = {
+  mi:   { pos: 'pronoun' },
+  di:   { pos: 'article' },
+  een:  { pos: 'article' },
+  dese: { pos: 'article' },
+  sender: { pos: 'plural_marker' },
+  wis:  { pos: 'verb' },
+  ka:   { pos: 'noun_or_particle' },
+  grobuki: { pos: 'noun' },
+  trap: { pos: 'noun' },
+  knoppunt: { pos: 'noun' },
+  eenkom: { pos: 'noun_or_verb' },
+  no:   { pos: 'particle' },
+  a:    { pos: 'particle' },
+  sa:   { pos: 'particle' },
+  lo:   { pos: 'particle' },
+  le:   { pos: 'particle' },
+};
+function loggTokenize(line) { return line.trim().toLowerCase().split(/\s+/).filter(Boolean); }
+function loggParse(tokens) {
+  if (!tokens.length) return { error: 'empty' };
+  let i = 0;
+  const w = (t) => LOGG_VOCAB[t];
+  const whoTok = tokens[i];
+  if (!w(whoTok) || w(whoTok).pos !== 'pronoun') return { error: `"${whoTok}" is not a recognized subject` };
+  i++;
+  let negated = false;
+  if (tokens[i] === 'no') { negated = true; i++; }
+  const doingTok = tokens[i];
+  const doing = w(doingTok);
+  if (!doing || (doing.pos !== 'verb' && doing.pos !== 'noun_or_verb')) return { error: `"${doingTok ?? ''}" is not a recognized verb` };
+  i++;
+  let tense = null;
+  if (['a','sa','lo','le'].includes(tokens[i])) { tense = tokens[i]; i++; }
+  let article = null, noun = null, plural = false;
+  if (tokens[i]) {
+    const aw = w(tokens[i]);
+    if (aw && aw.pos === 'article') {
+      article = tokens[i]; i++;
+      const nw = tokens[i] ? w(tokens[i]) : null;
+      if (!nw || (nw.pos !== 'noun' && nw.pos !== 'noun_or_particle' && nw.pos !== 'noun_or_verb')) {
+        return { error: `"${tokens[i] ?? ''}" is not a recognized noun after "${article}"` };
+      }
+      noun = tokens[i]; i++;
+      if (tokens[i] === 'sender') { plural = true; i++; }
+    } else {
+      return { error: `"${tokens[i]}" is not a recognized article` };
+    }
+  }
+  if (i < tokens.length) return { error: `unexpected extra word: "${tokens[i]}"` };
+  return { who: whoTok, negated, doing: doingTok, tense, article, noun, plural };
+}
+async function loggRun(parsed) {
+  if (parsed.negated) return 'Negation ("no") is recognized but no action uses it yet.';
+  if (parsed.doing !== 'wis') return `"${parsed.doing}" is recognized vocabulary but has no action yet.`;
+  if (!parsed.noun) return '"wis" (show) needs an object — try "mi wis di ka".';
+
+  if (parsed.noun === 'ka') {
+    const { data: settled } = await sb.rpc('get_settled_projects');
+    if (!settled || !settled.length) return 'di ka (the settlement): nothing settled yet.';
+    return 'di ka (the settlement):\n' + settled.slice(0, 5)
+      .map(p => `  - ${p.relation_name || p.relation_code}: ${p.total_logs_confirmed} LOGs confirmed (${fmtDate(p.settled_at)})`)
+      .join('\n');
+  }
+  if (parsed.noun === 'grobuki') {
+    const { data: settled } = await sb.rpc('get_settled_projects');
+    const n = settled?.length || 0;
+    const totalLogs = (settled || []).reduce((s, p) => s + (p.total_logs_confirmed || 0), 0);
+    return `di grobuki (the ledger): ${n} settlement${n === 1 ? '' : 's'}, ${totalLogs} total LOGs confirmed.`;
+  }
+  if (parsed.noun === 'trap') {
+    if (!operator) return 'di trap (the tier): not signed in.';
+    return `di trap (the tier): ${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs.`;
+  }
+  if (parsed.noun === 'knoppunt') {
+    if (!trackerState || trackerState.source == null) await loadWorkMap();
+    if (!trackerState.leaves?.length) return 'di knoppunt (the node): no work map yet.';
+    return `di knoppunt (the node) — ${trackerState.map?.goal || 'current map'}:\n` + trackerState.leaves.slice(0, 6)
+      .map(l => `  - ${l.task} [${l.status}]`)
+      .join('\n');
+  }
+  return `"${parsed.noun}" is recognized vocabulary but has no "wis" action yet.`;
+}
+// ---------------------------------------------------------------------------
+
 // Local commands first; anything unrecognized goes to the agent. This is
 // the seam "growing features from the center" happens through later —
 // a new command here is a new feature, no new screen required.
@@ -8039,8 +8131,24 @@ async function termDispatch(raw) {
   }
   termPendingOptions = null; // any other input leaves stale options behind
 
+  // LOGG: try the sentence against the LOG language's grammar first. Only
+  // a sentence whose very first word is a recognized LOGG subject (e.g.
+  // "mi") is treated as LOGG at all — anything else (English commands,
+  // free-form questions for the agent) is untouched by this branch.
+  const loggTokens = loggTokenize(cmd);
+  if (loggTokens.length && LOGG_VOCAB[loggTokens[0]]?.pos === 'pronoun') {
+    const parsed = loggParse(loggTokens);
+    if (parsed.error) {
+      termPrint(`LOGG — didn't parse: ${parsed.error}`, 'system');
+    } else {
+      termPrint(await loggRun(parsed), 'system');
+    }
+    return;
+  }
+
   if (cmd === 'help') {
     termPrint('Commands: help · clear · whoami · cycle · balance · theme · logout', 'system');
+    termPrint('LOGG: mi wis di ka / di grobuki / di trap / di knoppunt', 'system');
     termPrint('Anything else is sent to BIX AI.', 'system');
     return;
   }

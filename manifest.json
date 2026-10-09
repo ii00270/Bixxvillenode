@@ -1,8 +1,8 @@
 {
   "name": "Bixxville",
   "short_name": "Bixxville",
-  "description": "Signal, Messages, BIX AI, Profile — the network, priced and raw.",
-  "start_url": "./?source=pwa",
+  "description": "Signal, Messages, BIX AI, Profile \u2014 the network, priced and raw.",
+  "start_url": "./terminal.html?source=pwa",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",

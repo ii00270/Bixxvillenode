@@ -3047,14 +3047,50 @@ function reserveAmt(gross) { return gross * RESERVE; }
 
 // ── STATE ──
 let sb = null;
+// Server-issued session token (see migration 0005). Sent as x-bixx-session on
+// every REST/RPC call so protected database functions can verify who's
+// calling instead of trusting an operator id the browser supplies.
+let opSessionToken = null;
 let operator = null;    // { peer_name, access_key, tier, reputation_score, total_logs, ... }
 let currentSurface = 'home';
 let overlayStack = [];  // track what's in the overlay for back navigation
 let overlayCurrent = null;
 
 function initSB() {
-  if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY);
+  if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY, {
+    global: { fetch: (url, opts = {}) => {
+      // REST/RPC only — auth and storage endpoints have their own CORS rules.
+      if (opSessionToken && String(url).includes('/rest/v1/')) {
+        const h = new Headers(opts.headers || {});
+        h.set('x-bixx-session', opSessionToken);
+        opts = { ...opts, headers: h };
+      }
+      return fetch(url, opts);
+    } },
+  });
   return sb;
+}
+
+async function startOperatorSession(pin) {
+  try {
+    const { data, error } = await sb.rpc('issue_session', { p_pin: pin });
+    opSessionToken = (!error && data) ? data : null;
+  } catch (e) { opSessionToken = null; }
+}
+
+// Genesis signs in through Supabase Auth (email + password, or a restored
+// session on load), so its token comes from the verified login instead.
+async function startOperatorSessionFromAuth() {
+  try {
+    const { data, error } = await sb.rpc('issue_session_from_auth');
+    opSessionToken = (!error && data) ? data : null;
+  } catch (e) { opSessionToken = null; }
+}
+
+function endOperatorSession() {
+  const tok = opSessionToken;
+  opSessionToken = null;
+  if (tok && sb) fireAndForget(sb.rpc('end_session', { p_token: tok }));
 }
 
 // Fire-and-forget helper for best-effort calls (mainly emit_event) where we
@@ -3118,6 +3154,7 @@ async function doLogin() {
     }
 
     operator = { ...op, email };
+    await startOperatorSessionFromAuth();
     localStorage.setItem('bx_last_email', email);
     fireAndForget(sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${op.peer_name || email} signed in`,
@@ -3191,6 +3228,7 @@ async function doPinLogin() {
     delete op.pin_hash; // never keep the hash in client state, even though it transited once
 
     operator = op;
+    await startOperatorSession(pin);
     fireAndForget(sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${op.peer_name || 'Operator'} signed in`,
       p_payload: 'Operator session started (PIN).', p_source_entity: 'Auth', p_source_id: op.id,
@@ -3259,6 +3297,7 @@ async function doLogout() {
 
   // Fire-and-forget — a slow or hung network call must never block getting back to the gate
   if (sb) fireAndForget(sb.auth.signOut());
+  endOperatorSession();
 
   operator = null;
   closeAdminMode();
@@ -10562,6 +10601,7 @@ window.addEventListener('load', async () => {
     const op = Array.isArray(opRows) ? opRows[0] : opRows;
     if (op) {
       operator = { ...op, email: session.user.email };
+      await startOperatorSessionFromAuth();
       enterShell();
       return;
     }

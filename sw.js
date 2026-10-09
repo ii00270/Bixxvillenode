@@ -13,11 +13,11 @@
 // is exactly how an update shipped and still didn't show up for installed
 // PWA users. no-store forces a real round trip every time.
 
-const CACHE_NAME = 'bixxville-v3'; // bump busts every older cache on activate
+const CACHE_NAME = 'bixxville-v4'; // bump busts every older cache on activate
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(['./', './index.html', './manifest.json']))
+    caches.open(CACHE_NAME).then((cache) => cache.addAll(['./', './index.html', './terminal.html', './manifest.json']))
   );
   self.skipWaiting();
 });

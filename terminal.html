@@ -2422,6 +2422,41 @@ html.theme-light{
 .term-card-state.wait{color:var(--term-dim);}
 .term-card-state.progress{color:var(--orange);}
 .term-card-state.done{color:var(--green);}
+.term-card-state.review{color:var(--gold);}
+.term-card-grant{font-size:10.5px;color:var(--term-dim);margin-top:2px;}
+.term-card-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;}
+.term-card-btn{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  background:transparent;border:1px solid var(--term-line);color:var(--term-fg);
+  font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:5px;cursor:pointer;
+}
+.term-card-btn:hover{border-color:var(--green);color:var(--green);}
+.term-card-btn.primary{background:var(--green);border-color:var(--green);color:#08110C;font-weight:600;}
+.term-card-btn:disabled{opacity:.45;cursor:default;}
+
+/* Intake-style work & proof form, and the grant picker (inside the overlay) */
+.term-wf{font-family:var(--mono);color:var(--cream);}
+.term-wf a{color:var(--green);}
+.term-wf-done{margin-top:6px;font-size:13px;color:var(--cream);}
+.term-wf-sub{font-size:11.5px;color:var(--soft);margin-top:3px;}
+.term-wf-count{float:right;font-weight:400;text-transform:none;letter-spacing:0;color:var(--grey);}
+.term-wf-returned{margin-top:8px;padding:8px 10px;border-left:3px solid var(--red);background:rgba(var(--red-rgb),.06);font-size:12px;}
+.term-wf-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;word-break:break-word;}
+.term-wf-x{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--grey);font-size:18px;cursor:pointer;line-height:1;}
+.term-wf-x:hover{color:var(--red);}
+.term-wf-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:10px 0;}
+.term-wf-field{display:block;margin-bottom:10px;}
+.term-wf-field .form-lbl{display:block;margin-bottom:4px;}
+.term-wf-check{display:flex !important;gap:8px;align-items:flex-start;font-size:12.5px;margin:6px 0 12px;}
+.term-grant-row{
+  appearance:none;-webkit-appearance:none;display:flex;justify-content:space-between;align-items:center;width:100%;
+  background:transparent;border:1px solid var(--line);border-radius:7px;padding:10px 12px;margin-bottom:6px;
+  color:var(--cream);font-family:var(--mono);font-size:12.5px;cursor:pointer;text-align:left;
+}
+.term-grant-row:hover{border-color:var(--green);}
+.term-grant-row.current{border-color:var(--green);}
+.term-grant-sub{color:var(--soft);font-size:11px;}
+@media (max-width:767px){ .term-wf-grid{grid-template-columns:1fr;} }
 .term-card-k{color:var(--term-fg);margin-right:4px;}
 
 /* "All" = the decomposition map: one row per level, Genesis to Outcome. */
@@ -3435,8 +3470,8 @@ let overlayCurrent = null;
 function initSB() {
   if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY, {
     global: { fetch: (url, opts = {}) => {
-      // REST/RPC only — auth and storage endpoints have their own CORS rules.
-      if (opSessionToken && String(url).includes('/rest/v1/')) {
+      // Database and file-storage calls. Auth endpoints don't need it.
+      if (opSessionToken && /\/(rest|storage)\/v1\//.test(String(url))) {
         const h = new Headers(opts.headers || {});
         h.set('x-bixx-session', opSessionToken);
         opts = { ...opts, headers: h };
@@ -8786,7 +8821,9 @@ const byLeafCode = (a, b) => a.length - b.length || a.localeCompare(b);
 function renderLeafCard(l) {
   const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
   const payout = ((rateCents / 100) * l.logs).toFixed(2);
-  const owner = l.claimed_by ? (window._opNameCache[l.claimed_by] || 'Unknown member') : 'Unclaimed';
+  const grantee = l.assigned_to || l.claimed_by;
+  const owner = grantee ? (window._opNameCache[grantee] || 'Unknown member') : 'Not granted yet';
+  const me = operator?.id, isG = !!operator?.is_genesis, mine = !!grantee && grantee === me;
   const all = trackerState.leaves || [];
   const statusOf = c => all.find(x => x.leaf_code === c)?.status;
   const req = l.requires || [];
@@ -8794,10 +8831,21 @@ function renderLeafCard(l) {
   const unlocks = all.filter(x => (x.requires || []).includes(l.leaf_code)).map(x => x.leaf_code).sort(byLeafCode);
   const cp = (trackerState.branches || []).find(b => String(b.branch_id) === String(l.branch_id))?.code;
   const level = trackerState.depth?.[l.leaf_code];
-  const state = l.status === 'delivered' ? '<span class="term-card-state done">Delivered ✓</span>'
+  const submitted = l.status === 'in progress' && !!l.submitted_at;
+  const state = l.status === 'delivered' ? `<span class="term-card-state done">${l.verified_at ? 'Verified ✓' : 'Delivered ✓'}</span>`
+              : submitted ? '<span class="term-card-state review">Awaiting verification</span>'
               : l.status === 'in progress' ? '<span class="term-card-state progress">In progress</span>'
               : waiting.length ? `<span class="term-card-state wait">Waiting on ${esc(waiting.join(', '))}</span>`
               : '<span class="term-card-state ready">Ready to start</span>';
+  const id = esc(l.id);
+  const actions = [
+    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openAssignLeaf('${id}')">${grantee ? 'Change grant' : 'Grant…'}</button>` : '',
+    l.status === 'to-do' && mine && !waiting.length ? `<button class="term-card-btn primary" onclick="startLeafUI('${id}')">Start</button>` : '',
+    l.status === 'in progress' && !submitted && mine ? `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>` : '',
+    submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
+    submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
+    l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
+  ].join('');
   const reqLine = req.length
     ? req.map(c => `${esc(c)}${statusOf(c) === 'delivered' ? ' ✓' : ` (${esc(statusOf(c) || 'missing')})`}`).join(', ')
     : 'nothing — start here';
@@ -8819,11 +8867,12 @@ function renderLeafCard(l) {
         ${level != null ? `<span class="term-card-tag">${level === 0 ? 'Start' : 'T' + (level + 1)}</span>` : ''}
       </div>
       <div class="term-card-stateline">${state}</div>
+      <div class="term-card-grant">${grantee ? 'Granted to ' + esc(owner) : 'Not granted yet'}</div>
+      ${actions ? `<div class="term-card-actions">${actions}</div>` : ''}
       <div class="term-card-detail" hidden>
         <div><span class="term-card-k">Done when</span> ${esc(l.done_criterion || '—')}</div>
         <div><span class="term-card-k">Requires</span> ${reqLine}</div>
         <div><span class="term-card-k">Unlocks</span> ${unlocks.length ? esc(unlocks.join(', ')) : (l.kind === 'outcome' ? 'nothing — this is the finish' : 'nothing')}</div>
-        <div>Owner — ${esc(owner)}</div>
         ${l.status === 'delivered' && l.delivered_at ? (() => {
           // The real settlement's own cycle_number, when this map is
           // linked to one — not a client-side guess from a timestamp.
@@ -8841,6 +8890,243 @@ function renderLeafCard(l) {
 function setTrackerFilter(key) {
   window._trackerFilter = key;
   renderTrackerBoard();
+}
+
+// ── Grant → Start → log work & proof → verify ──────────────────────────
+// Every rule here is enforced in the database (migration 0007); the
+// buttons only appear where they'll succeed.
+const leafById = id => (trackerState.leaves || []).find(l => l.id === id);
+const handleOf = id => (window._opNameCache || {})[id] || 'member';
+const toLocalInput = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+const fmtWhen = d => new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const fmtDur = ms => { const m = Math.round(ms / 60000); return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`; };
+
+async function refreshTrackerAfterWork() {
+  if (trackerState?.mapId) await switchToMap(trackerState.mapId);
+}
+
+async function openAssignLeaf(leafId) {
+  const l = leafById(leafId);
+  if (!l) return;
+  const { data: ops } = await sb.rpc('list_operators');
+  const tierRank = t => ['apprentice', 'wrangler', 'architect', 'operator'].indexOf(String(t).toLowerCase());
+  openOverlay(`Grant ${l.leaf_code} — ${l.task}`, (body) => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="form-block"><div class="form-lbl">Step tier</div><div>${esc(l.tier)} · ${l.logs} LOG${l.logs === 1 ? '' : 's'}</div></div>
+      <div class="form-block">
+        <div class="form-lbl">Grant to</div>
+        ${(ops || []).filter(o => o.active !== false).map(o => {
+          const t = tier(o.total_logs);
+          const below = tierRank(t) < tierRank(l.tier);
+          const h = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase();
+          return `<button class="term-grant-row ${o.id === l.assigned_to ? 'current' : ''}" onclick="assignLeafUI('${esc(leafId)}','${esc(o.id)}')">
+            <span>${esc(h)} <span class="term-grant-sub">${esc(o.peer_name || '')} · ${esc(t)}</span></span>
+            <span class="term-grant-sub">${o.id === l.assigned_to ? 'granted' : below ? 'below step tier' : ''}</span>
+          </button></div>`;
+        }).join('')}
+        ${l.assigned_to ? `<button class="term-grant-row" onclick="assignLeafUI('${esc(leafId)}', null)"><span>Remove the grant</span></button>` : ''}
+      </div>`;
+  });
+}
+
+async function assignLeafUI(leafId, memberId) {
+  const { error } = await sb.rpc('assign_leaf', { p_leaf: leafId, p_member: memberId });
+  if (error) { toast(error.message); return; }
+  closeOverlay();
+  toast(memberId ? `Granted to ${handleOf(memberId)}.` : 'Grant removed.');
+  await refreshTrackerAfterWork();
+}
+
+async function startLeafUI(leafId) {
+  const { error } = await sb.rpc('start_leaf', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  await refreshTrackerAfterWork();
+  openWorkForm(leafId);
+}
+
+async function openWorkForm(leafId) {
+  openOverlay('Log work & proof', (body) => renderWorkForm(body, leafId));
+}
+
+async function renderWorkForm(body, leafId) {
+  const l = leafById(leafId);
+  body.innerHTML = '<div class="form-block">Loading…</div>';
+  const { data: w, error } = await sb.rpc('get_leaf_work', { p_leaf: leafId });
+  if (error || !l) { body.innerHTML = `<div class="term-wf"><div class="form-block">Couldn't load this step${error ? ' — ' + esc(error.message) : ''}.</div></div>`; return; }
+  const sessions = w.sessions || [], evidence = w.evidence || [], subs = w.submissions || [];
+  const lastReturned = [...subs].reverse().find(s => s.decision === 'returned');
+  const totalMs = sessions.reduce((t, s) => t + (new Date(s.ended_at) - new Date(s.started_at)), 0);
+  const defStart = sessions.length ? new Date(Date.now() - 3600000) : new Date(l.started_at || Date.now());
+  const files = evidence.filter(e => e.kind === 'file'), links = evidence.filter(e => e.kind === 'link');
+  body.innerHTML = `<div class="term-wf">
+    <div class="form-block">
+      <div class="form-lbl">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+      <div class="term-wf-done"><strong>Done when:</strong> ${esc(l.done_criterion)}</div>
+      <div class="term-wf-sub">${esc(l.tier)} · ${l.logs} LOG${l.logs === 1 ? '' : 's'} · started ${l.started_at ? esc(fmtWhen(l.started_at)) : '—'}</div>
+      ${lastReturned ? `<div class="term-wf-returned">Sent back ${esc(fmtWhen(lastReturned.decided_at))}: ${esc(lastReturned.decision_note || '')}</div>` : ''}
+    </div>
+
+    <div class="form-block">
+      <div class="form-lbl">Work sessions <span class="term-wf-count">${fmtDur(totalMs)} logged · ${l.logs} LOG${l.logs === 1 ? '' : 's'} estimated</span></div>
+      ${sessions.map(s => `<div class="term-wf-item">
+          <div><strong>${esc(fmtWhen(s.started_at))} → ${esc(fmtWhen(s.ended_at))}</strong> · ${fmtDur(new Date(s.ended_at) - new Date(s.started_at))}${s.notes ? `<div class="term-wf-sub">${esc(s.notes)}</div>` : ''}</div>
+          <button class="term-wf-x" title="Remove" onclick="workAction('${esc(leafId)}','delete_work_session',{p_id:'${esc(s.id)}'})">×</button>
+        </div>`).join('') || '<div class="term-wf-sub">None yet.</div>'}
+      <div class="term-wf-grid">
+        <label class="term-wf-field"><span class="form-lbl">Start time</span><input class="form-input" type="datetime-local" id="wf-start" value="${toLocalInput(defStart)}"></label>
+        <label class="term-wf-field"><span class="form-lbl">End time</span><input class="form-input" type="datetime-local" id="wf-end" value="${toLocalInput(new Date())}"></label>
+      </div>
+      <label class="term-wf-field"><span class="form-lbl">Notes — what you did in this session</span><textarea class="form-input" id="wf-notes" rows="3"></textarea></label>
+      <button class="term-card-btn primary" onclick="saveWorkSession('${esc(leafId)}')">Save session</button>
+    </div>
+
+    <div class="form-block">
+      <div class="form-lbl">Proof <span class="term-wf-count">${files.length} file${files.length === 1 ? '' : 's'} · ${links.length} link${links.length === 1 ? '' : 's'}</span></div>
+      ${evidence.map(e => `<div class="term-wf-item">
+          <div>${e.kind === 'file'
+            ? `<a href="#" onclick="openEvidenceFile('${esc(e.storage_path)}');return false;">${esc(e.filename || 'file')}</a> <span class="term-wf-sub">${e.size_bytes ? Math.ceil(e.size_bytes / 1024) + ' KB' : ''}</span>`
+            : `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url)}</a>`}
+            ${e.caption ? `<div class="term-wf-sub">${esc(e.caption)}</div>` : ''}</div>
+          <button class="term-wf-x" title="Remove" onclick="removeEvidence('${esc(leafId)}','${esc(e.id)}')">×</button>
+        </div>`).join('') || '<div class="term-wf-sub">Nothing attached yet — photos, receipts, signed pages, screenshots, documents.</div>'}
+      <label class="term-wf-field"><span class="form-lbl">Upload files (photos, PDFs, documents — up to 25 MB each)</span><input class="form-input" type="file" id="wf-files" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx"></label>
+      <label class="term-wf-field"><span class="form-lbl">…or a link</span><input class="form-input" type="url" id="wf-url" placeholder="https://"></label>
+      <label class="term-wf-field"><span class="form-lbl">Caption (optional)</span><input class="form-input" type="text" id="wf-caption" placeholder="What this shows"></label>
+      <button class="term-card-btn primary" onclick="addEvidence('${esc(leafId)}')">Attach</button>
+      <div class="term-wf-sub" id="wf-upload-status"></div>
+    </div>
+
+    <div class="form-block">
+      <div class="form-lbl">Submit for verification</div>
+      <label class="term-wf-field"><span class="form-lbl">What was done</span><textarea class="form-input" id="wf-summary" rows="3" placeholder="Summarize the finished work and where the proof is."></textarea></label>
+      <label class="term-wf-check"><input type="checkbox" id="wf-met"> The "done when" is met: ${esc(l.done_criterion)}</label>
+      <button class="term-card-btn primary" onclick="submitProof('${esc(leafId)}')" ${sessions.length ? '' : 'disabled title="Log at least one work session first"'}>Submit for verification</button>
+      <div class="term-wf-sub">Once submitted, the step is locked until Genesis verifies it or sends it back.</div>
+    </div></div>`;
+}
+
+async function workAction(leafId, rpc, args) {
+  const { error } = await sb.rpc(rpc, args);
+  if (error) { toast(error.message); return; }
+  renderWorkForm(document.getElementById('ov-body'), leafId);
+}
+
+async function saveWorkSession(leafId) {
+  const start = document.getElementById('wf-start').value, end = document.getElementById('wf-end').value;
+  if (!start || !end) { toast('Set both a start and an end time.'); return; }
+  if (new Date(end) <= new Date(start)) { toast('The end has to be after the start.'); return; }
+  await workAction(leafId, 'log_work_session', {
+    p_leaf: leafId, p_started_at: new Date(start).toISOString(), p_ended_at: new Date(end).toISOString(),
+    p_notes: document.getElementById('wf-notes').value,
+  });
+}
+
+async function addEvidence(leafId) {
+  const files = [...(document.getElementById('wf-files').files || [])];
+  const url = document.getElementById('wf-url').value.trim();
+  const caption = document.getElementById('wf-caption').value.trim();
+  const status = document.getElementById('wf-upload-status');
+  if (!files.length && !url) { toast('Choose a file or paste a link.'); return; }
+  if (url) {
+    const { error } = await sb.rpc('add_evidence_link', { p_leaf: leafId, p_url: url, p_caption: caption });
+    if (error) { toast(error.message); return; }
+  }
+  for (const [i, f] of files.entries()) {
+    if (f.size > 25 * 1024 * 1024) { toast(`${f.name} is over 25 MB — skipped.`); continue; }
+    status.textContent = `Uploading ${i + 1} of ${files.length}: ${f.name}…`;
+    const safe = f.name.replace(/[^\w.\-]+/g, '_').slice(-80);
+    const path = `${leafId}/${crypto.randomUUID()}-${safe}`;
+    const { error: upErr } = await sb.storage.from('work-evidence').upload(path, f, { contentType: f.type || 'application/octet-stream', upsert: false });
+    if (upErr) { toast(`${f.name}: ${upErr.message}`); continue; }
+    const { error } = await sb.rpc('register_evidence_file', {
+      p_leaf: leafId, p_storage_path: path, p_filename: f.name, p_mime: f.type || null, p_size: f.size, p_caption: caption,
+    });
+    if (error) { await sb.storage.from('work-evidence').remove([path]); toast(`${f.name}: ${error.message}`); }
+  }
+  renderWorkForm(document.getElementById('ov-body'), leafId);
+}
+
+async function removeEvidence(leafId, evidenceId) {
+  const { data: path, error } = await sb.rpc('delete_evidence', { p_id: evidenceId });
+  if (error) { toast(error.message); return; }
+  if (path) await sb.storage.from('work-evidence').remove([path]);
+  renderWorkForm(document.getElementById('ov-body'), leafId);
+}
+
+// Files are private — open each through a short-lived signed link.
+async function openEvidenceFile(path) {
+  const { data, error } = await sb.storage.from('work-evidence').createSignedUrl(path, 300);
+  if (error || !data?.signedUrl) { toast('Could not open that file.'); return; }
+  window.open(data.signedUrl, '_blank', 'noopener');
+}
+
+async function submitProof(leafId) {
+  const summary = document.getElementById('wf-summary').value.trim();
+  const met = document.getElementById('wf-met').checked;
+  if (!summary) { toast('Say what was done.'); return; }
+  if (!met) { toast('Confirm the "done when" is met.'); return; }
+  const { error } = await sb.rpc('submit_leaf_proof', { p_leaf: leafId, p_summary: summary, p_criterion_met: true });
+  if (error) { toast(error.message); return; }
+  closeOverlay();
+  toast('Submitted — waiting on verification.');
+  await refreshTrackerAfterWork();
+}
+
+// Genesis reviews; the assignee can see the same record read-only.
+async function openReview(leafId) {
+  openOverlay('Proof of work', (body) => renderReview(body, leafId));
+}
+
+async function renderReview(body, leafId) {
+  const l = leafById(leafId);
+  body.innerHTML = '<div class="form-block">Loading…</div>';
+  const { data: w, error } = await sb.rpc('get_leaf_work', { p_leaf: leafId });
+  if (error || !l) { body.innerHTML = `<div class="term-wf"><div class="form-block">Couldn't load this step${error ? ' — ' + esc(error.message) : ''}.</div></div>`; return; }
+  if (!w.can_see_proof) { body.innerHTML = '<div class="form-block">Only the person this step is granted to, and Genesis, can see its proof.</div>'; return; }
+  const sessions = w.sessions || [], evidence = w.evidence || [], subs = w.submissions || [];
+  const pending = subs.find(s => s.decision === 'pending');
+  const totalMs = sessions.reduce((t, s) => t + (new Date(s.ended_at) - new Date(s.started_at)), 0);
+  const canDecide = !!operator?.is_genesis && !!pending;
+  body.innerHTML = `<div class="term-wf">
+    <div class="form-block">
+      <div class="form-lbl">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+      <div class="term-wf-done"><strong>Done when:</strong> ${esc(l.done_criterion)}</div>
+      <div class="term-wf-sub">Granted to ${esc(handleOf(l.assigned_to || l.claimed_by))} · started ${l.started_at ? esc(fmtWhen(l.started_at)) : '—'}${l.verified_at ? ` · verified ${esc(fmtWhen(l.verified_at))} by ${esc(handleOf(l.verified_by))}${l.verified_by === (l.assigned_to || l.claimed_by) ? ' (self)' : ''}` : ''}</div>
+    </div>
+    <div class="form-block">
+      <div class="form-lbl">Work sessions <span class="term-wf-count">${fmtDur(totalMs)} logged · ${l.logs} LOG${l.logs === 1 ? '' : 's'} estimated</span></div>
+      ${sessions.map(s => `<div class="term-wf-item"><div><strong>${esc(fmtWhen(s.started_at))} → ${esc(fmtWhen(s.ended_at))}</strong> · ${fmtDur(new Date(s.ended_at) - new Date(s.started_at))}${s.notes ? `<div class="term-wf-sub">${esc(s.notes)}</div>` : ''}</div></div>`).join('') || '<div class="term-wf-sub">None.</div>'}
+    </div>
+    <div class="form-block">
+      <div class="form-lbl">Proof</div>
+      ${evidence.map(e => `<div class="term-wf-item"><div>${e.kind === 'file'
+          ? `<a href="#" onclick="openEvidenceFile('${esc(e.storage_path)}');return false;">${esc(e.filename || 'file')}</a>`
+          : `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url)}</a>`}${e.caption ? `<div class="term-wf-sub">${esc(e.caption)}</div>` : ''}</div></div>`).join('') || '<div class="term-wf-sub">Nothing attached.</div>'}
+    </div>
+    <div class="form-block">
+      <div class="form-lbl">Submissions</div>
+      ${subs.map(s => `<div class="term-wf-item"><div><strong>${esc(fmtWhen(s.submitted_at))}</strong> — ${esc(s.decision === 'pending' ? 'awaiting verification' : s.decision)}
+          <div class="term-wf-sub">${esc(s.summary)}</div>
+          ${s.decision_note ? `<div class="term-wf-sub">Genesis: ${esc(s.decision_note)}</div>` : ''}</div></div>`).join('') || '<div class="term-wf-sub">None.</div>'}
+    </div>
+    ${canDecide ? `<div class="form-block">
+      <div class="form-lbl">Your decision</div>
+      <label class="term-wf-field"><span class="form-lbl">Note (required to send it back)</span><textarea class="form-input" id="rv-note" rows="2"></textarea></label>
+      <div class="term-card-actions">
+        <button class="term-card-btn primary" onclick="decideProof('${esc(leafId)}','${esc(pending.id)}','verified')">Verify — done</button>
+        <button class="term-card-btn" onclick="decideProof('${esc(leafId)}','${esc(pending.id)}','returned')">Send back</button>
+      </div>
+    </div>` : ''}</div>`;
+}
+
+async function decideProof(leafId, submissionId, decision) {
+  const note = document.getElementById('rv-note')?.value.trim() || '';
+  if (decision === 'returned' && !note) { toast("Say what's missing when sending it back."); return; }
+  const { error } = await sb.rpc('review_leaf_submission', { p_submission: submissionId, p_decision: decision, p_note: note });
+  if (error) { toast(error.message); return; }
+  closeOverlay();
+  toast(decision === 'verified' ? 'Verified — the step is done.' : 'Sent back with your note.');
+  await refreshTrackerAfterWork();
 }
 
 // Every decomposition the OS has ever mapped, as real folders you can open

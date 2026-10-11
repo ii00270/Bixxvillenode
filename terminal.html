@@ -2407,6 +2407,34 @@ html.theme-light{
 .term-card-tag{padding:1px 6px;border-radius:3px;border:1px solid var(--term-line);}
 .term-card-tag.key{color:var(--orange);border-color:var(--orange);}
 
+/* Decomposition on the card: Genesis / Outcome / Key, where it stands, and
+   (expanded) what it needs and what it opens up. */
+.term-card.genesis{border-color:var(--orange);}
+.term-card.outcome{border-color:var(--green);}
+.term-card.key:not(.genesis):not(.outcome){border-color:var(--gold);}
+.term-card-badges{display:flex;gap:6px;margin-bottom:6px;}
+.term-badge{font-size:9px;letter-spacing:.08em;text-transform:uppercase;padding:1px 6px;border-radius:3px;font-weight:600;}
+.term-badge.genesis{background:var(--orange);color:#fff;}
+.term-badge.outcome{background:var(--green);color:var(--term-bg);}
+.term-badge.key{border:1px solid var(--gold);color:var(--gold);}
+.term-card-stateline{margin-top:7px;font-size:10.5px;}
+.term-card-state.ready{color:var(--green);}
+.term-card-state.wait{color:var(--term-dim);}
+.term-card-state.progress{color:var(--orange);}
+.term-card-state.done{color:var(--green);}
+.term-card-k{color:var(--term-fg);margin-right:4px;}
+
+/* "All" = the decomposition map: one row per level, Genesis to Outcome. */
+.term-tier-row{display:flex;gap:12px;align-items:flex-start;}
+.term-tier-lbl{flex:0 0 44px;padding-top:12px;text-align:right;font-size:10px;color:var(--term-dim);letter-spacing:.06em;}
+.term-tier-conn{margin:4px 0 4px 56px;color:var(--term-line);font-size:12px;}
+@media (max-width:767px){
+  .term-tier-row{flex-direction:column;gap:4px;}
+  .term-tier-lbl{flex:none;padding-top:0;text-align:left;}
+  .term-tier-conn{margin-left:0;}
+  .term-card{flex:1 1 100%;}
+}
+
 .term-timeline-cp{
   border:1px solid var(--term-line);border-radius:7px;padding:12px 14px;margin-bottom:10px;
 }
@@ -8580,18 +8608,9 @@ async function openDecomposition(mapId) {
 // they add to the price exactly.
 function renderDecompositionReport({ map, branches, leaves }) {
   const e = esc;
-  const byLen = (a, b) => a.length - b.length || a.localeCompare(b);
+  const byLen = byLeafCode;
   const L = [...(leaves || [])].sort((a, b) => byLen(a.leaf_code, b.leaf_code));
-  const byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
-  const depth = {};
-  const d = (c, seen = new Set()) => {
-    if (depth[c] != null) return depth[c];
-    if (seen.has(c)) return 0;
-    seen.add(c);
-    const req = (byCode[c]?.requires || []).filter(r => byCode[r]);
-    return (depth[c] = req.length ? 1 + Math.max(...req.map(r => d(r, seen))) : 0);
-  };
-  L.forEach(l => d(l.leaf_code));
+  const depth = leafDepths(L);
   const tierCount = L.length ? Math.max(...L.map(l => depth[l.leaf_code])) + 1 : 0;
 
   const rate = l => l.scoped_rate_cents ?? (CANON.TIER_RATES[l.tier] || 0) * 100;
@@ -8714,7 +8733,22 @@ async function renderTrackerBoard() {
   ];
   if (!window._trackerFilter) window._trackerFilter = 'all';
   const active = window._trackerFilter;
-  const items = active === 'all' ? trackerState.leaves : trackerState.leaves.filter(l => l.status === active);
+  const depth = leafDepths(trackerState.leaves);
+  trackerState.depth = depth;
+  const inOrder = [...trackerState.leaves].sort((a, b) => depth[a.leaf_code] - depth[b.leaf_code] || byLeafCode(a.leaf_code, b.leaf_code));
+  const items = active === 'all' ? inOrder : inOrder.filter(l => l.status === active);
+  let body;
+  if (active === 'all') {
+    const levels = Math.max(...inOrder.map(l => depth[l.leaf_code])) + 1;
+    const rows = [];
+    for (let t = 0; t < levels; t++) {
+      const ls = inOrder.filter(l => depth[l.leaf_code] === t);
+      rows.push(`<div class="term-tier-row"><div class="term-tier-lbl">${t === 0 ? 'START' : 'T' + (t + 1)}</div><div class="term-board-flat">${ls.map(renderLeafCard).join('')}</div></div>`);
+    }
+    body = rows.join('<div class="term-tier-conn">↓</div>');
+  } else {
+    body = `<div class="term-board-flat">${items.map(renderLeafCard).join('') || '<div class="term-panel-empty">Nothing here.</div>'}</div>`;
+  }
 
   const foldersHtml = await renderMapFolders();
   panel.innerHTML = `
@@ -8726,29 +8760,69 @@ async function renderTrackerBoard() {
         return `<button class="term-tab ${t.key === active ? 'active' : ''}" onclick="setTrackerFilter('${t.key}')">${t.label} <span class="term-tab-count">${n}</span></button>`;
       }).join('')}
     </div>
-    <div class="term-board-flat">
-      ${items.map(renderLeafCard).join('') || '<div class="term-panel-empty">Nothing here.</div>'}
-    </div>`;
+    ${body}`;
   updateSidebarCounts();
 }
+
+// Each step's level in the decomposition map: Genesis is 0, everything else
+// is one below the deepest step it requires — the same tiers the
+// Decomposition Report draws.
+function leafDepths(leaves) {
+  const byCode = Object.fromEntries((leaves || []).map(l => [l.leaf_code, l]));
+  const depth = {};
+  const d = (c, seen = new Set()) => {
+    if (depth[c] != null) return depth[c];
+    if (seen.has(c)) return 0;
+    seen.add(c);
+    const req = (byCode[c]?.requires || []).filter(r => byCode[r]);
+    return (depth[c] = req.length ? 1 + Math.max(...req.map(r => d(r, seen))) : 0);
+  };
+  (leaves || []).forEach(l => d(l.leaf_code));
+  return depth;
+}
+
+const byLeafCode = (a, b) => a.length - b.length || a.localeCompare(b);
 
 function renderLeafCard(l) {
   const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
   const payout = ((rateCents / 100) * l.logs).toFixed(2);
   const owner = l.claimed_by ? (window._opNameCache[l.claimed_by] || 'Unknown member') : 'Unclaimed';
+  const all = trackerState.leaves || [];
+  const statusOf = c => all.find(x => x.leaf_code === c)?.status;
+  const req = l.requires || [];
+  const waiting = req.filter(c => statusOf(c) !== 'delivered');
+  const unlocks = all.filter(x => (x.requires || []).includes(l.leaf_code)).map(x => x.leaf_code).sort(byLeafCode);
+  const cp = (trackerState.branches || []).find(b => String(b.branch_id) === String(l.branch_id))?.code;
+  const level = trackerState.depth?.[l.leaf_code];
+  const state = l.status === 'delivered' ? '<span class="term-card-state done">Delivered ✓</span>'
+              : l.status === 'in progress' ? '<span class="term-card-state progress">In progress</span>'
+              : waiting.length ? `<span class="term-card-state wait">Waiting on ${esc(waiting.join(', '))}</span>`
+              : '<span class="term-card-state ready">Ready to start</span>';
+  const reqLine = req.length
+    ? req.map(c => `${esc(c)}${statusOf(c) === 'delivered' ? ' ✓' : ` (${esc(statusOf(c) || 'missing')})`}`).join(', ')
+    : 'nothing — start here';
   return `
-    <div class="term-card" data-leaf="${esc(l.id)}">
+    <div class="term-card ${l.kind === 'genesis' ? 'genesis' : l.kind === 'outcome' ? 'outcome' : ''} ${l.is_key ? 'key' : ''}" data-leaf="${esc(l.id)}">
+      ${(l.kind === 'genesis' || l.kind === 'outcome' || l.is_key) ? `<div class="term-card-badges">
+        ${l.kind === 'genesis' ? '<span class="term-badge genesis">◆ Genesis</span>' : ''}
+        ${l.kind === 'outcome' ? '<span class="term-badge outcome">● Outcome</span>' : ''}
+        ${l.is_key ? '<span class="term-badge key">Key</span>' : ''}
+      </div>` : ''}
       <div class="term-card-top" onclick="toggleTermCard('${esc(l.id)}')">
         <div class="term-card-task">${esc(l.leaf_code)} — ${esc(l.task)}</div>
         <button class="term-card-toggle" aria-label="Details">+</button>
       </div>
       <div class="term-card-meta">
         <span class="term-card-tag">${esc(l.tier)}</span>
-        <span class="term-card-tag">${l.logs} LOGs</span>
-        <span class="term-card-tag">${esc(l.status)}</span>
-        ${l.is_key ? '<span class="term-card-tag key">Key</span>' : ''}
+        <span class="term-card-tag">${l.logs} LOG${l.logs === 1 ? '' : 's'}</span>
+        ${cp ? `<span class="term-card-tag">${esc(cp)}</span>` : ''}
+        ${level != null ? `<span class="term-card-tag">${level === 0 ? 'Start' : 'T' + (level + 1)}</span>` : ''}
       </div>
+      <div class="term-card-stateline">${state}</div>
       <div class="term-card-detail" hidden>
+        <div><span class="term-card-k">Done when</span> ${esc(l.done_criterion || '—')}</div>
+        <div><span class="term-card-k">Requires</span> ${reqLine}</div>
+        <div><span class="term-card-k">Unlocks</span> ${unlocks.length ? esc(unlocks.join(', ')) : (l.kind === 'outcome' ? 'nothing — this is the finish' : 'nothing')}</div>
         <div>Owner — ${esc(owner)}</div>
         ${l.status === 'delivered' && l.delivered_at ? (() => {
           // The real settlement's own cycle_number, when this map is

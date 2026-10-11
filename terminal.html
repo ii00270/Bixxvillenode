@@ -2442,6 +2442,14 @@ html.theme-light{
 .term-browser-upload:hover{border-color:var(--green);color:var(--green);}
 .term-browser-upload .term-browser-upload-icon{font-size:16px;}
 
+/* Decomposed — contract list and the report view */
+.term-decomp-card{cursor:pointer;transition:border-color .12s;}
+.term-decomp-card:hover{border-color:var(--green);}
+.term-decomp-tag{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:3px;padding:1px 6px;flex-shrink:0;margin-left:10px;}
+.term-decomp-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.term-decomp-bar .term-timeline-dl{margin-top:0;}
+.term-decomp-frame{width:100%;min-height:70vh;border:1px solid var(--term-line);border-radius:8px;background:#FAF8F3;display:block;}
+
 #term-scroll{
   flex:1;min-height:0;overflow-y:auto;
   padding:18px 20px 10px;
@@ -2705,6 +2713,7 @@ html.theme-light{
         <button class="term-sb-subitem" onclick="setTrackerFilter('delivered'); setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
         <button class="term-sb-subitem" onclick="openCurrentMapFile()">Map <span class="term-sb-count" id="term-sb-map-mark">—</span></button>
+        <button class="term-sb-subitem" onclick="setTermView('decomposed')">Decomposed <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
       </div>
     </div>
     <div class="term-sb-group">
@@ -2727,8 +2736,8 @@ html.theme-light{
     <div id="term-scroll"></div>
     <div id="term-panel" hidden></div>
     <div id="term-inputrow">
-      <button id="term-plus-sym" onclick="document.getElementById('term-upload-file').click()" title="Upload a decomposition worksheet" aria-label="Upload">+</button>
-      <input id="term-upload-file" type="file" accept=".html" hidden onchange="handleTermUpload(event)"/>
+      <button id="term-plus-sym" onclick="document.getElementById('term-upload-file').click()" title="Upload a contract (PDF, HTML, or worksheet JSON)" aria-label="Upload">+</button>
+      <input id="term-upload-file" type="file" accept=".pdf,.html,.htm,.json,application/pdf,text/html,application/json" multiple hidden onchange="handleTermUpload(event)"/>
       <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send">❯</button>
       <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
     </div>
@@ -3415,6 +3424,7 @@ async function startOperatorSession(pin) {
     const { data, error } = await sb.rpc('issue_session', { p_pin: pin });
     opSessionToken = (!error && data) ? data : null;
   } catch (e) { opSessionToken = null; }
+  if (opSessionToken) startSessionHeartbeat();
 }
 
 // Genesis signs in through Supabase Auth (email + password, or a restored
@@ -3424,9 +3434,42 @@ async function startOperatorSessionFromAuth() {
     const { data, error } = await sb.rpc('issue_session_from_auth');
     opSessionToken = (!error && data) ? data : null;
   } catch (e) { opSessionToken = null; }
+  if (opSessionToken) startSessionHeartbeat();
 }
 
+// Sessions last 12 hours from their last renewal. While the app is open
+// they're renewed every few minutes and whenever it comes back to the
+// foreground, so an open app never quietly loses its session.
+let sessionHeartbeat = null;
+function startSessionHeartbeat() {
+  clearInterval(sessionHeartbeat);
+  sessionHeartbeat = setInterval(renewOperatorSession, 5 * 60 * 1000);
+}
+
+// Returns true if a valid session is in hand afterwards.
+async function renewOperatorSession() {
+  if (!sb) return false;
+  if (opSessionToken) {
+    const { data, error } = await sb.rpc('renew_session');
+    if (error) return true;          // can't tell (network) — keep the token
+    if (data === true) return true;
+    opSessionToken = null;           // the server says it's gone
+  }
+  // Genesis can be re-issued silently from its Supabase Auth login. A PIN
+  // session can't be — that has to sign in again.
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user && operator) await startOperatorSessionFromAuth();
+  } catch (e) {}
+  return !!opSessionToken;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && operator) renewOperatorSession();
+});
+
 function endOperatorSession() {
+  clearInterval(sessionHeartbeat);
   const tok = opSessionToken;
   opSessionToken = null;
   if (tok && sb) fireAndForget(sb.rpc('end_session', { p_token: tok }));
@@ -8235,7 +8278,7 @@ function enterTerminal() {
   if (!shell.dataset.sidebarBooted) {
     shell.dataset.sidebarBooted = '1';
     setTermView('terminal');
-    loadWorkMap().then(updateSidebarCounts);
+    loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); });
   }
 }
 
@@ -8250,7 +8293,8 @@ function toggleTermSidebar(force) {
 }
 
 function setTermView(view) {
-  document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === view));
+  const navView = view === 'decomposed' ? 'tracker' : view;
+  document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   const scroll = document.getElementById('term-scroll');
   const panel = document.getElementById('term-panel');
   if (view !== 'browser') stopBrowserArt();
@@ -8263,6 +8307,7 @@ function setTermView(view) {
     if (view === 'tracker') renderTrackerBoard();
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'browser') renderBrowserPanel();
+    else if (view === 'decomposed') renderDecomposedPanel();
   }
   toggleTermSidebar(false);
 }
@@ -8280,26 +8325,60 @@ function updateSidebarCounts() {
       : '';
   }
   const mapMark = document.getElementById('term-sb-map-mark');
-  if (mapMark) mapMark.textContent = (live && trackerState.map?.source_html) ? '●' : '—';
+  if (mapMark) mapMark.textContent = (live && (trackerState.map?.source_html || trackerState.map?.source_raw)) ? '●' : '—';
 }
 
 // ── Opening an uploaded worksheet back up — a real file, a real tab ─────
-function openSourceHtml(html, filename) {
-  const blob = new Blob([html], { type: 'text/html' });
-  const url = URL.createObjectURL(blob);
-  window.open(url, '_blank');
-  setTimeout(() => URL.revokeObjectURL(url), 30000);
+// Uploaded originals open in a sandboxed frame with no access to this site's
+// origin — an uploaded HTML file is someone else's code, and opening it as a
+// same-site page would let its scripts read this app's stored login.
+async function viewContractOriginal(mapId) {
+  const { data, error } = await sb.from('work_maps')
+    .select('source_html,source_raw,source_mime,source_filename').eq('id', mapId).maybeSingle();
+  if (error || !data) { toast('Could not load that file.'); return; }
+  const name = data.source_filename || 'contract';
+  const mime = data.source_mime || (data.source_html ? 'text/html' : '');
+  if (mime === 'application/pdf' && data.source_raw) {
+    const bin = atob(data.source_raw);
+    const bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
+  const html = data.source_html || (mime === 'text/html' ? data.source_raw : null);
+  if (html) {
+    openOverlay(name, (body) => {
+      const f = document.createElement('iframe');
+      f.setAttribute('sandbox', 'allow-scripts allow-forms allow-modals allow-popups allow-downloads');
+      f.style.cssText = 'width:100%;height:75vh;border:1px solid var(--line);border-radius:8px;background:#fff;';
+      f.srcdoc = html;
+      body.appendChild(f);
+    });
+    return;
+  }
+  if (data.source_raw) {
+    let text = data.source_raw;
+    try { text = JSON.stringify(JSON.parse(text), null, 2); } catch (e) {}
+    openOverlay(name, (body) => {
+      const pre = document.createElement('pre');
+      pre.style.cssText = 'white-space:pre-wrap;font-family:var(--mono);font-size:11.5px;line-height:1.5;';
+      pre.textContent = text;
+      body.appendChild(pre);
+    });
+    return;
+  }
+  toast('No original file on record for this contract.');
 }
 
 function openCurrentMapFile() {
-  if (trackerState?.source !== 'live' || !trackerState.map) {
-    toast('No map loaded yet.'); return;
-  }
-  if (!trackerState.map.source_html) {
+  if (trackerState?.source !== 'live' || !trackerState.map) { toast('No map loaded yet.'); return; }
+  if (!trackerState.map.source_html && !trackerState.map.source_raw) {
     toast('This map has no source file on record — it wasn’t created from an upload.');
     return;
   }
-  openSourceHtml(trackerState.map.source_html, trackerState.map.source_filename || 'worksheet.html');
+  viewContractOriginal(trackerState.mapId);
 }
 
 // ── Browser — every uploaded decomposition worksheet, listed and openable ──
@@ -8309,13 +8388,13 @@ async function renderBrowserPanel() {
 
   const { data: maps, error } = await sb.from('work_maps')
     .select('id,goal,source_filename,created_at')
-    .not('source_html', 'is', null)
+    .or('source_html.not.is.null,source_raw.not.is.null')
     .order('created_at', { ascending: false });
 
   const uploadRow = `
     <button class="term-browser-upload" onclick="document.getElementById('term-upload-file').click()">
       <span class="term-browser-upload-icon">+</span>
-      <span>Upload a decomposition worksheet (.html)</span>
+      <span>Upload a contract — PDF, HTML, or worksheet JSON</span>
     </button>`;
 
   if (error || !maps?.length) {
@@ -8420,10 +8499,190 @@ function startBrowserArt() {
   frame();
 }
 
-async function openBrowserFile(mapId) {
-  const { data, error } = await sb.from('work_maps').select('source_html,source_filename').eq('id', mapId).maybeSingle();
-  if (error || !data?.source_html) { toast('Could not load that file.'); return; }
-  openSourceHtml(data.source_html, data.source_filename || 'worksheet.html');
+async function openBrowserFile(mapId) { await viewContractOriginal(mapId); }
+
+// ── Decomposed — every contract, drawn as a Decomposition Report ───────
+// The report is regenerated from the live database each time, so it always
+// shows current status — whatever format the contract was uploaded in.
+async function refreshDecomposedCount() {
+  const el = document.getElementById('term-sb-decomposed-count');
+  if (!el || !sb) return;
+  const { count, error } = await sb.from('work_maps').select('id', { count: 'exact', head: true });
+  el.textContent = error ? '—' : count;
+}
+
+async function renderDecomposedPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  const uploadRow = `
+    <button class="term-browser-upload" onclick="document.getElementById('term-upload-file').click()">
+      <span class="term-browser-upload-icon">+</span>
+      <span>Upload a contract to decompose — PDF, HTML, or worksheet JSON</span>
+    </button>`;
+  const [{ data: maps, error }, { data: leaves }] = await Promise.all([
+    sb.from('work_maps').select('id,goal,prepared_for,contract_date,date_mapped,created_at').order('created_at', { ascending: false }),
+    sb.from('work_leaves').select('map_id,logs,status'),
+  ]);
+  if (error) {
+    panel.innerHTML = `<div class="term-panel-head">Decomposed</div>${uploadRow}
+      <div class="term-panel-empty">Couldn't load contracts — if this keeps happening, sign out and back in.</div>`;
+    return;
+  }
+  if (!maps?.length) {
+    panel.innerHTML = `<div class="term-panel-head">Decomposed</div>${uploadRow}
+      <div class="term-panel-empty">Nothing decomposed yet.</div>`;
+    return;
+  }
+  panel.innerHTML = `
+    <div class="term-panel-head">Decomposed — ${maps.length} contract${maps.length === 1 ? '' : 's'}</div>
+    ${uploadRow}
+    ${maps.map(m => {
+      const ls = (leaves || []).filter(l => l.map_id === m.id);
+      const logs = ls.reduce((s, l) => s + l.logs, 0);
+      const done = ls.filter(l => l.status === 'delivered').length;
+      return `
+      <div class="term-timeline-cp term-decomp-card" onclick="openDecomposition('${esc(m.id)}')">
+        <div class="term-timeline-head">
+          <span class="term-timeline-title">${esc(m.goal)}</span>
+          <span class="term-decomp-tag">Decomposed</span>
+        </div>
+        <div class="term-timeline-meta">${esc(m.prepared_for || 'Client not recorded')} · ${esc(m.contract_date || fmtDate(m.date_mapped))}</div>
+        <div class="term-timeline-meta">${ls.length} executions · ${logs} LOGs · ${done} of ${ls.length} delivered</div>
+      </div>`;
+    }).join('')}`;
+  refreshDecomposedCount();
+}
+
+async function openDecomposition(mapId) {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  const { data, error } = await sb.rpc('get_work_map', { p_map: mapId });
+  if (error || !data?.map) { panel.innerHTML = '<div class="term-panel-empty">Could not load that contract.</div>'; return; }
+  const hasOriginal = !!(data.map.source_html || data.map.source_raw);
+  panel.innerHTML = `
+    <div class="term-decomp-bar">
+      <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All decomposed</button>
+      <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
+      <button class="term-timeline-dl" onclick="document.getElementById('term-decomp-frame').contentWindow.print()">Print / save PDF</button>
+      ${hasOriginal ? `<button class="term-timeline-dl" onclick="viewContractOriginal('${esc(mapId)}')">Original file</button>` : ''}
+    </div>
+    <iframe id="term-decomp-frame" sandbox="allow-same-origin allow-modals" class="term-decomp-frame" title="Decomposition Report"></iframe>`;
+  const frame = document.getElementById('term-decomp-frame');
+  frame.onload = () => { try { frame.style.height = frame.contentDocument.documentElement.scrollHeight + 'px'; } catch (e) {} };
+  frame.srcdoc = renderDecompositionReport(data);
+}
+
+// Same layout and typography as the Decomposition Report contracts arrive in,
+// rebuilt from the database: the map (tiers by longest dependency chain), the
+// wisdom keys, the sequence with live status, and settlement priced by canon —
+// labour at tier rate (or scoped rate), price = labour ÷ 0.75 rounded up,
+// each checkpoint floored to the cent, the last absorbing the remainder so
+// they add to the price exactly.
+function renderDecompositionReport({ map, branches, leaves }) {
+  const e = esc;
+  const byLen = (a, b) => a.length - b.length || a.localeCompare(b);
+  const L = [...(leaves || [])].sort((a, b) => byLen(a.leaf_code, b.leaf_code));
+  const byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
+  const depth = {};
+  const d = (c, seen = new Set()) => {
+    if (depth[c] != null) return depth[c];
+    if (seen.has(c)) return 0;
+    seen.add(c);
+    const req = (byCode[c]?.requires || []).filter(r => byCode[r]);
+    return (depth[c] = req.length ? 1 + Math.max(...req.map(r => d(r, seen))) : 0);
+  };
+  L.forEach(l => d(l.leaf_code));
+  const tierCount = L.length ? Math.max(...L.map(l => depth[l.leaf_code])) + 1 : 0;
+
+  const rate = l => l.scoped_rate_cents ?? (CANON.TIER_RATES[l.tier] || 0) * 100;
+  const labor = ls => ls.reduce((s, l) => s + Math.round(l.logs * rate(l)), 0);
+  const laborCents = labor(L);
+  const priceCents = Math.ceil(laborCents / 0.75);
+  const cps = [...(branches || [])].sort((a, b) => byLen(a.code, b.code));
+  let allotted = 0;
+  const cpRows = cps.map((b, i) => {
+    const ls = L.filter(l => String(l.branch_id) === String(b.branch_id));
+    const amt = i === cps.length - 1 ? priceCents - allotted : Math.floor(labor(ls) / 0.75);
+    allotted += amt;
+    return { b, ls, amt };
+  });
+  const money = c => (c / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const totalLogs = L.reduce((s, l) => s + l.logs, 0);
+  const delivered = new Set(L.filter(l => l.status === 'delivered').map(l => l.leaf_code));
+  const next = L.find(l => l.status !== 'delivered' && (l.requires || []).every(r => delivered.has(r)));
+  const keys = L.filter(l => l.is_key);
+  const cls = l => [l.kind === 'genesis' ? 'genesis' : '', l.kind === 'outcome' ? 'outcome' : '', l.is_key ? 'key-node' : ''].join(' ');
+  const statusOf = l => l.status === 'delivered' ? '<span style="color:var(--done)">Delivered ✓</span>'
+                      : l.status === 'in progress' ? 'In progress'
+                      : (l.target_date ? 'Due ' + e(fmtDate(l.target_date)) : 'To-do');
+
+  const css = `:root{--paper:#FAF8F3;--ink:#1B1A17;--ink-soft:#524F47;--faint:#8A8579;--line:#E0DBCF;--line2:#CFC8B8;--genesis:#C8612E;--key:#A8852C;--done:#4A7C59;--rule:#1B1A17}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:780px;margin:0 auto;padding:56px 48px 70px}.mast{border-bottom:3px solid var(--rule);padding-bottom:18px;margin-bottom:8px}
+.mast-top{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.mast-title{font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1.05;margin:10px 0 0;letter-spacing:-.02em}
+.mast-sub{font-family:'Newsreader',serif;font-style:italic;font-size:19px;color:var(--ink-soft);margin-top:6px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:16px 0 20px}.meta div.c{background:var(--paper);padding:12px 16px}
+.k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}.v{font-size:15px;margin-top:3px}
+section{margin-bottom:24px}.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--genesis);font-weight:600;margin-bottom:8px}
+h2{font-family:'Newsreader',serif;font-size:28px;font-weight:500;letter-spacing:-.01em;margin-bottom:14px;line-height:1.15}p{margin-bottom:12px;font-size:15px;color:var(--ink-soft)}p strong{color:var(--ink);font-weight:600}
+.lead{font-family:'Newsreader',serif;font-size:18px;line-height:1.5;color:var(--ink)}.dag{border:1px solid var(--line2);background:#FFFDF8;padding:14px 16px;margin:12px 0;break-inside:avoid}
+.dag-cap{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;text-align:center}
+.tier{display:flex;align-items:center;gap:12px;margin-bottom:3px}.tier-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);width:48px;flex-shrink:0;text-align:right}
+.nodes{display:flex;gap:10px;flex-wrap:wrap;flex:1}.node{border:1.5px solid var(--line2);background:var(--paper);padding:4px 9px;font-size:10.5px;font-weight:500;border-radius:3px;position:relative}
+.node.genesis{border-color:var(--genesis);border-width:2px;background:#FCF1E9}.node.outcome{border-color:var(--done);border-width:2px;background:#EEF4EF}
+.node.genesis::before{content:'◆ GENESIS';position:absolute;top:-8px;left:10px;background:var(--genesis);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
+.node.outcome::before{content:'● OUTCOME';position:absolute;top:-8px;left:10px;background:var(--done);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
+.node .nl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--genesis);font-weight:600;display:block;margin-bottom:2px}.node.key-node{border-color:var(--key)}
+.connector{text-align:center;color:var(--line2);font-size:11px;line-height:1;margin:1px 0 1px 62px}.key{border-left:3px solid var(--key);padding:4px 0 4px 20px;margin-bottom:20px;break-inside:avoid}
+.key-num{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--key);font-weight:600;text-transform:uppercase}.key-txt{font-family:'Newsreader',serif;font-size:18px;line-height:1.45;color:var(--ink);margin-top:4px}
+.seq{border-top:1px solid var(--line)}.step{display:grid;grid-template-columns:54px 1fr auto;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start;break-inside:avoid}
+.step-id{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--genesis);font-weight:600}.st{font-weight:600;font-size:15px;color:var(--ink);margin-bottom:3px}.sd{font-size:13px;color:var(--ink-soft)}.sd strong{color:var(--ink)}
+.dep{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);margin-top:5px;letter-spacing:.04em}.step-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);text-align:right;white-space:nowrap}
+.cp{border:1px solid var(--line2);background:#FFFDF8;padding:14px 18px;margin-bottom:10px;break-inside:avoid}.cp-h{display:flex;justify-content:space-between;align-items:baseline}
+.cp-id{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--done);font-size:13px}.cp-amt{font-family:'Newsreader',serif;font-size:24px;color:var(--ink)}.cp-b{font-size:13px;color:var(--ink-soft);margin-top:4px}
+.price{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0;break-inside:avoid}.price .c{background:var(--paper);padding:14px 16px}
+.price .big{font-family:'Newsreader',serif;font-size:30px;margin-top:2px}.price .c.hl{background:#FCF1E9}
+.foot{border-top:3px solid var(--rule);margin-top:48px;padding-top:16px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+@page{size:Letter;margin:0.45in;background:#FAF8F3}@media print{.page{padding:0}}
+@media(max-width:600px){.page{padding:36px 20px}.mast-title{font-size:32px}.meta,.price{grid-template-columns:1fr}.step{grid-template-columns:40px 1fr}.step-meta{grid-column:2;text-align:left}.tier{flex-direction:column;align-items:flex-start}.connector{margin-left:0}}`;
+
+  const tierRows = [];
+  for (let t = 0; t < tierCount; t++) {
+    const ns = L.filter(l => depth[l.leaf_code] === t);
+    tierRows.push(`<div class="tier"><div class="tier-lbl">${t === 0 ? 'START' : 'T' + (t + 1)}</div><div class="nodes">${
+      ns.map(l => `<div class="node ${cls(l)}"><span class="nl">${e(l.leaf_code)}</span>${e(l.task)}</div>`).join('')}</div></div>`);
+  }
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Decomposition Report · ${e(map.goal)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>${css}</style></head><body><div class="page">
+<div class="mast"><div class="mast-top"><span>Bixxville · Decomposition</span><span>Confidential to Client</span></div>
+<div class="mast-title">The Decomposition Report</div><div class="mast-sub">Your goal, broken into the order that actually moves it.</div></div>
+<div class="meta">
+<div class="c"><div class="k">Prepared for</div><div class="v">${e(map.prepared_for || '—')}</div></div>
+<div class="c"><div class="k">Date</div><div class="v">${e(map.contract_date || fmtDate(map.date_mapped))}</div></div>
+<div class="c"><div class="k">The goal, as stated</div><div class="v">"${e(map.goal)}"</div></div>
+<div class="c"><div class="k">Executions identified</div><div class="v">${L.length} · across ${tierCount} tier${tierCount === 1 ? '' : 's'} · ${totalLogs} LOG${totalLogs === 1 ? '' : 's'} · ${cps.length} checkpoint${cps.length === 1 ? '' : 's'}</div></div></div>
+<section><div class="eyebrow">The Reading</div><h2>What this is, and how to use it</h2>
+<p class="lead">One goal, ${L.length} moves. This report puts them in the order that moves the goal, and prices each checkpoint.</p>
+<p>Most goals fail because the work is done <strong>in the wrong order</strong>. Below: the map, the few moves that unlock everything, the exact sequence with where each step stands today, and the settlement schedule.</p></section>
+<section><div class="eyebrow">The Map</div><h2>Your goal as a dependency graph</h2>
+<p>Read top to bottom. Nothing on a lower tier starts until everything it points to above is done.</p>
+<div class="dag"><div class="dag-cap">Fig. 1 — ${L.length} executions · dependency-ordered</div>${tierRows.join('<div class="connector">↓</div>')}</div>
+<p>Gold outline = wisdom key. Orange = <strong>genesis</strong>, where you start. Green = <strong>outcome</strong>, the finish.</p></section>
+${keys.length ? `<section><div class="eyebrow">The Wisdom Keys</div><h2>The few moves that unlock everything</h2>
+<p>Of ${L.length} steps, ${keys.length} carry disproportionate weight.</p>${keys.map((k, i) => `<div class="key"><div class="key-num">Key ${String(i + 1).padStart(2, '0')}${k.kind === 'genesis' ? ' · The genesis' : ''}</div><div class="key-txt">${e(k.task)} (${e(k.leaf_code)}). Done when: ${e(k.done_criterion)}</div></div>`).join('')}</section>` : ''}
+<section><div class="eyebrow">The Sequence</div><h2>The order of operations</h2>
+<p>Each step is binary: done when its criterion is met, not before.</p><div class="seq">${L.map(l => `<div class="step"><div class="step-id">${e(l.leaf_code)}${l.kind === 'genesis' ? ' ◆' : l.kind === 'outcome' ? ' ●' : ''}</div><div class="step-body"><div class="st">${e(l.task)}</div><div class="sd"><strong>Done when:</strong> ${e(l.done_criterion)}</div><div class="dep">requires: ${(l.requires || []).length ? e(l.requires.join(', ')) : 'nothing — start here'} · ${l.logs} LOGs · ${e(l.tier)} · ${e(cps.find(b => String(b.branch_id) === String(l.branch_id))?.code || '—')}</div></div><div class="step-meta">${statusOf(l)}</div></div>`).join('')}</div></section>
+<section><div class="eyebrow">Settlement</div><h2>Checkpoints and what each pays</h2>
+<p>The Outcome is never left alone as its own checkpoint. Each checkpoint is sealed and paid when its nodes are verified done (Amendment V).</p>${cpRows.map(({ b, ls, amt }) => `<div class="cp"><div class="cp-h"><span class="cp-id">${e(b.code)}</span><span class="cp-amt">${money(amt)}</span></div><div class="cp-b">${ls.map(l => `${e(l.leaf_code)} ${e(l.task)}`).join(' · ')}</div><div class="dep">${ls.reduce((s, l) => s + l.logs, 0)} LOGs · ${ls.every(l => l.status === 'delivered') ? 'every node verified done' : 'sealed and paid when every node above is verified done'}</div></div>`).join('')}</section>
+<section><div class="eyebrow">Investment</div><h2>The price follows the work</h2>
+<div class="price"><div class="c"><div class="k">Total LOGs</div><div class="big">${totalLogs}</div></div><div class="c"><div class="k">Labor sum</div><div class="big">${money(laborCents)}</div></div><div class="c hl"><div class="k">Price</div><div class="big">${money(priceCents)}</div></div></div>
+<p>Price = labor sum ÷ 0.75 (LOG 4). Checkpoint payments above add up to the price exactly.</p></section>
+<section><div class="eyebrow">This Week</div><h2>Your one next move</h2><p>${next ? `Do <strong>${e(next.leaf_code)}</strong>: ${e(next.task)}. Done when: ${e(next.done_criterion)}` : 'Every step is delivered.'}</p></section>
+<div class="foot"><span>Bixxville · Decomposition Service</span><span>We trust the math.</span></div></div></body></html>`;
 }
 
 // ── Tracker board — Worksheet A's nodes, grouped by real status ─────────
@@ -8608,41 +8867,225 @@ async function downloadCheckpointStatement(cycleNum, btnEl) {
   }
 }
 
-// ── Upload: a decomposition worksheet export becomes a real work_map ────
-async function handleTermUpload(event) {
-  const file = event.target.files[0];
-  event.target.value = '';
-  if (!file) return;
-  if (!operator) { setTermView('terminal'); termPrint('Sign in as an operator to upload a decomposition.', 'err'); return; }
+// ── Upload: a contract, in any of its forms, becomes a real work_map ─────
+// Accepts the Decomposition Report (PDF or HTML), its worksheet JSON, and the
+// fillable decomposition-worksheet.html. All four become one payload and go
+// through the same checks before anything is written.
 
-  setTermView('terminal');
-  termPrint(`Uploading ${file.name}…`, 'system');
-  try {
-    const text = await file.text();
-    const match = text.match(/<script type="application\/json" id="logg-data">([\s\S]*?)<\/script>/);
-    if (!match) throw new Error('Not a decomposition worksheet — no data found in the file.');
-    const data = JSON.parse(match[1]);
-    if (!data.goal || !data.nodes?.length || !data.checkpoints?.length) {
-      throw new Error('Worksheet is incomplete — fill it out and run the collapse before downloading.');
+const CONTRACT_TIERS = ['apprentice', 'wrangler', 'architect', 'operator'];
+const REQ_LINE  = /^requires:\s*(.*?)\s*·\s*(\d+)\s*LOGs?\s*·\s*([a-z]+)\s*·\s*(CP\d+)/i;
+const STEP_HEAD = /^([A-Z]{1,2})(\s*[◆●])?\s+(\S.*)$/;
+const MAX_STORED_ORIGINAL = 5 * 1024 * 1024;
+
+function parseRequires(s) {
+  return /nothing/i.test(s) ? [] : s.split(',').map(x => x.trim()).filter(x => /^[A-Z]{1,2}$/.test(x));
+}
+
+// The HTML report, read from its markup. DOMParser builds an inert document,
+// so nothing in the uploaded file ever runs here.
+function contractFromReportHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const steps = doc.querySelectorAll('.step');
+  if (!steps.length) return null;
+  const meta = {};
+  doc.querySelectorAll('.meta .c').forEach(c => {
+    const k = c.querySelector('.k')?.textContent.trim().toLowerCase();
+    if (k) meta[k] = c.querySelector('.v')?.textContent.trim() || '';
+  });
+  const keys = new Set([...doc.querySelectorAll('.node.key-node .nl')].map(n => n.textContent.trim()));
+  doc.querySelectorAll('.key-txt').forEach(k => { const m = k.textContent.match(/\(([A-Z]{1,2})\)/); if (m) keys.add(m[1]); });
+  const nodes = [...steps].map(st => {
+    const idText = st.querySelector('.step-id')?.textContent || '';
+    const code = (idText.match(/[A-Z]{1,2}/) || [])[0];
+    const m = (st.querySelector('.dep')?.textContent || '').trim().match(REQ_LINE);
+    if (!code || !m) throw new Error(`couldn't read step "${idText.trim()}" — its "requires" line is missing or reworded`);
+    return {
+      code, task: st.querySelector('.st')?.textContent.trim() || '',
+      done_criterion: (st.querySelector('.sd')?.textContent || '').replace(/^\s*Done when:\s*/i, '').trim(),
+      requires: parseRequires(m[1]), logs: +m[2], tier: m[3].toLowerCase(), checkpoint: m[4].toUpperCase(),
+      kind: idText.includes('◆') ? 'genesis' : idText.includes('●') ? 'outcome' : 'leaf',
+      is_key: keys.has(code),
+    };
+  });
+  return {
+    goal: (meta['the goal, as stated'] || '').replace(/^["“]|["”]$/g, '').trim(),
+    date: meta['date'] || '', prepared_for: meta['prepared for'] || '',
+    threshold: +((doc.body.textContent.match(/reaches\s+(\d+)\s+LOGs/i) || [])[1] || 4),
+    nodes,
+  };
+}
+
+// The same report as a PDF: pdf.js gives text runs with end-of-line marks,
+// which rebuild the report's lines closely enough to read step by step.
+async function pdfLines(file) {
+  if (!window.pdfjsLib) throw new Error('the PDF reader failed to load');
+  const pdf = await pdfjsLib.getDocument({ data: await file.arrayBuffer() }).promise;
+  const lines = [];
+  for (let p = 1; p <= pdf.numPages; p++) {
+    const { items } = await (await pdf.getPage(p)).getTextContent();
+    let cur = '';
+    for (const it of items) {
+      cur += it.str;
+      if (it.hasEOL) { lines.push(cur); cur = ''; }
     }
+    if (cur) lines.push(cur);
+  }
+  return lines.map(l => l.replace(/\s+/g, ' ').trim()).filter(Boolean);
+}
 
-    const { error } = await sb.rpc('create_work_map_from_decomposition', {
-      p_goal: data.goal,
-      p_mapped_by: operator.id,
-      p_nodes: data.nodes,
-      p_checkpoints: data.checkpoints,
-      p_source_html: text,
-      p_source_filename: file.name,
-    });
-    if (error) throw new Error(error.message);
+function contractFromReportLines(L) {
+  // Letter-spaced labels come out of PDFs as "T HE GOAL" / "D ATE" — compare without spaces.
+  const squash = x => x.replace(/\s+/g, '').toUpperCase();
+  const at = label => L.findIndex(l => squash(l) === squash(label));
+  const gi = at('THE GOAL, AS STATED'), ge = at('EXECUTIONS IDENTIFIED');
+  const keys = new Set();
+  L.forEach((l, i) => { if (/^KEY\d+/.test(squash(l))) { const m = (L[i + 1] || '').match(/\(([A-Z]{1,2})\)/); if (m) keys.add(m[1]); } });
+  const nodes = [];
+  let cur = null, inDone = false;
+  for (const l of L) {
+    const req = l.match(REQ_LINE);
+    if (req && cur) {
+      Object.assign(cur, { requires: parseRequires(req[1]), logs: +req[2], tier: req[3].toLowerCase(), checkpoint: req[4].toUpperCase() });
+      nodes.push(cur); cur = null; inDone = false; continue;
+    }
+    if (cur && /^Done when:/i.test(l)) { cur.done_criterion = l.replace(/^Done when:\s*/i, ''); inDone = true; continue; }
+    if (cur && inDone) { cur.done_criterion += ' ' + l; continue; }
+    cur = null;   // a line that looked like a step but had no "Done when" after it
+    const h = l.match(STEP_HEAD);
+    if (h) cur = { code: h[1], task: h[3].trim(), done_criterion: '',
+                   kind: /◆/.test(h[2] || '') ? 'genesis' : /●/.test(h[2] || '') ? 'outcome' : 'leaf' };
+  }
+  nodes.forEach(n => { n.is_key = keys.has(n.code); });
+  if (!nodes.length) return null;
+  return {
+    goal: gi >= 0 ? L.slice(gi + 1, ge > gi ? ge : gi + 4).join(' ').replace(/^["“]|["”]$/g, '').trim() : '',
+    date: at('DATE') >= 0 ? L[at('DATE') + 1] : '',
+    prepared_for: at('PREPARED FOR') >= 0 ? L[at('PREPARED FOR') + 1] : '',
+    threshold: +((L.join(' ').match(/reaches\s+(\d+)\s+LOGs/i) || [])[1] || 4),
+    nodes,
+  };
+}
 
-    termPrint(`Map created: ${data.goal} — ${data.nodes.length} nodes, ${data.checkpoints.length} checkpoints.`, 'system');
+// One set of rules for every format — the same ones the database enforces,
+// checked here first so a bad contract gets a readable list of what's wrong.
+function normalizeContract(c) {
+  if (!c || !Array.isArray(c.nodes) || !c.nodes.length) throw new Error('no steps found in this file');
+  const errs = [];
+  if (!String(c.goal || '').trim()) errs.push('no goal');
+  const codes = new Set(c.nodes.map(n => n.code));
+  c.nodes.forEach(n => {
+    n.tier = String(n.tier || '').toLowerCase();
+    n.logs = parseInt(n.logs, 10);
+    n.requires = (n.requires || []).filter(r => r !== n.code);
+    n.is_key = !!n.is_key;
+    n.kind = ['genesis', 'outcome'].includes(n.kind) ? n.kind : 'leaf';
+    n.done_criterion = String(n.done_criterion || '').trim();
+    if (!CONTRACT_TIERS.includes(n.tier)) errs.push(`${n.code}: unknown tier "${n.tier}"`);
+    if (!(n.logs >= 1 && n.logs <= 32)) errs.push(`${n.code}: LOGs must be 1–32`);
+    if (!n.done_criterion) errs.push(`${n.code}: no "done when"`);
+    if (!/^CP\d+$/.test(n.checkpoint || '')) errs.push(`${n.code}: no checkpoint`);
+    n.requires.filter(r => !codes.has(r)).forEach(r => errs.push(`${n.code}: requires unknown step ${r}`));
+  });
+  // Markers can be lost in some exports; fall back to the graph itself.
+  if (!c.nodes.some(n => n.kind === 'genesis')) { const g = c.nodes.find(n => !n.requires.length); if (g) g.kind = 'genesis'; }
+  if (!c.nodes.some(n => n.kind === 'outcome')) {
+    const needed = new Set(c.nodes.flatMap(n => n.requires));
+    const o = [...c.nodes].reverse().find(n => !needed.has(n.code) && n.kind !== 'genesis'); if (o) o.kind = 'outcome';
+  }
+  if (c.nodes.filter(n => n.kind === 'genesis').length !== 1) errs.push('needs exactly one Genesis step');
+  if (c.nodes.filter(n => n.kind === 'outcome').length !== 1) errs.push('needs exactly one Outcome step');
+  if (!Array.isArray(c.checkpoints) || !c.checkpoints.length) {
+    c.checkpoints = [...new Set(c.nodes.map(n => n.checkpoint))].map((code, i) => ({ code, title: `Checkpoint ${i + 1}`, due_date: '', position: i }));
+  }
+  const cpCodes = new Set(c.checkpoints.map(cp => cp.code));
+  c.nodes.filter(n => !cpCodes.has(n.checkpoint)).forEach(n => errs.push(`${n.code}: checkpoint ${n.checkpoint} isn't listed`));
+  if (errs.length) throw new Error(errs.slice(0, 5).join('; ') + (errs.length > 5 ? ` (+${errs.length - 5} more)` : ''));
+  c.goal = String(c.goal).trim();
+  return c;
+}
+
+async function fileToBase64(file) {
+  const bytes = new Uint8Array(await file.arrayBuffer());
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+
+const normGoal = s => String(s || '').toLowerCase().replace(/["“”]/g, '').replace(/\s+/g, ' ').trim();
+
+async function handleTermUpload(event) {
+  const files = [...(event.target.files || [])];
+  event.target.value = '';
+  if (!files.length) return;
+  setTermView('terminal');
+  if (!operator) { termPrint('Sign in as an operator to upload a contract.', 'err'); return; }
+  if (!(await renewOperatorSession())) {
+    termPrint('Your session has expired — sign out and back in, then upload again.', 'err');
+    return;
+  }
+  let created = 0;
+  for (const file of files) created += await uploadOneContract(file);
+  if (created) {
     trackerState = { map: null, leaves: [], branches: [], source: null, mapId: null, gate: null };
     await loadWorkMap();
     updateSidebarCounts();
+    refreshDecomposedCount();
+  }
+}
+
+async function uploadOneContract(file) {
+  termPrint(`Reading ${file.name}…`, 'system');
+  try {
+    const name = file.name.toLowerCase();
+    let contract, mime, raw, html = null;
+    if (name.endsWith('.json') || file.type === 'application/json') {
+      mime = 'application/json'; raw = await file.text();
+      contract = JSON.parse(raw);
+    } else if (name.endsWith('.pdf') || file.type === 'application/pdf') {
+      mime = 'application/pdf';
+      contract = contractFromReportLines(await pdfLines(file));
+      if (!contract) throw new Error("this PDF isn't a Decomposition Report — no steps found");
+      raw = file.size <= MAX_STORED_ORIGINAL ? await fileToBase64(file) : null;
+    } else if (/\.html?$/.test(name) || file.type === 'text/html') {
+      mime = 'text/html'; raw = await file.text(); html = raw;
+      const m = raw.match(/<script type="application\/json" id="logg-data">([\s\S]*?)<\/script>/);
+      contract = m ? JSON.parse(m[1]) : contractFromReportHtml(raw);
+      if (!contract) throw new Error("this HTML isn't a Decomposition Report or a decomposition worksheet");
+    } else {
+      throw new Error('unsupported file — upload the contract as PDF, HTML, or its worksheet JSON');
+    }
+    normalizeContract(contract);
+    if (raw && raw.length > MAX_STORED_ORIGINAL * 1.4) { raw = null; html = null; }
+
+    const { data: maps } = await sb.from('work_maps').select('id,goal,created_at');
+    const dup = (maps || []).find(m => normGoal(m.goal) === normGoal(contract.goal));
+    if (dup) {
+      termPrint(`Already decomposed (uploaded ${fmtDate(dup.created_at)}): "${contract.goal}" — skipped ${file.name}.`, 'system');
+      return 0;
+    }
+
+    const logs = contract.nodes.reduce((s, n) => s + n.logs, 0);
+    termPrint(`Read ${contract.nodes.length} executions · ${logs} LOGs · ${contract.checkpoints.length} checkpoints.`, 'system');
+    const { data: map, error } = await sb.rpc('create_work_map_from_decomposition', {
+      p_goal: contract.goal, p_mapped_by: operator.id,
+      p_nodes: contract.nodes, p_checkpoints: contract.checkpoints,
+      p_source_html: html, p_source_filename: file.name,
+    });
+    if (error) throw new Error(error.message);
+    const mapId = map?.map?.id;
+    if (mapId) {
+      const { error: dErr } = await sb.rpc('set_work_map_details', {
+        p_map: mapId, p_prepared_for: contract.prepared_for || null, p_contract_date: contract.date || null,
+        p_source_mime: mime, p_source_raw: raw,
+      });
+      if (dErr) termPrint(`Saved the contract, but not its details — ${dErr.message}`, 'err');
+    }
+    termPrint(`Decomposed: "${contract.goal}" — open it under Tracker → Decomposed.`, 'system');
+    return 1;
   } catch (e) {
     console.error(e);
-    termPrint(`Upload failed — ${e.message}`, 'err');
+    termPrint(`Couldn't upload ${file.name} — ${e.message}`, 'err');
+    return 0;
   }
 }
 

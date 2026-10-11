@@ -3076,6 +3076,7 @@ async function startOperatorSession(pin) {
     const { data, error } = await sb.rpc('issue_session', { p_pin: pin });
     opSessionToken = (!error && data) ? data : null;
   } catch (e) { opSessionToken = null; }
+  if (opSessionToken) startSessionHeartbeat();
 }
 
 // Genesis signs in through Supabase Auth (email + password, or a restored
@@ -3085,9 +3086,42 @@ async function startOperatorSessionFromAuth() {
     const { data, error } = await sb.rpc('issue_session_from_auth');
     opSessionToken = (!error && data) ? data : null;
   } catch (e) { opSessionToken = null; }
+  if (opSessionToken) startSessionHeartbeat();
 }
 
+// Sessions last 12 hours from their last renewal. While the app is open
+// they're renewed every few minutes and whenever it comes back to the
+// foreground, so an open app never quietly loses its session.
+let sessionHeartbeat = null;
+function startSessionHeartbeat() {
+  clearInterval(sessionHeartbeat);
+  sessionHeartbeat = setInterval(renewOperatorSession, 5 * 60 * 1000);
+}
+
+// Returns true if a valid session is in hand afterwards.
+async function renewOperatorSession() {
+  if (!sb) return false;
+  if (opSessionToken) {
+    const { data, error } = await sb.rpc('renew_session');
+    if (error) return true;          // can't tell (network) — keep the token
+    if (data === true) return true;
+    opSessionToken = null;           // the server says it's gone
+  }
+  // Genesis can be re-issued silently from its Supabase Auth login. A PIN
+  // session can't be — that has to sign in again.
+  try {
+    const { data: { session } } = await sb.auth.getSession();
+    if (session?.user && operator) await startOperatorSessionFromAuth();
+  } catch (e) {}
+  return !!opSessionToken;
+}
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && operator) renewOperatorSession();
+});
+
 function endOperatorSession() {
+  clearInterval(sessionHeartbeat);
   const tok = opSessionToken;
   opSessionToken = null;
   if (tok && sb) fireAndForget(sb.rpc('end_session', { p_token: tok }));

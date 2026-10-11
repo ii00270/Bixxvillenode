@@ -2440,6 +2440,8 @@ html.theme-light{
 .term-wf-done{margin-top:6px;font-size:13px;color:var(--cream);}
 .term-wf-sub{font-size:11.5px;color:var(--soft);margin-top:3px;}
 .term-wf-count{float:right;font-weight:400;text-transform:none;letter-spacing:0;color:var(--grey);}
+.term-wf-msg{color:var(--red);font-size:12.5px;margin-top:8px;}
+.term-wf-msg:empty{display:none;}
 .term-wf-returned{margin-top:8px;padding:8px 10px;border-left:3px solid var(--red);background:rgba(var(--red-rgb),.06);font-size:12px;}
 .term-wf-item{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:12.5px;word-break:break-word;}
 .term-wf-x{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--grey);font-size:18px;cursor:pointer;line-height:1;}
@@ -9000,8 +9002,9 @@ async function renderWorkForm(body, leafId) {
       <div class="form-lbl">Submit for verification</div>
       <label class="term-wf-field"><span class="form-lbl">What was done</span><textarea class="form-input" id="wf-summary" rows="3" placeholder="Summarize the finished work and where the proof is."></textarea></label>
       <label class="term-wf-check"><input type="checkbox" id="wf-met"> The "done when" is met: ${esc(l.done_criterion)}</label>
-      <button class="term-card-btn primary" onclick="submitProof('${esc(leafId)}')" ${sessions.length ? '' : 'disabled title="Log at least one work session first"'}>Submit for verification</button>
-      <div class="term-wf-sub">Once submitted, the step is locked until Genesis verifies it or sends it back.</div>
+      <button class="term-card-btn primary" id="wf-submit" onclick="submitProof('${esc(leafId)}')">Submit for verification</button>
+      <div class="term-wf-msg" id="wf-msg"></div>
+      <div class="term-wf-sub">Submitting also saves any session or proof still filled in above. After that, the step is locked until Genesis verifies it or sends it back.</div>
     </div></div>`;
 }
 
@@ -9011,39 +9014,65 @@ async function workAction(leafId, rpc, args) {
   renderWorkForm(document.getElementById('ov-body'), leafId);
 }
 
-async function saveWorkSession(leafId) {
+// "none", "n/a", "-" in the link box mean there is no link.
+const isBlankLink = v => !v || /^(none|no|n\/?a|na|-|—|nil)$/i.test(v.trim());
+
+// Problems show right under the Submit button, not only as a toast that's
+// easy to miss.
+function wfMsg(text) {
+  const el = document.getElementById('wf-msg');
+  if (el) el.textContent = text || '';
+  if (text) toast(text);
+}
+
+async function saveWorkSession(leafId, opts = {}) {
   const start = document.getElementById('wf-start').value, end = document.getElementById('wf-end').value;
-  if (!start || !end) { toast('Set both a start and an end time.'); return; }
-  if (new Date(end) <= new Date(start)) { toast('The end has to be after the start.'); return; }
-  await workAction(leafId, 'log_work_session', {
+  if (!start || !end) { wfMsg('Set both a start time and an end time for your work session.'); return false; }
+  if (new Date(end) <= new Date(start)) { wfMsg('Your work session’s end time has to be after its start time.'); return false; }
+  const { error } = await sb.rpc('log_work_session', {
     p_leaf: leafId, p_started_at: new Date(start).toISOString(), p_ended_at: new Date(end).toISOString(),
     p_notes: document.getElementById('wf-notes').value,
   });
+  if (error) { wfMsg(error.message); return false; }
+  if (!opts.noRender) renderWorkForm(document.getElementById('ov-body'), leafId);
+  return true;
 }
 
-async function addEvidence(leafId) {
+async function addEvidence(leafId, opts = {}) {
   const files = [...(document.getElementById('wf-files').files || [])];
-  const url = document.getElementById('wf-url').value.trim();
+  const rawUrl = document.getElementById('wf-url').value.trim();
+  const url = isBlankLink(rawUrl) ? '' : rawUrl;
   const caption = document.getElementById('wf-caption').value.trim();
   const status = document.getElementById('wf-upload-status');
-  if (!files.length && !url) { toast('Choose a file or paste a link.'); return; }
+  if (url && !/^https?:\/\//i.test(url)) {
+    wfMsg('A link has to start with http:// or https:// — leave the link box empty if there isn’t one.');
+    return false;
+  }
+  if (!files.length && !url) {
+    if (opts.quietIfEmpty) return true;
+    wfMsg('Choose a file or paste a link.');
+    return false;
+  }
+  let ok = true;
   if (url) {
     const { error } = await sb.rpc('add_evidence_link', { p_leaf: leafId, p_url: url, p_caption: caption });
-    if (error) { toast(error.message); return; }
+    if (error) { wfMsg(error.message); return false; }
   }
   for (const [i, f] of files.entries()) {
-    if (f.size > 25 * 1024 * 1024) { toast(`${f.name} is over 25 MB — skipped.`); continue; }
+    if (f.size > 25 * 1024 * 1024) { wfMsg(`${f.name} is over 25 MB — not attached.`); ok = false; continue; }
     status.textContent = `Uploading ${i + 1} of ${files.length}: ${f.name}…`;
     const safe = f.name.replace(/[^\w.\-]+/g, '_').slice(-80);
     const path = `${leafId}/${crypto.randomUUID()}-${safe}`;
     const { error: upErr } = await sb.storage.from('work-evidence').upload(path, f, { contentType: f.type || 'application/octet-stream', upsert: false });
-    if (upErr) { toast(`${f.name}: ${upErr.message}`); continue; }
+    if (upErr) { wfMsg(`${f.name}: ${upErr.message}`); ok = false; continue; }
     const { error } = await sb.rpc('register_evidence_file', {
       p_leaf: leafId, p_storage_path: path, p_filename: f.name, p_mime: f.type || null, p_size: f.size, p_caption: caption,
     });
-    if (error) { await sb.storage.from('work-evidence').remove([path]); toast(`${f.name}: ${error.message}`); }
+    if (error) { await sb.storage.from('work-evidence').remove([path]); wfMsg(`${f.name}: ${error.message}`); ok = false; }
   }
-  renderWorkForm(document.getElementById('ov-body'), leafId);
+  if (status) status.textContent = '';
+  if (!opts.noRender) renderWorkForm(document.getElementById('ov-body'), leafId);
+  return ok;
 }
 
 async function removeEvidence(leafId, evidenceId) {
@@ -9060,13 +9089,26 @@ async function openEvidenceFile(path) {
   window.open(data.signedUrl, '_blank', 'noopener');
 }
 
+// One press does it all: whatever is still sitting in the session boxes and
+// the proof boxes gets saved first, then the step is submitted.
 async function submitProof(leafId) {
+  wfMsg('');
   const summary = document.getElementById('wf-summary').value.trim();
   const met = document.getElementById('wf-met').checked;
-  if (!summary) { toast('Say what was done.'); return; }
-  if (!met) { toast('Confirm the "done when" is met.'); return; }
+  if (!summary) { wfMsg('Write what was done in the "What was done" box.'); return; }
+  if (!met) { wfMsg('Tick the box confirming the "done when" is met.'); return; }
+  const btn = document.getElementById('wf-submit');
+  if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+  const restore = () => { if (btn) { btn.disabled = false; btn.textContent = 'Submit for verification'; } };
+  const { data: w } = await sb.rpc('get_leaf_work', { p_leaf: leafId });
+  const hasSessions = (w?.sessions || []).length > 0;
+  const pendingNotes = document.getElementById('wf-notes').value.trim();
+  if (!hasSessions || pendingNotes) {
+    if (!(await saveWorkSession(leafId, { noRender: true }))) { restore(); return; }
+  }
+  if (!(await addEvidence(leafId, { noRender: true, quietIfEmpty: true }))) { restore(); return; }
   const { error } = await sb.rpc('submit_leaf_proof', { p_leaf: leafId, p_summary: summary, p_criterion_met: true });
-  if (error) { toast(error.message); return; }
+  if (error) { wfMsg(error.message); restore(); return; }
   closeOverlay();
   toast('Submitted — waiting on verification.');
   await refreshTrackerAfterWork();

@@ -2330,6 +2330,16 @@ html.theme-light{
 .term-sb-item:hover{background:var(--term-line);}
 .term-sb-item.active{background:var(--term-line);color:var(--green);}
 .term-sb-icon{width:15px;height:15px;flex-shrink:0;opacity:.8;}
+.term-sb-row{display:flex;align-items:center;gap:2px;}
+.term-sb-row .term-sb-item{flex:1;min-width:0;}
+.term-sb-fold{
+  appearance:none;-webkit-appearance:none;-moz-appearance:none;
+  flex-shrink:0;width:26px;height:26px;border-radius:5px;border:none;background:transparent;
+  color:var(--term-dim);font-family:var(--mono);font-size:15px;line-height:1;cursor:pointer;
+}
+.term-sb-fold:hover{background:var(--term-line);color:var(--term-fg);}
+.term-sb-group.folded .term-sb-sub{display:none;}
+.term-sb-head{cursor:pointer;}
 .term-sb-sub{
   display:flex;flex-direction:column;margin:2px 0 8px 14px;
   border-left:1px solid var(--term-line);padding-left:10px;
@@ -2760,18 +2770,21 @@ html.theme-light{
 <div id="terminal-shell">
   <div id="term-sidebar-backdrop" onclick="toggleTermSidebar(false)"></div>
   <nav id="term-sidebar">
-    <div class="term-sb-head">BIXXVILLE</div>
+    <div class="term-sb-head" onclick="setTermView('terminal')" title="Terminal">BIXXVILLE</div>
     <div class="term-sb-group">
       <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
         <span>Terminal</span>
       </button>
     </div>
-    <div class="term-sb-group">
+    <div class="term-sb-group" data-group="tracker">
+      <div class="term-sb-row">
       <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>
         <span>Tracker</span>
       </button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('tracker')" aria-label="Collapse Tracker">−</button>
+      </div>
       <div class="term-sb-sub" id="term-sb-tracker-sub">
         <button class="term-sb-subitem" onclick="setTrackerFilter('to-do'); setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('in progress'); setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
@@ -2781,18 +2794,24 @@ html.theme-light{
         <button class="term-sb-subitem" onclick="setTermView('decomposed')">Decomposed <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
       </div>
     </div>
-    <div class="term-sb-group">
+    <div class="term-sb-group" data-group="statements">
+      <div class="term-sb-row">
       <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
         <span>Statements</span>
       </button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('statements')" aria-label="Collapse Statements">−</button>
+      </div>
       <div class="term-sb-sub" id="term-sb-statements-sub"></div>
     </div>
-    <div class="term-sb-group">
+    <div class="term-sb-group" data-group="browser">
+      <div class="term-sb-row">
       <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
         <span>Browser</span>
       </button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('browser')" aria-label="Collapse Browser">−</button>
+      </div>
       <div class="term-sb-sub" id="term-sb-browser-sub"></div>
     </div>
   </nav>
@@ -8301,6 +8320,17 @@ function currentAvatarUrl() {
 // unshown, holding the logic (Tracker, Downloads, canon) that grows back
 // in as terminal commands rather than screens.
 function enterUniShell() {
+  // Clients (Relations) keep the client view they've always had; members
+  // get the terminal.
+  if (relation && !operator) {
+    document.getElementById('terminal-shell')?.classList.remove('in');
+    document.getElementById('uni-shell').classList.add('in');
+    document.getElementById('uni-admin-btn')?.classList.add('hidden');
+    renderThemeToggleIcon();
+    restoreShoulder();
+    showUniTab('home');
+    return;
+  }
   enterTerminal();
 }
 
@@ -8342,12 +8372,39 @@ function enterTerminal() {
 
   if (!shell.dataset.sidebarBooted) {
     shell.dataset.sidebarBooted = '1';
+    applySbFolds();
     setTermView('terminal');
     loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); });
   }
 }
 
 // ── Sidebar: nested nav, mobile drawer ──────────────────────────────────
+// +/− beside Tracker, Statements and Browser fold their sub-lists away.
+// Remembered per device.
+function sbFolded() {
+  try { return JSON.parse(localStorage.getItem('bixx-sb-folded') || '[]'); } catch (e) { return []; }
+}
+function applySbFolds() {
+  const folded = sbFolded();
+  document.querySelectorAll('.term-sb-group[data-group]').forEach(g => {
+    const on = folded.includes(g.dataset.group);
+    g.classList.toggle('folded', on);
+    const b = g.querySelector('.term-sb-fold');
+    if (b) {
+      b.textContent = on ? '+' : '−';
+      const name = g.querySelector('.term-sb-item span')?.textContent || g.dataset.group;
+      b.setAttribute('aria-label', (on ? 'Expand ' : 'Collapse ') + name);
+    }
+  });
+}
+function toggleSbGroup(key) {
+  const folded = sbFolded();
+  const i = folded.indexOf(key);
+  if (i >= 0) folded.splice(i, 1); else folded.push(key);
+  try { localStorage.setItem('bixx-sb-folded', JSON.stringify(folded)); } catch (e) {}
+  applySbFolds();
+}
+
 function toggleTermSidebar(force) {
   const shell = document.getElementById('terminal-shell');
   if (!shell) return;
@@ -8386,7 +8443,7 @@ function updateSidebarCounts() {
   const sub = document.getElementById('term-sb-statements-sub');
   if (sub) {
     sub.innerHTML = live
-      ? trackerState.branches.map(b => `<button class="term-sb-subitem" onclick="setTermView('statements')"><span>${esc(b.code)}</span><span class="term-sb-count">${b.leaf_count}</span></button>`).join('')
+      ? [...trackerState.branches].sort((a, b) => byLeafCode(a.code, b.code)).map(b => `<button class="term-sb-subitem" onclick="setTermView('statements')"><span>${esc(b.code)}</span><span class="term-sb-count">${b.leaf_count}</span></button>`).join('')
       : '';
   }
   const mapMark = document.getElementById('term-sb-map-mark');
@@ -8628,13 +8685,203 @@ async function openDecomposition(mapId) {
     <div class="term-decomp-bar">
       <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All decomposed</button>
       <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
+      <button class="term-timeline-dl" id="term-decomp-switch" onclick="toggleDecompView()">Team plan</button>
       <button class="term-timeline-dl" onclick="document.getElementById('term-decomp-frame').contentWindow.print()">Print / save PDF</button>
       ${hasOriginal ? `<button class="term-timeline-dl" onclick="viewContractOriginal('${esc(mapId)}')">Original file</button>` : ''}
     </div>
     <iframe id="term-decomp-frame" sandbox="allow-same-origin allow-modals" class="term-decomp-frame" title="Decomposition Report"></iframe>`;
   const frame = document.getElementById('term-decomp-frame');
   frame.onload = () => { try { frame.style.height = frame.contentDocument.documentElement.scrollHeight + 'px'; } catch (e) {} };
+  window._decompData = data;
+  window._decompView = 'report';
   frame.srcdoc = renderDecompositionReport(data);
+}
+
+function toggleDecompView() {
+  const frame = document.getElementById('term-decomp-frame');
+  const btn = document.getElementById('term-decomp-switch');
+  if (!frame || !window._decompData) return;
+  window._decompView = window._decompView === 'report' ? 'team' : 'report';
+  frame.srcdoc = window._decompView === 'team' ? renderTeamPlanReport(window._decompData) : renderDecompositionReport(window._decompData);
+  if (btn) btn.textContent = window._decompView === 'team' ? 'Decomposition' : 'Team plan';
+}
+
+// The Decomposition Report's own styling — shared by every report the OS draws.
+const REPORT_CSS = `:root{--paper:#FAF8F3;--ink:#1B1A17;--ink-soft:#524F47;--faint:#8A8579;--line:#E0DBCF;--line2:#CFC8B8;--genesis:#C8612E;--key:#A8852C;--done:#4A7C59;--rule:#1B1A17}
+*{box-sizing:border-box;margin:0;padding:0}body{background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
+.page{max-width:780px;margin:0 auto;padding:56px 48px 70px}.mast{border-bottom:3px solid var(--rule);padding-bottom:18px;margin-bottom:8px}
+.mast-top{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
+.mast-title{font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1.05;margin:10px 0 0;letter-spacing:-.02em}
+.mast-sub{font-family:'Newsreader',serif;font-style:italic;font-size:19px;color:var(--ink-soft);margin-top:6px}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:16px 0 20px}.meta div.c{background:var(--paper);padding:12px 16px}
+.k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}.v{font-size:15px;margin-top:3px}
+section{margin-bottom:24px}.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--genesis);font-weight:600;margin-bottom:8px}
+h2{font-family:'Newsreader',serif;font-size:28px;font-weight:500;letter-spacing:-.01em;margin-bottom:14px;line-height:1.15}p{margin-bottom:12px;font-size:15px;color:var(--ink-soft)}p strong{color:var(--ink);font-weight:600}
+.lead{font-family:'Newsreader',serif;font-size:18px;line-height:1.5;color:var(--ink)}.dag{border:1px solid var(--line2);background:#FFFDF8;padding:14px 16px;margin:12px 0;break-inside:avoid}
+.dag-cap{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;text-align:center}
+.tier{display:flex;align-items:center;gap:12px;margin-bottom:3px}.tier-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);width:48px;flex-shrink:0;text-align:right}
+.nodes{display:flex;gap:10px;flex-wrap:wrap;flex:1}.node{border:1.5px solid var(--line2);background:var(--paper);padding:4px 9px;font-size:10.5px;font-weight:500;border-radius:3px;position:relative}
+.node.genesis{border-color:var(--genesis);border-width:2px;background:#FCF1E9}.node.outcome{border-color:var(--done);border-width:2px;background:#EEF4EF}
+.node.genesis::before{content:'◆ GENESIS';position:absolute;top:-8px;left:10px;background:var(--genesis);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
+.node.outcome::before{content:'● OUTCOME';position:absolute;top:-8px;left:10px;background:var(--done);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
+.node .nl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--genesis);font-weight:600;display:block;margin-bottom:2px}.node.key-node{border-color:var(--key)}
+.connector{text-align:center;color:var(--line2);font-size:11px;line-height:1;margin:1px 0 1px 62px}.key{border-left:3px solid var(--key);padding:4px 0 4px 20px;margin-bottom:20px;break-inside:avoid}
+.key-num{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--key);font-weight:600;text-transform:uppercase}.key-txt{font-family:'Newsreader',serif;font-size:18px;line-height:1.45;color:var(--ink);margin-top:4px}
+.seq{border-top:1px solid var(--line)}.step{display:grid;grid-template-columns:54px 1fr auto;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start;break-inside:avoid}
+.step-id{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--genesis);font-weight:600}.st{font-weight:600;font-size:15px;color:var(--ink);margin-bottom:3px}.sd{font-size:13px;color:var(--ink-soft)}.sd strong{color:var(--ink)}
+.dep{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);margin-top:5px;letter-spacing:.04em}.step-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);text-align:right;white-space:nowrap}
+.cp{border:1px solid var(--line2);background:#FFFDF8;padding:14px 18px;margin-bottom:10px;break-inside:avoid}.cp-h{display:flex;justify-content:space-between;align-items:baseline}
+.cp-id{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--done);font-size:13px}.cp-amt{font-family:'Newsreader',serif;font-size:24px;color:var(--ink)}.cp-b{font-size:13px;color:var(--ink-soft);margin-top:4px}
+.price{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0;break-inside:avoid}.price .c{background:var(--paper);padding:14px 16px}
+.price .big{font-family:'Newsreader',serif;font-size:30px;margin-top:2px}.price .c.hl{background:#FCF1E9}
+.foot{border-top:3px solid var(--rule);margin-top:48px;padding-top:16px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
+@page{size:Letter;margin:0.45in;background:#FAF8F3}@media print{.page{padding:0}}
+@media(max-width:600px){.page{padding:36px 20px}.mast-title{font-size:32px}.meta,.price{grid-template-columns:1fr}.step{grid-template-columns:40px 1fr}.step-meta{grid-column:2;text-align:left}.tier{flex-direction:column;align-items:flex-start}.connector{margin-left:0}}.tbl{width:100%;border-collapse:collapse;margin:10px 0;font-size:12.5px}.tbl tr{break-inside:avoid}.tbl th{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint);text-align:left;padding:5px 8px;border-bottom:2px solid var(--ink)}.tbl td{padding:6px 8px;border-bottom:1px solid var(--line);color:var(--ink-soft);vertical-align:top}.tbl td:first-child{color:var(--ink);font-weight:600}.tbl .num{text-align:right;white-space:nowrap}.tbl tr.tot td{border-top:2px solid var(--ink);font-weight:600;color:var(--ink)}.mono{font-family:'IBM Plex Mono',monospace;font-size:11.5px}.note{background:#F3EEE2;padding:10px 16px;margin:10px 0;font-size:12.5px;color:var(--ink-soft);break-inside:avoid}.keep{break-inside:avoid}`;
+
+// ── Team plan — who it takes to get a decomposition done ───────────────
+// Pure arithmetic on the map, nothing invented: each step's LOGs are its
+// working time (LOG 3: 1 LOG = 1 hour), it can't start before every step it
+// requires finishes, and each seat does one step at a time at its tier. A
+// schedule is simulated for a given number of seats per tier (steps on the
+// longest remaining chain go first); the smallest seat counts that still
+// finish in the target are the team.
+function planTeam(leaves) {
+  const S = Object.fromEntries(leaves.map(l => [l.leaf_code, l]));
+  const codes = Object.keys(S).sort(byLeafCode);
+  const reqs = c => (S[c].requires || []).filter(r => S[r]);
+  const dependents = Object.fromEntries(codes.map(c => [c, codes.filter(d => reqs(d).includes(c))]));
+  const tail = {};
+  const T = (c, seen = new Set()) => {
+    if (tail[c] != null) return tail[c];
+    if (seen.has(c)) return S[c].logs;
+    seen.add(c);
+    return (tail[c] = S[c].logs + Math.max(0, ...dependents[c].map(d => T(d, seen))));
+  };
+  codes.forEach(c => T(c));
+
+  const sim = seats => {
+    const pools = {};
+    Object.entries(seats).forEach(([t, n]) => { pools[t] = Array(n).fill(0); });
+    const start = {}, fin = {}, seatOf = {};
+    let t = 0, guard = 0;
+    while (Object.keys(fin).length < codes.length && guard++ < 20000) {
+      const ready = codes.filter(c => start[c] == null && reqs(c).every(r => fin[r] != null && fin[r] <= t))
+        .sort((a, b) => tail[b] - tail[a] || byLeafCode(a, b));
+      for (const c of ready) {
+        const pool = pools[S[c].tier];
+        if (!pool) continue;
+        let i = 0;
+        for (let k = 1; k < pool.length; k++) if (pool[k] < pool[i]) i = k;
+        if (pool[i] <= t) { start[c] = t; fin[c] = t + S[c].logs; pool[i] = fin[c]; seatOf[c] = i; }
+      }
+      const next = [...Object.values(fin), ...Object.values(pools).map(p => Math.min(...p))].filter(x => x > t);
+      t = next.length ? Math.min(...next) : t + 1;
+    }
+    return { finish: Math.max(0, ...Object.values(fin)), start, fin, seatOf };
+  };
+
+  const tierSteps = {};
+  codes.forEach(c => { tierSteps[S[c].tier] = (tierSteps[S[c].tier] || 0) + 1; });
+  const criticalPath = Math.max(0, ...Object.values(tail));
+  const smallestTeam = target => {
+    if (target < criticalPath) return null;
+    const seats = { ...tierSteps };
+    let changed = true;
+    while (changed) {
+      changed = false;
+      for (const t of Object.keys(seats).sort((a, b) => seats[b] - seats[a])) {
+        if (seats[t] > 1) { seats[t]--; if (sim(seats).finish <= target) changed = true; else seats[t]++; }
+      }
+    }
+    return seats;
+  };
+  const chain = [];
+  let cur = codes.filter(c => !reqs(c).length).sort((a, b) => tail[b] - tail[a])[0];
+  while (cur) { chain.push(cur); cur = [...dependents[cur]].sort((a, b) => tail[b] - tail[a])[0]; }
+
+  const fastestSeats = smallestTeam(criticalPath);
+  const leanSeats = Object.fromEntries(Object.keys(tierSteps).map(t => [t, 1]));
+  return {
+    S, codes, tail, chain, criticalPath, tierSteps, smallestTeam, sim,
+    totalLogs: codes.reduce((n, c) => n + S[c].logs, 0),
+    fastest: { seats: fastestSeats, ...sim(fastestSeats) },
+    lean: { seats: leanSeats, ...sim(leanSeats) },
+  };
+}
+
+function renderTeamPlanReport({ map, leaves }) {
+  const e = esc;
+  const L = leaves || [];
+  const P = planTeam(L);
+  const tierOrder = ['operator', 'architect', 'wrangler', 'apprentice'].filter(t => P.tierSteps[t]);
+  const title = t => t.charAt(0).toUpperCase() + t.slice(1);
+  const rate = l => l.scoped_rate_cents ?? (CANON.TIER_RATES[l.tier] || 0) * 100;
+  const pay = ls => ls.reduce((s, l) => s + Math.round(l.logs * rate(l)), 0);
+  const money = c => (c / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+  const seatsTotal = seats => Object.values(seats).reduce((a, b) => a + b, 0);
+  const shape = seats => tierOrder.filter(t => seats[t]).map(t => `${seats[t]} ${title(t).toLowerCase()}${seats[t] === 1 ? '' : 's'}`).join(' · ');
+  const depth = leafDepths(L);
+  const seatName = (tier, i, n) => n === 1 ? title(tier) : `${title(tier)} ${i + 1}`;
+  const F = P.fastest;
+  const roster = tierOrder.flatMap(t => Array.from({ length: F.seats[t] }, (_, i) => {
+    const ls = P.codes.filter(c => P.S[c].tier === t && F.seatOf[c] === i).sort((a, b) => F.start[a] - F.start[b]).map(c => P.S[c]);
+    return { name: seatName(t, i, F.seats[t]), tier: t, ls };
+  })).filter(r => r.ls.length);
+  const round4 = x => Math.ceil(x / 4) * 4;
+  const windows = [...new Set([P.criticalPath, round4(P.criticalPath * 1.25), round4(P.criticalPath * 1.5), round4(P.criticalPath * 2)])].sort((a, b) => a - b);
+  const bsize = n => (n / 4).toFixed(n % 4 ? 2 : 0).replace(/\.?0+$/, '');
+
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Plan · ${e(map.goal)}</title>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>${REPORT_CSS}</style></head><body><div class="page">
+<div class="mast"><div class="mast-top"><span>Bixxville · Team Plan</span><span>Confidential to Client</span></div>
+<div class="mast-title">The Team Plan</div><div class="mast-sub">Who it takes to get it done, and who does what.</div></div>
+<div class="meta">
+<div class="c"><div class="k">Prepared for</div><div class="v">${e(map.prepared_for || '—')}</div></div>
+<div class="c"><div class="k">Date</div><div class="v">${e(map.contract_date || fmtDate(map.date_mapped))}</div></div>
+<div class="c"><div class="k">The goal, as stated</div><div class="v">"${e(map.goal)}"</div></div>
+<div class="c"><div class="k">The work</div><div class="v">${L.length} steps · ${P.totalLogs} LOGs · critical path ${P.criticalPath} LOGs</div></div></div>
+
+<section><div class="eyebrow">The Reading</div><h2>Two ways to staff it</h2>
+<p class="lead">The fastest team is <strong>${seatsTotal(F.seats)} seats</strong> (${e(shape(F.seats))}). It finishes in ${F.finish} LOGs of working time (${bsize(F.finish)} BSize), as fast as the dependencies allow. The leanest is <strong>one seat per tier</strong> (${seatsTotal(P.lean.seats)}), finishing in ${P.lean.finish} LOGs.</p>
+<p>Working time is counted in LOGs from the moment the Genesis step starts, with each seat on one step at a time. Pay follows each step's tier, not the person's, so the total is the same either way: <strong>${money(pay(L))}</strong> in labor.</p></section>
+
+<section class="keep"><div class="eyebrow">Seats by Tier</div><h2>The roles, and the work in each</h2>
+<table class="tbl"><tr><th>Tier</th><th class="num">Steps</th><th class="num">LOGs</th><th class="num">Labor</th><th class="num">Fastest</th><th class="num">Leanest</th><th>First needed</th></tr>
+${tierOrder.map(t => {
+  const ls = L.filter(l => l.tier === t);
+  const first = ls.map(l => depth[l.leaf_code]).reduce((a, b) => Math.min(a, b), Infinity);
+  return `<tr><td>${title(t)}</td><td class="num">${ls.length}</td><td class="num">${ls.reduce((s, l) => s + l.logs, 0)}</td><td class="num">${money(pay(ls))}</td><td class="num">${F.seats[t]}</td><td class="num">1</td><td>${first === 0 ? 'At the start' : 'Level T' + (first + 1)}</td></tr>`;
+}).join('')}
+<tr class="tot"><td>Total</td><td class="num">${L.length}</td><td class="num">${P.totalLogs}</td><td class="num">${money(pay(L))}</td><td class="num">${seatsTotal(F.seats)}</td><td class="num">${seatsTotal(P.lean.seats)}</td><td></td></tr></table></section>
+
+<section><div class="eyebrow">The Roster</div><h2>Who does what — the fastest team</h2>
+<p>Each seat's steps in the order they come up. "Working time" is when the step can begin and end, in LOGs from the start.</p>
+${roster.map(r => `<div class="cp"><div class="cp-h"><span class="cp-id">${e(r.name)}</span><span class="cp-amt">${money(pay(r.ls))}</span></div>
+<table class="tbl"><tr><th>Step</th><th>Task</th><th class="num">LOGs</th><th class="num">Working time</th></tr>
+${r.ls.map(l => `<tr><td>${e(l.leaf_code)}${l.kind === 'genesis' ? ' ◆' : l.kind === 'outcome' ? ' ●' : ''}</td><td>${e(l.task)}</td><td class="num">${l.logs}</td><td class="num mono">${F.start[l.leaf_code]} → ${F.fin[l.leaf_code]}</td></tr>`).join('')}
+</table><div class="dep">${r.ls.reduce((s, l) => s + l.logs, 0)} LOGs · ${e(r.tier)} rate</div></div>`).join('')}</section>
+
+<section class="keep"><div class="eyebrow">The Critical Path</div><h2>The chain no team size can shorten</h2>
+<p>${P.chain.map(c => `<strong>${e(c)}</strong>`).join(' → ')} · ${P.criticalPath} LOGs. Each of these waits on the one before it, so adding people anywhere else does not bring the finish closer. Fill these seats first and keep them moving.</p>
+<table class="tbl"><tr><th>Step</th><th>Task</th><th>Tier</th><th class="num">LOGs</th></tr>
+${P.chain.map(c => { const l = P.S[c]; return `<tr><td>${e(c)}</td><td>${e(l.task)}</td><td>${e(l.tier)}</td><td class="num">${l.logs}</td></tr>`; }).join('')}</table></section>
+
+<section class="keep"><div class="eyebrow">The Two Gates</div><h2>Will a team fit the window? (LOG 4 §6)</h2>
+<p>Capacity = W × M, where W is the LOGs each member can work before the deadline and M is the members. The network does not quote if the work is over capacity, or if the critical path alone is longer than one member's window.</p>
+<table class="tbl"><tr><th>W — LOGs each member has</th><th>Team needed</th><th class="num">Seats</th><th class="num">Capacity vs work</th></tr>
+<tr><td>Under ${P.criticalPath}</td><td colspan="3">No-go. The critical path alone is ${P.criticalPath} LOGs, so no team size fits.</td></tr>
+${windows.map(W => { const s = P.smallestTeam(W); const m = seatsTotal(s); return `<tr><td>${W}</td><td>${e(shape(s))}</td><td class="num">${m}</td><td class="num">${W * m} vs ${P.totalLogs}</td></tr>`; }).join('')}
+</table>
+<div class="note">To read your own deadline: count the LOGs one member can give before it, find the nearest row, and staff that team. A bigger W means a smaller team.</div></section>
+
+<section class="keep"><div class="eyebrow">Staffing It</div><h2>How to build this team</h2>
+<p><strong>Grant each step to its seat in the Tracker.</strong> The roster above is the grant list: Genesis grants each step to the member holding that seat, and the member presses Start when it unlocks.</p>
+<p><strong>A higher tier can fill a lower seat.</strong> An Operator can take an Architect or Wrangler step, and an Architect can take a Wrangler step. The step is still paid at its own tier, so filling a seat from above changes who does it, not what it costs.</p>
+<p><strong>Staff the critical path first.</strong> ${P.chain.map(e).join(', ')} set the finish date. Every other seat has slack and can start later or be shared.</p></section>
+
+<div class="foot"><span>Bixxville · Decomposition Service</span><span>We trust the math.</span></div></div></body></html>`;
 }
 
 // Same layout and typography as the Decomposition Report contracts arrive in,
@@ -8672,36 +8919,7 @@ function renderDecompositionReport({ map, branches, leaves }) {
                       : l.status === 'in progress' ? 'In progress'
                       : (l.target_date ? 'Due ' + e(fmtDate(l.target_date)) : 'To-do');
 
-  const css = `:root{--paper:#FAF8F3;--ink:#1B1A17;--ink-soft:#524F47;--faint:#8A8579;--line:#E0DBCF;--line2:#CFC8B8;--genesis:#C8612E;--key:#A8852C;--done:#4A7C59;--rule:#1B1A17}
-*{box-sizing:border-box;margin:0;padding:0}body{background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
-.page{max-width:780px;margin:0 auto;padding:56px 48px 70px}.mast{border-bottom:3px solid var(--rule);padding-bottom:18px;margin-bottom:8px}
-.mast-top{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
-.mast-title{font-family:'Newsreader',serif;font-size:36px;font-weight:500;line-height:1.05;margin:10px 0 0;letter-spacing:-.02em}
-.mast-sub{font-family:'Newsreader',serif;font-style:italic;font-size:19px;color:var(--ink-soft);margin-top:6px}
-.meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:16px 0 20px}.meta div.c{background:var(--paper);padding:12px 16px}
-.k{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}.v{font-size:15px;margin-top:3px}
-section{margin-bottom:24px}.eyebrow{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--genesis);font-weight:600;margin-bottom:8px}
-h2{font-family:'Newsreader',serif;font-size:28px;font-weight:500;letter-spacing:-.01em;margin-bottom:14px;line-height:1.15}p{margin-bottom:12px;font-size:15px;color:var(--ink-soft)}p strong{color:var(--ink);font-weight:600}
-.lead{font-family:'Newsreader',serif;font-size:18px;line-height:1.5;color:var(--ink)}.dag{border:1px solid var(--line2);background:#FFFDF8;padding:14px 16px;margin:12px 0;break-inside:avoid}
-.dag-cap{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint);margin-bottom:12px;text-align:center}
-.tier{display:flex;align-items:center;gap:12px;margin-bottom:3px}.tier-lbl{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);width:48px;flex-shrink:0;text-align:right}
-.nodes{display:flex;gap:10px;flex-wrap:wrap;flex:1}.node{border:1.5px solid var(--line2);background:var(--paper);padding:4px 9px;font-size:10.5px;font-weight:500;border-radius:3px;position:relative}
-.node.genesis{border-color:var(--genesis);border-width:2px;background:#FCF1E9}.node.outcome{border-color:var(--done);border-width:2px;background:#EEF4EF}
-.node.genesis::before{content:'◆ GENESIS';position:absolute;top:-8px;left:10px;background:var(--genesis);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
-.node.outcome::before{content:'● OUTCOME';position:absolute;top:-8px;left:10px;background:var(--done);color:#fff;font-family:'IBM Plex Mono',monospace;font-size:7px;letter-spacing:.1em;padding:1px 5px;border-radius:2px}
-.node .nl{font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--genesis);font-weight:600;display:block;margin-bottom:2px}.node.key-node{border-color:var(--key)}
-.connector{text-align:center;color:var(--line2);font-size:11px;line-height:1;margin:1px 0 1px 62px}.key{border-left:3px solid var(--key);padding:4px 0 4px 20px;margin-bottom:20px;break-inside:avoid}
-.key-num{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;color:var(--key);font-weight:600;text-transform:uppercase}.key-txt{font-family:'Newsreader',serif;font-size:18px;line-height:1.45;color:var(--ink);margin-top:4px}
-.seq{border-top:1px solid var(--line)}.step{display:grid;grid-template-columns:54px 1fr auto;gap:16px;padding:13px 0;border-bottom:1px solid var(--line);align-items:start;break-inside:avoid}
-.step-id{font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--genesis);font-weight:600}.st{font-weight:600;font-size:15px;color:var(--ink);margin-bottom:3px}.sd{font-size:13px;color:var(--ink-soft)}.sd strong{color:var(--ink)}
-.dep{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--faint);margin-top:5px;letter-spacing:.04em}.step-meta{font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--faint);text-align:right;white-space:nowrap}
-.cp{border:1px solid var(--line2);background:#FFFDF8;padding:14px 18px;margin-bottom:10px;break-inside:avoid}.cp-h{display:flex;justify-content:space-between;align-items:baseline}
-.cp-id{font-family:'IBM Plex Mono',monospace;font-weight:600;color:var(--done);font-size:13px}.cp-amt{font-family:'Newsreader',serif;font-size:24px;color:var(--ink)}.cp-b{font-size:13px;color:var(--ink-soft);margin-top:4px}
-.price{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);margin:18px 0;break-inside:avoid}.price .c{background:var(--paper);padding:14px 16px}
-.price .big{font-family:'Newsreader',serif;font-size:30px;margin-top:2px}.price .c.hl{background:#FCF1E9}
-.foot{border-top:3px solid var(--rule);margin-top:48px;padding-top:16px;display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--faint)}
-@page{size:Letter;margin:0.45in;background:#FAF8F3}@media print{.page{padding:0}}
-@media(max-width:600px){.page{padding:36px 20px}.mast-title{font-size:32px}.meta,.price{grid-template-columns:1fr}.step{grid-template-columns:40px 1fr}.step-meta{grid-column:2;text-align:left}.tier{flex-direction:column;align-items:flex-start}.connector{margin-left:0}}`;
+
 
   const tierRows = [];
   for (let t = 0; t < tierCount; t++) {
@@ -8713,7 +8931,7 @@ h2{font-family:'Newsreader',serif;font-size:28px;font-weight:500;letter-spacing:
   return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Decomposition Report · ${e(map.goal)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<style>${css}</style></head><body><div class="page">
+<style>${REPORT_CSS}</style></head><body><div class="page">
 <div class="mast"><div class="mast-top"><span>Bixxville · Decomposition</span><span>Confidential to Client</span></div>
 <div class="mast-title">The Decomposition Report</div><div class="mast-sub">Your goal, broken into the order that actually moves it.</div></div>
 <div class="meta">
@@ -9221,7 +9439,8 @@ async function renderStatementsTimeline() {
     return;
   }
 
-  const sorted = [...trackerState.branches].sort((a, b) => (a.due_date || '9999-99-99') < (b.due_date || '9999-99-99') ? -1 : 1);
+  // Due date first; checkpoints without one keep their CP order (CP2 before CP10).
+  const sorted = [...trackerState.branches].sort((a, b) => (a.due_date || '9999-99-99').localeCompare(b.due_date || '9999-99-99') || byLeafCode(a.code, b.code));
   panel.innerHTML = `
     <div class="term-panel-head">Statements — ${esc(trackerState.map?.goal || '')}</div>
     ${sorted.map(b => {

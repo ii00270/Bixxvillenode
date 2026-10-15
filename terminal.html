@@ -6081,6 +6081,7 @@ function toggleProjScope(scId) {
 }
 
 async function exportProjectMap(projectId) {
+  if (!memberIds) await loadMemberIds().catch(() => {});   // the stamp's validator ID
   if (!window.jspdf) { toast('PDF library not loaded. Try again.'); return; }
 
   const { data: r } = await sb
@@ -6122,6 +6123,7 @@ async function exportProjectMap(projectId) {
   };
 
   bg(9,9,11); doc.rect(0,0,W,H,'F');
+  drawNetworkStamp(doc, M);
 
   // ── HEADER ──
   y = 22;
@@ -6504,6 +6506,7 @@ async function submitLogWork() {
 }
 
 async function generateCycleAudit(cycleNum) {
+  if (!memberIds) await loadMemberIds().catch(() => {});   // the stamp's validator ID
   const range = getCycleDateRange(cycleNum);
   if (!range) return null;
 
@@ -6644,6 +6647,7 @@ function downloadCycleAuditPDF() {
   };
 
   bg(9,9,11); doc.rect(0,0,W,H,'F');
+  drawNetworkStamp(doc, M);
 
   y = 22; tc(140,240,96); fw('bold'); fs(7); doc.text('@BIXXVILLE', M, y);
   tc(82,80,78); fw('normal'); fs(6.5); doc.text('Land of Geb, LLC · St. Croix · USVI', W-M, y, { align:'right' });
@@ -7812,6 +7816,7 @@ function openSettledProject(id) {
 }
 
 async function exportRecord(memberId) {
+  if (!memberIds) await loadMemberIds().catch(() => {});   // the stamp's validator ID
   const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: operator.email });
   const op = Array.isArray(opRows) ? opRows[0] : opRows;
   if (!op) { toast('Could not load record.'); return; }
@@ -7856,6 +7861,7 @@ async function exportRecord(memberId) {
 
   // Background
   bg(9,9,11); doc.rect(0,0,W,H,'F');
+  drawNetworkStamp(doc, M);
 
   // ── HEADER ──
   y = 22;
@@ -7875,6 +7881,8 @@ async function exportRecord(memberId) {
   y = 51;
   tc(82,80,78); fw('normal'); fs(6.5);
   doc.text(`Generated ${dateStr}  ·  Cycle ${cycle.num}  ·  Day ${cycle.day}  ·  ${cycle.left} days remaining`, M, y);
+  const ids = memberIds?.[op.id];
+  if (ids) doc.text(`Member ID ${ids.member_id || '-'}  ·  BIX ID ${ids.bix_id || 'not issued'}`, W - M, y, { align: 'right' });
 
   // Orange rule
   y = 56; dc(232,136,74); lw(0.8);
@@ -8421,6 +8429,7 @@ let termBalanceCache = null;
 function enterTerminal() {
   const shell = document.getElementById('terminal-shell');
   if (!shell) return;
+  loadMemberIds().catch(() => {});
   shell.classList.add('in');
   document.getElementById('uni-shell')?.classList.remove('in');
 
@@ -8750,6 +8759,7 @@ async function renderDecomposedPanel() {
 }
 
 async function openDecomposition(mapId) {
+  if (!memberIds) await loadMemberIds().catch(() => {});   // the stamp's validator ID
   const panel = document.getElementById('term-panel');
   panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
   const { data, error } = await sb.rpc('get_work_map', { p_map: mapId });
@@ -8794,8 +8804,50 @@ function setDecompView(view) {
   document.querySelectorAll('.term-decomp-bar [data-dv]').forEach(b => b.classList.toggle('on', b.dataset.dv === view));
 }
 
+// ── Network document stamp ─────────────────────────────────────────────
+// The standard header on every record the OS issues: validator and their
+// BIX ID, the AyeAye region (St. Croix — Atlantic Standard Time, −04:00
+// all year, no daylight saving), the system date in ISO 8601.
+const NETWORK_STAMP = {
+  title: 'Bixxville Network Operational Briefing',
+  validators: [{ name: 'Benjo Bixx', operatorId: '31442032-230b-4a17-8bf5-0d6352096df9' }],
+  region: 'LOC_REG=AyeAye | LAT=17.7275N | LON=64.747W | UTC_OFF=−4 |',
+  standard: 'ISO 8601 / USC',
+};
+let memberIds = null;   // operator id → { member_id, bix_id }
+async function loadMemberIds() {
+  const { data } = await sb.rpc('list_member_ids');
+  if (data) memberIds = Object.fromEntries(data.map(r => [r.id, r]));
+  return memberIds;
+}
+const stampDate = (d = new Date()) => new Date(d.getTime() - 4 * 3600e3).toISOString().slice(0, 19) + '-04:00';
+function networkStampLines(d = new Date()) {
+  return [
+    NETWORK_STAMP.title,
+    NETWORK_STAMP.validators.map((v, i) => `VALIDATOR ${i + 1}: ${v.name} ID: ${memberIds?.[v.operatorId]?.bix_id || '—'}`).join('   '),
+    `REGION: ${NETWORK_STAMP.region}`,
+    `System Date: ${stampDate(d)}  Operational Standard: ${NETWORK_STAMP.standard}`,
+  ];
+}
+function networkStampHtml(d) {
+  const [t, ...rest] = networkStampLines(d);
+  return `<div class="net-stamp"><div class="net-stamp-t">${esc(t)}</div>${rest.map(l => `<div>${esc(l)}</div>`).join('')}</div>`;
+}
+// PDFs: top margin, above the @BIXXVILLE line. The built-in PDF fonts have
+// no true minus sign, so − prints as -.
+function drawNetworkStamp(doc, M, rgb = [128, 126, 122]) {
+  doc.setTextColor(...rgb);
+  doc.setFontSize(5.6);
+  networkStampLines().map(l => l.replace(/[−—]/g, '-')).forEach((l, i) => {
+    doc.setFont('courier', i === 0 ? 'bold' : 'normal');
+    doc.text(l, M, 7 + i * 2.6);
+  });
+}
+
 // The Decomposition Report's own styling — shared by every report the OS draws.
-const REPORT_CSS = `:root{--paper:#FAF8F3;--ink:#1B1A17;--ink-soft:#524F47;--faint:#8A8579;--line:#E0DBCF;--line2:#CFC8B8;--genesis:#C8612E;--key:#A8852C;--done:#4A7C59;--rule:#1B1A17}
+const REPORT_CSS = `.net-stamp{font-family:'IBM Plex Mono',monospace;font-size:10.5px;line-height:1.6;color:var(--ink-soft);border:1px solid var(--line2);padding:10px 12px;margin-bottom:26px;overflow-wrap:anywhere}
+.net-stamp-t{font-weight:600;color:var(--ink);letter-spacing:.03em}
+:root{--paper:#FAF8F3;--ink:#1B1A17;--ink-soft:#524F47;--faint:#8A8579;--line:#E0DBCF;--line2:#CFC8B8;--genesis:#C8612E;--key:#A8852C;--done:#4A7C59;--rule:#1B1A17}
 *{box-sizing:border-box;margin:0;padding:0}body{background:var(--paper);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;line-height:1.55;-webkit-font-smoothing:antialiased}
 .page{max-width:780px;margin:0 auto;padding:56px 48px 70px}.mast{border-bottom:3px solid var(--rule);padding-bottom:18px;margin-bottom:8px}
 .mast-top{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--faint)}
@@ -8923,6 +8975,7 @@ function renderTeamPlanReport({ map, leaves }) {
 <title>Team Plan · ${e(map.goal)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>${REPORT_CSS}</style></head><body><div class="page">
+${networkStampHtml()}
 <div class="mast"><div class="mast-top"><span>Bixxville · Team Plan</span><span>Confidential to Client</span></div>
 <div class="mast-title">The Team Plan</div><div class="mast-sub">Who it takes to get it done, and who does what.</div></div>
 <div class="meta">
@@ -9020,6 +9073,7 @@ function renderDecompositionReport({ map, branches, leaves }) {
 <title>Decomposition Report · ${e(map.goal)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>${REPORT_CSS}</style></head><body><div class="page">
+${networkStampHtml()}
 <div class="mast"><div class="mast-top"><span>Bixxville · Decomposition</span><span>Confidential to Client</span></div>
 <div class="mast-title">The Decomposition Report</div><div class="mast-sub">Your goal, broken into the order that actually moves it.</div></div>
 <div class="meta">
@@ -10768,8 +10822,9 @@ async function termDispatch(raw) {
   }
   if (cmd === 'whoami') {
     if (operator) {
-      const { data: mid } = await sb.rpc('my_member_id');
-      termPrint(`${operator.peer_name} · ${mid ? 'member ID ' + mid + ' · ' : ''}${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs · ${operator.standing || 'active'}`, 'system');
+      await loadMemberIds();
+      const ids = memberIds?.[operator.id];
+      termPrint(`${operator.peer_name} · ${ids ? `member ID ${ids.member_id} · BIX ID ${ids.bix_id || 'not issued'} · ` : ''}${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs · ${operator.standing || 'active'}`, 'system');
     } else if (relation) {
       termPrint(`${relation.name} · Relation`, 'system');
     } else {

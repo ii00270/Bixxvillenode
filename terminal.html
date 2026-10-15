@@ -2470,6 +2470,79 @@ html.theme-light{
 .term-grant-sub{color:var(--soft);font-size:11px;}
 @media (max-width:767px){ .term-wf-grid{grid-template-columns:1fr;} }
 .term-card-k{color:var(--term-fg);margin-right:4px;}
+.term-panel-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin:-4px 0 14px;font-size:11px;color:var(--term-dim);}
+
+/* Script editor (Genesis) — inside the overlay */
+.se-row{border:1px solid var(--line);border-radius:7px;padding:10px;margin-bottom:8px;}
+.se-row .form-input{margin-bottom:6px;}
+.se-row-head{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px;color:var(--soft);}
+.se-row-head .term-wf-x{margin-left:auto;}
+.se-row-head > b{font-weight:400;white-space:nowrap;}
+.se-row-head select{font-family:var(--mono);font-size:11.5px;width:auto;flex:0 0 auto;margin:0;padding:3px 6px;}
+.se-field{display:grid;grid-template-columns:1fr 110px 24px;gap:6px;align-items:start;}
+.se-req{display:flex;align-items:center;gap:4px;}
+.se-status{display:inline-block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding:1px 6px;border-radius:3px;border:1px solid var(--line);}
+.se-status.approved{border-color:var(--green);color:var(--green);}
+.se-status.draft{border-color:var(--gold);color:var(--gold);}
+
+/* Guided work — full screen, one thing at a time */
+#gw{position:fixed;inset:0;z-index:170;background:var(--term-bg);color:var(--term-fg);font-family:var(--mono);overflow-y:auto;-webkit-overflow-scrolling:touch;}
+#gw[hidden]{display:none;}
+body.gw-open{overflow:hidden;}
+.gw-shell{max-width:640px;margin:0 auto;min-height:100%;display:flex;flex-direction:column;
+  padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(20px + env(safe-area-inset-bottom,0px));box-sizing:border-box;}
+.gw-top{display:flex;align-items:center;gap:10px;font-size:11px;color:var(--term-dim);}
+.gw-brand{letter-spacing:.14em;text-transform:uppercase;color:var(--term-fg);white-space:nowrap;}
+.gw-where{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.gw-x{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--term-dim);font-family:var(--mono);font-size:12px;cursor:pointer;padding:6px 0;white-space:nowrap;}
+.gw-x:hover{color:var(--term-fg);}
+.gw-bar{height:3px;background:var(--term-line);border-radius:2px;margin:12px 0 6px;overflow:hidden;}
+.gw-bar > div{height:100%;background:var(--green);transition:width .25s;}
+.gw-count{font-size:10.5px;color:var(--term-dim);}
+.gw-main{flex:1;padding:28px 0 12px;}
+.gw-kicker{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
+.gw-main h2{font-family:var(--mono);font-size:19px;font-weight:600;line-height:1.35;margin:0 0 12px;color:var(--term-fg);}
+.gw-p{font-size:13.5px;line-height:1.65;white-space:pre-wrap;margin:0 0 14px;}
+.gw-dim{color:var(--term-dim);font-size:12px;line-height:1.55;}
+.gw-kv{display:grid;grid-template-columns:auto 1fr;gap:6px 14px;font-size:12.5px;margin:14px 0;}
+.gw-kv > :nth-child(odd){color:var(--term-dim);}
+.gw-done{border-left:3px solid var(--green);padding:8px 12px;margin:14px 0;font-size:13px;line-height:1.55;}
+.gw-returned{border-left:3px solid var(--red);padding:8px 12px;margin:0 0 16px;font-size:12.5px;}
+.gw-field{display:block;margin:0 0 14px;}
+.gw-field > span{display:block;font-size:11px;color:var(--term-dim);margin-bottom:5px;}
+.gw-input{width:100%;box-sizing:border-box;background:transparent;color:var(--term-fg);border:1px solid var(--term-line);border-radius:6px;
+  padding:10px 12px;font-family:var(--mono);font-size:14px;outline:none;}
+.gw-input:focus{border-color:var(--green);}
+.gw-input[type=file]{padding:8px;font-size:12px;color:var(--term-dim);}
+.gw-input[type=file]::file-selector-button{appearance:none;background:transparent;border:1px solid var(--term-line);border-radius:5px;
+  color:var(--term-fg);font-family:var(--mono);font-size:12px;padding:7px 12px;margin-right:10px;cursor:pointer;}
+.gw-input[type=file]::file-selector-button:hover{border-color:var(--green);color:var(--green);}
+select.gw-input{appearance:auto;}
+textarea.gw-input{resize:vertical;line-height:1.5;}
+.gw-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.gw-btn{appearance:none;-webkit-appearance:none;background:transparent;border:1px solid var(--term-line);color:var(--term-fg);
+  font-family:var(--mono);font-size:12.5px;padding:10px 16px;border-radius:6px;cursor:pointer;}
+.gw-btn:hover{border-color:var(--green);color:var(--green);}
+.gw-btn.primary{background:var(--green);border-color:var(--green);color:#08110C;font-weight:600;}
+.gw-btn.primary:hover{color:#08110C;filter:brightness(1.06);}
+.gw-btn:disabled{opacity:.45;cursor:default;}
+.gw-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--term-line);font-size:12.5px;word-break:break-word;}
+.gw-item a{color:var(--green);}
+.gw-item .term-wf-x{color:var(--term-dim);}
+.gw-check{display:flex;gap:10px;align-items:flex-start;font-size:13px;line-height:1.5;margin:14px 0;cursor:pointer;}
+.gw-check input{margin-top:3px;}
+.gw-list{margin:12px 0;}
+.gw-ok{color:var(--green);}
+.gw-miss{color:var(--red);}
+.gw-msg{font-size:12.5px;color:var(--red);min-height:18px;margin:4px 0 8px;}
+.gw-msg.info{color:var(--term-dim);}
+.gw-nav{display:flex;justify-content:space-between;gap:10px;border-top:1px solid var(--term-line);padding-top:14px;}
+.gw-nav .gw-btn.primary{margin-left:auto;min-width:120px;}
+@media (max-width:767px){
+  .gw-input{font-size:16px;}           /* iOS zooms into anything smaller */
+  .gw-grid{grid-template-columns:1fr;}
+  .gw-main{padding-top:20px;}
+}
 
 /* "All" = the decomposition map: one row per level, Genesis to Outcome. */
 .term-tier-row{display:flex;gap:12px;align-items:flex-start;}
@@ -9021,8 +9094,14 @@ async function renderTrackerBoard() {
   }
 
   const foldersHtml = await renderMapFolders();
+  const unscripted = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && !scriptStatusOf(l.id)).length : 0;
+  const drafts = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && scriptStatusOf(l.id) === 'draft').length : 0;
   panel.innerHTML = `
     <div class="term-panel-head">Tracker — ${esc(trackerState.map?.goal || '')}</div>
+    ${unscripted || drafts ? `<div class="term-panel-tools">
+      ${unscripted ? `<button class="term-card-btn" onclick="draftAllScripts(this)">Draft scripts for ${unscripted} step${unscripted === 1 ? '' : 's'} with BIX AI</button>` : ''}
+      ${drafts ? `<span>${drafts} draft${drafts === 1 ? '' : 's'} waiting on your approval — open a step's Script to review it.</span>` : ''}
+    </div>` : ''}
     ${foldersHtml}
     <div class="term-tabs">
       ${tabs.map(t => {
@@ -9073,10 +9152,16 @@ function renderLeafCard(l) {
               : waiting.length ? `<span class="term-card-state wait">Waiting on ${esc(waiting.join(', '))}</span>`
               : '<span class="term-card-state ready">Ready to start</span>';
   const id = esc(l.id);
+  const script = scriptStatusOf(l.id);
   const actions = [
     l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openAssignLeaf('${id}')">${grantee ? 'Change grant' : 'Grant…'}</button>` : '',
-    l.status === 'to-do' && mine && !waiting.length ? `<button class="term-card-btn primary" onclick="startLeafUI('${id}')">Start</button>` : '',
-    l.status === 'in progress' && !submitted && mine ? `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>` : '',
+    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openScriptEditor('${id}')">${script === 'approved' ? 'Script ✓' : script === 'draft' ? 'Script — draft' : 'Write script'}</button>` : '',
+    l.status === 'to-do' && mine && !waiting.length
+      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`
+                               : `<button class="term-card-btn" disabled title="Genesis approves the step's script before work starts">Start — script pending</button>`) : '',
+    l.status === 'in progress' && !submitted && mine
+      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Continue</button>`
+                               : `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>`) : '',
     submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
     submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
     l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
@@ -9217,14 +9302,8 @@ async function renderWorkForm(body, leafId) {
 
     <div class="form-block">
       <div class="form-lbl">Proof <span class="term-wf-count">${files.length} file${files.length === 1 ? '' : 's'} · ${links.length} link${links.length === 1 ? '' : 's'}</span></div>
-      ${evidence.map(e => `<div class="term-wf-item">
-          <div>${e.kind === 'file'
-            ? `<a href="#" onclick="openEvidenceFile('${esc(e.storage_path)}');return false;">${esc(e.filename || 'file')}</a> <span class="term-wf-sub">${e.size_bytes ? Math.ceil(e.size_bytes / 1024) + ' KB' : ''}</span>`
-            : `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url)}</a>`}
-            ${e.caption ? `<div class="term-wf-sub">${esc(e.caption)}</div>` : ''}</div>
-          <button class="term-wf-x" title="Remove" onclick="removeEvidence('${esc(leafId)}','${esc(e.id)}')">×</button>
-        </div>`).join('') || '<div class="term-wf-sub">Nothing attached yet — photos, receipts, signed pages, screenshots, documents.</div>'}
-      <label class="term-wf-field"><span class="form-lbl">Upload files (photos, PDFs, documents — up to 25 MB each)</span><input class="form-input" type="file" id="wf-files" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx"></label>
+      ${evidence.map(e => evidenceLine(e, null, `removeEvidence('${esc(leafId)}','${esc(e.id)}')`)).join('') || '<div class="term-wf-sub">Nothing attached yet — photos, receipts, signed pages, screenshots, documents.</div>'}
+      <label class="term-wf-field"><span class="form-lbl">Upload files (photos, PDFs, documents — up to 50 MB each)</span><input class="form-input" type="file" id="wf-files" multiple accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx"></label>
       <label class="term-wf-field"><span class="form-lbl">…or a link</span><input class="form-input" type="url" id="wf-url" placeholder="https://"></label>
       <label class="term-wf-field"><span class="form-lbl">Caption (optional)</span><input class="form-input" type="text" id="wf-caption" placeholder="What this shows"></label>
       <button class="term-card-btn primary" onclick="addEvidence('${esc(leafId)}')">Attach</button>
@@ -9292,7 +9371,7 @@ async function addEvidence(leafId, opts = {}) {
     if (error) { wfMsg(error.message); return false; }
   }
   for (const [i, f] of files.entries()) {
-    if (f.size > 25 * 1024 * 1024) { wfMsg(`${f.name} is over 25 MB — not attached.`); ok = false; continue; }
+    if (f.size > EVIDENCE_MAX) { wfMsg(`${f.name} is over 50 MB — not attached.`); ok = false; continue; }
     status.textContent = `Uploading ${i + 1} of ${files.length}: ${f.name}…`;
     const safe = f.name.replace(/[^\w.\-]+/g, '_').slice(-80);
     const path = `${leafId}/${crypto.randomUUID()}-${safe}`;
@@ -9355,7 +9434,10 @@ async function openReview(leafId) {
 async function renderReview(body, leafId) {
   const l = leafById(leafId);
   body.innerHTML = '<div class="form-block">Loading…</div>';
-  const { data: w, error } = await sb.rpc('get_leaf_work', { p_leaf: leafId });
+  const [{ data: w, error }, { data: script }] = await Promise.all([
+    sb.rpc('get_leaf_work', { p_leaf: leafId }),
+    sb.rpc('get_leaf_script', { p_leaf: leafId }),
+  ]);
   if (error || !l) { body.innerHTML = `<div class="term-wf"><div class="form-block">Couldn't load this step${error ? ' — ' + esc(error.message) : ''}.</div></div>`; return; }
   if (!w.can_see_proof) { body.innerHTML = '<div class="form-block">Only the person this step is granted to, and Genesis, can see its proof.</div>'; return; }
   const sessions = w.sessions || [], evidence = w.evidence || [], subs = w.submissions || [];
@@ -9374,10 +9456,12 @@ async function renderReview(body, leafId) {
     </div>
     <div class="form-block">
       <div class="form-lbl">Proof</div>
-      ${evidence.map(e => `<div class="term-wf-item"><div>${e.kind === 'file'
-          ? `<a href="#" onclick="openEvidenceFile('${esc(e.storage_path)}');return false;">${esc(e.filename || 'file')}</a>`
-          : `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url)}</a>`}${e.caption ? `<div class="term-wf-sub">${esc(e.caption)}</div>` : ''}</div></div>`).join('') || '<div class="term-wf-sub">Nothing attached.</div>'}
+      ${proofSection(evidence, script)}
     </div>
+    ${(w.entries || []).length ? `<div class="form-block">
+      <div class="form-lbl">Entered by</div>
+      ${w.entries.map(x => `<div class="term-wf-item"><div>${esc(x.name)} · ${esc(x.member_id)}</div><div class="term-wf-sub">${esc(fmtWhen(x.at))}</div></div>`).join('')}
+    </div>` : ''}
     <div class="form-block">
       <div class="form-lbl">Submissions</div>
       ${subs.map(s => `<div class="term-wf-item"><div><strong>${esc(fmtWhen(s.submitted_at))}</strong> — ${esc(s.decision === 'pending' ? 'awaiting verification' : s.decision)}
@@ -9402,6 +9486,599 @@ async function decideProof(leafId, submissionId, decision) {
   closeOverlay();
   toast(decision === 'verified' ? 'Verified — the step is done.' : 'Sent back with your note.');
   await refreshTrackerAfterWork();
+}
+
+// ── Proof, shown per script item ───────────────────────────────────────
+const PROOF_KIND_LABEL = { file: 'File', photo: 'Photo', video: 'Video', form: 'Form', link: 'Link' };
+const PROOF_ACCEPT = {
+  file: 'application/pdf,image/*,.doc,.docx,.xls,.xlsx,.csv,.txt,.ppt,.pptx',
+  photo: 'image/*',
+  video: 'video/*',
+};
+const FIELD_TYPE_LABEL = { text: 'Short text', textarea: 'Long text', number: 'Number', date: 'Date', yesno: 'Yes / No' };
+const EVIDENCE_MAX = 50 * 1024 * 1024;
+const scriptStatusOf = id => trackerState?.scripts?.[id] || null;
+
+function evidenceLine(e, item, removeJs, cls = 'term-wf-item') {
+  let main;
+  if (e.kind === 'file') {
+    main = `<a href="#" onclick="openEvidenceFile('${esc(e.storage_path)}');return false;">${esc(e.filename || 'file')}</a> <span class="term-wf-sub">${e.size_bytes ? Math.ceil(e.size_bytes / 1024) + ' KB' : ''}</span>`;
+  } else if (e.kind === 'form') {
+    const fields = item?.fields || [];
+    const label = k => fields.find(f => f.key === k)?.label || k;
+    main = Object.entries(e.form_data || {}).map(([k, v]) => `<div><span class="term-wf-sub">${esc(label(k))}:</span> ${esc(String(v))}</div>`).join('');
+  } else {
+    main = `<a href="${esc(e.url)}" target="_blank" rel="noopener noreferrer">${esc(e.url)}</a>`;
+  }
+  return `<div class="${cls}"><div>${main}${e.caption ? `<div class="term-wf-sub">${esc(e.caption)}</div>` : ''}</div>
+    ${removeJs ? `<button class="term-wf-x" title="Remove" onclick="${removeJs}">×</button>` : ''}</div>`;
+}
+
+// The review screen's proof section: grouped under the script's items when
+// the step has one, a flat list otherwise.
+function proofSection(evidence, script) {
+  const items = script?.proof_items || [];
+  if (!items.length) return evidence.map(e => evidenceLine(e)).join('') || '<div class="term-wf-sub">Nothing attached.</div>';
+  const loose = evidence.filter(e => !items.some(x => x.id === e.proof_item));
+  return items.map(x => {
+    const got = evidence.filter(e => e.proof_item === x.id);
+    return `<div style="margin:10px 0 4px"><strong>${esc(x.label)}</strong> <span class="term-wf-sub">${esc(PROOF_KIND_LABEL[x.kind] || x.kind)}${x.required !== false ? ' · required' : ''} · ${got.length ? '✓' : 'missing'}</span></div>
+      ${got.map(e => evidenceLine(e, x)).join('') || '<div class="term-wf-sub">—</div>'}`;
+  }).join('') + (loose.length ? `<div style="margin:10px 0 4px"><strong>Other</strong></div>${loose.map(e => evidenceLine(e)).join('')}` : '');
+}
+
+
+// ── Step scripts — BIX AI drafts, Genesis approves ─────────────────────
+// A script is the prompts a member is walked through, then the proof items
+// that show the step's "done when" is met. Nothing is live until Genesis
+// approves it (enforced in migration 0009).
+let scriptEd = null;
+
+async function openScriptEditor(leafId) {
+  const l = leafById(leafId);
+  if (!l) return;
+  const { data, error } = await sb.rpc('get_leaf_script', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  scriptEd = {
+    leafId,
+    prompts: data?.prompts || [],
+    proof_items: data?.proof_items || [],
+    drafted_by: data?.drafted_by || null,
+    status: data?.status || null,
+  };
+  openOverlay(`Script — ${l.leaf_code} ${l.task}`, renderScriptEditor);
+}
+
+function renderScriptEditor(body = document.getElementById('ov-body')) {
+  const s = scriptEd, l = leafById(s.leafId);
+  if (!l) return;
+  const locked = l.status !== 'to-do';
+  const dis = locked ? 'disabled' : '';
+  const sel = (opts, cur, on) => `<select class="form-input" ${dis} onchange="${on}">${Object.entries(opts).map(([k, v]) => `<option value="${k}" ${k === cur ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select>`;
+  body.innerHTML = `<div class="term-wf">
+    <div class="form-block">
+      <div class="form-lbl">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+      <div class="term-wf-done"><strong>Done when:</strong> ${esc(l.done_criterion || '—')}</div>
+      <div class="term-wf-sub">${esc(l.tier)} · ${l.logs} LOG${l.logs === 1 ? '' : 's'} ·
+        ${s.status ? `<span class="se-status ${s.status}">${s.status === 'approved' ? 'Approved' : 'Draft'}</span>` : 'No script yet'}
+        ${s.drafted_by ? ` · first drafted by ${esc(s.drafted_by)}` : ''}</div>
+      ${locked ? '<div class="term-wf-returned">This step has started — its script is fixed.</div>' : `
+      <div class="term-card-actions"><button class="term-card-btn" id="se-draft" onclick="draftIntoEditor()">${s.prompts.length ? 'Redraft with BIX AI' : 'Draft with BIX AI'}</button></div>`}
+    </div>
+
+    <div class="form-block">
+      <div class="form-lbl">Prompts <span class="term-wf-count">one screen each, in order</span></div>
+      ${s.prompts.map((p, i) => `<div class="se-row">
+        <div class="se-row-head"><b>Prompt ${i + 1}</b>${locked ? '' : `<button class="term-wf-x" title="Remove" onclick="seRemove('prompts',${i})">×</button>`}</div>
+        <input class="form-input" ${dis} placeholder="Title — what to do" value="${esc(p.title || '')}" oninput="scriptEd.prompts[${i}].title=this.value">
+        <textarea class="form-input" ${dis} rows="2" placeholder="What to do and what to watch for" oninput="scriptEd.prompts[${i}].body=this.value">${esc(p.body || '')}</textarea>
+      </div>`).join('') || '<div class="term-wf-sub">None yet.</div>'}
+      ${locked ? '' : `<button class="term-card-btn" onclick="seAdd('prompts')">+ Prompt</button>`}
+    </div>
+
+    <div class="form-block">
+      <div class="form-lbl">Proof items <span class="term-wf-count">one screen each, after the prompts</span></div>
+      ${s.proof_items.map((x, i) => `<div class="se-row">
+        <div class="se-row-head"><b>Proof ${i + 1}</b>
+          ${sel(PROOF_KIND_LABEL, x.kind, `seKind(${i},this.value)`)}
+          <label class="se-req"><input type="checkbox" ${dis} ${x.required !== false ? 'checked' : ''} onchange="scriptEd.proof_items[${i}].required=this.checked"> required</label>
+          ${locked ? '' : `<button class="term-wf-x" title="Remove" onclick="seRemove('proof_items',${i})">×</button>`}</div>
+        <input class="form-input" ${dis} placeholder="What to provide" value="${esc(x.label || '')}" oninput="scriptEd.proof_items[${i}].label=this.value">
+        <input class="form-input" ${dis} placeholder="What a good one shows (optional)" value="${esc(x.hint || '')}" oninput="scriptEd.proof_items[${i}].hint=this.value">
+        ${x.kind === 'form' ? `<div class="term-wf-sub" style="margin:2px 0 6px">Form fields</div>
+          ${(x.fields || []).map((f, j) => `<div class="se-field">
+            <input class="form-input" ${dis} placeholder="Question" value="${esc(f.label || '')}" oninput="scriptEd.proof_items[${i}].fields[${j}].label=this.value">
+            ${sel(FIELD_TYPE_LABEL, f.type || 'text', `scriptEd.proof_items[${i}].fields[${j}].type=this.value`)}
+            ${locked ? '<span></span>' : `<button class="term-wf-x" title="Remove" onclick="seRemoveField(${i},${j})">×</button>`}
+          </div>`).join('')}
+          ${locked ? '' : `<button class="term-card-btn" onclick="seAddField(${i})">+ Field</button>`}` : ''}
+      </div>`).join('') || '<div class="term-wf-sub">None yet.</div>'}
+      ${locked ? '' : `<button class="term-card-btn" onclick="seAdd('proof_items')">+ Proof item</button>`}
+    </div>
+
+    ${locked ? '' : `<div class="form-block">
+      <div class="term-card-actions">
+        <button class="term-card-btn primary" onclick="saveScriptUI(true)">Approve</button>
+        <button class="term-card-btn" onclick="saveScriptUI(false)">Save draft</button>
+      </div>
+      <div class="term-wf-msg" id="se-msg"></div>
+      <div class="term-wf-sub">Approving makes it live: the member granted this step can start it and is walked through exactly this.</div>
+    </div>`}</div>`;
+}
+
+const seSlug = (s, taken) => {
+  let base = String(s || '').toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_|_$/g, '').slice(0, 40) || 'item';
+  let id = base, n = 2;
+  while (taken.has(id)) id = `${base}_${n++}`;
+  return id;
+};
+function seAdd(list) {
+  if (list === 'prompts') scriptEd.prompts.push({ title: '', body: '' });
+  else scriptEd.proof_items.push({ id: '', kind: 'file', label: '', hint: '', required: true });
+  renderScriptEditor();
+}
+function seRemove(list, i) { scriptEd[list].splice(i, 1); renderScriptEditor(); }
+function seKind(i, kind) {
+  const x = scriptEd.proof_items[i];
+  x.kind = kind;
+  if (kind === 'form' && !(x.fields || []).length) x.fields = [{ key: '', label: '', type: 'text' }];
+  renderScriptEditor();
+}
+function seAddField(i) { (scriptEd.proof_items[i].fields ||= []).push({ key: '', label: '', type: 'text' }); renderScriptEditor(); }
+function seRemoveField(i, j) { scriptEd.proof_items[i].fields.splice(j, 1); renderScriptEditor(); }
+
+// What the database stores: trimmed, blank rows dropped, stable ids/keys.
+function cleanScriptForSave(s) {
+  const prompts = s.prompts.map(p => ({ title: (p.title || '').trim(), body: (p.body || '').trim() })).filter(p => p.title);
+  const ids = new Set();
+  const proof_items = s.proof_items.filter(x => (x.label || '').trim()).map(x => {
+    const id = x.id && !ids.has(x.id) ? x.id : seSlug(x.label, ids);
+    ids.add(id);
+    const out = { id, kind: x.kind, label: x.label.trim(), hint: (x.hint || '').trim(), required: x.required !== false };
+    if (x.kind === 'form') {
+      const keys = new Set();
+      out.fields = (x.fields || []).filter(f => (f.label || '').trim()).map(f => {
+        const key = f.key && !keys.has(f.key) ? f.key : seSlug(f.label, keys);
+        keys.add(key);
+        return { key, label: f.label.trim(), type: f.type || 'text' };
+      });
+    }
+    return out;
+  });
+  return { prompts, proof_items };
+}
+
+async function saveScriptUI(approve) {
+  const msg = document.getElementById('se-msg');
+  const { prompts, proof_items } = cleanScriptForSave(scriptEd);
+  const say = t => { if (msg) msg.textContent = t || ''; if (t) toast(t); };
+  if (!prompts.length) return say('Add at least one prompt with a title.');
+  if (!proof_items.length) return say('Add at least one proof item with a label.');
+  const emptyForm = proof_items.find(x => x.kind === 'form' && !x.fields.length);
+  if (emptyForm) return say(`"${emptyForm.label}" is a form — give it at least one question.`);
+  const { error } = await sb.rpc('save_leaf_script', {
+    p_leaf: scriptEd.leafId, p_prompts: prompts, p_proof_items: proof_items,
+    p_approve: !!approve, p_drafted_by: scriptEd.drafted_by,
+  });
+  if (error) return say(error.message);
+  closeOverlay();
+  toast(approve ? 'Script approved — the step can be started.' : 'Draft saved.');
+  await refreshTrackerAfterWork();
+}
+
+// BIX AI drafts from the step itself: the contract, the task, its "done
+// when", its tier, what comes before and after it.
+async function requestScriptDraft(leafId) {
+  const l = leafById(leafId), all = trackerState.leaves || [], m = trackerState.map || {};
+  const taskOf = c => all.find(x => x.leaf_code === c)?.task || '';
+  const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${SB_KEY}`, 'x-bixx-session': opSessionToken || '' },
+    body: JSON.stringify({ mode: 'draft_script', step: {
+      goal: m.goal, outcome: m.outcome_task, code: l.leaf_code, task: l.task, done_when: l.done_criterion,
+      tier: l.tier, logs: l.logs,
+      requires: (l.requires || []).map(c => `${c} (${taskOf(c)})`).join('; '),
+      unlocks: all.filter(x => (x.requires || []).includes(l.leaf_code)).map(x => `${x.leaf_code} (${x.task})`).join('; '),
+    } }),
+  });
+  const data = await res.json().catch(() => ({}));
+  if (!res.ok || data.error || !data.script) throw new Error(data.error || 'No draft came back.');
+  return data.script;
+}
+
+async function draftIntoEditor() {
+  const btn = document.getElementById('se-draft');
+  if (btn) { btn.disabled = true; btn.textContent = 'BIX AI is drafting…'; }
+  try {
+    const sc = await requestScriptDraft(scriptEd.leafId);
+    Object.assign(scriptEd, { prompts: sc.prompts, proof_items: sc.proof_items, drafted_by: scriptEd.drafted_by || 'BIX AI' });
+    renderScriptEditor();
+    toast('Drafted — read it over, change anything, then approve.');
+  } catch (e) {
+    toast(e.message);
+    if (btn) { btn.disabled = false; btn.textContent = 'Draft with BIX AI'; }
+  }
+}
+
+// Every to-do step without a script gets a draft, saved as a draft —
+// Genesis still opens and approves each one.
+async function draftAllScripts(btn) {
+  const todo = (trackerState.leaves || []).filter(l => l.status === 'to-do' && !scriptStatusOf(l.id));
+  if (!todo.length) return;
+  let done = 0, failed = [];
+  for (const l of todo) {
+    if (btn) { btn.disabled = true; btn.textContent = `Drafting ${done + failed.length + 1} of ${todo.length}…`; }
+    try {
+      const sc = await requestScriptDraft(l.id);
+      const { error } = await sb.rpc('save_leaf_script', { p_leaf: l.id, p_prompts: sc.prompts, p_proof_items: sc.proof_items, p_approve: false, p_drafted_by: 'BIX AI' });
+      if (error) throw error;
+      done++;
+    } catch (e) { failed.push(`${l.leaf_code}: ${e.message}`); }
+  }
+  toast(`${done} draft${done === 1 ? '' : 's'} ready to review${failed.length ? ` · ${failed.length} failed` : ''}.`);
+  if (failed.length) console.warn('Script drafts that failed:', failed);
+  await refreshTrackerAfterWork();
+}
+
+
+// ── Guided work — the door, the prompts, the proof ─────────────────────
+// Opened from Start. One screen at a time: name + member ID, the step,
+// each prompt, time worked, one screen per proof item, then submit. Every
+// rule is the database's (0009); this only walks the member through it.
+let gw = null;
+const gwPosKey = id => `bixx-gw-pos-${id}`;
+const gwClockKey = id => `bixx-gw-clock-${id}`;
+const lsGet = k => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localStorage.setItem(k, v); } catch (e) { /* private mode */ } };
+
+async function openGuided(leafId) {
+  const l = leafById(leafId);
+  if (!l) return;
+  const { data: script, error } = await sb.rpc('get_leaf_script', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  if (!script || script.status !== 'approved') { toast('This step has no approved script yet.'); return; }
+  gw = {
+    leafId, script, work: null, i: 0, entered: false, submitted: false,
+    screens: [
+      { t: 'door' }, { t: 'intro' },
+      ...script.prompts.map((_, k) => ({ t: 'prompt', k })),
+      { t: 'time' },
+      ...script.proof_items.map((_, k) => ({ t: 'proof', k })),
+      { t: 'submit' },
+    ],
+  };
+  let el = document.getElementById('gw');
+  if (!el) { el = document.createElement('div'); el.id = 'gw'; document.body.appendChild(el); }
+  el.hidden = false;
+  document.body.classList.add('gw-open');
+  await gwLoadWork();
+  gwRender();
+}
+
+async function closeGuided() {
+  const el = document.getElementById('gw');
+  if (el) { el.hidden = true; el.innerHTML = ''; }
+  document.body.classList.remove('gw-open');
+  const was = gw;
+  gw = null;
+  if (was?.entered) await refreshTrackerAfterWork();
+}
+
+async function gwLoadWork() {
+  const { data } = await sb.rpc('get_leaf_work', { p_leaf: gw.leafId });
+  gw.work = data || { sessions: [], evidence: [], submissions: [] };
+}
+
+function gwMsg(text, info) {
+  const el = document.getElementById('gw-msg');
+  if (!el) return;
+  el.textContent = text || '';
+  el.className = 'gw-msg' + (info ? ' info' : '');
+}
+
+function gwGo(i) {
+  gw.i = Math.max(0, Math.min(i, gw.screens.length - 1));
+  if (gw.entered && gw.i > 0) lsSet(gwPosKey(gw.leafId), String(gw.i));
+  gwRender();
+  document.getElementById('gw')?.scrollTo(0, 0);
+}
+
+function gwRender() {
+  const el = document.getElementById('gw');
+  if (!gw || !el) return;
+  const l = leafById(gw.leafId), sc = gw.screens[gw.i], n = gw.screens.length;
+  const prompts = gw.script.prompts, items = gw.script.proof_items;
+  const evidence = gw.work?.evidence || [], sessions = gw.work?.sessions || [];
+  const where = { door: 'Enter', intro: 'The step', time: 'Time worked', submit: 'Submit' }[sc.t]
+    || (sc.t === 'prompt' ? `Prompt ${sc.k + 1} of ${prompts.length}` : `Proof ${sc.k + 1} of ${items.length}`);
+  let main = '', next = 'Next', back = gw.i > 1;
+
+  if (gw.submitted) {
+    main = `<div class="gw-kicker">Submitted</div>
+      <h2>Sent to Genesis for verification.</h2>
+      <p class="gw-p">${esc(l.leaf_code)} — ${esc(l.task)} is locked while it's reviewed. If anything's missing it comes back to you with a note, and you pick up from here.</p>`;
+    next = 'Back to Tracker'; back = false;
+  } else if (sc.t === 'door') {
+    main = `<div class="gw-kicker">Enter</div>
+      <h2>Who's doing this work?</h2>
+      <p class="gw-p gw-dim">Your name and your member ID. The last two digits of the ID are check digits (LOG 6), so a typo is caught before anything else.</p>
+      <label class="gw-field"><span>Your name</span><input class="gw-input" id="gw-name" autocomplete="off" spellcheck="false"></label>
+      <label class="gw-field"><span>Member ID</span><input class="gw-input" id="gw-mid" placeholder="LOG-M000-00" autocomplete="off" autocapitalize="characters" spellcheck="false"></label>
+      <div class="gw-dim">Your member ID is on your profile, or type <strong>whoami</strong> in the terminal.</div>`;
+    next = 'Enter';
+  } else if (sc.t === 'intro') {
+    const m = trackerState.map || {};
+    const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
+    const returned = [...(gw.work?.submissions || [])].reverse().find(s => s.decision === 'returned');
+    const unlocks = (trackerState.leaves || []).filter(x => (x.requires || []).includes(l.leaf_code)).map(x => x.leaf_code).sort(byLeafCode);
+    main = `${returned && l.status === 'in progress' ? `<div class="gw-returned">Sent back ${esc(fmtWhen(returned.decided_at))}: ${esc(returned.decision_note || '')}</div>` : ''}
+      <div class="gw-kicker">${esc(m.goal || 'Contract')}</div>
+      <h2>${esc(l.leaf_code)} — ${esc(l.task)}</h2>
+      <div class="gw-done"><strong>Done when:</strong> ${esc(l.done_criterion || '—')}</div>
+      <div class="gw-kv">
+        <span>Granted to</span><span>${esc(handleOf(l.assigned_to))}</span>
+        <span>Tier</span><span>${esc(l.tier)} · ${l.logs} LOG${l.logs === 1 ? '' : 's'}</span>
+        <span>Payout potential</span><span>$${((rateCents / 100) * l.logs).toFixed(2)}</span>
+        <span>Due</span><span>${l.target_date ? esc(fmtDate(l.target_date)) : 'No due date set'}</span>
+        <span>Comes after</span><span>${(l.requires || []).length ? esc(l.requires.join(', ')) + ' — verified' : 'nothing — this is a starting step'}</span>
+        <span>Unlocks</span><span>${unlocks.length ? esc(unlocks.join(', ')) : 'nothing — the finish'}</span>
+      </div>
+      <p class="gw-p gw-dim">${prompts.length} prompt${prompts.length === 1 ? '' : 's'}, then your time worked, then ${items.length} proof item${items.length === 1 ? '' : 's'}. You can leave and come back — it all saves as you go.</p>`;
+    next = 'Begin'; back = false;
+  } else if (sc.t === 'prompt') {
+    const p = prompts[sc.k];
+    main = `<div class="gw-kicker">Prompt ${sc.k + 1} of ${prompts.length}</div>
+      <h2>${esc(p.title)}</h2>
+      ${p.body ? `<p class="gw-p">${esc(p.body)}</p>` : ''}`;
+  } else if (sc.t === 'time') {
+    const clock = lsGet(gwClockKey(gw.leafId));
+    const totalMs = sessions.reduce((t, s) => t + (new Date(s.ended_at) - new Date(s.started_at)), 0);
+    const defStart = clock ? new Date(clock) : sessions.length ? new Date(Date.now() - 3600000) : new Date(l.started_at || Date.now());
+    main = `<div class="gw-kicker">Time worked</div>
+      <h2>When did you work on it?</h2>
+      <p class="gw-p gw-dim">Log each sitting. ${fmtDur(totalMs)} logged so far against ${l.logs} LOG${l.logs === 1 ? '' : 's'} estimated.</p>
+      <div class="gw-list">${sessions.map(s => `<div class="gw-item"><div><strong>${esc(fmtWhen(s.started_at))} → ${esc(fmtWhen(s.ended_at))}</strong> · ${fmtDur(new Date(s.ended_at) - new Date(s.started_at))}${s.notes ? `<div class="gw-dim">${esc(s.notes)}</div>` : ''}</div>
+        <button class="term-wf-x" title="Remove" onclick="gwRemoveSession('${esc(s.id)}')">×</button></div>`).join('')}</div>
+      <div style="margin:0 0 14px">${clock
+        ? `<span class="gw-dim">Clocked in ${esc(fmtWhen(clock))}. </span><button class="gw-btn" onclick="gwClock(false)">Clear clock-in</button>`
+        : `<button class="gw-btn" onclick="gwClock(true)">Clock in now</button> <span class="gw-dim">— come back when you stop and the times fill themselves in.</span>`}</div>
+      <div class="gw-grid">
+        <label class="gw-field"><span>Start</span><input class="gw-input" type="datetime-local" id="gw-start" value="${toLocalInput(defStart)}"></label>
+        <label class="gw-field"><span>End</span><input class="gw-input" type="datetime-local" id="gw-end" value="${toLocalInput(new Date())}"></label>
+      </div>
+      <label class="gw-field"><span>Notes — what you did</span><textarea class="gw-input" id="gw-notes" rows="3"></textarea></label>
+      <button class="gw-btn" onclick="gwSaveSession()">Save this session</button>`;
+  } else if (sc.t === 'proof') {
+    const x = items[sc.k], got = evidence.filter(e => e.proof_item === x.id);
+    const req = x.required !== false;
+    let input;
+    if (x.kind === 'link') {
+      input = `<label class="gw-field"><span>Link</span><input class="gw-input" type="url" id="gw-url" placeholder="https://"></label>
+        <label class="gw-field"><span>Caption (optional)</span><input class="gw-input" id="gw-caption"></label>
+        <button class="gw-btn" onclick="gwAttach()">Add link</button>`;
+    } else if (x.kind === 'form') {
+      const prev = got[0]?.form_data || {};
+      input = (x.fields || []).map(f => {
+        const v = prev[f.key] ?? '';
+        const id = `gw-f-${esc(f.key)}`;
+        const ctl = f.type === 'textarea' ? `<textarea class="gw-input" id="${id}" rows="3">${esc(String(v))}</textarea>`
+          : f.type === 'yesno' ? `<select class="gw-input" id="${id}"><option value=""></option>${['Yes', 'No'].map(o => `<option ${v === o ? 'selected' : ''}>${o}</option>`).join('')}</select>`
+          : `<input class="gw-input" id="${id}" type="${f.type === 'number' ? 'number' : f.type === 'date' ? 'date' : 'text'}" value="${esc(String(v))}">`;
+        return `<label class="gw-field"><span>${esc(f.label)}</span>${ctl}</label>`;
+      }).join('') + `<button class="gw-btn" onclick="gwAttach()">${got.length ? 'Update answers' : 'Save answers'}</button>`;
+    } else {
+      input = `<label class="gw-field"><span>${x.kind === 'photo' ? 'Photos' : x.kind === 'video' ? 'Video' : 'Files'} — up to 50 MB each${x.kind === 'video' ? ' (longer recordings: upload them somewhere and add the link instead)' : ''}</span>
+          <input class="gw-input" type="file" id="gw-file" multiple accept="${PROOF_ACCEPT[x.kind]}"></label>
+        <label class="gw-field"><span>Caption (optional)</span><input class="gw-input" id="gw-caption" placeholder="What this shows"></label>
+        <button class="gw-btn" onclick="gwAttach()">Upload</button>`;
+    }
+    main = `<div class="gw-kicker">Proof ${sc.k + 1} of ${items.length} · ${esc(PROOF_KIND_LABEL[x.kind])}${req ? ' · required' : ' · optional'}</div>
+      <h2>${esc(x.label)}</h2>
+      ${x.hint ? `<p class="gw-p gw-dim">${esc(x.hint)}</p>` : ''}
+      ${got.length && x.kind !== 'form' ? `<div class="gw-list">${got.map(e => evidenceLine(e, x, `gwRemoveEvidence('${esc(e.id)}')`, 'gw-item')).join('')}</div>` : ''}
+      ${got.length && x.kind === 'form' ? '<div class="gw-dim" style="margin-bottom:12px"><span class="gw-ok">✓ Saved.</span> Change anything and update.</div>' : ''}
+      ${input}`;
+  } else if (sc.t === 'submit') {
+    const totalMs = sessions.reduce((t, s) => t + (new Date(s.ended_at) - new Date(s.started_at)), 0);
+    main = `<div class="gw-kicker">Submit</div>
+      <h2>Ready for verification?</h2>
+      <div class="gw-list">
+        <div class="gw-item"><div>Time worked</div><div class="${sessions.length ? 'gw-ok' : 'gw-miss'}">${sessions.length ? `✓ ${fmtDur(totalMs)}` : 'missing'}</div></div>
+        ${items.map((x, k) => {
+          const ok = evidence.some(e => e.proof_item === x.id), req = x.required !== false;
+          return `<div class="gw-item"><div><a href="#" onclick="gwGo(${gw.screens.findIndex(s => s.t === 'proof' && s.k === k)});return false;">${esc(x.label)}</a></div>
+            <div class="${ok ? 'gw-ok' : req ? 'gw-miss' : 'gw-dim'}">${ok ? '✓' : req ? 'missing' : 'optional'}</div></div>`;
+        }).join('')}
+      </div>
+      <label class="gw-field"><span>What was done</span><textarea class="gw-input" id="gw-summary" rows="4" placeholder="Summarize the finished work."></textarea></label>
+      <label class="gw-check"><input type="checkbox" id="gw-met"> <span>The "done when" is met: ${esc(l.done_criterion || '')}</span></label>`;
+    next = 'Submit for verification';
+  }
+
+  const pct = gw.submitted ? 100 : Math.round((gw.i / (n - 1)) * 100);
+  el.innerHTML = `<div class="gw-shell">
+    <div class="gw-top">
+      <div class="gw-brand">Bixxville</div>
+      <div class="gw-where">${esc(l.leaf_code)} — ${esc(l.task)}</div>
+      <button class="gw-x" onclick="closeGuided()">${gw.entered ? 'Save &amp; exit' : 'Exit'} ✕</button>
+    </div>
+    <div class="gw-bar"><div style="width:${pct}%"></div></div>
+    <div class="gw-count">${gw.submitted ? 'Done' : `${gw.i + 1} of ${n} · ${esc(where)}`}</div>
+    <div class="gw-main">${main}</div>
+    <div class="gw-msg" id="gw-msg"></div>
+    <div class="gw-nav">
+      ${back ? '<button class="gw-btn" onclick="gwGo(gw.i - 1)">Back</button>' : ''}
+      <button class="gw-btn primary" id="gw-next" onclick="gwNext()">${esc(next)}</button>
+    </div></div>`;
+  if (sc.t === 'door' && !gw.submitted) {
+    const go = e => { if (e.key === 'Enter') gwNext(); };
+    document.getElementById('gw-name')?.addEventListener('keydown', go);
+    document.getElementById('gw-mid')?.addEventListener('keydown', go);
+    document.getElementById('gw-name')?.focus();
+  }
+}
+
+async function gwNext() {
+  if (!gw) return;
+  if (gw.submitted) { await closeGuided(); return; }
+  const sc = gw.screens[gw.i], btn = document.getElementById('gw-next');
+  const busy = on => { if (btn) btn.disabled = on; };
+  gwMsg('');
+  if (sc.t === 'door') {
+    const name = document.getElementById('gw-name').value.trim();
+    const mid = document.getElementById('gw-mid').value.trim().toUpperCase();
+    if (!name) return gwMsg('Type your name.');
+    if (!mid) return gwMsg('Type your member ID.');
+    if (!/^[A-Z0-9]+(-[A-Z0-9]+)*-\d{2}$/.test(mid) || !CANON.verifyId(mid)) return gwMsg('That ID’s check digits don’t add up — look for a typo.');
+    busy(true);
+    gwMsg('Checking…', true);
+    const { error } = await sb.rpc('verify_work_entry', { p_leaf: gw.leafId, p_name: name, p_member_id: mid });
+    if (error) { busy(false); return gwMsg(error.message); }
+    if (leafById(gw.leafId)?.status === 'to-do') {
+      const { error: sErr } = await sb.rpc('start_leaf', { p_leaf: gw.leafId });
+      if (sErr) { busy(false); return gwMsg(sErr.message); }
+      lsSet(gwPosKey(gw.leafId), null);
+    }
+    gw.entered = true;
+    await refreshTrackerAfterWork();
+    await gwLoadWork();
+    const saved = parseInt(lsGet(gwPosKey(gw.leafId)) || '', 10);
+    return gwGo(saved > 1 && saved < gw.screens.length ? saved : 1);
+  }
+  if (sc.t === 'time') {
+    const notes = document.getElementById('gw-notes').value.trim();
+    if (!(gw.work?.sessions || []).length || notes) {
+      busy(true);
+      const ok = await gwSaveSession({ quiet: true });
+      busy(false);
+      if (!ok) return;
+    }
+    return gwGo(gw.i + 1);
+  }
+  if (sc.t === 'proof') {
+    const x = gw.script.proof_items[sc.k];
+    busy(true);
+    const pending = gwPendingInput(x);
+    if (pending && !(await gwAttach({ stay: true }))) { busy(false); return; }
+    busy(false);
+    const has = (gw.work?.evidence || []).some(e => e.proof_item === x.id);
+    if (x.required !== false && !has) return gwMsg('This one’s required — attach it before going on.');
+    return gwGo(gw.i + 1);
+  }
+  if (sc.t === 'submit') {
+    const summary = document.getElementById('gw-summary').value.trim();
+    if (!summary) return gwMsg('Write what was done.');
+    if (!document.getElementById('gw-met').checked) return gwMsg('Tick the box confirming the "done when" is met.');
+    busy(true);
+    const { error } = await sb.rpc('submit_leaf_proof', { p_leaf: gw.leafId, p_summary: summary, p_criterion_met: true });
+    if (error) {
+      busy(false);
+      if (/member ID/i.test(error.message)) { gw.entered = true; gwGo(0); return gwMsg(error.message); }
+      return gwMsg(error.message);
+    }
+    lsSet(gwPosKey(gw.leafId), null);
+    lsSet(gwClockKey(gw.leafId), null);
+    gw.submitted = true;
+    gwRender();
+    return;
+  }
+  gwGo(gw.i + 1);
+}
+
+function gwClock(on) {
+  lsSet(gwClockKey(gw.leafId), on ? new Date().toISOString() : null);
+  gwRender();
+}
+
+async function gwSaveSession(opts = {}) {
+  const start = document.getElementById('gw-start').value, end = document.getElementById('gw-end').value;
+  if (!start || !end) { gwMsg('Set both a start and an end time.'); return false; }
+  if (new Date(end) <= new Date(start)) { gwMsg('The end time has to be after the start time.'); return false; }
+  const { error } = await sb.rpc('log_work_session', {
+    p_leaf: gw.leafId, p_started_at: new Date(start).toISOString(), p_ended_at: new Date(end).toISOString(),
+    p_notes: document.getElementById('gw-notes').value,
+  });
+  if (error) { gwMsg(error.message); return false; }
+  lsSet(gwClockKey(gw.leafId), null);
+  await gwLoadWork();
+  if (!opts.quiet) { gwRender(); gwMsg('Session saved.', true); }
+  return true;
+}
+
+async function gwRemoveSession(id) {
+  const { error } = await sb.rpc('delete_work_session', { p_id: id });
+  if (error) return gwMsg(error.message);
+  await gwLoadWork();
+  gwRender();
+}
+
+// Anything typed or chosen on a proof screen that hasn't been attached yet.
+function gwPendingInput(x) {
+  if (x.kind === 'link') return !isBlankLink(document.getElementById('gw-url')?.value || '');
+  if (x.kind === 'form') {
+    const prev = (gw.work?.evidence || []).find(e => e.proof_item === x.id && e.kind === 'form')?.form_data || {};
+    return (x.fields || []).some(f => (document.getElementById(`gw-f-${f.key}`)?.value || '').trim() !== String(prev[f.key] ?? '').trim());
+  }
+  return (document.getElementById('gw-file')?.files || []).length > 0;
+}
+
+async function gwAttach(opts = {}) {
+  const x = gw.script.proof_items[gw.screens[gw.i].k];
+  const caption = (document.getElementById('gw-caption')?.value || '').trim();
+  const tag = async (id) => {
+    const { error } = await sb.rpc('set_evidence_item', { p_id: id, p_item: x.id });
+    if (error) throw error;
+  };
+  try {
+    if (x.kind === 'form') {
+      const data = {}, blank = [];
+      for (const f of x.fields || []) {
+        const v = (document.getElementById(`gw-f-${f.key}`)?.value || '').trim();
+        if (!v) blank.push(f.label);
+        data[f.key] = f.type === 'number' && v !== '' ? Number(v) : v;
+      }
+      if (blank.length) { gwMsg(`Answer every question — still blank: ${blank.join('; ')}`); return false; }
+      const { error } = await sb.rpc('add_evidence_form', { p_leaf: gw.leafId, p_item: x.id, p_data: data });
+      if (error) throw error;
+    } else if (x.kind === 'link') {
+      const url = (document.getElementById('gw-url').value || '').trim();
+      if (!/^https?:\/\//i.test(url)) { gwMsg('A link has to start with http:// or https://'); return false; }
+      const { data: id, error } = await sb.rpc('add_evidence_link', { p_leaf: gw.leafId, p_url: url, p_caption: caption });
+      if (error) throw error;
+      await tag(id);
+    } else {
+      const files = [...(document.getElementById('gw-file')?.files || [])];
+      if (!files.length) { gwMsg('Choose a file first.'); return false; }
+      const wrongType = f => (x.kind === 'photo' && !/^image\//.test(f.type)) || (x.kind === 'video' && !/^video\//.test(f.type));
+      for (const [i, f] of files.entries()) {
+        if (wrongType(f)) { gwMsg(`${f.name} isn’t a ${x.kind}.`); return false; }
+        if (f.size > EVIDENCE_MAX) { gwMsg(`${f.name} is over 50 MB.${x.kind === 'video' ? ' Upload it somewhere and add the link on a link item, or trim it.' : ''}`); return false; }
+        gwMsg(`Uploading ${i + 1} of ${files.length}: ${f.name}…`, true);
+        const path = `${gw.leafId}/${crypto.randomUUID()}-${f.name.replace(/[^\w.\-]+/g, '_').slice(-80)}`;
+        const { error: upErr } = await sb.storage.from('work-evidence').upload(path, f, { contentType: f.type || 'application/octet-stream', upsert: false });
+        if (upErr) { gwMsg(`${f.name}: ${upErr.message}`); return false; }
+        const { data: id, error } = await sb.rpc('register_evidence_file', {
+          p_leaf: gw.leafId, p_storage_path: path, p_filename: f.name, p_mime: f.type || null, p_size: f.size, p_caption: caption,
+        });
+        if (error) { await sb.storage.from('work-evidence').remove([path]); throw error; }
+        await tag(id);
+      }
+    }
+  } catch (e) {
+    gwMsg(e.message || String(e));
+    return false;
+  }
+  await gwLoadWork();
+  if (!opts.stay) { gwRender(); gwMsg('Attached.', true); }
+  return true;
+}
+
+async function gwRemoveEvidence(id) {
+  const { data: path, error } = await sb.rpc('delete_evidence', { p_id: id });
+  if (error) return gwMsg(error.message);
+  if (path) await sb.storage.from('work-evidence').remove([path]);
+  await gwLoadWork();
+  gwRender();
 }
 
 // Every decomposition the OS has ever mapped, as real folders you can open
@@ -10091,7 +10768,8 @@ async function termDispatch(raw) {
   }
   if (cmd === 'whoami') {
     if (operator) {
-      termPrint(`${operator.peer_name} · ${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs · ${operator.standing || 'active'}`, 'system');
+      const { data: mid } = await sb.rpc('my_member_id');
+      termPrint(`${operator.peer_name} · ${mid ? 'member ID ' + mid + ' · ' : ''}${tier(operator.total_logs)} · ${operator.total_logs || 0} total LOGs · ${operator.standing || 'active'}`, 'system');
     } else if (relation) {
       termPrint(`${relation.name} · Relation`, 'system');
     } else {
@@ -13007,6 +13685,10 @@ async function loadWorkMap(requestedMapId) {
     trackerState.mapId    = mapId;
     trackerState.source   = 'live';
     trackerState.settlement = null;
+
+    // Which steps have a script, and whether it's approved (0009).
+    const { data: scripts } = await sb.rpc('map_script_status', { p_map: mapId });
+    trackerState.scripts = scripts || {};
 
     // relation_submissions carries the REAL cycle a contract settled in —
     // computing it client-side from a leaf's delivered_at can disagree

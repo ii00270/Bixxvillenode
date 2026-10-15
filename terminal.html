@@ -2523,6 +2523,7 @@ html.theme-light{
 .term-decomp-tag{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:3px;padding:1px 6px;flex-shrink:0;margin-left:10px;}
 .term-decomp-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .term-decomp-bar .term-timeline-dl{margin-top:0;}
+.term-decomp-bar .term-timeline-dl.on{background:var(--green);color:#08110C;}
 .term-decomp-frame{width:100%;min-height:70vh;border:1px solid var(--term-line);border-radius:8px;background:#FAF8F3;display:block;}
 
 #term-scroll{
@@ -8685,7 +8686,9 @@ async function openDecomposition(mapId) {
     <div class="term-decomp-bar">
       <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All decomposed</button>
       <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
-      <button class="term-timeline-dl" id="term-decomp-switch" onclick="toggleDecompView()">Team plan</button>
+      <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Decomposition</button>
+      <button class="term-timeline-dl" data-dv="team" onclick="setDecompView('team')">Team plan</button>
+      ${data.map.team_plan_raw ? `<button class="term-timeline-dl" data-dv="calc" onclick="setDecompView('calc')">Calculated plan</button>` : ''}
       <button class="term-timeline-dl" onclick="document.getElementById('term-decomp-frame').contentWindow.print()">Print / save PDF</button>
       ${hasOriginal ? `<button class="term-timeline-dl" onclick="viewContractOriginal('${esc(mapId)}')">Original file</button>` : ''}
     </div>
@@ -8693,17 +8696,29 @@ async function openDecomposition(mapId) {
   const frame = document.getElementById('term-decomp-frame');
   frame.onload = () => { try { frame.style.height = frame.contentDocument.documentElement.scrollHeight + 'px'; } catch (e) {} };
   window._decompData = data;
-  window._decompView = 'report';
-  frame.srcdoc = renderDecompositionReport(data);
+  setDecompView('report');
 }
 
-function toggleDecompView() {
+// Team plan shows the uploaded plan when there is one (the plan it was
+// staffed from), otherwise the OS's calculated plan.
+function setDecompView(view) {
   const frame = document.getElementById('term-decomp-frame');
-  const btn = document.getElementById('term-decomp-switch');
-  if (!frame || !window._decompData) return;
-  window._decompView = window._decompView === 'report' ? 'team' : 'report';
-  frame.srcdoc = window._decompView === 'team' ? renderTeamPlanReport(window._decompData) : renderDecompositionReport(window._decompData);
-  if (btn) btn.textContent = window._decompView === 'team' ? 'Decomposition' : 'Team plan';
+  const d = window._decompData;
+  if (!frame || !d) return;
+  const uploaded = d.map.team_plan_raw;
+  if (view === 'team' && uploaded && d.map.team_plan_mime === 'application/pdf') {
+    const bin = atob(uploaded), bytes = new Uint8Array(bin.length);
+    for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    const url = URL.createObjectURL(new Blob([bytes], { type: 'application/pdf' }));
+    window.open(url, '_blank');
+    setTimeout(() => URL.revokeObjectURL(url), 60000);
+    return;
+  }
+  window._decompView = view;
+  frame.srcdoc = view === 'report' ? renderDecompositionReport(d)
+               : view === 'team' && uploaded ? uploaded
+               : renderTeamPlanReport(d);
+  document.querySelectorAll('.term-decomp-bar [data-dv]').forEach(b => b.classList.toggle('on', b.dataset.dv === view));
 }
 
 // The Decomposition Report's own styling — shared by every report the OS draws.
@@ -9664,11 +9679,20 @@ async function uploadOneContract(file) {
       contract = JSON.parse(raw);
     } else if (name.endsWith('.pdf') || file.type === 'application/pdf') {
       mime = 'application/pdf';
-      contract = contractFromReportLines(await pdfLines(file));
+      const lines = await pdfLines(file);
+      if (lines.some(l => /^Who fills it:/i.test(l))) {
+        await stageTeamPlan(teamPlanFromLines(lines), file, 'application/pdf', await fileToBase64(file));
+        return 0;
+      }
+      contract = contractFromReportLines(lines);
       if (!contract) throw new Error("this PDF isn't a Decomposition Report — no steps found");
       raw = file.size <= MAX_STORED_ORIGINAL ? await fileToBase64(file) : null;
     } else if (/\.html?$/.test(name) || file.type === 'text/html') {
       mime = 'text/html'; raw = await file.text(); html = raw;
+      if (/class="seatcard"/.test(raw)) {
+        await stageTeamPlan(teamPlanFromHtml(raw), file, 'text/html', raw);
+        return 0;
+      }
       const m = raw.match(/<script type="application\/json" id="logg-data">([\s\S]*?)<\/script>/);
       contract = m ? JSON.parse(m[1]) : contractFromReportHtml(raw);
       if (!contract) throw new Error("this HTML isn't a Decomposition Report or a decomposition worksheet");
@@ -9708,6 +9732,161 @@ async function uploadOneContract(file) {
     termPrint(`Couldn't upload ${file.name} — ${e.message}`, 'err');
     return 0;
   }
+}
+
+// ── Team plan upload — seats, who fills them, and the steps they carry ──
+// A team plan is read, matched to the contract it staffs, and shown as a
+// preview. Nothing is granted until Genesis presses Apply; each grant then
+// goes through assign_leaf like a grant made by hand.
+const TP_STEP = /(?:^|\s)([A-Z]{1,2}) (.+?) (\d+)L(?=\s|$)/g;
+
+function teamPlanFromHtml(html) {
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  const seats = [...doc.querySelectorAll('.seatcard')].map(card => {
+    const fill = [...card.querySelectorAll('.seat-b')].find(b => /who fills it/i.test(b.textContent));
+    return {
+      id: card.querySelector('.seat-id')?.textContent.trim() || '',
+      name: card.querySelector('.seat-name')?.textContent.trim() || '',
+      tier: ((card.querySelector('.seat-meta')?.textContent || '').match(/^\s*(\w+)\s+TIER/i) || [])[1]?.toLowerCase() || '',
+      filler: (fill?.textContent || '').replace(/^\s*Who fills it:\s*/i, '').trim(),
+      steps: [...card.querySelectorAll('.seat-steps > span')].map(sp => {
+        const code = sp.querySelector('b')?.textContent.trim() || '';
+        const logsTxt = [...sp.querySelectorAll('span')].pop()?.textContent.trim() || '';
+        const task = sp.textContent.replace(code, '').replace(logsTxt, '').trim();
+        return { code, task, logs: parseInt(logsTxt, 10) || 0 };
+      }).filter(x => x.code),
+    };
+  }).filter(x => x.id && x.steps.length);
+  const metaSource = [...doc.querySelectorAll('.meta .c')].find(c => /source/i.test(c.querySelector('.k')?.textContent || ''));
+  return { source: metaSource?.querySelector('.v')?.textContent.trim() || '', seats };
+}
+
+function teamPlanFromLines(L) {
+  const squash = x => x.replace(/\s+/g, '').toUpperCase();
+  const seats = [];
+  let cur = null, buf = '';
+  const flush = () => {
+    if (!cur) return;
+    cur.steps = [...buf.matchAll(TP_STEP)].map(m => ({ code: m[1], task: m[2].trim(), logs: +m[3] }));
+    seats.push(cur);
+  };
+  for (const l of L) {
+    const head = l.match(/^(S\d+)\s*(.+?)\s+\$[\d,]+\.\d{2}$/);
+    if (head) { flush(); cur = { id: head[1], name: head[2].trim(), tier: '', filler: '', steps: [] }; buf = ''; continue; }
+    if (!cur) continue;
+    if (/THEHANDOFFS|WHEREWORKPASSES/.test(squash(l))) { flush(); cur = null; continue; }
+    const tier = l.match(/^(\w+)\s+TIER\b/i);
+    if (tier && !cur.tier) { cur.tier = tier[1].toLowerCase(); continue; }
+    if (/^Who fills it:/i.test(l)) { cur.filler = l.replace(/^Who fills it:\s*/i, '').trim(); buf = ''; continue; }
+    if (cur.filler) buf += ' ' + l;
+  }
+  flush();
+  // The value under SOURCE can wrap onto more lines; stop at the next label (all caps).
+  const si = L.findIndex(l => squash(l) === 'SOURCE');
+  const src = [];
+  for (let k = si + 1; si >= 0 && k < L.length && src.length < 3 && !/^[A-Z][A-Z ,·]+$/.test(L[k]); k++) src.push(L[k]);
+  return { source: src.join(' '), seats: seats.filter(x => x.steps.length) };
+}
+
+// The member a seat's "Who fills it" names, if any. "Recruit…" means nobody yet.
+function memberForFiller(filler, ops) {
+  if (!filler || /^\s*recruit/i.test(filler)) return null;
+  const hits = (ops || []).map(o => {
+    const names = [o.peer_name, (o.handle || '').replace(/^@/, '')].filter(Boolean);
+    const at = Math.min(...names.map(n => { const m = filler.match(new RegExp('\\b' + n.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'i')); return m ? m.index : Infinity; }));
+    return { o, at };
+  }).filter(h => h.at !== Infinity).sort((a, b) => a.at - b.at);
+  return hits[0]?.o || null;
+}
+
+async function stageTeamPlan(plan, file, mime, raw) {
+  if (!plan.seats.length) throw new Error('this looks like a team plan, but no seats with steps could be read');
+  if (!operator?.is_genesis) throw new Error('only Genesis can staff a contract from a team plan');
+  const planSteps = plan.seats.flatMap(st => st.steps);
+  const [{ data: maps }, { data: leaves }, { data: ops }] = await Promise.all([
+    sb.from('work_maps').select('id,goal'),
+    sb.from('work_leaves').select('id,map_id,leaf_code,task,tier,status,assigned_to'),
+    sb.rpc('list_operators'),
+  ]);
+  const norm = x => String(x || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  const scored = (maps || []).map(m => {
+    const ls = (leaves || []).filter(l => l.map_id === m.id);
+    const hit = planSteps.filter(p => ls.some(l => l.leaf_code === p.code && norm(l.task) === norm(p.task))).length;
+    return { m, ls, hit };
+  }).sort((a, b) => b.hit - a.hit);
+  const best = scored[0];
+  if (!best || best.hit < planSteps.length) {
+    throw new Error(`this plan's steps don't all match a decomposed contract${plan.source ? ` (it says it's for: ${plan.source})` : ''}. Upload that decomposition first, then this plan.`);
+  }
+  termPrint(`Read team plan ${file.name}: ${plan.seats.length} seats, ${planSteps.length} steps — matches "${best.m.goal}". Review it before anything is granted.`, 'system');
+  window._stagedTeamPlan = { plan, map: best.m, leaves: best.ls, ops: ops || [], file, mime, raw };
+  openTeamPlanPreview();
+}
+
+function openTeamPlanPreview() {
+  const st = window._stagedTeamPlan;
+  if (!st) return;
+  const handle = o => o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase();
+  let grants = 0, keep = 0;
+  const rows = st.plan.seats.map(seat => {
+    const who = memberForFiller(seat.filler, st.ops);
+    const lines = seat.steps.map(p => {
+      const l = st.leaves.find(x => x.leaf_code === p.code);
+      let note;
+      if (!who) { note = 'stays open'; keep++; }
+      else if (l.status !== 'to-do') { note = `already ${l.status} — unchanged`; keep++; }
+      else if (l.assigned_to === who.id) { note = 'already granted'; keep++; }
+      else { note = l.assigned_to ? `grant (replaces ${handleOf(l.assigned_to)})` : 'grant'; grants++; }
+      return `<div class="term-wf-item"><div><strong>${esc(p.code)}</strong> ${esc(p.task)} <span class="term-wf-sub">${p.logs} LOGs · ${esc(l.tier)}${seat.tier && l.tier !== seat.tier ? ` (seat is ${esc(seat.tier)})` : ''}</span></div><span class="term-grant-sub">${esc(note)}</span></div>`;
+    }).join('');
+    return `<div class="form-block">
+      <div class="form-lbl">${esc(seat.id)} · ${esc(seat.name)}</div>
+      <div class="term-wf-sub">Fills it: ${esc(seat.filler || '—')} → ${who ? `<strong>${esc(handle(who))}</strong>` : '<strong>nobody yet</strong>'}</div>
+      ${lines}
+    </div>`;
+  }).join('');
+  openOverlay('Staff from team plan', (body) => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="form-block">
+        <div class="form-lbl">${esc(st.map.goal)}</div>
+        <div class="term-wf-sub">${grants} step${grants === 1 ? '' : 's'} will be granted. ${keep} stay as they are. Steps already started are never moved.</div>
+      </div>
+      ${rows}
+      <div class="form-block">
+        <button class="term-card-btn primary" id="tp-apply" onclick="applyTeamPlan()">Apply ${grants} grant${grants === 1 ? '' : 's'} and keep the plan with the contract</button>
+        <div class="term-wf-msg" id="wf-msg"></div>
+      </div></div>`;
+  });
+}
+
+async function applyTeamPlan() {
+  const st = window._stagedTeamPlan;
+  if (!st) return;
+  const btn = document.getElementById('tp-apply');
+  if (btn) { btn.disabled = true; btn.textContent = 'Applying…'; }
+  let done = 0;
+  const failed = [];
+  for (const seat of st.plan.seats) {
+    const who = memberForFiller(seat.filler, st.ops);
+    if (!who) continue;
+    for (const p of seat.steps) {
+      const l = st.leaves.find(x => x.leaf_code === p.code);
+      if (!l || l.status !== 'to-do' || l.assigned_to === who.id) continue;
+      const { error } = await sb.rpc('assign_leaf', { p_leaf: l.id, p_member: who.id });
+      if (error) failed.push(`${p.code}: ${error.message}`); else done++;
+    }
+  }
+  const { error: keepErr } = await sb.rpc('set_work_map_team_plan', { p_map: st.map.id, p_raw: st.raw, p_mime: st.mime, p_filename: st.file.name });
+  if (failed.length || keepErr) {
+    wfMsg([...failed, keepErr ? `plan not kept: ${keepErr.message}` : ''].filter(Boolean).join('; '));
+    if (btn) { btn.disabled = false; btn.textContent = 'Try again'; }
+    return;
+  }
+  closeOverlay();
+  window._stagedTeamPlan = null;
+  termPrint(`Staffed "${st.map.goal}": ${done} step${done === 1 ? '' : 's'} granted. The team plan is kept with the contract.`, 'system');
+  await switchToMap(st.map.id);
+  setTermView('tracker');
 }
 
 function termPrint(text, cls) {

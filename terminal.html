@@ -13,16 +13,16 @@
 <meta name="apple-mobile-web-app-title" content="Bixxville">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script>
-// Applied synchronously, before the stylesheet paints anything, so a saved
-// light-mode preference never flashes dark first. Default (no stored value)
-// stays exactly the app's original dark-only look.
+// Applied synchronously, before the stylesheet paints anything, so the
+// theme never flashes. Light — the Land of Geb website's look — is the
+// default; dark is a stored choice (the `theme` command).
 try {
-  if (localStorage.getItem('bixx-theme') === 'light') document.documentElement.classList.add('theme-light');
-} catch(e) {}
+  if (localStorage.getItem('bixx-theme2') !== 'dark') document.documentElement.classList.add('theme-light');
+} catch(e) { document.documentElement.classList.add('theme-light'); }
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
@@ -34,7 +34,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
 
 /* ── TOKENS ── */
 :root{
-  --black:    #000000;
+  --black:    #0A0A0A;
   --surface:  #0D0D0D;
   --surface2: #141414;
   --line:     #1E1E1E;
@@ -42,12 +42,16 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
   --cream:    #FFFFFF;
   --soft:     #C8C6C2;
   --grey:     #707070;
-  --green:    #8CF060;
-  --orange:   #E8884A;
-  --red:      #E05252;
+  --green:    #FF2D95;   /* the accent — Land of Geb pink (name kept so every rule follows) */
+  --orange:   #FF7A1A;
+  --red:      #FF5A4F;
+  --yellow:   #FFEA00;
+  --on-accent:#0A0A0A;   /* text on an accent fill */
+  --neon:     linear-gradient(90deg, #FFEA00 0%, #FF7A1A 50%, #FF2D95 100%);
+  --neon-v:   linear-gradient(180deg, #FFEA00 0%, #FF7A1A 50%, #FF2D95 100%);
   --mono:     'IBM Plex Mono', monospace;
   --sans:     'Inter', system-ui, sans-serif;
-  --display:  'Syne', 'Inter', sans-serif;
+  --display:  'Anton', 'Impact', 'Inter', sans-serif;
   --nav-h:    56px; /* must match #bottom-nav height — spacing calcs depend on it */
   --top-h:    56px;
   --safe-b:   env(safe-area-inset-bottom, 0px);
@@ -59,12 +63,12 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
   --tint:     rgba(255,255,255,.03);
   --hairline: rgba(255,255,255,.04);
   --shell:    #0A0A0B; /* the framed app card's own ground */
-  --gold:     #D4AF37; /* Wisdom Key marker */
+  --gold:     #FFEA00; /* Wisdom Key marker */
   /* Triplets, so the accent tints (borders, glows, 5%-alpha fills) can
      follow the theme instead of staying dark-mode lime on cream. */
-  --green-rgb:  140,240,96;
-  --orange-rgb: 232,136,74;
-  --red-rgb:    224,82,82;
+  --green-rgb:  255,45,149;
+  --orange-rgb: 255,122,26;
+  --red-rgb:    255,90,79;
   /* Chrome surfaces — bars, sheets, dialogs. Translucent, so they need
      their own tokens rather than reusing the opaque ones. */
   --chrome:     rgba(0,0,0,.92);
@@ -83,30 +87,32 @@ html,body{height:100%;width:100%;overflow:hidden;background:var(--black);}
    value so small UI text still clears contrast on cream — the brand hues
    are built for large marks, not 9px mono labels. ── */
 html.theme-light{
-  --black:    #FAF5EC;
-  --surface:  #F3ECDD;
-  --surface2: #EBE2CF;
-  --line:     #DED3BC;
-  --line2:    #C6B99C;
-  --cream:    #1A161E;
-  --soft:     #443E4C;
-  --grey:     #6E6676;
-  --green:    #0E8886;
-  --orange:   #A8730B;
-  --red:      #D93A2B;
-  --tint:     rgba(26,22,30,.04);
-  --hairline: rgba(26,22,30,.08);
-  --shell:    #FFFCF5;
-  --gold:     #8A6D12;
-  --green-rgb:  14,136,134;
-  --orange-rgb: 168,115,11;
-  --red-rgb:    217,58,43;
-  --chrome:     rgba(250,245,236,.94);
-  --chrome-2:   rgba(250,245,236,.78);
-  --chrome-3:   rgba(250,245,236,.66);
-  --overlay-bg: rgba(252,249,242,.985);
-  --overlay-bg-desktop: rgba(252,249,242,.95);
-  --dialog-bg:  rgba(250,245,236,.92);
+  --black:    #FFFFFF;
+  --surface:  #F7F7F5;
+  --surface2: #EFEFEC;
+  --line:     #E4E4E4;
+  --line2:    #CFCFCB;
+  --cream:    #0A0A0A;
+  --soft:     #3A3A3A;
+  --grey:     #6B6B6B;
+  --green:    #D6146F;   /* pink, deep enough for small text on white */
+  --orange:   #C2410C;
+  --red:      #C81E1E;
+  --yellow:   #B89A00;
+  --on-accent:#FFFFFF;
+  --tint:     rgba(10,10,10,.04);
+  --hairline: rgba(10,10,10,.08);
+  --shell:    #FFFFFF;
+  --gold:     #8A6D00;
+  --green-rgb:  214,20,111;
+  --orange-rgb: 194,65,12;
+  --red-rgb:    200,30,30;
+  --chrome:     rgba(255,255,255,.94);
+  --chrome-2:   rgba(255,255,255,.78);
+  --chrome-3:   rgba(255,255,255,.66);
+  --overlay-bg: rgba(255,255,255,.985);
+  --overlay-bg-desktop: rgba(255,255,255,.96);
+  --dialog-bg:  rgba(255,255,255,.92);
 }
 
 /* ── AUTH GATE ── */
@@ -600,7 +606,7 @@ html.theme-light{
 .rel-msg-hint{font-family:var(--sans);font-size:13px;color:var(--soft);line-height:1.6;margin-bottom:16px;}
 .rel-msg-scroll{max-height:none;display:flex;flex-direction:column;gap:8px;padding:16px 18px;}
 .rel-bubble{max-width:78%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.45;font-family:var(--sans);}
-.rel-bubble.me{align-self:flex-end;background:var(--green);color:#08110C;border-bottom-right-radius:4px;}
+.rel-bubble.me{align-self:flex-end;background:var(--green);color:var(--on-accent);border-bottom-right-radius:4px;}
 .rel-bubble.them{align-self:flex-start;background:var(--surface);border:1px solid var(--line2);color:var(--cream);border-bottom-left-radius:4px;}
 .rel-bubble-who{font-family:var(--mono);font-size:8px;letter-spacing:.1em;text-transform:uppercase;opacity:.65;margin-bottom:3px;}
 
@@ -1045,7 +1051,7 @@ html.theme-light{
 .dash-task-check{
   width:16px;height:16px;border-radius:4px;border:1.5px solid var(--line2);cursor:pointer;
   flex-shrink:0;display:flex;align-items:center;justify-content:center;
-  font-size:10px;color:#08110C;font-weight:700;
+  font-size:10px;color:var(--on-accent);font-weight:700;
 }
 .dash-task-check.done{background:var(--green);border-color:var(--green);}
 .dash-task-text{flex:1;font-family:var(--sans);font-size:13px;color:var(--cream);word-break:break-word;}
@@ -1059,7 +1065,7 @@ html.theme-light{
 }
 .dash-task-input:focus{border-color:var(--green);}
 .dash-task-add-btn{
-  background:var(--green);color:#08110C;border:none;border-radius:6px;padding:0 14px;
+  background:var(--green);color:var(--on-accent);border:none;border-radius:6px;padding:0 14px;
   font-family:var(--mono);font-size:11px;font-weight:700;cursor:pointer;flex-shrink:0;
 }
 
@@ -1886,7 +1892,7 @@ html.theme-light{
   font-family:var(--sans);font-size:13px;line-height:1.45;
 }
 .dm-bubble.mine{
-  background:var(--green);color:#08110C;border:none;
+  background:var(--green);color:var(--on-accent);border:none;
   border-bottom-left-radius:16px;border-bottom-right-radius:4px;
 }
 .dm-bubble-time{font-family:var(--mono);font-size:8px;opacity:.6;margin-top:4px;text-align:right;}
@@ -1910,7 +1916,7 @@ html.theme-light{
   display:flex;align-items:center;justify-content:center;cursor:pointer;
   -webkit-tap-highlight-color:transparent;
 }
-.dm-send-btn{background:var(--green);border-color:var(--green);color:#08110C;padding-left:2px;}
+.dm-send-btn{background:var(--green);border-color:var(--green);color:var(--on-accent);padding-left:2px;}
 .dm-mic-btn.recording{
   background:rgba(var(--red-rgb),.15);border-color:var(--red);color:var(--red);
   animation:dm-pulse 1s ease-in-out infinite;
@@ -2287,16 +2293,16 @@ html.theme-light{
    replaces.
    ══════════════════════════════════════════════════════════════ */
 :root{
-  --term-bg:     #161616;
-  --term-fg:     #E4E4E2;
-  --term-dim:    #7A7A78;
-  --term-line:   #2A2A28;
+  --term-bg:     #0A0A0A;
+  --term-fg:     #EDEDEB;
+  --term-dim:    #8A8A88;
+  --term-line:   #262626;
 }
 html.theme-light{
   --term-bg:     #FFFFFF;
-  --term-fg:     #1A161E;
-  --term-dim:    #6E6676;
-  --term-line:   #E3E0E6;
+  --term-fg:     #0A0A0A;
+  --term-dim:    #6B6B6B;
+  --term-line:   #E4E4E4;
 }
 
 #terminal-shell{
@@ -2328,7 +2334,8 @@ html.theme-light{
   transition:background .12s;
 }
 .term-sb-item:hover{background:var(--term-line);}
-.term-sb-item.active{background:var(--term-line);color:var(--green);}
+.term-sb-item.active{background:var(--term-line);color:var(--term-fg);font-weight:500;box-shadow:inset 3px 0 0 #FF2D95;}
+.term-sb-item.active .term-sb-icon{opacity:1;color:var(--green);}
 .term-sb-icon{width:15px;height:15px;flex-shrink:0;opacity:.8;}
 .term-sb-row{display:flex;align-items:center;gap:2px;}
 .term-sb-row .term-sb-item{flex:1;min-width:0;}
@@ -2338,6 +2345,117 @@ html.theme-light{
   color:var(--term-dim);font-family:var(--mono);font-size:15px;line-height:1;cursor:pointer;
 }
 .term-sb-fold:hover{background:var(--term-line);color:var(--term-fg);}
+
+/* Profile chip — bottom of the sidebar */
+.term-sb-me{
+  appearance:none;-webkit-appearance:none;margin-top:auto;display:flex;align-items:center;gap:10px;width:100%;
+  padding:10px 8px;border:1px solid var(--term-line);border-radius:10px;background:transparent;color:var(--term-fg);
+  font-family:var(--mono);text-align:left;cursor:pointer;transition:border-color .2s,background .2s;position:relative;overflow:hidden;flex-shrink:0;
+}
+.term-sb-me::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--neon-v);opacity:0;transition:opacity .2s}
+.term-sb-me:hover{border-color:var(--term-dim);}
+.term-sb-me:hover::before,.term-sb-me.on::before{opacity:1}
+.term-sb-me-av{width:32px;height:32px;border-radius:50%;flex-shrink:0;overflow:hidden;display:grid;place-items:center;
+  background:var(--term-line);font-size:13px;font-weight:600;}
+.term-sb-me-txt{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.3}
+.term-sb-me-txt b{font-size:12.5px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-sb-me-txt small{font-size:10.5px;color:var(--term-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.term-sb-me-chev{width:12px;height:12px;color:var(--term-dim);flex-shrink:0}
+
+/* Profile — slides over the OS, which stays visible and dimmed behind it */
+#pf-scrim{position:fixed;inset:0;z-index:139;background:rgba(10,10,10,.38);opacity:0;pointer-events:none;transition:opacity .3s;
+  backdrop-filter:blur(2px);-webkit-backdrop-filter:blur(2px)}
+#pf-scrim.on{opacity:1;pointer-events:auto}
+#pf{position:fixed;top:0;bottom:0;left:0;z-index:140;width:min(760px,100vw);background:var(--term-bg);color:var(--term-fg);
+  font-family:var(--mono);overflow-y:auto;-webkit-overflow-scrolling:touch;transform:translateX(-104%);
+  transition:transform .42s cubic-bezier(.2,.75,.2,1);box-shadow:24px 0 60px rgba(0,0,0,.18);border-right:1px solid var(--term-line)}
+#pf.on{transform:none}
+.pf-top{position:sticky;top:0;z-index:3;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:14px 22px;padding-top:calc(14px + env(safe-area-inset-top,0px));background:var(--term-bg);border-bottom:1px solid var(--term-line)}
+.pf-top b{font-size:12px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.pf-x{appearance:none;width:36px;height:36px;border-radius:50%;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-size:16px;cursor:pointer}
+.pf-x:hover{border-color:var(--term-fg)}
+.pf-banner{height:150px;position:relative;overflow:hidden;
+  background:linear-gradient(115deg,#FFEA00 0%,#FF7A1A 45%,#FF2D95 100%)}
+.pf-banner::before{content:'';position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,.22) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.22) 1px,transparent 1px);background-size:26px 26px}
+.pf-banner::after{content:'';position:absolute;right:-60px;top:-80px;width:280px;height:280px;border-radius:50%;border:1px solid rgba(255,255,255,.55)}
+.pf-head{padding:0 26px 22px;display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:end;border-bottom:1px solid var(--term-line)}
+.pf-av{width:104px;height:104px;border-radius:50%;margin-top:-52px;border:4px solid var(--term-bg);background:var(--term-line);overflow:hidden;
+  display:grid;place-items:center;position:relative;cursor:pointer;z-index:1}
+.pf-av::after{content:'Change';position:absolute;inset:auto 0 0 0;padding:4px 0 6px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;
+  text-align:center;background:rgba(10,10,10,.6);color:#fff;opacity:0;transition:opacity .2s}
+.pf-av:hover::after{opacity:1}
+.pf-name{font-family:var(--display);font-weight:400;font-size:38px;line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.pf-sub{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-top:8px;font-size:12px;color:var(--term-dim)}
+.pf-pill{border:1px solid var(--term-line);border-radius:999px;padding:2px 10px;font-size:11px;color:var(--term-fg)}
+.pf-pill.tier{border-color:transparent;background:var(--neon);color:#0A0A0A;font-weight:600}
+.pf-acts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.pf-btn{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:11.5px;
+  letter-spacing:.06em;padding:9px 14px;border-radius:8px;cursor:pointer;white-space:nowrap}
+.pf-btn:hover{border-color:var(--term-fg)}
+.pf-btn.solid{background:var(--term-fg);color:var(--term-bg);border-color:var(--term-fg)}
+.pf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));border-bottom:1px solid var(--term-line)}
+.pf-stats div{padding:20px 22px;border-right:1px solid var(--term-line)}
+.pf-stats div:last-child{border-right:none}
+.pf-stats b{display:block;font-weight:300;font-size:32px;line-height:1.1}
+.pf-stats span{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim)}
+.pf-sec{padding:22px 26px;border-bottom:1px solid var(--term-line)}
+.pf-sec h4{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:14px;display:flex;justify-content:space-between;gap:10px}
+.pf-sec h4 span{font-weight:400;letter-spacing:.04em;text-transform:none;color:var(--term-dim)}
+.pf-ids{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.pf-id{border:1px solid var(--term-line);border-radius:12px;padding:14px 16px;position:relative}
+.pf-id small{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.pf-id b{display:block;font-size:20px;font-weight:500;margin:6px 0 4px;letter-spacing:.02em}
+.pf-id p{font-size:11.5px;color:var(--term-dim)}
+.pf-copy{position:absolute;right:10px;top:10px;appearance:none;border:none;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:11px;cursor:pointer}
+.pf-copy:hover{color:var(--term-fg)}
+.pf-ladder{position:relative;height:10px;border-radius:5px;background:var(--term-line);margin:30px 0 30px}
+.pf-ladder i{position:absolute;left:0;top:0;bottom:0;border-radius:5px;background:var(--neon)}
+.pf-ladder em{position:absolute;top:-24px;transform:translateX(-50%);font-style:normal;font-size:10.5px;color:var(--term-dim);white-space:nowrap}
+.pf-ladder em.on{color:var(--term-fg);font-weight:600}
+.pf-ladder s{position:absolute;top:-4px;width:2px;height:18px;background:var(--term-fg);transform:translateX(-1px)}
+.pf-ladder u{position:absolute;top:16px;transform:translateX(-50%);font-size:10px;color:var(--term-dim);text-decoration:none}
+.pf-ladder-read{font-size:13px}
+.pf-table{width:100%;border-collapse:collapse;font-size:12.5px}
+.pf-table th{text-align:left;font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim);padding:8px 8px 8px 0;border-bottom:1px solid var(--term-line)}
+.pf-table td{padding:11px 8px 11px 0;border-bottom:1px solid var(--term-line);vertical-align:top}
+.pf-table tr.go{cursor:pointer}
+.pf-table tr.go:hover td{background:var(--term-line)}
+.pf-st{display:inline-block;border-radius:999px;padding:2px 9px;font-size:10.5px;white-space:nowrap;border:1px solid var(--term-line)}
+.pf-st.done{background:var(--neon);color:#0A0A0A;border-color:transparent}
+.pf-st.review{border-color:var(--green);color:var(--green)}
+.pf-st.progress{border-color:var(--orange);color:var(--orange)}
+.pf-empty{font-size:12.5px;color:var(--term-dim)}
+.pf-list{border:1px solid var(--term-line);border-radius:12px;overflow:hidden}
+.pf-row{appearance:none;display:flex;align-items:center;gap:14px;width:100%;padding:14px 16px;border:none;border-bottom:1px solid var(--term-line);
+  background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:13px;text-align:left;cursor:pointer}
+.pf-row:last-child{border-bottom:none}
+.pf-row:hover{background:var(--term-line)}
+.pf-row svg{width:17px;height:17px;flex-shrink:0;color:var(--term-dim)}
+.pf-row span{flex:1}
+.pf-row small{color:var(--term-dim);font-size:11.5px}
+.pf-row.danger{color:var(--red)}
+.pf-switch{width:40px;height:22px;border-radius:11px;background:var(--term-line);position:relative;flex-shrink:0;transition:background .2s}
+.pf-switch::after{content:'';position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--term-fg);transition:transform .2s}
+.pf-switch.on{background:var(--neon)}
+.pf-switch.on::after{transform:translateX(18px);background:#0A0A0A}
+.pf-stamp{font-size:10.5px;line-height:1.7;color:var(--term-dim);border:1px solid var(--term-line);padding:10px 12px;overflow-wrap:anywhere}
+.pf-stamp b{color:var(--term-fg)}
+@media (max-width:767px){
+  .pf-head{grid-template-columns:auto 1fr;padding:0 18px 18px}
+  .pf-acts{grid-column:1 / -1;justify-content:flex-start}
+  .pf-av{width:88px;height:88px;margin-top:-44px}
+  .pf-name{font-size:30px}
+  .pf-stats{grid-template-columns:1fr 1fr}
+  .pf-stats div:nth-child(2){border-right:none}
+  .pf-stats div:nth-child(-n+2){border-bottom:1px solid var(--term-line)}
+  .pf-sec{padding:20px 18px}
+  .pf-ids{grid-template-columns:1fr}
+  .pf-table .hide-sm{display:none}
+  .pf-ladder em{font-size:9.5px}
+  .pf-row small.desc{display:none}
+}
 .term-sb-group.folded .term-sb-sub{display:none;}
 .term-sb-head{cursor:pointer;}
 .term-sb-sub{
@@ -2377,7 +2495,7 @@ html.theme-light{
     display:flex;appearance:none;-webkit-appearance:none;-moz-appearance:none;
     position:fixed;left:14px;top:calc(12px + env(safe-area-inset-top,0px));z-index:61;
     width:40px;height:40px;border-radius:50%;align-items:center;justify-content:center;
-    background:var(--green);color:#08110C;border:1px solid var(--green);
+    background:var(--green);color:var(--on-accent);border:1px solid var(--green);
     font-size:16px;cursor:pointer;box-shadow:0 2px 14px rgba(0,0,0,.4);
     transition:transform .1s;
   }
@@ -2404,7 +2522,7 @@ html.theme-light{
 }
 .term-tab + .term-tab{margin-left:14px;}
 .term-tab:hover{color:var(--term-fg);}
-.term-tab.active{color:var(--green);border-bottom-color:var(--green);}
+.term-tab.active{color:var(--term-fg);border-bottom-color:transparent;border-image:var(--neon) 1;}
 .term-tab-count{color:var(--term-dim);font-size:10.5px;}
 
 .term-board-flat{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-start;}
@@ -2441,7 +2559,7 @@ html.theme-light{
   font-family:var(--mono);font-size:11px;padding:5px 10px;border-radius:5px;cursor:pointer;
 }
 .term-card-btn:hover{border-color:var(--green);color:var(--green);}
-.term-card-btn.primary{background:var(--green);border-color:var(--green);color:#08110C;font-weight:600;}
+.term-card-btn.primary{background:var(--green);border-color:var(--green);color:var(--on-accent);font-weight:600;}
 .term-card-btn:disabled{opacity:.45;cursor:default;}
 
 /* Intake-style work & proof form, and the grant picker (inside the overlay) */
@@ -2497,7 +2615,7 @@ body.gw-open{overflow:hidden;}
 .gw-x{appearance:none;-webkit-appearance:none;background:transparent;border:none;color:var(--term-dim);font-family:var(--mono);font-size:12px;cursor:pointer;padding:6px 0;white-space:nowrap;}
 .gw-x:hover{color:var(--term-fg);}
 .gw-bar{height:3px;background:var(--term-line);border-radius:2px;margin:12px 0 6px;overflow:hidden;}
-.gw-bar > div{height:100%;background:var(--green);transition:width .25s;}
+.gw-bar > div{height:100%;background:var(--neon);transition:width .25s;}
 .gw-count{font-size:10.5px;color:var(--term-dim);}
 .gw-main{flex:1;padding:28px 0 12px;}
 .gw-kicker{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--green);margin-bottom:10px;}
@@ -2523,8 +2641,8 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
 .gw-btn{appearance:none;-webkit-appearance:none;background:transparent;border:1px solid var(--term-line);color:var(--term-fg);
   font-family:var(--mono);font-size:12.5px;padding:10px 16px;border-radius:6px;cursor:pointer;}
 .gw-btn:hover{border-color:var(--green);color:var(--green);}
-.gw-btn.primary{background:var(--green);border-color:var(--green);color:#08110C;font-weight:600;}
-.gw-btn.primary:hover{color:#08110C;filter:brightness(1.06);}
+.gw-btn.primary{background:var(--green);border-color:var(--green);color:var(--on-accent);font-weight:600;}
+.gw-btn.primary:hover{color:var(--on-accent);filter:brightness(1.06);}
 .gw-btn:disabled{opacity:.45;cursor:default;}
 .gw-item{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;padding:9px 0;border-bottom:1px solid var(--term-line);font-size:12.5px;word-break:break-word;}
 .gw-item a{color:var(--green);}
@@ -2596,7 +2714,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
 .term-decomp-tag{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--green);border:1px solid var(--green);border-radius:3px;padding:1px 6px;flex-shrink:0;margin-left:10px;}
 .term-decomp-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
 .term-decomp-bar .term-timeline-dl{margin-top:0;}
-.term-decomp-bar .term-timeline-dl.on{background:var(--green);color:#08110C;}
+.term-decomp-bar .term-timeline-dl.on{background:var(--green);color:var(--on-accent);}
 .term-decomp-frame{width:100%;min-height:70vh;border:1px solid var(--term-line);border-radius:8px;background:#FAF8F3;display:block;}
 
 #term-scroll{
@@ -2697,7 +2815,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   background:var(--term-line);border:none;color:var(--term-fg);
   font-family:var(--mono);font-size:12px;line-height:1;cursor:pointer;
 }
-.term-card-toggle:hover{background:var(--green);color:#08110C;}
+.term-card-toggle:hover{background:var(--green);color:var(--on-accent);}
 .term-card-detail{
   margin-top:8px;padding-top:8px;border-top:1px solid var(--term-line);
   display:flex;flex-direction:column;gap:3px;color:var(--term-dim);font-size:11px;
@@ -2710,7 +2828,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:5px;cursor:pointer;
   transition:background .12s,color .12s;
 }
-.term-timeline-dl:hover{background:var(--green);color:#08110C;}
+.term-timeline-dl:hover{background:var(--green);color:var(--on-accent);}
 .term-timeline-dl:disabled{opacity:.5;cursor:default;background:transparent;color:var(--term-dim);border-color:var(--term-line);}
 </style>
 </head>
@@ -2760,7 +2878,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   <defs>
     <style>
       .cls-1 {
-        fill: #8CF060;
+        fill: #FF2D95;
       }
     </style>
   </defs>
@@ -2888,6 +3006,11 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
       </div>
       <div class="term-sb-sub" id="term-sb-browser-sub"></div>
     </div>
+    <button class="term-sb-me" id="term-sb-me" onclick="openProfilePanel()" aria-label="Open your profile">
+      <span class="term-sb-me-av" id="term-sb-me-av"></span>
+      <span class="term-sb-me-txt"><b id="term-sb-me-name">—</b><small id="term-sb-me-id">Profile</small></span>
+      <svg class="term-sb-me-chev" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4.5 2.5 8 6l-3.5 3.5"/></svg>
+    </button>
   </nav>
   <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu">☰</button>
   <div id="term-main">
@@ -2997,7 +3120,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
     <div class="ds-peer">
       <div class="ds-peer-mark" id="ds-peer-mark" style="cursor:pointer" onclick="if(operator)openMemberRecord(operator.id)" title="Open your profile (sign out is in there)">
         <svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg">
-          <path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
+          <path fill="#FF2D95" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/>
         </svg>
       </div>
       <div style="flex:1;min-width:0;cursor:pointer" onclick="if(operator)openMemberRecord(operator.id)" title="Open your profile (sign out is in there)">
@@ -3119,7 +3242,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <div class="nav-dot"></div>
       </button>
       <button class="nav-btn active" id="nav-members" onclick="showSurface('members')">
-        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#8CF060" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
+        <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="#FF2D95" stroke-width="1.5" stroke-linecap="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87"/><path d="M16 3.13a4 4 0 010 7.75"/></svg>
         <div class="nav-label">Members</div>
         <div class="nav-dot"></div>
       </button>
@@ -4688,7 +4811,7 @@ function renderMembersList() {
   if (!body) return;
   const members = window._allMembers || [];
   const RATES = { operator:100, architect:85, wrangler:65, apprentice:39 };
-  const owavSm = `<svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#8CF060" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
+  const owavSm = `<svg width="20" height="20" viewBox="0 0 775 789" xmlns="http://www.w3.org/2000/svg"><path fill="#FF2D95" d="M534,377l-41,192c-2,11-4,17-6,26-2-9-4-14-6-26l-33-144c78-24,127-92,127-174,0-101-76-182-188-182s-188,81-188,182c0,82,49,151,127,174l-33,144c-3,12-4,17-6,26-2-9-4-17-5-26l-37-192H49l86,343h318l86-343H534ZM307,251c0-51,36-88,80-88,48,0,81,37,81,88s-34,89-81,89-80-37-80-89ZM368,579l11-45c3-12,5-23,8-34,3,12,5,22,8,34l11,45H368Z"/></svg>`;
 
   const filtered = members.filter(m => {
     const mTier = tier(m.total_logs).toLowerCase();
@@ -6111,7 +6234,7 @@ async function exportProjectMap(projectId) {
   const lw = (w) => doc.setLineWidth(w);
 
   const STATUS_COLORS = {
-    confirmed: { bar:[140,240,96], bg:[234,243,222], text:[39,80,10] },
+    confirmed: { bar:[255,45,149], bg:[255,228,240], text:[122,10,62] },
     delivered: { bar:[232,136,74], bg:[250,238,218], text:[99,56,6]  },
     assigned:  { bar:[232,136,74], bg:[250,238,218], text:[99,56,6]  },
     disputed:  { bar:[224,82,82],  bg:[252,235,235], text:[121,31,31]},
@@ -6127,7 +6250,7 @@ async function exportProjectMap(projectId) {
 
   // ── HEADER ──
   y = 22;
-  tc(140,240,96); fw('bold'); fs(7);
+  tc(255,45,149); fw('bold'); fs(7);
   doc.text('@BIXXVILLE', M, y);
   tc(82,80,78); fw('normal'); fs(6.5);
   doc.text('Land of Geb, LLC  ·  St. Croix  ·  USVI', W-M, y, { align:'right' });
@@ -6161,7 +6284,7 @@ async function exportProjectMap(projectId) {
   stats.forEach((s,i) => {
     const x = M + i * statW;
     if (i > 0) doc.line(x, y, x, y+statH);
-    s.green ? tc(140,240,96) : tc(242,240,236);
+    s.green ? tc(255,45,149) : tc(242,240,236);
     fw('bold'); fs(13);
     doc.text(s.val, x+statW/2, y+10, { align:'center' });
     tc(82,80,78); fw('normal'); fs(5.5);
@@ -6649,7 +6772,7 @@ function downloadCycleAuditPDF() {
   bg(9,9,11); doc.rect(0,0,W,H,'F');
   drawNetworkStamp(doc, M);
 
-  y = 22; tc(140,240,96); fw('bold'); fs(7); doc.text('@BIXXVILLE', M, y);
+  y = 22; tc(255,45,149); fw('bold'); fs(7); doc.text('@BIXXVILLE', M, y);
   tc(82,80,78); fw('normal'); fs(6.5); doc.text('Land of Geb, LLC · St. Croix · USVI', W-M, y, { align:'right' });
 
   y = 36; tc(82,80,78); fw('normal'); fs(7); doc.text('CYCLE AUDIT', M, y);
@@ -6671,7 +6794,7 @@ function downloadCycleAuditPDF() {
   stats.forEach((s,i) => {
     const x = M + i * statW;
     if (i > 0) doc.line(x, y, x, y+statH);
-    s.green ? tc(140,240,96) : tc(242,240,236);
+    s.green ? tc(255,45,149) : tc(242,240,236);
     fw('bold'); fs(13); doc.text(s.val, x+statW/2, y+10, { align:'center' });
     tc(82,80,78); fw('normal'); fs(5); doc.text(s.lbl, x+statW/2, y+16, { align:'center' });
   });
@@ -6701,7 +6824,7 @@ function downloadCycleAuditPDF() {
   drawSection('EXECUTION LOG', report.logs.map(l => ({
     title: l.description, subtitle: `Cycle ${l.cycle_number} · Block ${l.block_number} · ${l.actual_hours ? Number(l.actual_hours).toFixed(1)+'h actual' : 'in progress'}`,
     right: l.agreed_hours ? l.agreed_hours+'h agreed' : '',
-    bg: [17,17,19], bar: [140,240,96], sub: [168,166,162],
+    bg: [17,17,19], bar: [255,45,149], sub: [168,166,162],
   })));
 
   drawSection('MISSED CLAIMS', report.missed.map(c => ({
@@ -6711,7 +6834,7 @@ function downloadCycleAuditPDF() {
 
   drawSection('SETTLED THIS CYCLE', report.settled.map(p => ({
     title: p.title || p.relation_name || 'Project', subtitle: p.relation_name || p.relation_code || '-',
-    right: `${p.total_logs_confirmed || 0} LOG`, bg: [17,17,19], bar: [140,240,96], sub: [168,166,162],
+    right: `${p.total_logs_confirmed || 0} LOG`, bg: [17,17,19], bar: [255,45,149], sub: [168,166,162],
   })));
 
   drawSection('PAYMENTS THIS CYCLE', report.payments.map(p => ({
@@ -7091,7 +7214,7 @@ async function saveGenesisPin() {
   }
 }
 
-function openMemberRecord(memberId, overrides) {
+function openMemberRecord(memberId, overrides, opts = {}) {
   openOverlay('Profile', async (body) => {
     const { data: allOps } = await sb.rpc('list_operators');
     let op = (allOps || []).find(o => o.id === memberId);
@@ -7163,6 +7286,7 @@ function openMemberRecord(memberId, overrides) {
     window._myClaims   = myClaims;
 
     renderProfileView(body, op, breakdown, memberId, currentWork, walletBalance);
+    if (opts.edit && isSelf) renderProfileEdit();
   });
 }
 
@@ -7688,6 +7812,7 @@ async function uploadAvatarFile(inputEl) {
     if (saveErr) throw saveErr;
 
     operator.avatar_url = publicUrl;
+    refreshProfilePanel();
     if (window._profOp) window._profOp.avatar_url = publicUrl;
 
     const preview = document.getElementById('prof-avatar-preview');
@@ -7749,6 +7874,7 @@ async function saveProfile() {
     operator.desired_bid_size = bidSize || null;
 
     toast('Profile saved.');
+    refreshProfilePanel();
 
     // Refresh, but patch in exactly what we just successfully wrote — this way the
     // display never depends on the re-fetch happening to include these columns.
@@ -7865,7 +7991,7 @@ async function exportRecord(memberId) {
 
   // ── HEADER ──
   y = 22;
-  tc(140,240,96); fw('bold'); fs(7);
+  tc(255,45,149); fw('bold'); fs(7);
   doc.text('@BIXXVILLE', M, y);
   tc(82,80,78); fw('normal'); fs(6.5);
   doc.text('Land of Geb, LLC  ·  St. Croix  ·  USVI', W-M, y, { align:'right' });
@@ -7902,7 +8028,7 @@ async function exportRecord(memberId) {
   stats.forEach((s,i) => {
     const x = M + i * statW;
     if (i > 0) doc.line(x, y, x, y+statH);
-    s.green ? tc(140,240,96) : tc(242,240,236);
+    s.green ? tc(255,45,149) : tc(242,240,236);
     fw('bold'); fs(13);
     doc.text(s.val, x+statW/2, y+10, { align:'center' });
     tc(82,80,78); fw('normal'); fs(5.5);
@@ -7913,7 +8039,7 @@ async function exportRecord(memberId) {
   y += statH + 8;
   dc(30,30,34); lw(0.2);
   doc.rect(M, y, CW, 24, 'S');
-  dc(140,240,96); lw(1);
+  dc(255,45,149); lw(1);
   doc.line(M, y, M, y+24);
   lw(0.2); dc(30,30,34);
 
@@ -7922,7 +8048,7 @@ async function exportRecord(memberId) {
 
   tc(168,166,162); fw('normal'); fs(8);
   doc.text(`${totalLogs} LOG  ×  1 hour`, M+4, y+11);
-  tc(140,240,96); fw('bold');
+  tc(255,45,149); fw('bold');
   doc.text(`${totalLogs} hours confirmed`, W-M-2, y+11, { align:'right' });
 
   tc(168,166,162); fw('normal');
@@ -8025,7 +8151,7 @@ async function exportRecord(memberId) {
       });
 
       // Final arrow to OUTCOME
-      dc(140,240,96); lw(0.8);
+      dc(255,45,149); lw(0.8);
       doc.line(nx, nodeY + nH/2, nx + gap, nodeY + nH/2);
       doc.line(nx + gap - 2, nodeY + nH/2 - 1.5, nx + gap, nodeY + nH/2);
       doc.line(nx + gap - 2, nodeY + nH/2 + 1.5, nx + gap, nodeY + nH/2);
@@ -8033,10 +8159,10 @@ async function exportRecord(memberId) {
 
       // OUTCOME node
       bg(17,17,19); doc.rect(nx, nodeY, nW, nH, 'F');
-      dc(140,240,96); lw(2); doc.rect(nx, nodeY, nW, nH, 'S');
+      dc(255,45,149); lw(2); doc.rect(nx, nodeY, nW, nH, 'S');
       tc(82,80,78); fw('bold'); fs(5);
       doc.text('OUTCOME', nx + nW/2, nodeY + 6, { align:'center' });
-      tc(140,240,96); fw('bold'); fs(7);
+      tc(255,45,149); fw('bold'); fs(7);
       doc.text('Project', nx + nW/2, nodeY + 13, { align:'center' });
       doc.text('closed', nx + nW/2, nodeY + 19, { align:'center' });
 
@@ -8109,7 +8235,7 @@ async function exportRecord(memberId) {
     if (y > H - 30) { doc.addPage(); bg(9,9,11); doc.rect(0,0,W,H,'F'); y = 20; }
     doc.line(M, y, W-M, y);
     tc(82,80,78); fw('normal'); fs(6.5); doc.text('CREDENTIALS', M, y+5);
-    tc(140,240,96); fw('bold'); fs(8);
+    tc(255,45,149); fw('bold'); fs(8);
     doc.text(creds.join('  ·  '), W-M, y+5, { align:'right', maxWidth: CW*0.65 });
     y += 9;
   }
@@ -8129,13 +8255,13 @@ async function exportRecord(memberId) {
   y = H - 20;
   dc(30,30,34); lw(0.2); doc.line(M, y, W-M, y);
   y += 5;
-  tc(140,240,96); fw('bold'); fs(6);
+  tc(255,45,149); fw('bold'); fs(6);
   doc.text('BIXXVILLE OS v1.1  ·  CANONICAL', M, y);
   tc(82,80,78); fw('normal'); fs(5.5);
   doc.text('This record is generated by the Bixxville operating system and is not self-reported.', M, y+4);
   doc.text('Produced from confirmed settlements on the ledger. Each LOG = 1 confirmed hour of qualified work.', M, y+8);
   doc.text('Christiansted, St. Croix, USVI  ·  Genesis Feb 27 2025', M, y+12);
-  tc(140,240,96); fw('bold');
+  tc(255,45,149); fw('bold');
   doc.text('Scoped  ·  Verified  ·  Settled', W-M, y+12, { align:'right' });
 
   const filename = `BixxvilleWorkRecord_${(op.peer_name||'record').replace(/\s+/g,'_')}_C${cycle.num}.pdf`;
@@ -8187,8 +8313,7 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), ms);
 }
 
-// ── THEME ── light mode is opt-in; no stored preference means dark, exactly
-// the app's original look.
+// ── THEME ── light (the website's look) unless dark was chosen.
 function currentTheme() {
   return document.documentElement.classList.contains('theme-light') ? 'light' : 'dark';
 }
@@ -8207,8 +8332,8 @@ function refreshNavIconColors() {
 }
 function setTheme(theme) {
   document.documentElement.classList.toggle('theme-light', theme === 'light');
-  try { localStorage.setItem('bixx-theme', theme); } catch(e) {}
-  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', theme === 'light' ? '#FAF5EC' : '#000000'));
+  try { localStorage.setItem('bixx-theme2', theme); } catch(e) {}
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', theme === 'light' ? '#FFFFFF' : '#0A0A0A'));
   refreshNavIconColors();
   renderThemeToggleIcon();
 }
@@ -8429,7 +8554,8 @@ let termBalanceCache = null;
 function enterTerminal() {
   const shell = document.getElementById('terminal-shell');
   if (!shell) return;
-  loadMemberIds().catch(() => {});
+  renderSbMe();
+  loadMemberIds().then(renderSbMe).catch(() => {});
   shell.classList.add('in');
   document.getElementById('uni-shell')?.classList.remove('in');
 
@@ -8459,6 +8585,180 @@ function enterTerminal() {
     setTermView('terminal');
     loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); });
   }
+}
+
+// ── Profile — the chip at the bottom of the sidebar, and the page it opens ──
+// The page slides over the OS (which stays put, dimmed, behind it). Every
+// figure on it is read from the member's own records.
+const TIER_STEPS = [['Apprentice', 0, 39], ['Wrangler', 100, 65], ['Architect', 400, 85], ['Operator', 1000, 100]];
+
+function renderSbMe() {
+  if (!operator) return;
+  const av = document.getElementById('term-sb-me-av');
+  if (av) av.innerHTML = avatarHtml(operator.peer_name, operator.avatar_url, 13);
+  const nm = document.getElementById('term-sb-me-name');
+  if (nm) nm.textContent = operator.peer_name || 'Member';
+  const id = document.getElementById('term-sb-me-id');
+  if (id) id.textContent = memberIds?.[operator.id]?.member_id || tier(operator.total_logs);
+}
+
+function profileOpen() { return !!document.getElementById('pf')?.classList.contains('on'); }
+
+async function openProfilePanel() {
+  if (!operator) return;
+  let pf = document.getElementById('pf');
+  if (!pf) {
+    const scrim = document.createElement('div');
+    scrim.id = 'pf-scrim';
+    scrim.onclick = closeProfilePanel;
+    pf = document.createElement('aside');
+    pf.id = 'pf';
+    pf.setAttribute('aria-label', 'Your profile');
+    document.body.append(scrim, pf);
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && profileOpen() && !document.getElementById('overlay')?.classList.contains('open')) closeProfilePanel();
+    });
+  }
+  document.getElementById('terminal-shell')?.classList.remove('sidebar-open');
+  document.getElementById('term-sb-me')?.classList.add('on');
+  pf.innerHTML = '<div class="pf-top"><b>Profile</b><button class="pf-x" onclick="closeProfilePanel()" aria-label="Close">✕</button></div><div class="pf-sec pf-empty">Loading…</div>';
+  requestAnimationFrame(() => { pf.classList.add('on'); document.getElementById('pf-scrim').classList.add('on'); });
+  await renderProfilePanel();
+}
+
+function closeProfilePanel() {
+  document.getElementById('pf')?.classList.remove('on');
+  document.getElementById('pf-scrim')?.classList.remove('on');
+  document.getElementById('term-sb-me')?.classList.remove('on');
+}
+
+function refreshProfilePanel() {
+  renderSbMe();
+  if (profileOpen()) renderProfilePanel();
+}
+
+async function renderProfilePanel() {
+  const pf = document.getElementById('pf');
+  if (!pf || !operator) return;
+  const op = operator;
+  const [ids, stepsRes] = await Promise.all([
+    loadMemberIds().catch(() => memberIds),
+    sb.from('work_leaves').select('id,map_id,leaf_code,task,tier,logs,scoped_rate_cents,status,submitted_at,verified_at,delivered_at')
+      .eq('assigned_to', op.id).order('created_at', { ascending: false }),
+  ]);
+  const steps = stepsRes.data || [];
+  const mapIds = [...new Set(steps.map(s => s.map_id))];
+  const goals = {};
+  if (mapIds.length) {
+    const { data: maps } = await sb.from('work_maps').select('id,goal').in('id', mapIds);
+    (maps || []).forEach(m => { goals[m.id] = m.goal; });
+  }
+  const mine = ids?.[op.id] || {};
+  const logs = op.total_logs || 0;
+  const verified = steps.filter(s => s.status === 'delivered');
+  const active = steps.filter(s => s.status === 'in progress');
+  const rate = s => (s.scoped_rate_cents ?? (CANON.TIER_RATES[s.tier] || 0) * 100);
+  const verifiedValue = verified.reduce((t, s) => t + s.logs * rate(s), 0) / 100;
+  let k = 0; TIER_STEPS.forEach((t, i) => { if (logs >= t[1]) k = i; });
+  const next = TIER_STEPS[k + 1];
+  // Each tier gets its own stretch of the bar (the LOG thresholds are too
+  // uneven to space linearly): 0 → 0%, 100 → 24%, 400 → 50%, 1,000 → 76%.
+  const STOPS = [[0, 0], [100, 24], [400, 50], [1000, 76], [1600, 100]];
+  const pct = v => { v = Math.min(v, 1600); for (let i = 1; i < STOPS.length; i++) { const [a, pa] = STOPS[i - 1], [b, pb] = STOPS[i]; if (v <= b) return pa + (v - a) / (b - a) * (pb - pa); } return 100; };
+  const handle = op.handle || '@' + (op.peer_name || '').replace(/\s/g, '').toUpperCase();
+  const statusPill = s => s.status === 'delivered' ? '<span class="pf-st done">Verified</span>'
+    : s.submitted_at ? '<span class="pf-st review">Awaiting verification</span>'
+    : s.status === 'in progress' ? '<span class="pf-st progress">In progress</span>' : '<span class="pf-st">To do</span>';
+  const icon = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+  const stamp = networkStampLines();
+  const copyBtn = (v, what) => v ? `<button class="pf-copy" onclick="navigator.clipboard?.writeText('${esc(v)}');toast('${what} copied.')">Copy</button>` : '';
+
+  pf.innerHTML = `
+    <div class="pf-top"><b>Profile</b><button class="pf-x" onclick="closeProfilePanel()" aria-label="Close">✕</button></div>
+    <div class="pf-banner"></div>
+    <div class="pf-head">
+      <div class="pf-av" onclick="document.getElementById('pf-avatar-input').click()" title="Change photo">${avatarHtml(op.peer_name, op.avatar_url, 40)}</div>
+      <input type="file" id="pf-avatar-input" accept="image/*" hidden onchange="uploadAvatarFile(this)">
+      <div style="min-width:0;padding-top:18px">
+        <div class="pf-name">${esc(op.peer_name || 'Member')}</div>
+        <div class="pf-sub">
+          <span>${esc(handle)}</span>
+          <span class="pf-pill tier">${esc(TIER_STEPS[k][0])}</span>
+          <span class="pf-pill">${esc(op.standing || 'active')}</span>
+          ${op.is_genesis ? '<span class="pf-pill">Genesis</span>' : ''}
+          ${op.region ? `<span>${esc(op.region)}</span>` : ''}
+        </div>
+        ${op.contact_email ? `<div class="pf-sub">${esc(op.contact_email)}</div>` : ''}
+      </div>
+      <div class="pf-acts">
+        <button class="pf-btn solid" onclick="openMemberRecord(operator.id, null, { edit: true })">Edit profile</button>
+        <button class="pf-btn" onclick="exportRecord(operator.id)">Work record PDF</button>
+      </div>
+    </div>
+
+    <div class="pf-stats">
+      <div><b>${logs.toLocaleString()}</b><span>Total LOGs</span></div>
+      <div><b>${verified.length}</b><span>Steps verified</span></div>
+      <div><b>${active.length}</b><span>Active steps</span></div>
+      <div><b>${op.streak || 0}</b><span>Streak</span></div>
+    </div>
+
+    <div class="pf-sec">
+      <h4>Your IDs</h4>
+      <div class="pf-ids">
+        <div class="pf-id"><small>Member ID</small><b>${esc(mine.member_id || '—')}</b><p>Type it with your name to enter a step.</p>${copyBtn(mine.member_id, 'Member ID')}</div>
+        <div class="pf-id"><small>BIX ID</small><b>${esc(mine.bix_id || 'Not issued')}</b><p>${mine.bix_id ? 'Printed on the network stamp.' : 'Genesis records this one.'}</p>${copyBtn(mine.bix_id, 'BIX ID')}</div>
+      </div>
+    </div>
+
+    <div class="pf-sec">
+      <h4>Tier <span>$${TIER_STEPS[k][2]} per LOG</span></h4>
+      <div class="pf-ladder"><i style="width:${pct(logs)}%"></i>
+        ${TIER_STEPS.map((t, i) => `<s style="left:${pct(t[1])}%"></s><em class="${i === k ? 'on' : ''}" style="left:${i ? pct(t[1]) : 0}%;${i ? '' : 'transform:none'}">${t[0]}</em><u style="left:${i ? pct(t[1]) : 0}%;${i ? '' : 'transform:none'}">${t[1].toLocaleString()}</u>`).join('')}
+      </div>
+      <div class="pf-ladder-read">${next
+        ? `<b>${(next[1] - logs).toLocaleString()}</b> more verified LOGs to reach <b>${next[0]}</b> ($${next[2]} per LOG).`
+        : 'Top tier.'}${verified.length ? ` Your verified steps are worth <b>$${verifiedValue.toLocaleString('en-US', { minimumFractionDigits: 2 })}</b>.` : ''}</div>
+    </div>
+
+    <div class="pf-sec">
+      <h4>Your steps <span>${steps.length} granted to you</span></h4>
+      ${steps.length ? `<table class="pf-table">
+        <tr><th>Step</th><th class="hide-sm">Contract</th><th>Tier · LOGs</th><th>Status</th></tr>
+        ${steps.map(s => `<tr class="go" onclick="openStepFromProfile('${esc(s.map_id)}')">
+          <td><b>${esc(s.leaf_code)}</b> ${esc(s.task)}</td>
+          <td class="hide-sm">${esc(goals[s.map_id] || '—')}</td>
+          <td>${esc(s.tier)} · ${s.logs}</td>
+          <td>${statusPill(s)}</td></tr>`).join('')}
+      </table>` : '<div class="pf-empty">No steps granted to you yet.</div>'}
+    </div>
+
+    <div class="pf-sec">
+      <h4>Account</h4>
+      <div class="pf-list">
+        <button class="pf-row" onclick="setTheme(currentTheme() === 'light' ? 'dark' : 'light'); renderProfilePanel()">
+          ${icon('<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>')}
+          <span>Appearance</span><small>${currentTheme() === 'light' ? 'Light' : 'Dark'}</small><i class="pf-switch ${currentTheme() === 'dark' ? 'on' : ''}"></i></button>
+        <button class="pf-row" onclick="openMemberRecord(operator.id, null, { edit: true })">
+          ${icon('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>')}<span>Edit details</span><small class="desc">photo, bio, skills, contact, wallet</small></button>
+        <button class="pf-row" onclick="openMemberRecord(operator.id)">
+          ${icon('<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>')}<span>Full record</span><small class="desc">ledger, execution log, cycle audit</small></button>
+        ${op.is_genesis ? `<button class="pf-row" onclick="openGenesisConsole()">
+          ${icon('<path d="M12 3 4 7v6c0 4 3.5 7 8 8 4.5-1 8-4 8-8V7z"/>')}<span>Genesis Console</span><small class="desc">members, PINs, central wallet</small></button>` : ''}
+        <button class="pf-row danger" onclick="closeProfilePanel(); doLogout()">
+          ${icon('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>')}<span>Sign out</span></button>
+      </div>
+    </div>
+
+    <div class="pf-sec" style="border-bottom:none">
+      <div class="pf-stamp"><b>${esc(stamp[0])}</b><br>${stamp.slice(1).map(esc).join('<br>')}</div>
+    </div>`;
+}
+
+async function openStepFromProfile(mapId) {
+  closeProfilePanel();
+  setTermView('tracker');
+  if (mapId && trackerState?.mapId !== mapId) await switchToMap(mapId);
 }
 
 // ── Sidebar: nested nav, mobile drawer ──────────────────────────────────
@@ -8677,7 +8977,7 @@ function startBrowserArt() {
   // theme toggle mid-view still looks right next render.
   const colorsLive = () => currentTheme() === 'light'
     ? ['rgba(14,136,134,.35)', 'rgba(168,115,11,.28)', 'rgba(217,58,43,.22)']
-    : ['rgba(140,240,96,.22)', 'rgba(232,136,74,.18)', 'rgba(224,82,82,.14)'];
+    : ['rgba(255,45,149,.22)', 'rgba(232,136,74,.18)', 'rgba(224,82,82,.14)'];
 
   let t = 0;
   function frame() {
@@ -11405,7 +11705,7 @@ function renderNetNavigator(dir) {
   const lanes = document.getElementById('net-nav-lanes');
   if (!svg || !lanes) return;
 
-  const palette = ['#8CF060', '#AA8C4E', '#E8884A', '#C8C6C2'];
+  const palette = ['#FF2D95', '#AA8C4E', '#E8884A', '#C8C6C2'];
   const nodes = [...dir].sort((a, b) => (b.total_generated || 0) - (a.total_generated || 0)).slice(0, 7);
   const hubX = 120, hubY = 190;
 
@@ -11417,7 +11717,7 @@ function renderNetNavigator(dir) {
       const y = y0 + gap * i;
       const color = palette[i % palette.length];
       const hot = i === 0 && (b.total_generated || 0) > 0;
-      paths += `<path d="M144,${hubY} C260,${hubY} 300,${y} 410,${y}" fill="none" stroke="${hot ? '#8CF060' : '#2C2C2C'}" stroke-width="${hot ? 1.6 : 1.3}"/>`;
+      paths += `<path d="M144,${hubY} C260,${hubY} 300,${y} 410,${y}" fill="none" stroke="${hot ? '#FF2D95' : '#2C2C2C'}" stroke-width="${hot ? 1.6 : 1.3}"/>`;
       const label = (b.name || b.relation_code || '—').slice(0, 22);
       dots += `<g class="ndash-node" onclick="openBusinessDetail('${esc(b.relation_code)}')">` +
         `<circle cx="418" cy="${y}" r="7" fill="${color}"/>` +
@@ -11430,8 +11730,8 @@ function renderNetNavigator(dir) {
     <circle cx="58" cy="72" r="3" fill="#2C2C2C"/><circle cx="42" cy="298" r="3" fill="#2C2C2C"/>
     <circle cx="84" cy="338" r="2.5" fill="#2C2C2C"/><circle cx="200" cy="46" r="2.5" fill="#2C2C2C"/>
     ${paths}
-    <circle cx="${hubX}" cy="${hubY}" r="24" fill="none" stroke="#8CF060" stroke-width="1.6"/>
-    <circle cx="${hubX}" cy="${hubY}" r="5" fill="#8CF060"/>
+    <circle cx="${hubX}" cy="${hubY}" r="24" fill="none" stroke="#FF2D95" stroke-width="1.6"/>
+    <circle cx="${hubX}" cy="${hubY}" r="5" fill="#FF2D95"/>
     <text x="${hubX}" y="${hubY + 42}" text-anchor="middle" fill="#707070" font-family="IBM Plex Mono,monospace" font-size="10" letter-spacing=".08em">BIXXVILLE OS</text>
     ${nodes.length ? '' : `<text x="418" y="${hubY + 4}" fill="#707070" font-family="Inter,sans-serif" font-size="11">No businesses yet</text>`}
     ${dots}`;

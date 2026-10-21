@@ -2429,6 +2429,124 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
   #term-footer #term-mkts{display:none}
 }
 
+
+/* ── The dashboard and the agent are separate surfaces now ── */
+#term-main{position:relative}
+#term-home{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 10px;-webkit-overflow-scrolling:touch}
+@media (min-width:768px){ #term-home{padding:28px 48px 14px} }
+@media (max-width:767px){ #term-home{padding-top:calc(62px + env(safe-area-inset-top,0px))} }
+
+/* Agent panel — slides up over the dashboard, never inside it */
+#agent{position:absolute;right:20px;bottom:calc(var(--composer-h,120px) + 8px);z-index:30;width:min(470px,calc(100% - 40px));
+  height:min(600px,calc(100% - var(--composer-h,120px) - 40px));display:flex;flex-direction:column;
+  background:var(--term-bg);
+  border:1px solid var(--term-line);border-radius:24px;box-shadow:0 30px 80px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.06);
+  opacity:0;transform:translateY(18px) scale(.98);pointer-events:none;transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1);overflow:hidden}
+#agent.open{opacity:1;transform:none;pointer-events:auto}
+@media (min-width:768px){ #agent{right:48px} }
+.ag-head{display:flex;align-items:center;gap:12px;padding:16px 16px 12px 18px;border-bottom:1px solid var(--term-line)}
+.ag-head div{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
+.ag-head b{font-size:14px;font-weight:600}
+.ag-head small{font-size:11px;color:var(--term-dim)}
+.ag-ic{appearance:none;width:34px;height:34px;border-radius:50%;border:1px solid transparent;background:transparent;color:var(--term-dim);cursor:pointer;display:grid;place-items:center}
+.ag-ic:hover{border-color:var(--term-line);color:var(--term-fg)}
+.ag-ic svg{width:16px;height:16px}
+
+/* The orb — BIX AI's presence; it turns while it thinks */
+.ag-orb{width:38px;height:38px;border-radius:50%;flex-shrink:0;position:relative;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.95) 0 7%,rgba(255,255,255,0) 32%),
+             radial-gradient(circle at 70% 75%,rgba(255,45,149,.9),rgba(255,45,149,0) 55%),
+             linear-gradient(145deg,#FFEA00,#FF7A1A 50%,#FF2D95);
+  box-shadow:0 0 18px rgba(255,45,149,.35),inset 0 -4px 10px rgba(0,0,0,.25)}
+.ag-orb.sm{width:24px;height:24px;box-shadow:0 0 10px rgba(255,45,149,.3),inset 0 -2px 6px rgba(0,0,0,.25)}
+.ag-orb.busy{animation:orb 1.6s linear infinite}
+@keyframes orb{0%{filter:hue-rotate(0deg);transform:rotate(0)}100%{filter:hue-rotate(-35deg);transform:rotate(360deg)}}
+
+#agent #term-scroll{flex:1;min-height:0;overflow-y:auto;padding:16px 18px 10px !important;font-size:13.5px;line-height:1.65;display:flex;flex-direction:column;gap:10px}
+#agent .term-line{margin:0}
+#agent .term-line.in{align-self:flex-end;max-width:84%;background:var(--term-line);border:1px solid color-mix(in srgb,var(--term-line) 60%,var(--term-fg) 8%);
+  border-radius:16px 16px 4px 16px;padding:10px 14px}
+#agent .term-line.in .term-prompt-sym{display:none}
+#agent .term-line.agent{display:flex;gap:10px;align-items:flex-start;max-width:96%}
+#agent .term-line.agent .ag-orb{margin-top:2px}
+#agent .term-line.agent .ag-text{flex:1;min-width:0;white-space:pre-wrap}
+#agent .term-line.out:not(.agent){color:var(--term-fg)}
+#agent .term-line.system{font-size:12px;font-style:normal}
+#agent .term-line.thinking{display:flex;gap:10px;align-items:center;color:var(--term-dim)}
+#agent .term-line.thinking span:last-child{background:linear-gradient(90deg,var(--term-dim) 0%,var(--term-fg) 50%,var(--term-dim) 100%);background-size:200% 100%;
+  -webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 1.6s linear infinite}
+@keyframes shimmer{to{background-position:-200% 0}}
+#agent .term-options{display:flex;flex-direction:column;gap:6px;margin-left:34px}
+#agent .term-opt{appearance:none;text-align:left;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:12.5px;
+  border-radius:12px;padding:8px 12px;cursor:pointer}
+#agent .term-opt:hover{border-color:var(--green)}
+.ag-chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 18px 12px}
+.ag-chips:empty{display:none}
+.ag-chips button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:11.5px;border-radius:999px;padding:5px 12px;cursor:pointer}
+.ag-chips button:hover{color:var(--term-fg);border-color:var(--term-fg)}
+
+/* Composer — its own surface, like the references: + | Ask anything … | voice | send */
+#term-composer{flex-shrink:0;padding:6px 20px 12px;position:relative;z-index:31}
+@media (min-width:768px){ #term-composer{padding:6px 48px 14px} }
+.cp-shell{border:1px solid var(--term-line);border-radius:20px;padding:8px 10px 10px;background:linear-gradient(180deg,color-mix(in srgb,var(--term-line) 35%,transparent),transparent);
+  box-shadow:0 10px 30px rgba(0,0,0,.08)}
+.cp-status{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:2px 8px 8px;font-size:11.5px;color:var(--term-dim)}
+.cp-status svg{width:13px;height:13px;vertical-align:-2px;margin-right:6px}
+.cp-live{display:inline-flex;align-items:center;gap:7px;white-space:nowrap}
+.cp-live i{width:8px;height:8px;border-radius:50%;background:var(--up,#3DDC97);box-shadow:0 0 0 4px color-mix(in srgb,var(--up,#3DDC97) 18%,transparent)}
+.cp-live.busy i{background:#FF2D95;box-shadow:0 0 0 4px rgba(255,45,149,.2);animation:blink2 1s steps(1) infinite}
+@keyframes blink2{50%{opacity:.35}}
+#term-composer #term-inputrow{padding:0 !important;display:flex;align-items:center;gap:8px;border:1px solid var(--term-line);border-radius:14px;background:var(--term-bg);
+  padding:6px 6px 6px 10px !important;position:relative;transition:border-color .2s,box-shadow .2s}
+#term-composer #term-inputrow::before{content:'';position:absolute;left:12%;right:12%;top:-1px;height:1px;background:linear-gradient(90deg,transparent,color-mix(in srgb,var(--term-fg) 35%,transparent),transparent)}
+#term-composer #term-inputrow:focus-within{border-color:color-mix(in srgb,var(--term-fg) 30%,var(--term-line));box-shadow:0 0 0 4px rgba(255,45,149,.10)}
+.cp-sep{width:1px;height:20px;background:var(--term-line);flex-shrink:0}
+#term-composer #term-input{font-size:14px;padding:8px 2px}
+.cp-mic{appearance:none;width:36px;height:36px;border-radius:10px;border:none;background:transparent;color:var(--term-dim);cursor:pointer;display:grid;place-items:center;flex-shrink:0}
+.cp-mic svg{width:20px;height:20px}
+.cp-mic:hover{color:var(--term-fg)}
+.cp-mic.rec{color:#FF2D95}
+.cp-mic.rec svg rect{animation:wave .8s ease-in-out infinite alternate}
+.cp-mic.rec svg rect:nth-child(2){animation-delay:.15s}.cp-mic.rec svg rect:nth-child(3){animation-delay:.3s}.cp-mic.rec svg rect:nth-child(4){animation-delay:.45s}
+@keyframes wave{from{transform:scaleY(.4)}to{transform:scaleY(1)}}
+.cp-mic svg rect{transform-origin:center;transform-box:fill-box}
+#term-composer #term-prompt-sym{width:38px;height:38px;border-radius:50%;background:var(--term-fg);color:var(--term-bg);font-size:16px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.15),0 4px 12px rgba(0,0,0,.15)}
+#term-composer #term-prompt-sym:hover{opacity:1;background:linear-gradient(135deg,#FFEA00,#FF7A1A 50%,#FF2D95);color:#0A0A0A}
+#term-composer #term-prompt-sym svg{width:16px;height:16px}
+#term-composer #term-prompt-sym:disabled{opacity:.4;cursor:default}
+@media (max-width:767px){
+  #agent{left:10px;right:10px;width:auto;height:min(72vh,calc(100% - var(--composer-h,120px) - 70px));border-radius:22px}
+  .cp-status .cp-tip{display:none}
+}
+
+/* Sidebar — active item glows on its right edge; the rail can fold to icons */
+.term-sb-item.active{
+  background:linear-gradient(90deg,var(--term-line) 0%,var(--term-line) 55%,rgba(255,45,149,.16) 100%);
+  color:var(--term-fg);font-weight:500;position:relative;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 1px 2px rgba(0,0,0,.12);
+}
+.term-sb-item.active::after{content:'';position:absolute;right:3px;top:7px;bottom:7px;width:4px;border-radius:3px;
+  background:#FF2D95;box-shadow:0 0 8px #FF2D95,0 0 18px rgba(255,45,149,.55)}
+.term-sb-item.active .term-sb-icon{opacity:1}
+#term-sidebar{position:relative}
+.term-sb-collapse{appearance:none;position:absolute;right:12px;top:14px;width:30px;height:30px;border-radius:7px;border:1px solid var(--term-line);
+  background:transparent;color:var(--term-dim);cursor:pointer;display:grid;place-items:center}
+.term-sb-collapse:hover{color:var(--term-fg);border-color:var(--term-dim)}
+.term-sb-collapse svg{width:16px;height:16px;transition:transform .25s}
+#term-sidebar{transition:width .25s}
+@media (min-width:768px){
+  #terminal-shell.sb-mini #term-sidebar{width:68px;padding-left:8px;padding-right:8px}
+  #terminal-shell.sb-mini .term-sb-head{font-size:0;padding-bottom:44px}
+  #terminal-shell.sb-mini .term-sb-collapse{right:18px;top:12px}
+  #terminal-shell.sb-mini .term-sb-collapse svg{transform:scaleX(-1)}
+  #terminal-shell.sb-mini .term-sb-item span,#terminal-shell.sb-mini .term-sb-sub,#terminal-shell.sb-mini .term-sb-fold,
+  #terminal-shell.sb-mini .term-sb-me-txt,#terminal-shell.sb-mini .term-sb-me-chev{display:none}
+  #terminal-shell.sb-mini .term-sb-item{justify-content:center;padding:10px 0}
+  #terminal-shell.sb-mini .term-sb-me{justify-content:center;padding:8px 0}
+}
+@media (max-width:767px){ .term-sb-collapse{display:none} }
+
 /* Profile chip — bottom of the sidebar */
 .term-sb-me{
   appearance:none;-webkit-appearance:none;margin-top:auto;display:flex;align-items:center;gap:10px;width:100%;
@@ -3046,6 +3164,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   <div id="term-sidebar-backdrop" onclick="toggleTermSidebar(false)"></div>
   <nav id="term-sidebar">
     <div class="term-sb-head" onclick="setTermView('terminal')" title="Terminal">BIXXVILLE</div>
+    <button class="term-sb-collapse" onclick="toggleSbCollapse()" title="Collapse the sidebar" aria-label="Collapse the sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 10l-2 2 2 2"/></svg></button>
     <div class="term-sb-group">
       <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
@@ -3087,13 +3206,33 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   </nav>
   <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu">☰</button>
   <div id="term-main">
-    <div id="term-scroll"></div>
+    <div id="term-home"></div>
     <div id="term-panel" hidden></div>
-    <div id="term-inputrow">
-      <button id="term-plus-sym" onclick="document.getElementById('term-upload-file').click()" title="Upload a contract (PDF, HTML, or worksheet JSON)" aria-label="Upload">+</button>
-      <input id="term-upload-file" type="file" accept=".pdf,.html,.htm,.json,application/pdf,text/html,application/json" multiple hidden onchange="handleTermUpload(event)"/>
-      <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send">❯</button>
-      <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask BIX AI, or type help…"/>
+    <section id="agent" aria-label="BIX AI">
+      <header class="ag-head">
+        <span class="ag-orb" id="ag-orb-main"></span>
+        <div><b>BIX AI</b><small id="ag-ctx">Network agent · fresh conversation</small></div>
+        <button class="ag-ic" onclick="newAgentConversation()" title="New conversation" aria-label="New conversation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12a8 8 0 1 1-2.3-5.6"/><path d="M20 4v5h-5"/></svg></button>
+        <button class="ag-ic" onclick="toggleAgent(false)" title="Minimize" aria-label="Minimize"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M6 12h12"/></svg></button>
+      </header>
+      <div id="term-scroll"></div>
+      <div class="ag-chips" id="ag-chips"></div>
+    </section>
+    <div id="term-composer">
+      <div class="cp-shell">
+        <div class="cp-status">
+          <span class="cp-tip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>Ask about your contracts, the markets or the network — or type <b>help</b>.</span>
+          <span class="cp-live" id="cp-live"><i></i><span>Session active</span></span>
+        </div>
+        <div id="term-inputrow">
+          <button id="term-plus-sym" onclick="document.getElementById('term-upload-file').click()" title="Upload a contract (PDF, HTML, or worksheet JSON)" aria-label="Upload">+</button>
+          <input id="term-upload-file" type="file" accept=".pdf,.html,.htm,.json,application/pdf,text/html,application/json" multiple hidden onchange="handleTermUpload(event)"/>
+          <span class="cp-sep"></span>
+          <input id="term-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Ask anything…"/>
+          <button class="cp-mic" id="cp-mic" onclick="toggleComposerVoice()" title="Speak instead of typing" aria-label="Voice input"><svg viewBox="0 0 24 24" fill="currentColor"><rect x="3" y="9" width="2" height="6" rx="1"/><rect x="8" y="5" width="2" height="14" rx="1"/><rect x="13" y="7" width="2" height="10" rx="1"/><rect x="18" y="10" width="2" height="4" rx="1"/></svg></button>
+          <button id="term-prompt-sym" onclick="handleTermInput()" title="Send" aria-label="Send"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></button>
+        </div>
+      </div>
     </div>
     <div id="term-footer">
       <span class="seg"><span class="live-dot"></span><span id="term-time">—</span></span>
@@ -8637,8 +8776,7 @@ function enterTerminal() {
   if (scroll && !scroll.dataset.booted) {
     scroll.dataset.booted = '1';
     const who = operator?.peer_name || relation?.name || 'there';
-    termPrint(`BIXXVILLE — signed in as ${who}.`, 'system');
-    termPrint(`Type a question for BIX AI, or 'help' for commands.`, 'system');
+    termPrint(`Signed in as ${who}. Ask about your contracts, the markets or the network — or type 'help' for commands.`, 'system');
   }
 
   updateTermFooter();
@@ -8650,16 +8788,138 @@ function enterTerminal() {
     input.dataset.wired = '1';
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') handleTermInput(); });
   }
-  input?.focus();
-  document.getElementById('term-scroll')?.addEventListener('click', () => input?.focus());
+  if (input && !input.dataset.agentWired) {
+    input.dataset.agentWired = '1';
+    input.addEventListener('focus', () => toggleAgent(true));
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('agent')?.classList.contains('open') && !profileOpen()) toggleAgent(false); });
+    addEventListener('resize', syncComposerHeight);
+  }
+  try { if (localStorage.getItem('bixx-sb-mini') === '1') shell.classList.add('sb-mini'); } catch (e) { /* private mode */ }
+  requestAnimationFrame(syncComposerHeight);
+  agentContextLabel();
 
   if (!shell.dataset.sidebarBooted) {
     shell.dataset.sidebarBooted = '1';
     applySbFolds();
     setTermView('terminal');
     loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); renderDashTracker(); });
-    requestAnimationFrame(() => { const sc = document.getElementById('term-scroll'); if (sc) sc.scrollTop = 0; });
+
   }
+}
+
+// ── The agent — BIX AI's own surface ────────────────────────────────────
+// Typing to BIX AI is a turn-taking loop: you send a turn, it thinks, it
+// answers, you refine. The model itself is stateless; what makes it a
+// conversation is the history sent with every turn — so the panel shows
+// how many turns it's holding, lets you start clean, and offers the
+// short meta-instructions ("go deeper", "critique this") that steer the
+// next turn without restating the topic.
+const AGENT_FOLLOWUPS = ['Go deeper', 'Refine this', 'Critique this', 'Summarize'];
+
+function toggleAgent(open) {
+  const a = document.getElementById('agent');
+  if (!a) return;
+  const on = open ?? !a.classList.contains('open');
+  a.classList.toggle('open', on);
+  if (on) { const sc = document.getElementById('term-scroll'); if (sc) sc.scrollTop = sc.scrollHeight; }
+}
+
+function agentContextLabel() {
+  const el = document.getElementById('ag-ctx');
+  if (!el) return;
+  const turns = Math.floor(bixAiHistory.length / 2);
+  el.textContent = turns ? `Network agent · ${turns} turn${turns === 1 ? '' : 's'} in context` : 'Network agent · fresh conversation';
+}
+
+function agentBusy(on) {
+  document.getElementById('ag-orb-main')?.classList.toggle('busy', on);
+  const live = document.getElementById('cp-live');
+  if (live) { live.classList.toggle('busy', on); live.querySelector('span').textContent = on ? 'BIX AI is thinking…' : 'Session active'; }
+  const send = document.getElementById('term-prompt-sym');
+  if (send) send.disabled = on;
+}
+
+function agentFollowups(show) {
+  const el = document.getElementById('ag-chips');
+  if (!el) return;
+  el.innerHTML = show ? AGENT_FOLLOWUPS.map(t => `<button type="button" onclick="agentSend('${t}')">${t}</button>`).join('') : '';
+  const sc = document.getElementById('term-scroll');
+  if (sc) requestAnimationFrame(() => { sc.scrollTop = sc.scrollHeight; });
+}
+
+function agentSend(text) {
+  const input = document.getElementById('term-input');
+  if (!input) return;
+  input.value = text;
+  handleTermInput();
+}
+
+function newAgentConversation() {
+  bixAiHistory = [];
+  termPendingOptions = null;
+  const sc = document.getElementById('term-scroll');
+  if (sc) sc.innerHTML = '';
+  agentFollowups(false);
+  agentContextLabel();
+  termPrint('New conversation — BIX AI starts with no memory of the last one.', 'system');
+  document.getElementById('term-input')?.focus();
+}
+
+// Size the agent panel against the composer, whatever height it wraps to.
+function syncComposerHeight() {
+  const c = document.getElementById('term-composer'), f = document.getElementById('term-footer'), m = document.getElementById('term-main');
+  if (c && m) m.style.setProperty('--composer-h', (c.offsetHeight + (f?.offsetHeight || 0)) + 'px');
+}
+
+// Voice: record, transcribe (the deployed transcribe-voice function), and
+// put the words in the box — you read them before they're sent.
+let cpRecorder = null, cpChunks = [], cpStarted = 0;
+async function toggleComposerVoice() {
+  const btn = document.getElementById('cp-mic');
+  if (cpRecorder && cpRecorder.state === 'recording') { cpRecorder.stop(); return; }
+  if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === 'undefined') { toast('Voice needs microphone access, which this browser doesn’t allow.'); return; }
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    cpChunks = [];
+    cpRecorder = new MediaRecorder(stream);
+    cpRecorder.ondataavailable = e => { if (e.data.size) cpChunks.push(e.data); };
+    cpRecorder.onstop = async () => {
+      stream.getTracks().forEach(t => t.stop());
+      btn?.classList.remove('rec');
+      if (Date.now() - cpStarted < 800) { toast('Too short — hold on a moment longer.'); return; }
+      const blob = new Blob(cpChunks, { type: cpRecorder.mimeType || 'audio/webm' });
+      const live = document.getElementById('cp-live');
+      if (live) live.querySelector('span').textContent = 'Transcribing…';
+      try {
+        const form = new FormData();
+        form.append('audio', blob, 'voice.webm');
+        const res = await fetch(`${SB_URL}/functions/v1/transcribe-voice`, { method: 'POST', headers: { Authorization: `Bearer ${SB_KEY}` }, body: form });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok || data.error) throw new Error(data.error || 'Transcription failed.');
+        const input = document.getElementById('term-input');
+        if (data.text && input) { input.value = (input.value ? input.value + ' ' : '') + data.text.trim(); input.focus(); }
+        else toast('Couldn’t hear anything in that — try again.');
+      } catch (e) {
+        toast('Couldn’t transcribe that — ' + (e.message || 'try again.'));
+      } finally {
+        if (live) live.querySelector('span').textContent = 'Session active';
+      }
+    };
+    cpRecorder.start();
+    cpStarted = Date.now();
+    btn?.classList.add('rec');
+    const live = document.getElementById('cp-live');
+    if (live) live.querySelector('span').textContent = 'Listening — tap the wave to stop';
+  } catch (e) {
+    toast('Couldn’t reach your microphone.');
+  }
+}
+
+function toggleSbCollapse() {
+  const sh = document.getElementById('terminal-shell');
+  const on = !sh.classList.contains('sb-mini');
+  sh.classList.toggle('sb-mini', on);
+  try { localStorage.setItem('bixx-sb-mini', on ? '1' : '0'); } catch (e) { /* private mode */ }
 }
 
 // ── Dashboard — the Terminal's home: wallet, markets, tracker, cycle ─────
@@ -8722,13 +8982,13 @@ function sparkPath(series, w, h, pad = 2) {
 let dashChartKey = 'BTC', dashTrackerTab = 'in progress', dashTimer = null;
 
 function ensureDash() {
-  const scroll = document.getElementById('term-scroll');
-  if (!scroll) return null;
+  const home = document.getElementById('term-home');
+  if (!home) return null;
   let d = document.getElementById('term-dash');
   if (!d) {
     d = document.createElement('div');
     d.id = 'term-dash';
-    scroll.prepend(d);
+    home.appendChild(d);
   }
   return d;
 }
@@ -8751,7 +9011,7 @@ async function renderDashboard() {
         <div class="dash-card dash-track" id="dash-track"></div>
         <div class="dash-card dash-cycle" id="dash-cycle"></div>
       </div>
-      <div class="dash-console"><span>Console</span><small>Ask BIX AI or type a command below — try <b>help</b></small></div>`;
+`;
   }
   renderDashMe();
   if (!memberIds) loadMemberIds().then(renderDashMe).catch(() => {});
@@ -8764,7 +9024,7 @@ async function renderDashboard() {
   updateTermMarketsTicker(m);
   clearInterval(dashTimer);
   dashTimer = setInterval(async () => {
-    if (document.getElementById('term-scroll')?.style.display === 'none' || document.hidden) return;
+    if (document.getElementById('term-home')?.style.display === 'none' || document.hidden) return;
     const mm = await loadMarkets(true);
     renderDashMarkets(mm); renderDashChart(mm); updateTermMarketsTicker(mm);
   }, 120000);
@@ -8867,7 +9127,7 @@ function renderDashMe() {
       </div>
     </div>
     <div class="dash-quick">
-      <button class="dash-btn" onclick="document.getElementById('term-input').focus()">Ask BIX AI</button>
+      <button class="dash-btn" onclick="toggleAgent(true); document.getElementById('term-input').focus()">Ask BIX AI</button>
       <button class="dash-btn" onclick="document.getElementById('term-upload-file').click()">Upload contract</button>
       <button class="dash-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-statements')?.scrollIntoView({ behavior: 'smooth' }), 500)">Statements</button>
       <button class="dash-btn" onclick="setTermView('tracker')">Tracker board</button>
@@ -9174,15 +9434,15 @@ function toggleTermSidebar(force) {
 function setTermView(view) {
   const navView = view === 'decomposed' ? 'tracker' : view;
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
-  const scroll = document.getElementById('term-scroll');
+  const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
   if (view !== 'browser') stopBrowserArt();
   if (view === 'terminal') {
-    scroll.style.display = '';
+    home.style.display = '';
     panel.style.display = 'none';
     renderDashboard();
   } else {
-    scroll.style.display = 'none';
+    home.style.display = 'none';
     panel.style.display = 'block';
     if (view === 'tracker') renderTrackerBoard();
     else if (view === 'statements') renderStatementsTimeline();
@@ -11319,8 +11579,8 @@ function termPrintAgentTagged(text) {
   const scroll = document.getElementById('term-scroll');
   if (!scroll) return;
   const div = document.createElement('div');
-  div.className = 'term-line out';
-  div.innerHTML = `<span class="agent-tag">BIX AI ·</span>${esc(text)}`;
+  div.className = 'term-line out agent';
+  div.innerHTML = `<span class="ag-orb sm"></span><div class="ag-text">${esc(text)}</div>`;
   scroll.appendChild(div);
   scroll.scrollTop = scroll.scrollHeight;
 }
@@ -11336,9 +11596,10 @@ function termPrintOptions(options) {
   if (!scroll) return;
   const div = document.createElement('div');
   div.className = 'term-line system term-options';
-  div.innerHTML = options.map((o, i) => `<div class="term-opt"><span class="term-opt-num">${i + 1}</span>${esc(o)}</div>`).join('');
+  div.innerHTML = options.map((o, i) => `<button type="button" class="term-opt" data-i="${i}"><span class="term-opt-num">${i + 1}</span>${esc(o)}</button>`).join('');
+  div.querySelectorAll('.term-opt').forEach(b => b.addEventListener('click', () => agentSend(String(+b.dataset.i + 1))));
   scroll.appendChild(div);
-  termPrint('Type a number to choose, or just keep typing.', 'system');
+  scroll.scrollTop = scroll.scrollHeight;
 }
 
 async function handleTermInput() {
@@ -11346,6 +11607,8 @@ async function handleTermInput() {
   const raw = input?.value.trim();
   if (!raw) return;
   input.value = '';
+  toggleAgent(true);
+  agentFollowups(false);
   termEcho(raw);
   await termDispatch(raw);
 }
@@ -11532,9 +11795,13 @@ async function termDispatch(raw) {
 async function termAskAgent(text) {
   if (!operator) { termPrint('Sign in as an operator to talk to BIX AI.', 'err'); return; }
   bixAiHistory.push({ role: 'user', content: text });
-  termPrint('Thinking…', 'system');
   const scroll = document.getElementById('term-scroll');
-  const thinkingEl = scroll?.lastElementChild;
+  const thinkingEl = document.createElement('div');
+  thinkingEl.className = 'term-line thinking';
+  thinkingEl.innerHTML = '<span class="ag-orb sm busy"></span><span>Thinking…</span>';
+  scroll?.appendChild(thinkingEl);
+  if (scroll) scroll.scrollTop = scroll.scrollHeight;
+  agentBusy(true);
 
   try {
     const res = await fetch(`${SB_URL}/functions/v1/bix-ai`, {
@@ -11555,9 +11822,15 @@ async function termAskAgent(text) {
     const { text: cleanText, options } = extractOptions(data.reply);
     termPrintAgentTagged(cleanText || data.reply);
     termPrintOptions(options);
+    agentFollowups(!options?.length);
+    agentBusy(false);
+    agentContextLabel();
   } catch(e) {
     console.error(e);
     thinkingEl?.remove();
+    bixAiHistory.pop();   // the turn never landed — don't keep it in context
+    agentBusy(false);
+    agentContextLabel();
     // The real reason, not a guess — "not deployed" and "key is wrong"
     // are different problems with different fixes, and the function's
     // own error message already says which one it is.

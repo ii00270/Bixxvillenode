@@ -2346,6 +2346,89 @@ html.theme-light{
 }
 .term-sb-fold:hover{background:var(--term-line);color:var(--term-fg);}
 
+
+/* ── Dashboard (Terminal home) ── */
+:root{--up:#3DDC97;--down:#FF5A4F}
+html.theme-light{--up:#0F9D58;--down:#C81E1E}
+#term-dash{display:flex;flex-direction:column;gap:14px;padding:4px 0 10px;font-family:var(--mono)}
+.dash-row{display:grid;gap:14px}
+.dash-top{grid-template-columns:minmax(240px,1fr) minmax(0,3fr)}
+.dash-mid{grid-template-columns:minmax(0,2fr) minmax(260px,1fr)}
+.dash-low{grid-template-columns:minmax(0,2fr) minmax(220px,1fr)}
+.dash-card{border:1px solid var(--term-line);border-radius:14px;padding:16px 18px;background:var(--term-bg);color:var(--term-fg);min-width:0;text-align:left;font-family:var(--mono)}
+.dash-lbl{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:11.5px;color:var(--term-dim);margin-bottom:10px;flex-wrap:wrap}
+.dash-lbl > span:first-child{display:flex;align-items:center;gap:7px;color:var(--term-fg);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-chip{border:1px solid var(--term-line);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--term-dim)}
+.dash-big{font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.dash-mid-v{font-size:20px;font-weight:500;line-height:1.2;margin:2px 0 4px}
+.dash-sub{font-size:11.5px;color:var(--term-dim);margin-top:8px}
+.dash-note{font-size:10.5px;color:var(--term-dim)}
+.dash-note b{color:var(--term-fg)}
+.dash-chg{font-size:11.5px;font-weight:600}
+.dash-chg.up{color:var(--up)} .dash-chg.down{color:var(--down)}
+.dash-bar{height:6px;border-radius:3px;background:var(--term-line);margin-top:12px;overflow:hidden}
+.dash-bar i{display:block;height:100%;background:var(--neon)}
+.dash-acts,.dash-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.dash-quick .dash-btn{flex:1 1 calc(50% - 8px)}
+.dash-btn{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:11.5px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:border-color .2s,background .2s}
+.dash-btn:hover{border-color:var(--term-fg)}
+.dash-btn.sm{padding:4px 10px;font-size:11px}
+.dash-mkts{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:14px;overflow-x:auto;scrollbar-width:thin}
+.dash-mkt{cursor:pointer;display:flex;flex-direction:column;gap:2px;transition:border-color .2s}
+.dash-mkt:hover{border-color:var(--term-dim)}
+.dash-mkt.on{border-color:transparent;box-shadow:0 0 0 1.5px #FF2D95 inset}
+.dash-mkt-foot{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.dash-dot{width:8px;height:8px;border-radius:50%;display:inline-block;flex-shrink:0}
+.d-DXY{background:var(--term-fg)} .d-EUR{background:#3B82F6} .d-BTC{background:#F7931A} .d-XAU{background:#E8B923} .d-XAG{background:#B8BCC2}
+.dash-spark{width:100%;height:34px;margin-top:8px}
+.dash-spark path{fill:none;stroke:url(#dashLine);stroke:#FF7A1A;stroke-width:1.6;vector-effect:non-scaling-stroke}
+.dash-tabs{display:inline-flex;gap:2px;border:1px solid var(--term-line);border-radius:999px;padding:2px}
+.dash-tabs button{appearance:none;border:none;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:11px;padding:4px 10px;border-radius:999px;cursor:pointer}
+.dash-tabs button em{font-style:normal;opacity:.7}
+.dash-tabs button.on{background:var(--neon);color:#0A0A0A;font-weight:600}
+.dash-chart-head{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.dash-chart-head b{font-size:24px;font-weight:500}
+.dash-plot{position:relative;height:210px}
+.dash-plot svg{width:100%;height:180px;display:block}
+.dash-grid{stroke:var(--term-line);stroke-dasharray:3 4}
+.dash-cross{stroke:var(--term-dim);stroke-dasharray:3 3}
+.dash-tip{position:absolute;top:0;width:120px;background:var(--term-fg);color:var(--term-bg);border-radius:8px;padding:6px 9px;font-size:11px;pointer-events:none;display:flex;flex-direction:column}
+.dash-tip b{font-size:13px}
+.dash-tip[hidden]{display:none}
+.dash-axis{display:flex;justify-content:space-between;font-size:10.5px;color:var(--term-dim);margin-top:6px}
+.dash-mcard{border-radius:14px;padding:16px 18px;background:linear-gradient(120deg,#FFEA00 0%,#FF7A1A 48%,#FF2D95 100%);color:#0A0A0A;cursor:pointer;position:relative;overflow:hidden;
+  box-shadow:0 10px 30px rgba(255,45,149,.18)}
+.dash-mcard::after{content:'';position:absolute;right:-50px;top:-60px;width:180px;height:180px;border-radius:50%;border:1px solid rgba(255,255,255,.6)}
+.dash-mcard-top{display:flex;justify-content:space-between;font-family:var(--display);font-size:16px;letter-spacing:.06em}
+.dash-mcard-tier{font-family:var(--mono);font-size:11px;background:#0A0A0A;color:#fff;border-radius:999px;padding:2px 10px;letter-spacing:0}
+.dash-mcard-id{font-size:22px;font-weight:600;letter-spacing:.08em;margin:22px 0 16px}
+.dash-mcard-foot{display:flex;justify-content:space-between;gap:10px}
+.dash-mcard-foot small{display:block;font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;opacity:.7}
+.dash-mcard-foot b{font-size:12.5px}
+.dash-ring{display:flex;align-items:center;gap:16px}
+.dash-ring svg{width:112px;height:112px;flex-shrink:0}
+.dash-ring-bg{fill:none;stroke:var(--term-line);stroke-width:9}
+.dash-ring b{display:block;font-family:var(--display);font-weight:400;font-size:40px;line-height:1}
+.dash-ring span{font-size:12px;color:var(--term-dim)}
+.dash-table td{font-size:12px}
+.dash-more{margin-top:10px}
+.dash-empty{font-size:12.5px;color:var(--term-dim);padding:6px 0}
+.dash-console{display:flex;align-items:baseline;gap:12px;border-top:1px solid var(--term-line);padding-top:12px;margin-top:4px}
+.dash-console span{font-size:11px;letter-spacing:.14em;text-transform:uppercase;font-weight:600}
+.dash-console small{font-size:11.5px;color:var(--term-dim)}
+#term-mkts{display:inline-flex;gap:16px;white-space:nowrap}
+#term-mkts i{font-style:normal}
+#term-mkts i.up{color:var(--up)} #term-mkts i.down{color:var(--down)}
+@media (max-width:1100px){
+  .dash-top,.dash-mid,.dash-low{grid-template-columns:1fr}
+}
+@media (max-width:767px){
+  .dash-mkts{grid-template-columns:repeat(5,minmax(150px,1fr))}
+  .dash-big{font-size:26px}
+  #term-dash{padding-top:36px}
+  #term-footer #term-mkts{display:none}
+}
+
 /* Profile chip — bottom of the sidebar */
 .term-sb-me{
   appearance:none;-webkit-appearance:none;margin-top:auto;display:flex;align-items:center;gap:10px;width:100%;
@@ -2986,16 +3069,6 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" onclick="setTermView('decomposed')">Decomposed <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
       </div>
     </div>
-    <div class="term-sb-group" data-group="statements">
-      <div class="term-sb-row">
-      <button class="term-sb-item" data-view="statements" onclick="setTermView('statements')">
-        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l5 5v13a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2z"/><path d="M14 2v5h5"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
-        <span>Statements</span>
-      </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('statements')" aria-label="Collapse Statements">−</button>
-      </div>
-      <div class="term-sb-sub" id="term-sb-statements-sub"></div>
-    </div>
     <div class="term-sb-group" data-group="browser">
       <div class="term-sb-row">
       <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">
@@ -3027,6 +3100,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
       <span class="seg" id="term-cycle">—</span>
       <span class="seg" id="term-balance">—</span>
       <span class="seg" id="term-id">—</span>
+      <span class="seg" id="term-mkts"></span>
     </div>
   </div>
 </div>
@@ -8555,7 +8629,7 @@ function enterTerminal() {
   const shell = document.getElementById('terminal-shell');
   if (!shell) return;
   renderSbMe();
-  loadMemberIds().then(renderSbMe).catch(() => {});
+  loadMemberIds().then(() => { renderSbMe(); renderDashMe(); }).catch(() => {});
   shell.classList.add('in');
   document.getElementById('uni-shell')?.classList.remove('in');
 
@@ -8583,8 +8657,302 @@ function enterTerminal() {
     shell.dataset.sidebarBooted = '1';
     applySbFolds();
     setTermView('terminal');
-    loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); });
+    loadWorkMap().then(() => { updateSidebarCounts(); refreshDecomposedCount(); renderDashTracker(); });
+    requestAnimationFrame(() => { const sc = document.getElementById('term-scroll'); if (sc) sc.scrollTop = 0; });
   }
+}
+
+// ── Dashboard — the Terminal's home: wallet, markets, tracker, cycle ─────
+// Everything here is live and real. Markets come from free public sources
+// that answer browsers directly (no keys): CoinGecko for Bitcoin,
+// gold-api.com for gold and silver spot, and the European Central Bank's
+// daily reference rates (via frankfurter.dev) for EUR/USD — and for the
+// DXY, which is computed from those same ECB rates with ICE's published
+// formula, since no free service carries the index itself.
+const MKT = { data: null, at: 0, loading: null };
+const DXY_W = { EUR: -0.576, JPY: 0.136, GBP: -0.119, CAD: 0.091, SEK: 0.042, CHF: 0.036 };
+// r = units of each currency per 1 USD (ECB rates rebased to USD).
+// EUR and GBP enter the index as XXX/USD, so their rate is inverted.
+const dxyFrom = r => 50.14348112 * Object.entries(DXY_W)
+  .reduce((p, [c, w]) => p * Math.pow(c === 'EUR' || c === 'GBP' ? 1 / r[c] : r[c], w), 1);
+
+async function loadMarkets(force) {
+  if (!force && MKT.data && Date.now() - MKT.at < 120000) return MKT.data;
+  if (MKT.loading) return MKT.loading;
+  const j = u => fetch(u).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const since = new Date(Date.now() - 40 * 864e5).toISOString().slice(0, 10);
+  const syms = 'EUR,JPY,GBP,CAD,SEK,CHF';
+  MKT.loading = Promise.all([
+    j('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin&vs_currencies=usd&include_24hr_change=true'),
+    j('https://api.coingecko.com/api/v3/coins/bitcoin/market_chart?vs_currency=usd&days=30&interval=daily'),
+    j('https://api.gold-api.com/price/XAU'),
+    j('https://api.gold-api.com/price/XAG'),
+    j(`https://api.frankfurter.dev/v1/${since}..?base=USD&symbols=${syms}`),
+  ]).then(([btc, btcHist, xau, xag, fx]) => {
+    const fxDays = fx?.rates ? Object.entries(fx.rates).sort(([a], [b]) => a.localeCompare(b)) : [];
+    const eurSeries = fxDays.map(([d, r]) => [new Date(d + 'T12:00:00Z').getTime(), 1 / r.EUR]);
+    const dxySeries = fxDays.map(([d, r]) => [new Date(d + 'T12:00:00Z').getTime(), dxyFrom(r)]);
+    const chg = s => s.length > 1 ? (s[s.length - 1][1] / s[s.length - 2][1] - 1) * 100 : null;
+    const last = s => s.length ? s[s.length - 1][1] : null;
+    const data = {
+      DXY: { name: 'Dollar Index', sym: 'DXY', price: last(dxySeries), change: chg(dxySeries), series: dxySeries, note: 'computed from ECB rates · daily', dp: 2 },
+      EUR: { name: 'Euro', sym: 'EUR/USD', price: last(eurSeries), change: chg(eurSeries), series: eurSeries, note: 'ECB reference rate · daily', dp: 4 },
+      BTC: { name: 'Bitcoin', sym: 'BTC', price: btc?.bitcoin?.usd ?? null, change: btc?.bitcoin?.usd_24h_change ?? null,
+             series: (btcHist?.prices || []).map(([t, v]) => [t, v]), note: '24h · CoinGecko', dp: 0, usd: true },
+      XAU: { name: 'Gold', sym: 'XAU', price: xau?.price ?? null, change: null, series: [], note: 'spot · per oz', dp: 2, usd: true, at: xau?.updatedAt },
+      XAG: { name: 'Silver', sym: 'XAG', price: xag?.price ?? null, change: null, series: [], note: 'spot · per oz', dp: 2, usd: true, at: xag?.updatedAt },
+      fxDate: fxDays.length ? fxDays[fxDays.length - 1][0] : null,
+    };
+    MKT.data = data; MKT.at = Date.now(); MKT.loading = null;
+    return data;
+  }).catch(e => { MKT.loading = null; console.warn('markets unavailable', e); return MKT.data; });
+  return MKT.loading;
+}
+
+const mktFmt = (m) => m.price == null ? '—'
+  : (m.usd ? '$' : '') + m.price.toLocaleString('en-US', { minimumFractionDigits: m.dp, maximumFractionDigits: m.dp });
+const chgHtml = c => c == null ? '' : `<span class="dash-chg ${c >= 0 ? 'up' : 'down'}">${c >= 0 ? '▲' : '▼'} ${Math.abs(c).toFixed(2)}%</span>`;
+
+function sparkPath(series, w, h, pad = 2) {
+  if (!series || series.length < 2) return '';
+  const vs = series.map(p => p[1]), lo = Math.min(...vs), hi = Math.max(...vs), span = hi - lo || 1;
+  return series.map((p, i) => `${i ? 'L' : 'M'}${(i / (series.length - 1) * (w - pad * 2) + pad).toFixed(1)},${(h - pad - (p[1] - lo) / span * (h - pad * 2)).toFixed(1)}`).join(' ');
+}
+
+let dashChartKey = 'BTC', dashTrackerTab = 'in progress', dashTimer = null;
+
+function ensureDash() {
+  const scroll = document.getElementById('term-scroll');
+  if (!scroll) return null;
+  let d = document.getElementById('term-dash');
+  if (!d) {
+    d = document.createElement('div');
+    d.id = 'term-dash';
+    scroll.prepend(d);
+  }
+  return d;
+}
+
+async function renderDashboard() {
+  const d = ensureDash();
+  if (!d || !operator) return;
+  if (!d.dataset.built) {
+    d.dataset.built = '1';
+    d.innerHTML = `
+      <div class="dash-row dash-top">
+        <div class="dash-card dash-bal" id="dash-bal"></div>
+        <div class="dash-mkts" id="dash-mkts"></div>
+      </div>
+      <div class="dash-row dash-mid">
+        <div class="dash-card dash-chart" id="dash-chart"></div>
+        <div class="dash-card dash-me" id="dash-me"></div>
+      </div>
+      <div class="dash-row dash-low">
+        <div class="dash-card dash-track" id="dash-track"></div>
+        <div class="dash-card dash-cycle" id="dash-cycle"></div>
+      </div>
+      <div class="dash-console"><span>Console</span><small>Ask BIX AI or type a command below — try <b>help</b></small></div>`;
+  }
+  renderDashMe();
+  if (!memberIds) loadMemberIds().then(renderDashMe).catch(() => {});
+  renderDashCycle();
+  renderDashTracker();
+  renderDashBalance();
+  const m = await loadMarkets();
+  renderDashMarkets(m);
+  renderDashChart(m);
+  updateTermMarketsTicker(m);
+  clearInterval(dashTimer);
+  dashTimer = setInterval(async () => {
+    if (document.getElementById('term-scroll')?.style.display === 'none' || document.hidden) return;
+    const mm = await loadMarkets(true);
+    renderDashMarkets(mm); renderDashChart(mm); updateTermMarketsTicker(mm);
+  }, 120000);
+}
+
+async function renderDashBalance() {
+  const el = document.getElementById('dash-bal');
+  if (!el) return;
+  const addr = operator?.wallet_address;
+  const short = addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : null;
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">USDC · Base</span></div>
+    <div class="dash-big" id="dash-bal-v">${addr ? '…' : '—'}</div>
+    <div class="dash-bar"><i style="width:100%"></i></div>
+    <div class="dash-sub">${addr ? `Wallet ${esc(short)}` : 'No wallet on file yet.'}</div>
+    <div class="dash-acts">
+      <button class="dash-btn" onclick="openMemberRecord(operator.id)">Ledger</button>
+      <button class="dash-btn" onclick="${addr ? `navigator.clipboard?.writeText('${esc(addr)}');toast('Wallet address copied.')` : `openMemberRecord(operator.id, null, { edit: true })`}">${addr ? 'Copy address' : 'Add wallet'}</button>
+    </div>`;
+  if (addr) {
+    const b = termBalanceCache ?? await fetchUsdcBalance(addr).catch(() => null);
+    const v = document.getElementById('dash-bal-v');
+    if (v) v.textContent = b != null ? '$' + b.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Unavailable';
+  }
+}
+
+function renderDashMarkets(m) {
+  const el = document.getElementById('dash-mkts');
+  if (!el) return;
+  if (!m) { el.innerHTML = '<div class="dash-card dash-empty">Market data is unavailable right now.</div>'; return; }
+  const ratio = m.XAU.price && m.XAG.price ? (m.XAU.price / m.XAG.price).toFixed(1) : null;
+  el.innerHTML = ['DXY', 'EUR', 'BTC', 'XAU', 'XAG'].map(k => {
+    const x = m[k];
+    const sp = x.series.length > 1 ? `<svg class="dash-spark" viewBox="0 0 120 34" preserveAspectRatio="none"><path d="${sparkPath(x.series.slice(-30), 120, 34)}"/></svg>` : '';
+    return `<button class="dash-card dash-mkt ${dashChartKey === k ? 'on' : ''}" ${x.series.length > 1 ? `onclick="dashChartKey='${k}';renderDashChart(MKT.data);renderDashMarkets(MKT.data)"` : ''}>
+      <div class="dash-lbl"><span><i class="dash-dot d-${k}"></i>${esc(x.name)}</span><span class="dash-chip">${esc(x.sym)}</span></div>
+      <div class="dash-mid-v">${mktFmt(x)}</div>
+      <div class="dash-mkt-foot">${chgHtml(x.change) || `<span class="dash-note">${esc(x.note)}</span>`}${x.change != null ? `<span class="dash-note">${esc(x.note)}</span>` : ''}</div>
+      ${sp || (k === 'XAG' && ratio ? `<div class="dash-note">Gold/silver ratio <b>${ratio}</b></div>` : '')}
+    </button>`;
+  }).join('');
+}
+
+function renderDashChart(m) {
+  const el = document.getElementById('dash-chart');
+  if (!el) return;
+  const x = m?.[dashChartKey];
+  const keys = ['BTC', 'EUR', 'DXY'];
+  if (!x || x.series.length < 2) { el.innerHTML = '<div class="dash-empty">Chart data is unavailable right now.</div>'; return; }
+  const s = x.series, W = 640, H = 200;
+  const vs = s.map(p => p[1]), lo = Math.min(...vs), hi = Math.max(...vs);
+  const path = sparkPath(s, W, H, 6);
+  const first = s[0][1], lastV = s[s.length - 1][1], period = (lastV / first - 1) * 100;
+  const fmtV = v => (x.usd ? '$' : '') + v.toLocaleString('en-US', { minimumFractionDigits: x.dp, maximumFractionDigits: x.dp });
+  const fmtD = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  el.innerHTML = `
+    <div class="dash-lbl"><span>${esc(x.name)} · last 30 days</span>
+      <span class="dash-tabs">${keys.map(k => `<button class="${k === dashChartKey ? 'on' : ''}" onclick="dashChartKey='${k}';renderDashChart(MKT.data);renderDashMarkets(MKT.data)">${k === 'EUR' ? 'EUR/USD' : k}</button>`).join('')}</span></div>
+    <div class="dash-chart-head"><b>${fmtV(lastV)}</b>${chgHtml(period)}<span class="dash-note">over the period · ${esc(x.note)}</span></div>
+    <div class="dash-plot" id="dash-plot">
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
+        <defs><linearGradient id="dashLine" x1="0" x2="1"><stop offset="0" stop-color="#FFEA00"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FF2D95"/></linearGradient>
+        <linearGradient id="dashArea" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#FF7A1A" stop-opacity=".22"/><stop offset="1" stop-color="#FF2D95" stop-opacity="0"/></linearGradient></defs>
+        ${[0.25, 0.5, 0.75].map(f => `<line x1="0" x2="${W}" y1="${H * f}" y2="${H * f}" class="dash-grid"/>`).join('')}
+        <path d="${path} L${W - 6},${H} L6,${H} Z" fill="url(#dashArea)"/>
+        <path d="${path}" fill="none" stroke="url(#dashLine)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+        <line id="dash-x" x1="0" x2="0" y1="0" y2="${H}" class="dash-cross" style="display:none" vector-effect="non-scaling-stroke"/>
+      </svg>
+      <div class="dash-tip" id="dash-tip" hidden></div>
+      <div class="dash-axis"><span>${fmtD(s[0][0])}</span><span>${fmtV(lo)} – ${fmtV(hi)}</span><span>${fmtD(s[s.length - 1][0])}</span></div>
+    </div>`;
+  const plot = el.querySelector('#dash-plot'), tip = el.querySelector('#dash-tip'), cross = el.querySelector('#dash-x');
+  plot.addEventListener('pointermove', e => {
+    const r = plot.getBoundingClientRect();
+    const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+    const i = Math.round(f * (s.length - 1));
+    const px = 6 + i / (s.length - 1) * (W - 12);
+    cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.style.display = '';
+    tip.hidden = false;
+    tip.innerHTML = `<b>${fmtV(s[i][1])}</b><span>${fmtD(s[i][0])}</span>`;
+    tip.style.left = Math.min(r.width - 120, Math.max(0, f * r.width - 60)) + 'px';
+  });
+  plot.addEventListener('pointerleave', () => { tip.hidden = true; cross.style.display = 'none'; });
+}
+
+function renderDashMe() {
+  const el = document.getElementById('dash-me');
+  if (!el || !operator) return;
+  const ids = memberIds?.[operator.id] || {};
+  let k = 0; TIER_STEPS.forEach((t, i) => { if ((operator.total_logs || 0) >= t[1]) k = i; });
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Member card</span><button class="dash-btn sm" onclick="openProfilePanel()">Profile</button></div>
+    <div class="dash-mcard" onclick="openProfilePanel()">
+      <div class="dash-mcard-top"><span>BIXXVILLE</span><span class="dash-mcard-tier">${esc(TIER_STEPS[k][0])}</span></div>
+      <div class="dash-mcard-id">${esc(ids.member_id || '— — —')}</div>
+      <div class="dash-mcard-foot">
+        <div><small>Member</small><b>${esc(operator.peer_name || '')}</b></div>
+        <div><small>BIX ID</small><b>${esc(ids.bix_id || '—')}</b></div>
+        <div><small>LOGs</small><b>${(operator.total_logs || 0).toLocaleString()}</b></div>
+      </div>
+    </div>
+    <div class="dash-quick">
+      <button class="dash-btn" onclick="document.getElementById('term-input').focus()">Ask BIX AI</button>
+      <button class="dash-btn" onclick="document.getElementById('term-upload-file').click()">Upload contract</button>
+      <button class="dash-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-statements')?.scrollIntoView({ behavior: 'smooth' }), 500)">Statements</button>
+      <button class="dash-btn" onclick="setTermView('tracker')">Tracker board</button>
+    </div>`;
+}
+
+function renderDashCycle() {
+  const el = document.getElementById('dash-cycle');
+  if (!el) return;
+  const c = getActiveCycle();
+  const C = 2 * Math.PI * 52, done = c.day / 28;
+  const end = c.end || new Date(Date.now() + c.left * 864e5);
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Cycle</span><span class="dash-chip">28 days</span></div>
+    <div class="dash-ring">
+      <svg viewBox="0 0 120 120"><defs><linearGradient id="dashRing" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FFEA00"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FF2D95"/></linearGradient></defs>
+        <circle cx="60" cy="60" r="52" class="dash-ring-bg"/><circle cx="60" cy="60" r="52" fill="none" stroke="url(#dashRing)" stroke-width="9" stroke-dasharray="${C * done} ${C}" transform="rotate(-90 60 60)" stroke-linecap="round"/></svg>
+      <div><b>C${c.num}</b><span>Day ${c.day} of 28</span></div>
+    </div>
+    <div class="dash-sub">${c.left} day${c.left === 1 ? '' : 's'} left · settles ${esc(fmtDate(end))}</div>`;
+}
+
+async function renderDashTracker() {
+  const el = document.getElementById('dash-track');
+  if (!el) return;
+  if (!trackerState || trackerState.source == null) await loadWorkMap();
+  const live = trackerState?.source === 'live';
+  const L = live ? trackerState.leaves : [];
+  if (!window._opNameCache) {
+    const { data: ops } = await sb.rpc('list_operators');
+    window._opNameCache = {};
+    (ops || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
+  }
+  const tabs = [['to-do', 'To-do'], ['in progress', 'In progress'], ['delivered', 'Delivered'], ['all', 'All']];
+  const rows = (dashTrackerTab === 'all' ? L : L.filter(l => l.status === dashTrackerTab)).slice().sort((a, b) => byLeafCode(a.leaf_code, b.leaf_code));
+  const pill = l => l.status === 'delivered' ? '<span class="pf-st done">Verified</span>'
+    : l.submitted_at ? '<span class="pf-st review">Awaiting verification</span>'
+    : l.status === 'in progress' ? '<span class="pf-st progress">In progress</span>' : '<span class="pf-st">To do</span>';
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Tracker${live ? ' · ' + esc(trackerState.map?.goal || '') : ''}</span>
+      <span class="dash-tabs">${tabs.map(([k, n]) => `<button class="${k === dashTrackerTab ? 'on' : ''}" onclick="dashTrackerTab='${k}';renderDashTracker()">${n} <em>${k === 'all' ? L.length : L.filter(l => l.status === k).length}</em></button>`).join('')}</span></div>
+    ${!live ? '<div class="dash-empty">No contract yet. Upload one with + below.</div>'
+      : rows.length ? `<table class="pf-table dash-table">
+        <tr><th>Step</th><th class="hide-sm">Tier · LOGs</th><th class="hide-sm">Granted to</th><th>Status</th></tr>
+        ${rows.slice(0, 8).map(l => `<tr class="go" onclick="openTrackerCard('${esc(l.id)}')">
+          <td><b>${esc(l.leaf_code)}</b> ${esc(l.task)}</td>
+          <td class="hide-sm">${esc(l.tier)} · ${l.logs}</td>
+          <td class="hide-sm">${esc(l.assigned_to ? (window._opNameCache[l.assigned_to] || '—') : 'Not granted')}</td>
+          <td>${pill(l)}</td></tr>`).join('')}
+      </table>${rows.length > 8 ? `<div class="dash-more"><button class="dash-btn sm" onclick="setTermView('tracker')">See all ${rows.length} on the board →</button></div>` : ''}`
+      : '<div class="dash-empty">Nothing here.</div>'}`;
+}
+
+async function openTrackerCard(leafId) {
+  setTermView('tracker');
+  await renderTrackerBoard();
+  const card = document.querySelector(`.term-card[data-leaf="${CSS.escape(leafId)}"]`);
+  if (card) {
+    if (card.querySelector('.term-card-detail')?.hidden) toggleTermCard(leafId);
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+function updateTermMarketsTicker(m) {
+  const el = document.getElementById('term-mkts');
+  if (!el || !m) return;
+  el.innerHTML = ['DXY', 'EUR', 'BTC', 'XAU', 'XAG'].map(k => {
+    const x = m[k];
+    return `<span>${esc(k === 'EUR' ? 'EUR/USD' : k)} ${mktFmt(x)}${x.change != null ? ` <i class="${x.change >= 0 ? 'up' : 'down'}">${x.change >= 0 ? '+' : ''}${x.change.toFixed(2)}%</i>` : ''}</span>`;
+  }).join('');
+}
+
+// Checkpoint statements, now kept in the profile.
+function statementsListHtml() {
+  if (trackerState?.source !== 'live' || !trackerState.branches?.length) return '<div class="pf-empty">No checkpoints yet — statements appear once a contract is uploaded.</div>';
+  const sorted = [...trackerState.branches].sort((a, b) => (a.due_date || '9999-99-99').localeCompare(b.due_date || '9999-99-99') || byLeafCode(a.code, b.code));
+  return `<table class="pf-table">
+    <tr><th>Checkpoint</th><th class="hide-sm">Due</th><th class="hide-sm">LOGs</th><th></th></tr>
+    ${sorted.map(b => {
+      const cycleNum = trackerState.settlement?.cycle_number
+        ?? (b.due_date ? cycleNumberForDate(new Date(b.due_date + 'T00:00:00')) : getActiveCycle().num);
+      return `<tr><td><b>${esc(b.code)}</b> ${esc(b.title)}</td><td class="hide-sm">${b.due_date ? esc(fmtDate(b.due_date)) : '—'}</td><td class="hide-sm">${b.total_logs}</td>
+        <td style="text-align:right"><button class="pf-btn" onclick="downloadCheckpointStatement(${cycleNum}, this)">PDF · C${cycleNum}</button></td></tr>`;
+    }).join('')}
+  </table>`;
 }
 
 // ── Profile — the chip at the bottom of the sidebar, and the page it opens ──
@@ -8641,6 +9009,7 @@ async function renderProfilePanel() {
   const pf = document.getElementById('pf');
   if (!pf || !operator) return;
   const op = operator;
+  if (!trackerState || trackerState.source == null) await loadWorkMap();
   const [ids, stepsRes] = await Promise.all([
     loadMemberIds().catch(() => memberIds),
     sb.from('work_leaves').select('id,map_id,leaf_code,task,tier,logs,scoped_rate_cents,status,submitted_at,verified_at,delivered_at')
@@ -8733,6 +9102,11 @@ async function renderProfilePanel() {
       </table>` : '<div class="pf-empty">No steps granted to you yet.</div>'}
     </div>
 
+    <div class="pf-sec" id="pf-statements">
+      <h4>Statements <span>${trackerState?.source === 'live' ? esc(trackerState.map?.goal || '') : ''}</span></h4>
+      ${statementsListHtml()}
+    </div>
+
     <div class="pf-sec">
       <h4>Account</h4>
       <div class="pf-list">
@@ -8806,6 +9180,7 @@ function setTermView(view) {
   if (view === 'terminal') {
     scroll.style.display = '';
     panel.style.display = 'none';
+    renderDashboard();
   } else {
     scroll.style.display = 'none';
     panel.style.display = 'block';
@@ -11117,7 +11492,7 @@ async function termDispatch(raw) {
   }
   if (cmd === 'clear') {
     const scroll = document.getElementById('term-scroll');
-    if (scroll) scroll.innerHTML = '';
+    if (scroll) [...scroll.children].forEach(c => { if (c.id !== 'term-dash') c.remove(); });
     return;
   }
   if (cmd === 'whoami') {

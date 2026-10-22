@@ -1,0 +1,21 @@
+# Cloudflare Pages response headers for app.bixxville.xyz
+#
+# Content-Security-Policy, in plain terms: pages may only load code, styles,
+# fonts, images and data from this site itself plus the services listed
+# below — the Supabase project, the two code CDNs the app already uses,
+# Google Fonts, the blockchain nodes that read the wallet balance, the
+# market-data sources on the dashboard, and TradingView's chart widget.
+# 'unsafe-inline' is required because the app is written as inline
+# <script> blocks and onclick handlers; everything else is still locked
+# to the list.
+
+/*
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://cdnjs.cloudflare.com https://s3.tradingview.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://deotcopartijomfveakr.supabase.co; media-src 'self' blob: https://deotcopartijomfveakr.supabase.co; connect-src 'self' https://deotcopartijomfveakr.supabase.co wss://deotcopartijomfveakr.supabase.co https://mainnet.base.org https://ethereum-rpc.publicnode.com https://api.coingecko.com https://api.frankfurter.dev https://api.gold-api.com https://cdnjs.cloudflare.com; worker-src 'self' blob: https://cdnjs.cloudflare.com; frame-src 'self' blob: https://*.tradingview.com https://*.tradingview-widget.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# The service worker must always be re-checked, or a stale copy keeps serving old pages.
+/sw.js
+  Cache-Control: no-cache

@@ -2480,6 +2480,7 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 .dash-bar i{display:block;height:100%;background:var(--neon)}
 .dash-acts,.dash-quick{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .dash-quick .dash-btn{flex:1 1 calc(50% - 8px)}
+.dash-btn.solid{background:var(--neon);color:#0A0A0A;border-color:transparent;font-weight:700}
 .dash-btn{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:11.5px;padding:8px 12px;border-radius:8px;cursor:pointer;transition:border-color .2s,background .2s}
 .dash-btn:hover{border-color:var(--term-fg)}
 .dash-btn.sm{padding:4px 10px;font-size:11px}
@@ -9791,19 +9792,26 @@ function routePrompt(text) {
   agentSend(text);
 }
 
-// Put a wallet on file from MetaMask (HashPack joins this once it's set up).
+// Put a wallet on file from MetaMask: add one, or change the one on file.
+// (HashPack can join this later; MetaMask is the only option for now.)
 async function openAddWallet() {
   if (!window.ethereum) { toast('No wallet found. Use Chrome with MetaMask installed.'); return; }
   try {
     const [a] = await window.ethereum.request({ method: 'eth_requestAccounts' });
     if (!a) return;
-    const ok = await osConfirm(`Put ${a.slice(0, 6)}…${a.slice(-4)} on file as your wallet? You’ll sign in with it and be paid to it through escrow.`);
+    const have = (operator.wallet_address || '').toLowerCase();
+    if (have === a.toLowerCase()) { toast('That MetaMask account is already your wallet.'); return; }
+    const ok = await osConfirm(have
+      ? `Change your wallet to ${a.slice(0, 6)}…${a.slice(-4)}? You’ll sign in and be paid with this one instead of ${have.slice(0, 6)}…${have.slice(-4)}.`
+      : `Put ${a.slice(0, 6)}…${a.slice(-4)} on file as your wallet? You’ll sign in with it and be paid to it through escrow.`);
     if (!ok) return;
     const { data, error } = await sb.rpc('set_member_wallet', { p_operator_id: operator.id, p_wallet: a });
     if (error) { toast(error.message); return; }
     operator.wallet_address = data;
+    termBalanceCache = null;
     toast('Wallet saved.');
     renderDashboard();
+    if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) { await loadPeople(true); renderClientsPanel(); }
   } catch (e) { toast(e?.code === 4001 ? 'Cancelled in MetaMask.' : 'Couldn’t connect the wallet.'); }
 }
 
@@ -9819,7 +9827,9 @@ async function renderDashBalance() {
     <div class="dash-sub">${addr ? `Wallet ${esc(short)}` : 'No wallet on file yet.'}</div>
     <div class="dash-acts">
       <button class="dash-btn" onclick="openMemberRecord(operator.id)">Ledger</button>
-      <button class="dash-btn" onclick="${addr ? `navigator.clipboard?.writeText('${esc(addr)}');toast('Wallet address copied.')` : `openMemberRecord(operator.id, null, { edit: true })`}">${addr ? 'Copy address' : 'Add wallet'}</button>
+      ${addr ? `<button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(addr)}');toast('Wallet address copied.')">Copy address</button>
+      <button class="dash-btn" onclick="openAddWallet()">Change wallet</button>`
+             : `<button class="dash-btn solid" onclick="openAddWallet()">Add wallet · MetaMask</button>`}
     </div>`;
   if (addr) {
     const b = termBalanceCache ?? await fetchUsdcBalance(addr).catch(() => null);

@@ -642,6 +642,22 @@ html.theme-light{
 .ig-gates small{font-family:var(--mono);font-size:10px;color:#8A8A88}
 .ig-done-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
 .ig-big{font-family:var(--mono);font-size:20px;display:block}
+.ig-folders{display:grid;gap:22px;margin-top:12px}
+.ig-folder{border-top:3px solid var(--fc);padding-top:12px}
+.ig-folder-head{display:grid;grid-template-columns:auto 1fr auto auto;align-items:center;gap:14px;background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:16px;padding:14px 16px;font-family:var(--sans)}
+.ig-folder-ico{width:44px;height:44px;color:var(--fc)}
+.ig-folder-ico svg{width:100%;height:100%}
+.ig-folder-ico .front{fill:var(--fc);fill-opacity:.25}
+.ig-folder-title b{display:block;font-size:15px;line-height:1.3}
+.ig-folder-title small{font-family:var(--mono);font-size:10.5px;color:#8A8A88}
+.ig-folder-stats{display:grid;grid-template-columns:repeat(3,minmax(74px,auto));gap:6px}
+.ig-folder-stats div{background:#111113;border:1px solid #1C1C1E;border-radius:10px;padding:7px 10px;text-align:center}
+.ig-folder-stats b{display:block;font-family:var(--mono);font-size:15px}
+.ig-folder-stats small{font-family:var(--mono);font-size:9px;color:#8A8A88;text-transform:uppercase;letter-spacing:.08em}
+.ig-folder-open{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--fc);border:1px solid var(--fc);border-radius:999px;padding:4px 10px}
+.ig-folder > .ig-bar{margin:8px 2px 0}
+.ig-folder .ig-board{margin-top:10px}
+@media (max-width:760px){.ig-folder-head{grid-template-columns:auto 1fr}.ig-folder-stats,.ig-folder-head > .ig-btn,.ig-folder-open{grid-column:1 / -1}}
 .escrow-panel{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:4px 0 10px}
 .escrow-panel .form-input{margin-top:4px}
 .escrow-muted{font-family:var(--mono);font-size:10.5px;color:var(--grey);line-height:1.6}
@@ -10965,7 +10981,9 @@ function updateSidebarCounts() {
   const live = trackerState?.source === 'live';
   document.querySelectorAll('#term-sb-tracker-sub [data-count]').forEach(el => {
     if (!live) { el.textContent = '—'; return; }
-    el.textContent = el.dataset.count === 'all' ? trackerState.leaves.length : trackerState.leaves.filter(l => l.status === el.dataset.count).length;
+    el.textContent = el.dataset.count === 'all' ? trackerState.leaves.length
+      : el.dataset.count === 'in progress' && window._progressAll != null ? window._progressAll
+      : trackerState.leaves.filter(l => l.status === el.dataset.count).length;
   });
   const sub = document.getElementById('term-sb-statements-sub');
   if (sub) {
@@ -11466,8 +11484,8 @@ async function renderTrackerBoard() {
       rows.push(`<div class="term-tier-row"><div class="term-tier-lbl">${t === 0 ? 'START' : 'T' + (t + 1)}</div><div class="term-board-flat">${ls.map(renderLeafCard).join('')}</div></div>`);
     }
     body = rows.join('<div class="term-tier-conn">↓</div>');
-  } else if (active === 'in progress' && items.length) {
-    body = await renderProgressBoard(items);
+  } else if (active === 'in progress') {
+    body = await renderProgressFolders();
   } else if (active === 'delivered' && items.length) {
     body = await renderDeliveredBoard(items);
   } else {
@@ -11475,6 +11493,9 @@ async function renderTrackerBoard() {
   }
 
   const foldersHtml = await renderMapFolders();
+  // In progress counts every folder (that tab shows them all).
+  const { count: progressAll } = await sb.from('work_leaves').select('id', { count: 'exact', head: true }).eq('status', 'in progress');
+  window._progressAll = progressAll;
   const unscripted = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && !scriptStatusOf(l.id)).length : 0;
   const drafts = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && scriptStatusOf(l.id) === 'draft').length : 0;
   panel.innerHTML = `
@@ -11486,7 +11507,7 @@ async function renderTrackerBoard() {
     ${foldersHtml}
     <div class="term-tabs">
       ${tabs.map(t => {
-        const n = t.key === 'all' ? trackerState.leaves.length : trackerState.leaves.filter(l => l.status === t.key).length;
+        const n = t.key === 'all' ? trackerState.leaves.length : t.key === 'in progress' && progressAll != null ? progressAll : trackerState.leaves.filter(l => l.status === t.key).length;
         return `<button class="term-tab ${t.key === active ? 'active' : ''}" data-k="${t.key}" onclick="setTrackerFilter('${t.key}')"><i class="tdot"></i>${t.label} <span class="term-tab-count">${n}</span></button>`;
       }).join('')}
     </div>
@@ -11672,11 +11693,11 @@ function igSpotlight(m, l) {
   </div>`;
 }
 
-async function renderProgressBoard(items) {
+async function renderProgressBoard(items, keepLive) {
   try { await loadPeople(); } catch (e) {}
   const work = await loadLeafWork(items.map(l => l.id));
   const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
-  window._igLive = {};
+  if (!keepLive) window._igLive = {};
   return `<div class="ig-board">${items.map(l => {
     const w = work[l.id] || { closedMs: 0, openSince: 0 };
     const rate = leafRateCents(l), budgetMs = l.logs * HOUR;
@@ -11706,9 +11727,59 @@ async function renderProgressBoard(items) {
         </section>
         ${igSpotlight(people[grantee], l)}
       </div>
-      <footer class="ig-foot">${leafActionsHtml(l) || ''}</footer>
+      <footer class="ig-foot">${l.map_id && l.map_id !== trackerState.mapId
+        ? `<button class="term-card-btn primary" onclick="openFolderAt('${esc(l.map_id)}','in progress')">Open in its folder</button>`
+        : (leafActionsHtml(l) || '')}</footer>
     </article>`;
   }).join('')}</div>`;
+}
+
+// In progress across every folder (contract), each under its folder's header.
+async function renderProgressFolders() {
+  const [{ data: maps }, { data: stats }, { data: live }] = await Promise.all([
+    sb.from('work_maps').select('id,goal,prepared_for,contract_date,date_mapped,created_at').order('created_at', { ascending: false }),
+    sb.from('work_leaves').select('map_id,status,logs'),
+    sb.from('work_leaves').select('*').eq('status', 'in progress'),
+  ]);
+  const inProg = live || [];
+  if (!inProg.length) return '<div class="term-panel-empty">Nothing is in progress in any folder.</div>';
+  const all = maps || [];
+  const colorOf = id => FOLDER_COLORS[[...all].reverse().findIndex(m => m.id === id) % FOLDER_COLORS.length] || FOLDER_COLORS[0];
+  const folderSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path class="back" d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h4.3l2 2h8.7A1.5 1.5 0 0 1 21 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/><path class="front" d="M3 10a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/></svg>`;
+  // The open folder first, then newest.
+  const order = all.filter(m => inProg.some(l => l.map_id === m.id))
+    .sort((a, b) => (b.id === trackerState.mapId) - (a.id === trackerState.mapId));
+  window._igLive = {};
+  const sections = [];
+  for (const m of order) {
+    const ls = (stats || []).filter(x => x.map_id === m.id);
+    const steps = ls.length, done = ls.filter(x => x.status === 'delivered').length;
+    const logs = ls.reduce((n, x) => n + x.logs, 0), logsDone = ls.filter(x => x.status === 'delivered').reduce((n, x) => n + x.logs, 0);
+    const items = inProg.filter(l => l.map_id === m.id).sort((a, b) => byLeafCode(a.leaf_code, b.leaf_code));
+    sections.push(`<section class="ig-folder" style="--fc:${colorOf(m.id)}">
+      <header class="ig-folder-head">
+        <span class="ig-folder-ico">${folderSvg}</span>
+        <div class="ig-folder-title"><b>${esc(m.goal)}</b><small>${esc(m.prepared_for || 'Client not recorded')} · mapped ${esc(fmtDate(m.date_mapped || m.created_at))}</small></div>
+        <div class="ig-folder-stats">
+          <div><b>${items.length}</b><small>In progress</small></div>
+          <div><b>${done}/${steps}</b><small>Steps done</small></div>
+          <div><b>${logsDone}/${logs}</b><small>LOGs done</small></div>
+        </div>
+        ${m.id === trackerState.mapId ? '<span class="ig-folder-open">Current folder</span>'
+          : `<button class="ig-btn ghost" onclick="openFolderAt('${esc(m.id)}','all')">Open folder</button>`}
+      </header>
+      <div class="ig-bar wide"><i style="width:${logs ? Math.round(logsDone / logs * 100) : 0}%"></i></div>
+      ${await renderProgressBoard(items, true)}
+    </section>`);
+  }
+  return `<div class="ig-folders">${sections.join('')}</div>`;
+}
+
+// Switch to a folder and show one of its tabs.
+async function openFolderAt(mapId, tab) {
+  window._trackerFilter = tab;
+  await loadWorkMap(mapId);
+  setTermView('tracker');
 }
 
 function tickProgress() {

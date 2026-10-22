@@ -2548,6 +2548,278 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 }
 @media (max-width:767px){ .term-sb-collapse{display:none} }
 
+
+/* ══ People: Clients, Notifications, Chat, Calendar ══ */
+:root{--t-app:#64748B;--t-wra:#3B82F6;--t-arc:#8B5CF6;--t-ope:#FF7A1A;--st-todo:#94A3B8;--st-ready:#FF2D95;--st-prog:#FF7A1A;--st-rev:#8B5CF6;--st-done:#10B981}
+.pp-ico{width:16px;height:16px;flex-shrink:0}
+.pp-muted{color:var(--term-dim);font-size:12px}
+.pp-empty{color:var(--term-dim);font-size:12.5px;padding:18px;text-align:center}
+.pp-head{display:flex;justify-content:space-between;align-items:flex-end;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.pp-head h2{font-family:var(--display);font-weight:400;font-size:34px;line-height:1;text-transform:uppercase;letter-spacing:.01em}
+.pp-head p{font-size:12.5px;color:var(--term-dim);margin-top:6px;max-width:560px}
+.pp-head-acts{display:flex;gap:8px;flex-wrap:wrap}
+.pp-btn{appearance:none;display:inline-flex;align-items:center;gap:8px;border:1px solid var(--term-line);background:var(--term-bg);color:var(--term-fg);
+  font-family:var(--mono);font-size:12px;padding:9px 14px;border-radius:10px;cursor:pointer;transition:border-color .2s,box-shadow .2s,transform .1s}
+.pp-btn:hover{border-color:var(--term-fg)}
+.pp-btn:active{transform:translateY(1px)}
+.pp-btn:disabled{opacity:.45;cursor:default}
+.pp-btn.solid{background:var(--term-fg);color:var(--term-bg);border-color:var(--term-fg)}
+.pp-btn.solid:hover{box-shadow:3px 3px 0 #FF2D95,6px 6px 0 #FFEA00}
+.pp-btn.big{width:100%;justify-content:center;padding:13px 16px;font-size:13px}
+.pp-icbtn{appearance:none;width:32px;height:32px;border-radius:8px;border:1px solid transparent;background:transparent;color:var(--term-dim);cursor:pointer;display:inline-grid;place-items:center;font-size:16px}
+.pp-icbtn:hover{border-color:var(--term-line);color:var(--term-fg)}
+.pp-tabs{display:flex;align-items:center;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--term-line);margin-bottom:14px}
+.pp-tabs > button:not(.pp-chip){appearance:none;display:inline-flex;align-items:center;gap:8px;border:none;background:transparent;color:var(--term-dim);
+  font-family:var(--mono);font-size:13px;padding:10px 6px;margin-right:10px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px}
+.pp-tabs > button:not(.pp-chip).on{color:var(--term-fg);border-image:var(--neon) 1;border-bottom:2px solid}
+.pp-tabs em,.pp-chip em{font-style:normal;font-size:10.5px;padding:1px 7px;border-radius:999px;background:var(--term-line);color:var(--term-fg)}
+.pp-tabs > button.on em{background:var(--term-fg);color:var(--term-bg)}
+.pp-tabs-gap{flex:1}
+.pp-tabs.slim{border-bottom:none;margin:6px 0 10px}
+.pp-chip{appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--term-line);background:transparent;color:var(--term-dim);
+  font-family:var(--mono);font-size:11.5px;padding:5px 10px;border-radius:999px;cursor:pointer;margin-bottom:8px}
+.pp-chip i{width:7px;height:7px;border-radius:50%;background:var(--term-dim)}
+.pp-chip.f-working i{background:var(--st-prog)} .pp-chip.f-new i{background:var(--st-ready)} .pp-chip.f-projects i{background:var(--t-wra)} .pp-chip.f-settled i{background:var(--st-done)}
+.pp-chip.on{color:var(--term-fg);border-color:var(--term-fg)}
+.pp-card{border:1px solid var(--term-line);border-radius:16px;overflow:hidden;background:var(--term-bg)}
+.pp-card-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--term-line)}
+.pp-search{display:flex;align-items:center;gap:8px;border:1px solid var(--term-line);border-radius:10px;padding:7px 10px;min-width:240px;background:color-mix(in srgb,var(--term-line) 35%,transparent);color:var(--term-dim)}
+.pp-search input{border:none;outline:none;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:12.5px;width:100%}
+.pp-table-wrap{overflow-x:auto}
+.pp-table{width:100%;border-collapse:collapse;font-size:12.5px;min-width:760px}
+.pp-table th{text-align:left;font-weight:500;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim);padding:10px 14px;border-bottom:1px solid var(--term-line);white-space:nowrap}
+.pp-table td{padding:12px 14px;border-bottom:1px solid var(--term-line);vertical-align:middle}
+.pp-table tr:last-child td{border-bottom:none}
+.pp-table tr:hover td{background:color-mix(in srgb,var(--term-line) 35%,transparent)}
+.pp-person{display:flex;align-items:center;gap:11px;min-width:180px}
+.pp-person b{display:block;font-size:13px;font-weight:600}
+.pp-person small{display:block;color:var(--term-dim);font-size:11px;margin-top:1px}
+.pp-av{width:36px;height:36px;border-radius:50%;flex-shrink:0;display:grid;place-items:center;position:relative;font-size:12px;font-weight:600;
+  background:color-mix(in srgb,#3B82F6 18%,var(--term-bg));color:var(--term-fg)}
+.pp-av img{width:100%;height:100%;object-fit:cover;border-radius:50%}
+.pp-av.client{background:color-mix(in srgb,#E8B923 22%,var(--term-bg))}
+.pp-dot{position:absolute;right:-1px;bottom:-1px;width:10px;height:10px;border-radius:50%;border:2px solid var(--term-bg)}
+.pp-dot.on{background:var(--st-done)} .pp-dot.warn{background:var(--st-prog)} .pp-dot.off{background:#EF4444}
+.pp-exec{display:inline-block;margin:3px 0 0;font-size:10px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--neon);color:#0A0A0A}
+.pp-contact{display:flex;align-items:center;gap:6px;font-size:12px;margin:2px 0;white-space:nowrap}
+.pp-contact .pp-ico{width:13px;height:13px;color:var(--term-dim)}
+.pp-copy{appearance:none;display:inline-flex;align-items:center;gap:3px;border:none;background:transparent;color:var(--t-wra);font-family:var(--mono);font-size:11px;cursor:pointer;padding:0 2px}
+.pp-copy .pp-ico{width:12px;height:12px;color:currentColor}
+.pp-copy:hover{text-decoration:underline}
+.pp-code{font-family:var(--mono);font-size:12px;font-weight:600;letter-spacing:.12em;padding:2px 7px;border-radius:6px;background:var(--term-line)}
+.pp-ids span{display:block;font-size:12px;white-space:nowrap}
+.pp-ids small{display:block;font-size:11px;color:var(--term-dim)}
+.pp-wallet{display:flex;align-items:center;gap:8px;font-size:12px;white-space:nowrap}
+.pp-wallet > .pp-ico{color:var(--term-dim)}
+.pp-link{appearance:none;border:none;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:11px;padding:0;cursor:pointer}
+.pp-link:hover{color:var(--term-fg);text-decoration:underline}
+.pp-tier{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:999px;white-space:nowrap;border:1px solid transparent}
+.pp-tier.apprentice{color:var(--t-app);background:color-mix(in srgb,var(--t-app) 14%,transparent);border-color:color-mix(in srgb,var(--t-app) 35%,transparent)}
+.pp-tier.wrangler{color:var(--t-wra);background:color-mix(in srgb,var(--t-wra) 14%,transparent);border-color:color-mix(in srgb,var(--t-wra) 35%,transparent)}
+.pp-tier.architect{color:var(--t-arc);background:color-mix(in srgb,var(--t-arc) 14%,transparent);border-color:color-mix(in srgb,var(--t-arc) 35%,transparent)}
+.pp-tier.operator{color:var(--t-ope);background:color-mix(in srgb,var(--t-ope) 14%,transparent);border-color:color-mix(in srgb,var(--t-ope) 35%,transparent)}
+.pp-tier.exec{background:var(--neon);color:#0A0A0A}
+.pp-logs{display:block;font-size:10.5px;color:var(--term-dim);margin-top:3px}
+.pp-work{display:flex;gap:6px}
+.pp-work span{font-size:11px;min-width:24px;text-align:center;padding:2px 6px;border-radius:6px;background:var(--term-line)}
+.pp-work .act{background:color-mix(in srgb,var(--st-prog) 18%,transparent);color:var(--st-prog)}
+.pp-work .ok{background:color-mix(in srgb,var(--st-done) 18%,transparent);color:var(--st-done)}
+.pp-standing{display:inline-block;font-size:11px;padding:2px 9px;border-radius:999px;background:color-mix(in srgb,var(--st-done) 16%,transparent);color:var(--st-done);text-transform:capitalize}
+.pp-standing.probation{background:color-mix(in srgb,var(--st-prog) 16%,transparent);color:var(--st-prog)}
+.pp-standing.suspended{background:color-mix(in srgb,#EF4444 16%,transparent);color:#EF4444}
+.pp-pager{display:flex;justify-content:center;gap:6px;padding:12px;border-top:1px solid var(--term-line)}
+.pp-pager button{appearance:none;min-width:34px;height:32px;border-radius:8px;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);font-family:var(--mono);cursor:pointer}
+.pp-pager button.on{background:var(--term-fg);color:var(--term-bg)}
+.pp-pager button:disabled{opacity:.4;cursor:default}
+.pp-menu{position:fixed;z-index:200;min-width:190px;border:1px solid var(--term-line);border-radius:12px;background:var(--term-bg);box-shadow:0 18px 40px rgba(0,0,0,.18);padding:5px;font-family:var(--mono)}
+.pp-menu button{appearance:none;display:block;width:100%;text-align:left;border:none;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:12.5px;padding:9px 12px;border-radius:8px;cursor:pointer}
+.pp-menu button:hover{background:var(--term-line)}
+.pp-menu button.danger{color:var(--red)}
+@media (max-width:1100px){ .pp-table .hide-md{display:none} }
+
+/* Add drawer */
+#pp-scrim{position:fixed;inset:0;z-index:141;background:rgba(10,10,10,.38);opacity:0;pointer-events:none;transition:opacity .3s}
+#pp-scrim.on{opacity:1;pointer-events:auto}
+#pp-drawer{position:fixed;top:0;bottom:0;right:0;z-index:142;width:min(460px,100vw);background:var(--term-bg);color:var(--term-fg);font-family:var(--mono);
+  overflow-y:auto;transform:translateX(104%);transition:transform .38s cubic-bezier(.2,.75,.2,1);border-left:1px solid var(--term-line);box-shadow:-24px 0 60px rgba(0,0,0,.16);padding-bottom:30px}
+#pp-drawer.on{transform:none}
+.pp-dr-top{display:flex;justify-content:space-between;align-items:center;padding:16px 20px;border-bottom:1px solid var(--term-line);position:sticky;top:0;background:var(--term-bg);z-index:1}
+.pp-dr-top b{font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+.pp-seg{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:18px 20px 10px;padding:4px;border:1px solid var(--term-line);border-radius:12px}
+.pp-seg button{appearance:none;display:flex;justify-content:center;align-items:center;gap:8px;border:none;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:12.5px;padding:9px;border-radius:9px;cursor:pointer}
+.pp-seg button.on{background:var(--term-fg);color:var(--term-bg)}
+.pp-dr-lead{font-size:12.5px;color:var(--term-dim);padding:0 20px;line-height:1.6}
+.pp-form{display:flex;flex-direction:column;gap:14px;padding:16px 20px}
+.pp-form.flat{padding:0}
+.pp-form label > span,.pp-field > span{display:block;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim);margin-bottom:6px}
+.pp-form em{text-transform:none;font-style:normal;letter-spacing:0;opacity:.7}
+.pp-form input,.pp-form textarea{width:100%;border:1px solid var(--term-line);border-radius:10px;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:14px;padding:11px 12px;outline:none}
+.pp-form input:focus,.pp-form textarea:focus{border-color:var(--term-fg);box-shadow:0 0 0 4px rgba(255,45,149,.10)}
+.pp-form-msg{color:var(--red);font-size:12.5px;min-height:1px}
+.pp-tierpick{display:grid;gap:8px}
+.pp-tieropt{display:flex;flex-direction:column;gap:2px;border:1px solid var(--term-line);border-left:4px solid var(--tc);border-radius:10px;padding:10px 12px;cursor:pointer;position:relative}
+.pp-tieropt input{position:absolute;opacity:0}
+.pp-tieropt b{font-size:13px;color:var(--tc)}
+.pp-tieropt small{font-size:11px;color:var(--term-dim)}
+.pp-tieropt:has(input:checked){background:color-mix(in srgb,var(--tc) 12%,transparent);border-color:var(--tc)}
+.pp-tieropt.apprentice{--tc:var(--t-app)} .pp-tieropt.wrangler{--tc:var(--t-wra)} .pp-tieropt.architect{--tc:var(--t-arc)} .pp-tieropt.operator{--tc:var(--t-ope)}
+.pp-done{display:flex;flex-direction:column;gap:12px;padding:24px 20px}
+.pp-done h3{font-size:18px;font-weight:600}
+.pp-done-badge{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:var(--neon);color:#0A0A0A}
+.pp-done-badge .pp-ico{width:22px;height:22px}
+.pp-secret{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;position:relative}
+.pp-secret small{display:block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.pp-secret b{display:block;font-size:24px;font-weight:600;letter-spacing:.12em;margin-top:4px}
+.pp-secret.pin{border-color:#FF2D95;background:color-mix(in srgb,#FF2D95 7%,transparent)}
+.pp-secret .pp-copy{position:absolute;right:12px;top:12px}
+
+/* Notifications */
+.nt-sec{margin-bottom:22px}
+.nt-sec h4{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.nt-sec h4 em{font-style:normal;font-size:10.5px;padding:1px 8px;border-radius:999px;background:#FF2D95;color:#fff;letter-spacing:0}
+.nt-att{display:grid;gap:8px}
+.nt-att-row{appearance:none;display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:1px solid var(--term-line);border-left:4px solid var(--ac);border-radius:12px;
+  background:color-mix(in srgb,var(--ac) 6%,var(--term-bg));color:var(--term-fg);font-family:var(--mono);padding:12px 14px;cursor:pointer}
+.nt-att-row:hover{border-color:var(--ac)}
+.nt-att-row.k-verify{--ac:var(--st-rev)} .nt-att-row.k-start{--ac:var(--st-ready)} .nt-att-row.k-continue{--ac:var(--st-prog)}
+.nt-att-ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac)}
+.nt-att-txt{flex:1;min-width:0}
+.nt-att-txt b{display:block;font-size:13px}
+.nt-att-txt small{display:block;font-size:11.5px;color:var(--term-dim);margin-top:2px}
+.nt-att-go{font-size:12px;color:var(--ac);white-space:nowrap}
+.nt-list{border:1px solid var(--term-line);border-radius:14px;overflow:hidden}
+.nt-row{appearance:none;display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:none;border-bottom:1px solid var(--term-line);background:var(--term-bg);
+  color:var(--term-fg);font-family:var(--mono);padding:12px 14px;cursor:pointer}
+.nt-row:last-child{border-bottom:none}
+.nt-row:hover{background:color-mix(in srgb,var(--term-line) 40%,var(--term-bg))}
+.nt-row.new{background:color-mix(in srgb,#FF2D95 5%,var(--term-bg))}
+.nt-ico{width:32px;height:32px;border-radius:50%;display:grid;place-items:center;flex-shrink:0;--ec:var(--term-dim);background:color-mix(in srgb,var(--ec) 16%,transparent);color:var(--ec)}
+.t-message .nt-ico{--ec:#FF2D95} .t-member_joined .nt-ico{--ec:var(--t-wra)} .t-log .nt-ico{--ec:var(--st-prog)} .t-cycle .nt-ico{--ec:var(--t-arc)} .t-engagement .nt-ico{--ec:#E8B923} .t-system .nt-ico{--ec:var(--t-app)}
+.nt-txt{flex:1;min-width:0}
+.nt-txt b{display:block;font-size:12.5px;font-weight:500}
+.nt-row.new .nt-txt b{font-weight:700}
+.nt-txt small{display:block;font-size:11px;color:var(--term-dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nt-txt .crit{color:var(--red)}
+.nt-dot{width:8px;height:8px;border-radius:50%;background:#FF2D95;flex-shrink:0}
+.term-sb-count.hot{background:#FF2D95;color:#fff;border-radius:999px;padding:0 7px;font-weight:600}
+
+/* Chat */
+.ch-wrap{display:grid;grid-template-columns:300px 1fr;border:1px solid var(--term-line);border-radius:16px;overflow:hidden;height:calc(100vh - 260px);min-height:420px;background:var(--term-bg)}
+.ch-side{border-right:1px solid var(--term-line);display:flex;flex-direction:column;min-height:0}
+.ch-side-top{padding:14px;border-bottom:1px solid var(--term-line);display:flex;flex-direction:column;gap:10px}
+.ch-side-top h2{font-family:var(--display);font-weight:400;font-size:26px;text-transform:uppercase;line-height:1}
+.ch-side-top .pp-search{min-width:0}
+.ch-list{flex:1;overflow-y:auto;padding:6px}
+.ch-item{appearance:none;display:flex;align-items:center;gap:10px;width:100%;text-align:left;border:none;background:transparent;color:var(--term-fg);font-family:var(--mono);padding:9px 10px;border-radius:10px;cursor:pointer}
+.ch-item:hover{background:var(--term-line)}
+.ch-item.on{background:color-mix(in srgb,#FF2D95 10%,var(--term-bg));box-shadow:inset 3px 0 0 #FF2D95}
+.ch-item-txt{flex:1;min-width:0}
+.ch-item-txt b{display:block;font-size:12.5px}
+.ch-item-txt small{display:block;font-size:11px;color:var(--term-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ch-item-meta{display:flex;flex-direction:column;align-items:flex-end;gap:4px;font-size:10.5px;color:var(--term-dim)}
+.ch-item-meta i{font-style:normal;min-width:18px;height:18px;border-radius:9px;background:#FF2D95;color:#fff;font-size:10px;display:grid;place-items:center;padding:0 5px}
+.ch-sep{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--term-dim);padding:12px 10px 4px}
+.ch-thread{display:flex;flex-direction:column;min-height:0}
+.ch-head{display:flex;align-items:center;gap:11px;padding:12px 16px;border-bottom:1px solid var(--term-line)}
+.ch-head b{display:block;font-size:13.5px}
+.ch-head small{display:block;font-size:11px;color:var(--term-dim)}
+.ch-back{display:none}
+.ch-msgs{flex:1;overflow-y:auto;padding:16px 18px;display:flex;flex-direction:column;gap:6px}
+.ch-day{align-self:center;font-size:10.5px;color:var(--term-dim);padding:8px 0}
+.ch-msg{display:flex;flex-direction:column;align-items:flex-start;max-width:76%}
+.ch-msg.mine{align-self:flex-end;align-items:flex-end}
+.ch-bubble{padding:9px 13px;border-radius:16px 16px 16px 4px;background:var(--term-line);font-size:13px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.ch-msg.mine .ch-bubble{border-radius:16px 16px 4px 16px;background:var(--term-fg);color:var(--term-bg)}
+.ch-msg small{font-size:10px;color:var(--term-dim);margin:3px 4px 4px}
+.ch-compose{display:flex;align-items:flex-end;gap:8px;padding:10px 12px;border-top:1px solid var(--term-line)}
+.ch-compose textarea{flex:1;resize:none;border:1px solid var(--term-line);border-radius:12px;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:13.5px;padding:10px 12px;outline:none;max-height:140px}
+.ch-compose textarea:focus{border-color:var(--term-fg)}
+.ch-send{appearance:none;width:40px;height:40px;border-radius:50%;border:none;background:var(--term-fg);color:var(--term-bg);display:grid;place-items:center;cursor:pointer;flex-shrink:0}
+.ch-send:hover{background:linear-gradient(135deg,#FFEA00,#FF7A1A 50%,#FF2D95);color:#0A0A0A}
+.ch-empty{margin:auto;display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--term-dim);font-size:12.5px;text-align:center;padding:30px}
+.ch-empty .pp-ico{width:30px;height:30px;color:#FF2D95}
+.ch-empty b{color:var(--term-fg);font-size:14px}
+.ch-empty.small{padding:20px}
+@media (max-width:767px){
+  .ch-wrap{grid-template-columns:1fr;height:calc(100vh - 230px)}
+  .ch-wrap .ch-thread{display:none}
+  .ch-wrap.has-thread .ch-side{display:none}
+  .ch-wrap.has-thread .ch-thread{display:flex}
+  .ch-back{display:inline-grid}
+}
+
+/* Calendar */
+.ca-wrap{display:grid;grid-template-columns:260px 1fr;gap:14px;min-height:0}
+.ca-side{border:1px solid var(--term-line);border-radius:16px;padding:14px;align-self:start;max-height:calc(100vh - 200px);overflow-y:auto}
+.ca-today b{display:block;font-family:var(--display);font-weight:400;font-size:26px;text-transform:uppercase;line-height:1}
+.ca-today span{display:block;font-size:11.5px;color:var(--term-dim);margin-top:4px}
+.ca-grp h5{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--term-dim);margin:12px 0 6px;font-weight:500}
+.ca-todo{appearance:none;display:flex;gap:10px;align-items:flex-start;width:100%;text-align:left;border:none;background:transparent;color:var(--term-fg);font-family:var(--mono);padding:7px 4px;border-radius:8px;cursor:pointer}
+.ca-todo:hover{background:var(--term-line)}
+.ca-todo i{width:14px;height:14px;border-radius:4px;border:1.5px solid var(--st-ready);flex-shrink:0;margin-top:2px}
+.ca-todo.prog i{border-color:var(--st-prog);background:color-mix(in srgb,var(--st-prog) 25%,transparent)}
+.ca-todo.ev i{border-radius:50%;border-color:#FF2D95;background:#FF2D95}
+.ca-todo b{display:block;font-size:12px;font-weight:500}
+.ca-todo small{display:block;font-size:10.5px;color:var(--term-dim)}
+.ca-main{border:1px solid var(--term-line);border-radius:16px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ca-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:12px 14px;border-bottom:1px solid var(--term-line)}
+.ca-nav{display:flex;align-items:center;gap:6px}
+.ca-nav h2{font-size:15px;font-weight:600;margin-left:8px}
+.ca-legend{display:flex;gap:12px;font-size:11px;color:var(--term-dim)}
+.ca-legend span::before{content:'';display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px;vertical-align:-1px;background:var(--lc)}
+.ca-legend .ev{--lc:#FF2D95} .ca-legend .step{--lc:var(--st-prog)} .ca-legend .cp{--lc:#E8B923} .ca-legend .cycle{--lc:var(--t-arc)}
+.ca-grid-wrap{overflow:auto;max-height:calc(100vh - 270px)}
+.ca-grid{display:grid;grid-template-columns:64px repeat(7,minmax(110px,1fr));min-width:830px}
+.ca-corner{font-size:10px;color:var(--term-dim);display:grid;place-items:center;border-bottom:1px solid var(--term-line);position:sticky;top:0;background:var(--term-bg);z-index:3}
+.ca-dh{display:flex;flex-direction:column;align-items:center;padding:8px 0;border-bottom:1px solid var(--term-line);border-left:1px solid var(--term-line);position:sticky;top:0;background:var(--term-bg);z-index:3}
+.ca-dh b{font-size:20px;font-weight:500;line-height:1}
+.ca-dh span{font-size:10px;color:var(--term-dim);letter-spacing:.1em}
+.ca-dh.today b{background:var(--neon);color:#0A0A0A;border-radius:10px;padding:2px 8px}
+.ca-allday-l{font-size:10px;color:var(--term-dim);padding:8px 6px;border-bottom:1px solid var(--term-line)}
+.ca-allday{border-left:1px solid var(--term-line);border-bottom:1px solid var(--term-line);padding:4px;display:flex;flex-direction:column;gap:3px;min-height:34px}
+.ca-chip{border-radius:7px;padding:3px 7px;font-size:10.5px;line-height:1.3;border-left:3px solid var(--cc);background:color-mix(in srgb,var(--cc) 14%,var(--term-bg))}
+.ca-chip b{display:block;font-weight:600}
+.ca-chip span{display:block;color:var(--term-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ca-chip.step{--cc:var(--st-prog)} .ca-chip.cp{--cc:#E8B923} .ca-chip.cycle{--cc:var(--t-arc)}
+.ca-hours div{font-size:10px;color:var(--term-dim);text-align:right;padding:2px 8px 0 0;box-sizing:border-box}
+.ca-col{position:relative;border-left:1px solid var(--term-line)}
+.ca-col.today{background:color-mix(in srgb,#FF2D95 3%,transparent)}
+.ca-slot{border-bottom:1px dashed color-mix(in srgb,var(--term-line) 80%,transparent);box-sizing:border-box}
+.ca-ev{appearance:none;position:absolute;left:4px;right:4px;border:none;border-left:3px solid #FF2D95;border-radius:8px;background:color-mix(in srgb,#FF2D95 14%,var(--term-bg));
+  color:var(--term-fg);font-family:var(--mono);text-align:left;padding:5px 7px;cursor:pointer;overflow:hidden;box-shadow:0 2px 8px rgba(0,0,0,.06)}
+.ca-ev:hover{background:color-mix(in srgb,#FF2D95 22%,var(--term-bg))}
+.ca-ev b{display:block;font-size:11.5px}
+.ca-ev span{display:block;font-size:10px;color:var(--term-dim)}
+.ca-now{position:absolute;left:0;right:0;height:2px;background:#FF2D95;z-index:2}
+.ca-now::before{content:'';position:absolute;left:-4px;top:-3px;width:8px;height:8px;border-radius:50%;background:#FF2D95}
+@media (max-width:900px){ .ca-wrap{grid-template-columns:1fr} .ca-side{max-height:none} .ca-legend{display:none} }
+
+/* ══ Tracker colour: folders per contract, statuses by colour ══ */
+.term-folders{gap:12px}
+.term-folder{flex:0 0 136px;padding:10px 8px;border:1px solid transparent;border-radius:12px;color:var(--term-fg)}
+.term-folder svg{width:40px;height:40px;color:var(--fc)}
+.term-folder svg path.back{fill:color-mix(in srgb,var(--fc) 30%,transparent)}
+.term-folder svg path.front{fill:color-mix(in srgb,var(--fc) 55%,transparent)}
+.term-folder:hover{background:color-mix(in srgb,var(--fc) 8%,transparent);border-color:color-mix(in srgb,var(--fc) 35%,transparent)}
+.term-folder.active{background:color-mix(in srgb,var(--fc) 13%,transparent);border-color:var(--fc);color:var(--term-fg)}
+.term-folder.active .term-folder-label{font-weight:600}
+.term-tab .tdot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.term-tab[data-k="to-do"] .tdot{background:var(--st-todo)} .term-tab[data-k="in progress"] .tdot{background:var(--st-prog)}
+.term-tab[data-k="delivered"] .tdot{background:var(--st-done)} .term-tab[data-k="all"] .tdot{background:var(--neon)}
+.term-tab.active .term-tab-count{background:var(--term-fg);color:var(--term-bg);border-radius:999px;padding:0 6px}
+.term-card{position:relative;transition:box-shadow .2s,transform .2s}
+.term-card::before{content:'';position:absolute;left:-1px;top:10px;bottom:10px;width:3px;border-radius:0 3px 3px 0;background:var(--sc,transparent)}
+.term-card[data-st="wait"]{--sc:var(--st-todo)} .term-card[data-st="ready"]{--sc:var(--st-ready)} .term-card[data-st="progress"]{--sc:var(--st-prog)}
+.term-card[data-st="review"]{--sc:var(--st-rev)} .term-card[data-st="done"]{--sc:var(--st-done)}
+.term-card:hover{box-shadow:0 8px 24px rgba(0,0,0,.08);transform:translateY(-1px)}
+.term-card.flash{box-shadow:0 0 0 3px #FF2D95}
+.term-card-state{display:inline-block;padding:2px 9px;border-radius:999px;font-weight:600}
+.term-card-state.ready{color:var(--st-ready);background:color-mix(in srgb,var(--st-ready) 13%,transparent)}
+.term-card-state.wait{color:var(--term-dim);background:var(--term-line)}
+.term-card-state.progress{color:var(--st-prog);background:color-mix(in srgb,var(--st-prog) 13%,transparent)}
+.term-card-state.review{color:var(--st-rev);background:color-mix(in srgb,var(--st-rev) 13%,transparent)}
+.term-card-state.done{color:var(--st-done);background:color-mix(in srgb,var(--st-done) 13%,transparent)}
+
 /* Profile chip — bottom of the sidebar */
 .term-sb-me{
   appearance:none;-webkit-appearance:none;margin-top:auto;display:flex;align-items:center;gap:10px;width:100%;
@@ -3187,6 +3459,20 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
         <button class="term-sb-subitem" onclick="openCurrentMapFile()">Map <span class="term-sb-count" id="term-sb-map-mark">—</span></button>
         <button class="term-sb-subitem" onclick="setTermView('decomposed')">Decomposed <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
+      </div>
+    </div>
+    <div class="term-sb-group" data-group="clients">
+      <div class="term-sb-row">
+      <button class="term-sb-item" data-view="clients" onclick="setTermView('clients')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg>
+        <span>Clients</span>
+      </button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('clients')" aria-label="Collapse Clients">−</button>
+      </div>
+      <div class="term-sb-sub" id="term-sb-clients-sub">
+        <button class="term-sb-subitem" data-sub="notifications" onclick="setTermView('notifications')">Notifications <span class="term-sb-count" id="sb-notif-count"></span></button>
+        <button class="term-sb-subitem" data-sub="chat" onclick="setTermView('chat')">Chat <span class="term-sb-count" id="sb-chat-count"></span></button>
+        <button class="term-sb-subitem" data-sub="calendar" onclick="setTermView('calendar')">Calendar</button>
       </div>
     </div>
     <div class="term-sb-group" data-group="browser">
@@ -8770,6 +9056,9 @@ function enterTerminal() {
   if (!shell) return;
   renderSbMe();
   loadMemberIds().then(() => { renderSbMe(); renderDashMe(); }).catch(() => {});
+  refreshNotifCount();
+  clearInterval(window._notifTimer);
+  window._notifTimer = setInterval(() => { if (!document.hidden && operator) refreshNotifCount(); }, 60000);
   shell.classList.add('in');
   document.getElementById('uni-shell')?.classList.remove('in');
 
@@ -8777,7 +9066,7 @@ function enterTerminal() {
   if (scroll && !scroll.dataset.booted) {
     scroll.dataset.booted = '1';
     const who = operator?.peer_name || relation?.name || 'there';
-    termPrint(`Signed in as ${who}. Ask about your contracts, the markets or the network — or type 'help' for commands.`, 'system');
+    termPrint(`Signed in as ${who}${operator?.is_genesis ? ' — Executive Operator' : ''}. Ask about your contracts, the markets or the network — or type 'help' for commands.`, 'system');
   }
 
   updateTermFooter();
@@ -9119,7 +9408,7 @@ function renderDashMe() {
   el.innerHTML = `
     <div class="dash-lbl"><span>Member card</span><button class="dash-btn sm" onclick="openProfilePanel()">Profile</button></div>
     <div class="dash-mcard" onclick="openProfilePanel()">
-      <div class="dash-mcard-top"><span>BIXXVILLE</span><span class="dash-mcard-tier">${esc(TIER_STEPS[k][0])}</span></div>
+      <div class="dash-mcard-top"><span>BIXXVILLE</span><span class="dash-mcard-tier">${operator.is_genesis ? 'Executive Operator' : esc(TIER_STEPS[k][0])}</span></div>
       <div class="dash-mcard-id">${esc(ids.member_id || '— — —')}</div>
       <div class="dash-mcard-foot">
         <div><small>Member</small><b>${esc(operator.peer_name || '')}</b></div>
@@ -9216,6 +9505,679 @@ function statementsListHtml() {
   </table>`;
 }
 
+// ══════════════════════════════════════════════════════════════════════
+// PEOPLE — Clients (members + clients), Notifications, Chat, Calendar
+// Every call here goes through the session-checked functions in migration
+// 0011, so what a screen shows is exactly what the signed-in member may see.
+// ══════════════════════════════════════════════════════════════════════
+const isExec = () => !!operator?.is_genesis;
+const roleLabel = op => op?.is_genesis ? 'Executive Operator' : tier(op?.total_logs);
+const TIER_COLOR = { Apprentice: 'apprentice', Wrangler: 'wrangler', Architect: 'architect', Operator: 'operator' };
+const agoText = ts => {
+  const s = (Date.now() - new Date(ts)) / 1000;
+  if (s < 60) return 'just now';
+  if (s < 3600) return Math.floor(s / 60) + 'm ago';
+  if (s < 86400) return Math.floor(s / 3600) + 'h ago';
+  if (s < 86400 * 7) return Math.floor(s / 86400) + 'd ago';
+  return new Date(ts).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+const initials = n => (n || '?').trim().split(/\s+/).map(w => w[0]).slice(0, 2).join('').toUpperCase();
+const shortAddr = a => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
+const ico = (d, cls = '') => `<svg class="pp-ico ${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const ICON = {
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
+  phone: '<path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2"/>',
+  copy: '<rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/>',
+  dots: '<circle cx="12" cy="5" r="1.2" fill="currentColor"/><circle cx="12" cy="12" r="1.2" fill="currentColor"/><circle cx="12" cy="19" r="1.2" fill="currentColor"/>',
+  users: '<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/>',
+  brief: '<rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M3 13h18"/>',
+  search: '<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
+  wallet: '<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="16.5" cy="13.5" r="1.2" fill="currentColor"/>',
+  tools: '<path d="M14.7 6.3a4 4 0 0 0-5.4 5.4L3 18l3 3 6.3-6.3a4 4 0 0 0 5.4-5.4l-2.5 2.5-2.4-.6-.6-2.4z"/>',
+  bell: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 8 3 8H3s3-1 3-8"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  chat: '<path d="M4 5h16v11H8l-4 4z"/>',
+  check: '<path d="m5 12 5 5 9-10"/>',
+  cal: '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+  flag: '<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+  back: '<path d="M15 5l-7 7 7 7"/>',
+  send: '<path d="M12 19V5M5 12l7-7 7 7"/>',
+};
+function copyText(t, what) { navigator.clipboard?.writeText(t).then(() => toast((what || 'Copied') + ' copied.')).catch(() => toast('Couldn’t copy — select it and copy by hand.')); }
+
+// Small popover menu for row actions.
+function openRowMenu(btn, items) {
+  closeRowMenu();
+  const m = document.createElement('div');
+  m.className = 'pp-menu';
+  m.id = 'pp-menu';
+  m.innerHTML = items.map((it, i) => `<button type="button" data-i="${i}" class="${it.danger ? 'danger' : ''}">${esc(it.label)}</button>`).join('');
+  document.body.appendChild(m);
+  const r = btn.getBoundingClientRect();
+  m.style.top = Math.min(innerHeight - m.offsetHeight - 8, r.bottom + 4) + 'px';
+  m.style.left = Math.max(8, r.right - m.offsetWidth) + 'px';
+  m.querySelectorAll('button').forEach(b => b.addEventListener('click', () => { closeRowMenu(); items[+b.dataset.i].run(); }));
+  setTimeout(() => document.addEventListener('click', closeRowMenu, { once: true }), 0);
+}
+function closeRowMenu() { document.getElementById('pp-menu')?.remove(); }
+
+// ── Clients page ─────────────────────────────────────────────────────
+const CL = { tab: 'members', filter: 'all', q: '', page: 1, members: null, clients: null, funds: {} };
+const CL_PAGE = 12;
+
+async function loadPeople(force) {
+  if (force || !CL.members) {
+    const [m, c] = await Promise.all([sb.rpc('network_members'), sb.rpc('network_clients')]);
+    if (m.error) throw m.error;
+    if (c.error) throw c.error;
+    CL.members = m.data || [];
+    CL.clients = c.data || [];
+  }
+}
+
+async function renderClientsPanel() {
+  const panel = document.getElementById('term-panel');
+  if (!panel.querySelector('.cl-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  try { await loadPeople(); } catch (e) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the network — ${esc(e.message)}</div>`; return; }
+  const isM = CL.tab === 'members';
+  const filters = isM
+    ? [['all', 'All'], ['working', 'Working now'], ['new', 'New']]
+    : [['all', 'All'], ['projects', 'With projects'], ['settled', 'Settled']];
+  if (!filters.some(f => f[0] === CL.filter)) CL.filter = 'all';
+  const q = CL.q.trim().toLowerCase();
+  const month = Date.now() - 30 * 864e5;
+  let rows = isM ? CL.members : CL.clients;
+  rows = rows.filter(r => {
+    if (isM && CL.filter === 'working' && !r.steps_active) return false;
+    if (isM && CL.filter === 'new' && new Date(r.created_at) < month) return false;
+    if (!isM && CL.filter === 'projects' && !r.projects) return false;
+    if (!isM && CL.filter === 'settled' && !r.settled) return false;
+    if (!q) return true;
+    return [r.peer_name, r.name, r.handle, r.email, r.member_id, r.bix_id, r.code, r.wallet_address].some(v => (v || '').toLowerCase().includes(q));
+  });
+  const pages = Math.max(1, Math.ceil(rows.length / CL_PAGE));
+  CL.page = Math.min(CL.page, pages);
+  const shown = rows.slice((CL.page - 1) * CL_PAGE, CL.page * CL_PAGE);
+  const fcount = k => {
+    const all = isM ? CL.members : CL.clients;
+    if (k === 'all') return all.length;
+    if (k === 'working') return all.filter(r => r.steps_active).length;
+    if (k === 'new') return all.filter(r => new Date(r.created_at) >= month).length;
+    if (k === 'projects') return all.filter(r => r.projects).length;
+    if (k === 'settled') return all.filter(r => r.settled).length;
+  };
+  panel.innerHTML = `<div class="cl-wrap">
+    <div class="pp-head">
+      <div><h2>Clients</h2><p>Everyone on the network — the members who do the work and the clients you do it for.</p></div>
+      <div class="pp-head-acts">
+        ${isExec() ? `<button class="pp-btn" onclick="openNetworkTools()">${ico(ICON.tools)}Network tools</button>
+        <button class="pp-btn solid" onclick="openAddPerson('${isM ? 'member' : 'client'}')">${ico(ICON.plus)}Add ${isM ? 'member' : 'client'}</button>` : ''}
+      </div>
+    </div>
+    <div class="pp-tabs">
+      <button class="${isM ? 'on' : ''}" onclick="CL.tab='members';CL.page=1;renderClientsPanel()">${ico(ICON.users)}Members <em>${CL.members.length}</em></button>
+      <button class="${!isM ? 'on' : ''}" onclick="CL.tab='clients';CL.page=1;renderClientsPanel()">${ico(ICON.brief)}Clients <em>${CL.clients.length}</em></button>
+      <span class="pp-tabs-gap"></span>
+      ${filters.map(([k, n]) => `<button class="pp-chip f-${k} ${CL.filter === k ? 'on' : ''}" onclick="CL.filter='${k}';CL.page=1;renderClientsPanel()"><i></i>${n} <em>${fcount(k)}</em></button>`).join('')}
+    </div>
+    <div class="pp-card">
+      <div class="pp-card-top">
+        <label class="pp-search">${ico(ICON.search)}<input id="cl-q" placeholder="Search ${isM ? 'members' : 'clients'}" value="${esc(CL.q)}" oninput="CL.q=this.value;CL.page=1;clSearchSoon()"></label>
+        <span class="pp-muted">Showing <b>${shown.length}</b> of <b>${rows.length}</b> ${isM ? 'members' : 'clients'}</span>
+      </div>
+      <div class="pp-table-wrap"><table class="pp-table">
+        ${isM ? `<tr><th>Member</th><th>Contact</th><th class="hide-md">IDs</th><th>Wallet</th><th>Tier</th><th class="hide-md">Work</th><th></th></tr>
+          ${shown.map(clMemberRow).join('') || '<tr><td colspan="7" class="pp-empty">No members match.</td></tr>'}`
+        : `<tr><th>Client</th><th>Contact</th>${isExec() ? '<th class="hide-md">Sign-in code</th>' : ''}<th>Wallet</th><th>Projects</th><th>Standing</th><th></th></tr>
+          ${shown.map(clClientRow).join('') || `<tr><td colspan="7" class="pp-empty">${CL.clients.length ? 'No clients match.' : 'No clients yet.' + (isExec() ? ' Add your first with “Add client”.' : '')}</td></tr>`}`}
+      </table></div>
+      ${pages > 1 ? `<div class="pp-pager">
+        <button ${CL.page === 1 ? 'disabled' : ''} onclick="CL.page--;renderClientsPanel()">‹</button>
+        ${Array.from({ length: pages }, (_, i) => `<button class="${i + 1 === CL.page ? 'on' : ''}" onclick="CL.page=${i + 1};renderClientsPanel()">${i + 1}</button>`).join('')}
+        <button ${CL.page === pages ? 'disabled' : ''} onclick="CL.page++;renderClientsPanel()">›</button></div>` : ''}
+    </div></div>`;
+  const qi = document.getElementById('cl-q');
+  if (qi && document.activeElement?.id !== 'cl-q' && CL._typing) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
+  CL._typing = false;
+  shown.forEach(r => { if (r.wallet_address) clLoadFunds(r.wallet_address); });
+}
+let clSearchTimer = null;
+function clSearchSoon() { clearTimeout(clSearchTimer); CL._typing = true; clSearchTimer = setTimeout(renderClientsPanel, 180); }
+
+function clFundsHtml(addr) {
+  if (!addr) return '<span class="pp-muted">No wallet</span>';
+  const f = CL.funds[addr];
+  const amt = f === undefined ? '<span class="pp-muted">checking…</span>'
+    : f === null ? '<span class="pp-muted">unavailable</span>'
+    : `<b>$${f.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</b> <span class="pp-muted">USDC</span>`;
+  return `<div class="pp-wallet" data-addr="${esc(addr)}">${ico(ICON.wallet)}<div><div>${amt}</div><button class="pp-link" onclick="copyText('${esc(addr)}','Wallet address')">${esc(shortAddr(addr))}</button></div></div>`;
+}
+async function clLoadFunds(addr) {
+  if (CL.funds[addr] !== undefined) return;
+  CL.funds[addr] = undefined;
+  let v = null;
+  try { v = await fetchUsdcBalance(addr); } catch (e) { v = null; }
+  CL.funds[addr] = v ?? null;
+  document.querySelectorAll(`.pp-wallet[data-addr="${CSS.escape(addr)}"]`).forEach(el => { el.outerHTML = clFundsHtml(addr); });
+}
+
+function clContactHtml(email, phone) {
+  if (!email && !phone) return '<span class="pp-muted">No contact info yet</span>';
+  return `${email ? `<div class="pp-contact">${ico(ICON.mail)}<span>${esc(email)}</span><button class="pp-copy" onclick="copyText('${esc(email)}','Email')">${ico(ICON.copy)}Copy</button></div>` : ''}
+    ${phone ? `<div class="pp-contact">${ico(ICON.phone)}<span>${esc(phone)}</span></div>` : ''}`;
+}
+
+function clMemberRow(m) {
+  const t = tier(m.total_logs);
+  const status = m.standing === 'suspended' ? 'off' : m.standing === 'probation' ? 'warn' : 'on';
+  return `<tr>
+    <td><div class="pp-person">
+      <span class="pp-av">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(m.peer_name))}<i class="pp-dot ${status}"></i></span>
+      <div><b>${esc(m.peer_name)}</b>${m.is_genesis ? '<span class="pp-exec">Executive Operator</span>' : ''}<small>${esc(m.region || m.handle || 'Member')}</small></div></div></td>
+    <td>${clContactHtml(m.email, m.phone)}</td>
+    <td class="hide-md"><div class="pp-ids"><span>${esc(m.member_id || '—')}</span><small>${esc(m.bix_id || 'no BIX ID')}</small></div></td>
+    <td>${clFundsHtml(m.wallet_address)}</td>
+    <td><span class="pp-tier ${m.is_genesis ? 'exec' : TIER_COLOR[t]}">${m.is_genesis ? 'Executive' : t}</span><small class="pp-logs">${(m.total_logs || 0).toLocaleString()} LOGs</small></td>
+    <td class="hide-md"><div class="pp-work"><span title="Granted">${m.steps_granted}</span><span class="act" title="In progress">${m.steps_active}</span><span class="ok" title="Verified">${m.steps_verified}</span></div></td>
+    <td><button class="pp-icbtn" aria-label="Actions for ${esc(m.peer_name)}" onclick="clMemberMenu(this,'${esc(m.id)}')">${ico(ICON.dots)}</button></td>
+  </tr>`;
+}
+function clMemberMenu(btn, id) {
+  const m = CL.members.find(x => x.id === id);
+  if (!m) return;
+  const items = [{ label: 'View full record', run: () => openMemberRecord(id) }];
+  if (id !== operator.id) items.push({ label: 'Message', run: () => openChatWith(id) });
+  if (m.member_id) items.push({ label: 'Copy member ID', run: () => copyText(m.member_id, 'Member ID') });
+  if (m.email) items.push({ label: 'Copy email', run: () => copyText(m.email, 'Email') });
+  openRowMenu(btn, items);
+}
+
+function clClientRow(c) {
+  return `<tr>
+    <td><div class="pp-person"><span class="pp-av client">${esc(initials(c.name))}</span>
+      <div><b>${esc(c.name)}</b><small>${c.handle ? esc(c.handle) : 'Client since ' + esc(fmtDate(c.created_at))}</small></div></div></td>
+    <td>${clContactHtml(c.email, c.phone)}</td>
+    ${isExec() ? `<td class="hide-md">${c.code ? `<div class="pp-contact"><code class="pp-code">${esc(c.code)}</code><button class="pp-copy" onclick="copyText('${esc(c.code)}','Sign-in code')">${ico(ICON.copy)}Copy</button></div>` : '—'}</td>` : ''}
+    <td>${clFundsHtml(c.wallet_address)}</td>
+    <td><div class="pp-ids"><span>${c.projects} project${c.projects === 1 ? '' : 's'}</span><small>${c.settled} settled${c.settled_value ? ' · $' + Number(c.settled_value).toLocaleString('en-US', { maximumFractionDigits: 2 }) : ''}</small></div></td>
+    <td><span class="pp-standing ${esc(c.standing)}">${esc(c.standing)}</span></td>
+    <td><button class="pp-icbtn" aria-label="Actions for ${esc(c.name)}" onclick="clClientMenu(this,'${esc(c.id)}')">${ico(ICON.dots)}</button></td>
+  </tr>`;
+}
+function clClientMenu(btn, id) {
+  const c = CL.clients.find(x => x.id === id);
+  if (!c) return;
+  const items = [];
+  if (c.code) items.push({ label: 'Copy sign-in code', run: () => copyText(c.code, 'Sign-in code') });
+  if (c.email) items.push({ label: 'Copy email', run: () => copyText(c.email, 'Email') });
+  if (c.wallet_address) items.push({ label: 'Copy wallet address', run: () => copyText(c.wallet_address, 'Wallet address') });
+  if (!items.length) items.push({ label: 'Nothing to copy yet', run: () => {} });
+  openRowMenu(btn, items);
+}
+
+// The PIN-recovery queue, central wallet and payment audit, from the old console.
+function openNetworkTools() { openGenesisConsole(); }
+
+// ── Add a member or a client — a drawer, not a page change ──
+function openAddPerson(kind) {
+  if (!isExec()) return;
+  let d = document.getElementById('pp-drawer');
+  if (!d) {
+    const scrim = document.createElement('div');
+    scrim.id = 'pp-scrim';
+    scrim.onclick = closeAddPerson;
+    d = document.createElement('aside');
+    d.id = 'pp-drawer';
+    d.setAttribute('aria-label', 'Add to the network');
+    document.body.append(scrim, d);
+  }
+  renderAddPerson(kind);
+  requestAnimationFrame(() => { d.classList.add('on'); document.getElementById('pp-scrim').classList.add('on'); d.querySelector('input')?.focus(); });
+}
+function closeAddPerson() {
+  document.getElementById('pp-drawer')?.classList.remove('on');
+  document.getElementById('pp-scrim')?.classList.remove('on');
+}
+function renderAddPerson(kind, done) {
+  const d = document.getElementById('pp-drawer');
+  const isM = kind === 'member';
+  const tiers = [['Apprentice', 39, 0], ['Wrangler', 65, 100], ['Architect', 85, 400], ['Operator', 100, 1000]];
+  d.innerHTML = `
+    <div class="pp-dr-top"><b>Add to the network</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>
+    ${done ? done : `
+    <div class="pp-seg">
+      <button class="${isM ? 'on' : ''}" onclick="renderAddPerson('member')">${ico(ICON.users)}Member</button>
+      <button class="${!isM ? 'on' : ''}" onclick="renderAddPerson('client')">${ico(ICON.brief)}Client</button>
+    </div>
+    <p class="pp-dr-lead">${isM ? 'A member does the work. They get a member ID and a 7-digit PIN to sign in — you’ll see the PIN once, to hand to them.'
+                                : 'A client is someone you do the work for. They get a 6-character code to sign in to their client view.'}</p>
+    <form class="pp-form" onsubmit="event.preventDefault(); submitAddPerson('${kind}')">
+      <label><span>Name</span><input id="ap-name" autocomplete="off" required placeholder="${isM ? 'Their full name' : 'Business or person'}"></label>
+      <label><span>Email</span><input id="ap-email" type="email" autocomplete="off" ${isM ? 'required' : ''} placeholder="name@example.com"></label>
+      ${isM ? `<div class="pp-field"><span>Starting tier</span><div class="pp-tierpick">
+        ${tiers.map(([t, rate, logs], i) => `<label class="pp-tieropt ${TIER_COLOR[t]}"><input type="radio" name="ap-tier" value="${t}" ${i === 0 ? 'checked' : ''}><b>${t}</b><small>$${rate} per LOG · starts at ${logs.toLocaleString()} LOGs</small></label>`).join('')}
+      </div></div>` : `
+      <label><span>Phone <em>optional</em></span><input id="ap-phone" autocomplete="off" placeholder="+1 340 …"></label>
+      <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" placeholder="0x…"></label>`}
+      <div class="pp-form-msg" id="ap-msg"></div>
+      <button class="pp-btn solid big" id="ap-go" type="submit">${ico(ICON.plus)}Add ${isM ? 'member' : 'client'}</button>
+    </form>`}`;
+}
+async function submitAddPerson(kind) {
+  const msg = document.getElementById('ap-msg'), go = document.getElementById('ap-go');
+  const val = id => (document.getElementById(id)?.value || '').trim();
+  msg.textContent = '';
+  go.disabled = true;
+  try {
+    if (kind === 'member') {
+      const t = document.querySelector('input[name="ap-tier"]:checked')?.value;
+      const { data, error } = await sb.rpc('invite_member', { p_name: val('ap-name'), p_email: val('ap-email'), p_tier: t });
+      if (error) throw error;
+      const welcome = `Welcome to Bixxville, ${data.name}.\nYour member ID: ${data.member_id}\nYour PIN: ${data.pin}\nSign in at ${location.origin}${location.pathname.replace(/[^/]*$/, '')}terminal.html`;
+      window._apWelcome = welcome;
+      renderAddPerson('member', `
+        <div class="pp-done">
+          <div class="pp-done-badge">${ico(ICON.check)}</div>
+          <h3>${esc(data.name)} is on the network.</h3>
+          <div class="pp-secret"><small>Member ID</small><b>${esc(data.member_id)}</b><button class="pp-copy" onclick="copyText('${esc(data.member_id)}','Member ID')">${ico(ICON.copy)}Copy</button></div>
+          <div class="pp-secret pin"><small>PIN — shown once</small><b>${esc(data.pin)}</b><button class="pp-copy" onclick="copyText('${esc(data.pin)}','PIN')">${ico(ICON.copy)}Copy</button></div>
+          <p class="pp-muted">Copy the PIN now — it isn’t stored anywhere it can be read back. If it’s lost, they can request a reset from the sign-in screen.</p>
+          <button class="pp-btn solid big" onclick="copyText(window._apWelcome,'Welcome message')">${ico(ICON.copy)}Copy a welcome message</button>
+          <button class="pp-btn big" onclick="closeAddPerson()">Done</button>
+        </div>`);
+    } else {
+      const { data, error } = await sb.rpc('add_client', { p_name: val('ap-name'), p_email: val('ap-email'), p_phone: val('ap-phone'), p_wallet: val('ap-wallet') });
+      if (error) throw error;
+      renderAddPerson('client', `
+        <div class="pp-done">
+          <div class="pp-done-badge">${ico(ICON.check)}</div>
+          <h3>${esc(data.name)} is a client.</h3>
+          <div class="pp-secret pin"><small>Their sign-in code</small><b>${esc(data.code)}</b><button class="pp-copy" onclick="copyText('${esc(data.code)}','Sign-in code')">${ico(ICON.copy)}Copy</button></div>
+          <p class="pp-muted">They enter this code on the sign-in screen to reach their client view. You can find it again on the Clients tab.</p>
+          <button class="pp-btn big" onclick="closeAddPerson()">Done</button>
+        </div>`);
+    }
+    await loadPeople(true);
+    if (CL.tab !== (kind === 'member' ? 'members' : 'clients')) CL.tab = kind === 'member' ? 'members' : 'clients';
+    if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) renderClientsPanel();
+  } catch (e) {
+    msg.textContent = e.message || String(e);
+    go.disabled = false;
+  }
+}
+
+// ── Notifications ────────────────────────────────────────────────────
+const NT = { filter: 'all', events: [], attention: [] };
+const EVENT_KIND = {
+  MESSAGE: ['chat', 'Message'], MEMBER_JOINED: ['users', 'Member'], LOG: ['flag', 'Work'], CYCLE: ['cal', 'Cycle'],
+  ENGAGEMENT: ['brief', 'Client'], SYSTEM: ['bell', 'System'],
+};
+
+async function loadAttention() {
+  const out = [];
+  const me = operator?.id;
+  if (!me) return out;
+  const { data: maps } = await sb.from('work_maps').select('id,goal');
+  const goal = Object.fromEntries((maps || []).map(m => [m.id, m.goal]));
+  if (isExec()) {
+    const { data } = await sb.from('work_leaves').select('id,map_id,leaf_code,task,submitted_at')
+      .eq('status', 'in progress').not('submitted_at', 'is', null);
+    (data || []).forEach(l => out.push({ kind: 'verify', id: l.id, map: l.map_id, when: l.submitted_at,
+      title: `Verify ${l.leaf_code} — ${l.task}`, sub: goal[l.map_id] || '' }));
+  }
+  const { data: mine } = await sb.from('work_leaves').select('id,map_id,leaf_code,task,status,submitted_at,requires,target_date').eq('assigned_to', me).neq('status', 'delivered');
+  (mine || []).forEach(l => {
+    if (l.status === 'to-do') out.push({ kind: 'start', id: l.id, map: l.map_id, when: l.target_date, title: `Granted to you: ${l.leaf_code} — ${l.task}`, sub: goal[l.map_id] || '' });
+    else if (!l.submitted_at) out.push({ kind: 'continue', id: l.id, map: l.map_id, when: l.target_date, title: `In progress: ${l.leaf_code} — ${l.task}`, sub: goal[l.map_id] || '' });
+  });
+  return out;
+}
+
+async function refreshNotifCount() {
+  try {
+    const [{ data: ev }, att] = await Promise.all([sb.rpc('get_events'), loadAttention()]);
+    NT.events = ev || [];
+    NT.attention = att;
+    const unread = NT.events.filter(e => e.status !== 'acknowledged').length;
+    const n = unread + att.filter(a => a.kind === 'verify' || a.kind === 'start').length;
+    const el = document.getElementById('sb-notif-count');
+    if (el) { el.textContent = n || ''; el.classList.toggle('hot', n > 0); }
+    const chat = NT.events.filter(e => e.type === 'MESSAGE' && e.status !== 'acknowledged').length;
+    const ce = document.getElementById('sb-chat-count');
+    if (ce) { ce.textContent = chat || ''; ce.classList.toggle('hot', chat > 0); }
+  } catch (e) { /* signed out or offline — the count just stays */ }
+}
+
+async function renderNotificationsPanel() {
+  const panel = document.getElementById('term-panel');
+  if (!panel.querySelector('.nt-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  await refreshNotifCount();
+  const unread = NT.events.filter(e => e.status !== 'acknowledged');
+  const list = NT.filter === 'unread' ? unread : NT.filter === 'messages' ? NT.events.filter(e => e.type === 'MESSAGE') : NT.events;
+  const actLabel = { verify: 'Review', start: 'Start', continue: 'Open' };
+  panel.innerHTML = `<div class="nt-wrap">
+    <div class="pp-head">
+      <div><h2>Notifications</h2><p>What needs you, and what’s happened on the network.</p></div>
+      <div class="pp-head-acts"><button class="pp-btn" ${unread.length ? '' : 'disabled'} onclick="ntMarkAll()">${ico(ICON.check)}Mark all read</button></div>
+    </div>
+    ${NT.attention.length ? `<div class="nt-sec"><h4>Needs your attention <em>${NT.attention.length}</em></h4>
+      <div class="nt-att">${NT.attention.map((a, i) => `<button class="nt-att-row k-${a.kind}" onclick="ntOpenAttention(${i})">
+        <span class="nt-att-ico">${ico(a.kind === 'verify' ? ICON.check : ICON.flag)}</span>
+        <span class="nt-att-txt"><b>${esc(a.title)}</b><small>${esc(a.sub)}${a.when ? ' · ' + (a.kind === 'verify' ? 'submitted ' + esc(agoText(a.when)) : 'due ' + esc(fmtDate(a.when))) : ''}</small></span>
+        <span class="nt-att-go">${actLabel[a.kind]} →</span></button>`).join('')}</div></div>` : ''}
+    <div class="nt-sec"><h4>Activity</h4>
+      <div class="pp-tabs slim">${[['all', 'All', NT.events.length], ['unread', 'Unread', unread.length], ['messages', 'Messages', NT.events.filter(e => e.type === 'MESSAGE').length]]
+        .map(([k, n, c]) => `<button class="pp-chip ${NT.filter === k ? 'on' : ''}" onclick="NT.filter='${k}';renderNotificationsPanel()">${n} <em>${c}</em></button>`).join('')}</div>
+      <div class="nt-list">${list.slice(0, 60).map(e => {
+        const [ic, label] = EVENT_KIND[e.type] || EVENT_KIND.SYSTEM;
+        const isNew = e.status !== 'acknowledged';
+        return `<button class="nt-row ${isNew ? 'new' : ''} t-${esc((e.type || 'SYSTEM').toLowerCase())}" onclick="ntOpen('${esc(e.id)}')">
+          <span class="nt-ico">${ico(ICON[ic])}</span>
+          <span class="nt-txt"><b>${esc(e.title || label)}</b>${e.payload && e.type === 'MESSAGE' ? `<small>“${esc(e.payload)}”</small>` : ''}<small>${esc(label)} · ${esc(agoText(e.created_at))}${e.critical ? ' · <strong class="crit">critical</strong>' : ''}</small></span>
+          ${isNew ? '<i class="nt-dot"></i>' : ''}</button>`;
+      }).join('') || '<div class="pp-empty">Nothing here.</div>'}</div>
+    </div></div>`;
+}
+async function ntMarkAll() {
+  const { error } = await sb.rpc('ack_all_events', { p_by: operator.peer_name });
+  if (error) { toast(error.message); return; }
+  renderNotificationsPanel();
+}
+async function ntOpen(id) {
+  const e = NT.events.find(x => x.id === id);
+  if (e && e.status !== 'acknowledged') { await sb.rpc('ack_event', { p_id: id, p_by: operator.peer_name }); e.status = 'acknowledged'; }
+  if (e?.type === 'MESSAGE' && e.source_id) { setTermView('chat'); await chatOpenConversation(e.source_id); return; }
+  renderNotificationsPanel();
+}
+async function ntOpenAttention(i) {
+  const a = NT.attention[i];
+  if (!a) return;
+  if (trackerState?.mapId !== a.map) await loadWorkMap(a.map);
+  setTermView('tracker');
+  await renderTrackerBoard();
+  if (a.kind === 'verify') openReview(a.id);
+  else if (a.kind === 'start' || a.kind === 'continue') {
+    const card = document.querySelector(`.term-card[data-leaf="${CSS.escape(a.id)}"]`);
+    card?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card?.classList.add('flash');
+    setTimeout(() => card?.classList.remove('flash'), 1600);
+  }
+}
+
+// ── Chat — members with members ──────────────────────────────────────
+const CH = { convs: [], contacts: [], active: null, msgs: [], timer: null, q: '' };
+
+async function renderChatPanel() {
+  const panel = document.getElementById('term-panel');
+  if (!panel.querySelector('.ch-wrap')) {
+    panel.innerHTML = `<div class="ch-wrap ${CH.active ? 'has-thread' : ''}">
+      <aside class="ch-side">
+        <div class="ch-side-top"><h2>Chat</h2><label class="pp-search">${ico(ICON.search)}<input id="ch-q" placeholder="Search members" oninput="CH.q=this.value;chatRenderList()"></label></div>
+        <div class="ch-list" id="ch-list"><div class="pp-empty">Loading…</div></div>
+      </aside>
+      <section class="ch-thread" id="ch-thread"><div class="ch-empty">${ico(ICON.chat)}<b>Pick a conversation</b><span>or start one with any member on the network.</span></div></section>
+    </div>`;
+  }
+  await chatLoadLists();
+  if (CH.active) chatRenderThread();
+  clearInterval(CH.timer);
+  CH.timer = setInterval(() => {
+    if (document.hidden || !document.querySelector('.ch-wrap')) return;
+    chatLoadLists(true);
+    if (CH.active) chatLoadMessages(true);
+  }, 6000);
+}
+async function chatLoadLists(quiet) {
+  const me = operator.id;
+  const [c, k] = await Promise.all([
+    sb.rpc('list_my_conversations', { p_kind: 'operator', p_id: me }),
+    sb.rpc('list_messageable_contacts', { p_caller_kind: 'operator', p_caller_id: me }),
+  ]);
+  if (c.error || k.error) { if (!quiet) toast((c.error || k.error).message); return; }
+  CH.convs = c.data || [];
+  CH.contacts = k.data || [];
+  chatRenderList();
+}
+function chatRenderList() {
+  const el = document.getElementById('ch-list');
+  if (!el) return;
+  const q = CH.q.trim().toLowerCase();
+  const withConv = new Set(CH.convs.map(c => c.other_id));
+  const unreadBy = {};
+  (NT.events || []).filter(e => e.type === 'MESSAGE' && e.status !== 'acknowledged').forEach(e => { unreadBy[e.source_id] = (unreadBy[e.source_id] || 0) + 1; });
+  const convs = CH.convs.filter(c => !q || (c.other_name || '').toLowerCase().includes(q));
+  const others = CH.contacts.filter(k => !withConv.has(k.id) && (!q || (k.name || '').toLowerCase().includes(q)));
+  el.innerHTML = `
+    ${convs.map(c => `<button class="ch-item ${CH.active === c.conversation_id ? 'on' : ''}" onclick="chatOpenConversation('${esc(c.conversation_id)}')">
+      <span class="pp-av">${c.other_avatar_url ? `<img src="${esc(c.other_avatar_url)}" alt="">` : esc(initials(c.other_name))}</span>
+      <span class="ch-item-txt"><b>${esc(c.other_name)}</b><small>${esc(c.last_body || (c.last_voice_url ? 'Voice note' : 'No messages yet'))}</small></span>
+      <span class="ch-item-meta">${c.last_message_at ? esc(agoText(c.last_message_at)) : ''}${unreadBy[c.conversation_id] ? `<i>${unreadBy[c.conversation_id]}</i>` : ''}</span></button>`).join('')}
+    ${others.length ? `<div class="ch-sep">Start a conversation</div>${others.map(k => `<button class="ch-item" onclick="openChatWith('${esc(k.id)}')">
+      <span class="pp-av">${k.avatar_url ? `<img src="${esc(k.avatar_url)}" alt="">` : esc(initials(k.name))}</span>
+      <span class="ch-item-txt"><b>${esc(k.name)}</b><small>${esc(k.subtitle || 'Member')}</small></span></button>`).join('')}` : ''}
+    ${!convs.length && !others.length ? '<div class="pp-empty">No one matches.</div>' : ''}`;
+}
+async function openChatWith(memberId) {
+  if (document.getElementById('term-panel')?.querySelector('.ch-wrap') == null) setTermView('chat');
+  const { data, error } = await sb.rpc('get_or_create_conversation', { p_a_kind: 'operator', p_a_id: operator.id, p_b_kind: 'operator', p_b_id: memberId });
+  if (error) { toast(error.message); return; }
+  await chatLoadLists(true);
+  await chatOpenConversation(data);
+}
+async function chatOpenConversation(id) {
+  CH.active = id;
+  document.querySelector('.ch-wrap')?.classList.add('has-thread');
+  chatRenderList();
+  await chatLoadMessages();
+  // Reading the thread reads its notifications too.
+  const unread = (NT.events || []).filter(e => e.type === 'MESSAGE' && e.source_id === id && e.status !== 'acknowledged');
+  for (const e of unread) { await sb.rpc('ack_event', { p_id: e.id, p_by: operator.peer_name }); e.status = 'acknowledged'; }
+  if (unread.length) { refreshNotifCount(); chatRenderList(); }
+}
+async function chatLoadMessages(quiet) {
+  if (!CH.active) return;
+  const { data, error } = await sb.rpc('get_conversation_messages', { p_conversation_id: CH.active });
+  if (error) { if (!quiet) toast(error.message); return; }
+  const changed = (data || []).length !== CH.msgs.length || CH._for !== CH.active;
+  CH.msgs = data || [];
+  CH._for = CH.active;
+  if (changed || !quiet) chatRenderThread();
+}
+function chatRenderThread() {
+  const el = document.getElementById('ch-thread');
+  if (!el) return;
+  const conv = CH.convs.find(c => c.conversation_id === CH.active);
+  const other = conv ? (CL.members || []).find(m => m.id === conv.other_id) : null;
+  const draft = document.getElementById('ch-input')?.value || '';
+  let lastDay = '';
+  el.innerHTML = `
+    <div class="ch-head">
+      <button class="pp-icbtn ch-back" onclick="CH.active=null;document.querySelector('.ch-wrap')?.classList.remove('has-thread');chatRenderList()" aria-label="Back">${ico(ICON.back)}</button>
+      <span class="pp-av">${conv?.other_avatar_url ? `<img src="${esc(conv.other_avatar_url)}" alt="">` : esc(initials(conv?.other_name))}</span>
+      <div><b>${esc(conv?.other_name || 'Conversation')}</b><small>${esc(other ? [other.member_id, other.is_genesis ? 'Executive Operator' : tier(other.total_logs)].filter(Boolean).join(' · ') : 'Member')}</small></div>
+    </div>
+    <div class="ch-msgs" id="ch-msgs">${CH.msgs.map(m => {
+      const day = new Date(m.created_at).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' });
+      const sep = day !== lastDay ? `<div class="ch-day">${esc(day)}</div>` : '';
+      lastDay = day;
+      const mine = m.sender_id === operator.id;
+      return `${sep}<div class="ch-msg ${mine ? 'mine' : ''}"><div class="ch-bubble">${m.body ? esc(m.body) : (m.voice_url ? `<audio controls preload="none" src="${esc(m.voice_url)}"></audio>` : '')}</div>
+        <small>${mine ? '' : esc(m.sender_name) + ' · '}${new Date(m.created_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}</small></div>`;
+    }).join('') || '<div class="ch-empty small">No messages yet — say hello.</div>'}</div>
+    <form class="ch-compose" onsubmit="event.preventDefault(); chatSend()">
+      <textarea id="ch-input" rows="1" placeholder="Write a message…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();chatSend()}" oninput="this.style.height='auto';this.style.height=Math.min(140,this.scrollHeight)+'px'">${esc(draft)}</textarea>
+      <button type="submit" class="ch-send" aria-label="Send">${ico(ICON.send)}</button>
+    </form>`;
+  const box = document.getElementById('ch-msgs');
+  if (box) box.scrollTop = box.scrollHeight;
+}
+async function chatSend() {
+  const input = document.getElementById('ch-input');
+  const body = input?.value.trim();
+  if (!body || !CH.active) return;
+  input.value = '';
+  const { error } = await sb.rpc('send_direct_message', { p_conversation_id: CH.active, p_sender_kind: 'operator', p_sender_id: operator.id, p_sender_name: operator.peer_name, p_body: body, p_voice_url: null });
+  if (error) { toast(error.message); input.value = body; return; }
+  await chatLoadMessages();
+  chatLoadLists(true);
+  document.getElementById('ch-input')?.focus();
+}
+
+// ── Calendar ─────────────────────────────────────────────────────────
+const CA = { start: null, side: 'todo', events: [], due: [], cps: [] };
+const dayStart = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
+const mondayOf = d => { const x = dayStart(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
+const sameDay = (a, b) => dayStart(a).getTime() === dayStart(b).getTime();
+const CA_H0 = 0, CA_H1 = 24, CA_ROW = 48;
+
+async function renderCalendarPanel() {
+  if (!CA.start) CA.start = mondayOf(new Date());
+  const panel = document.getElementById('term-panel');
+  if (!panel.querySelector('.ca-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  const from = new Date(CA.start), to = new Date(CA.start); to.setDate(to.getDate() + 7);
+  const [ev, leaves, branches, maps] = await Promise.all([
+    sb.rpc('calendar_list', { p_from: from.toISOString(), p_to: to.toISOString() }),
+    sb.from('work_leaves').select('id,map_id,leaf_code,task,target_date,status,assigned_to'),
+    sb.from('work_branches').select('id,map_id,code,title,due_date').not('due_date', 'is', null),
+    sb.from('work_maps').select('id,goal'),
+  ]);
+  if (ev.error) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the calendar — ${esc(ev.error.message)}</div>`; return; }
+  const goal = Object.fromEntries((maps.data || []).map(m => [m.id, m.goal]));
+  CA.events = ev.data || [];
+  CA.leaves = (leaves.data || []).map(l => ({ ...l, goal: goal[l.map_id] }));
+  CA.cps = (branches.data || []).map(b => ({ ...b, goal: goal[b.map_id] }));
+  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(CA.start); d.setDate(d.getDate() + i); return d; });
+  const today = new Date();
+  const cyc = getActiveCycle();
+  const cycEnd = new Date(cyc.end); cycEnd.setDate(cycEnd.getDate() - 1);
+  const allDay = d => [
+    ...CA.leaves.filter(l => l.target_date && sameDay(new Date(l.target_date + 'T12:00:00'), d)).map(l => ({ cls: 'step', t: `${l.leaf_code} due`, s: l.task })),
+    ...CA.cps.filter(b => sameDay(new Date(b.due_date + 'T12:00:00'), d)).map(b => ({ cls: 'cp', t: `${b.code} due`, s: b.title })),
+    ...(sameDay(cycEnd, d) ? [{ cls: 'cycle', t: `C${cyc.num} settles`, s: 'Last day of the cycle' }] : []),
+    ...(sameDay(cyc.end, d) ? [{ cls: 'cycle', t: `C${cyc.num + 1} begins`, s: 'A new 28-day cycle' }] : []),
+  ];
+  const timed = d => CA.events.filter(e => sameDay(new Date(e.starts_at), d));
+  const fmtH = h => (h % 12 || 12) + (h < 12 ? ' AM' : ' PM');
+  const md = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const label = days[0].getMonth() === days[6].getMonth()
+    ? `${md(days[0])} – ${days[6].getDate()}, ${days[6].getFullYear()}`
+    : `${md(days[0])} – ${md(days[6])}, ${days[6].getFullYear()}`;
+  // The side list: my open steps (by due date) and the week's events.
+  const mine = CA.leaves.filter(l => l.assigned_to === operator.id && l.status !== 'delivered').sort((a, b) => (a.target_date || '9999').localeCompare(b.target_date || '9999'));
+  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
+  const groups = [
+    ['This week', mine.filter(l => l.target_date && new Date(l.target_date) <= weekEnd)],
+    ['Later', mine.filter(l => l.target_date && new Date(l.target_date) > weekEnd)],
+    ['No due date', mine.filter(l => !l.target_date)],
+  ].filter(g => g[1].length);
+  panel.innerHTML = `<div class="ca-wrap">
+    <aside class="ca-side">
+      <div class="ca-today"><b>Today</b><span>${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span></div>
+      <div class="pp-tabs slim"><button class="pp-chip ${CA.side === 'todo' ? 'on' : ''}" onclick="CA.side='todo';renderCalendarPanel()">To-do <em>${mine.length}</em></button>
+        <button class="pp-chip ${CA.side === 'events' ? 'on' : ''}" onclick="CA.side='events';renderCalendarPanel()">Events <em>${CA.events.length}</em></button></div>
+      ${CA.side === 'todo'
+        ? (groups.map(([n, ls]) => `<div class="ca-grp"><h5>${n}</h5>${ls.map(l => `<button class="ca-todo ${l.status === 'in progress' ? 'prog' : ''}" onclick="caOpenStep('${esc(l.map_id)}','${esc(l.id)}')">
+            <i></i><span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.goal || '')}${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span></button>`).join('')}</div>`).join('')
+           || '<div class="pp-empty">Nothing granted to you is open.</div>')
+        : (CA.events.map(e => `<button class="ca-todo ev" onclick="caShowEvent('${esc(e.id)}')"><i></i><span><b>${esc(e.title)}</b><small>${esc(new Date(e.starts_at).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }))} · ${esc(e.created_by || '')}</small></span></button>`).join('')
+           || '<div class="pp-empty">No events this week.</div>')}
+    </aside>
+    <section class="ca-main">
+      <div class="ca-bar">
+        <div class="ca-nav"><button class="pp-icbtn" onclick="CA.start.setDate(CA.start.getDate()-7);renderCalendarPanel()" aria-label="Previous week">‹</button>
+          <button class="pp-btn" onclick="CA.start=mondayOf(new Date());renderCalendarPanel()">Today</button>
+          <button class="pp-icbtn" onclick="CA.start.setDate(CA.start.getDate()+7);renderCalendarPanel()" aria-label="Next week">›</button>
+          <h2>${esc(label)}</h2></div>
+        <div class="ca-legend"><span class="ev">Event</span><span class="step">Step due</span><span class="cp">Checkpoint</span><span class="cycle">Cycle</span></div>
+        <button class="pp-btn solid" onclick="caAddEvent()">${ico(ICON.plus)}Add event</button>
+      </div>
+      <div class="ca-grid-wrap"><div class="ca-grid">
+        <div class="ca-corner">UTC−4</div>
+        ${days.map(d => `<div class="ca-dh ${sameDay(d, today) ? 'today' : ''}"><b>${d.getDate()}</b><span>${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</span></div>`).join('')}
+        <div class="ca-allday-l">All day</div>
+        ${days.map(d => `<div class="ca-allday">${allDay(d).map(a => `<div class="ca-chip ${a.cls}" title="${esc(a.s)}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></div>`).join('')}</div>`).join('')}
+        <div class="ca-hours">${Array.from({ length: CA_H1 - CA_H0 }, (_, i) => `<div style="height:${CA_ROW}px">${fmtH(CA_H0 + i)}</div>`).join('')}</div>
+        ${days.map(d => `<div class="ca-col ${sameDay(d, today) ? 'today' : ''}" style="height:${(CA_H1 - CA_H0) * CA_ROW}px" ondblclick="caAddEvent('${d.toISOString()}', event)">
+          ${Array.from({ length: CA_H1 - CA_H0 }, () => `<div class="ca-slot" style="height:${CA_ROW}px"></div>`).join('')}
+          ${timed(d).map(e => {
+            const s = new Date(e.starts_at), en = e.ends_at ? new Date(e.ends_at) : new Date(s.getTime() + 3600e3);
+            const top = Math.max(0, (s.getHours() + s.getMinutes() / 60 - CA_H0) * CA_ROW);
+            const h = Math.max(26, ((en - s) / 3600e3) * CA_ROW - 4);
+            return `<button class="ca-ev" style="top:${top + 2}px;height:${h}px" onclick="caShowEvent('${esc(e.id)}')"><b>${esc(e.title)}</b><span>${esc(s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))}${e.ends_at ? ' – ' + esc(en.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })) : ''}</span></button>`;
+          }).join('')}
+          ${sameDay(d, today) ? `<i class="ca-now" style="top:${(today.getHours() + today.getMinutes() / 60 - CA_H0) * CA_ROW}px"></i>` : ''}
+        </div>`).join('')}
+      </div></div>
+    </section></div>`;
+  const gw = panel.querySelector('.ca-grid-wrap');
+  // Open on the working day (7 AM), or an hour before now if that's later.
+  if (gw && !CA._scrolled) { gw.scrollTop = Math.max(7, Math.min(today.getHours() - 1, 17)) * CA_ROW; CA._scrolled = true; }
+}
+async function caOpenStep(mapId, leafId) {
+  if (trackerState?.mapId !== mapId) await loadWorkMap(mapId);
+  await openTrackerCard(leafId);
+}
+function caShowEvent(id) {
+  const e = CA.events.find(x => x.id === id);
+  if (!e) return;
+  const s = new Date(e.starts_at);
+  openOverlay(e.title, body => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="form-block"><div class="form-lbl">When</div><div>${esc(s.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' }))}${e.ends_at ? ' – ' + esc(new Date(e.ends_at).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })) : ''}</div></div>
+      ${e.notes ? `<div class="form-block"><div class="form-lbl">Notes</div><div style="white-space:pre-wrap">${esc(e.notes)}</div></div>` : ''}
+      <div class="form-block"><div class="form-lbl">Added by</div><div>${esc(e.created_by || '—')}</div></div>
+      ${e.mine ? `<div class="form-block"><button class="term-card-btn" onclick="caRemoveEvent('${esc(e.id)}')">Remove this event</button></div>` : ''}
+    </div>`;
+  });
+}
+async function caRemoveEvent(id) {
+  const { error } = await sb.rpc('calendar_remove', { p_id: id });
+  if (error) { toast(error.message); return; }
+  closeOverlay();
+  toast('Event removed.');
+  renderCalendarPanel();
+}
+function caAddEvent(dayIso, ev) {
+  const base = dayIso ? new Date(dayIso) : new Date();
+  if (ev && dayIso) {
+    const col = ev.currentTarget.getBoundingClientRect();
+    const h = Math.floor(CA_H0 + (ev.clientY - col.top) / CA_ROW);
+    base.setHours(Math.max(CA_H0, Math.min(CA_H1 - 1, h)), 0, 0, 0);
+  } else { base.setMinutes(0, 0, 0); base.setHours(base.getHours() + 1); }
+  const pad = n => String(n).padStart(2, '0');
+  const dStr = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`;
+  const tStr = `${pad(base.getHours())}:00`, eStr = `${pad(Math.min(23, base.getHours() + 1))}:00`;
+  openOverlay('Add an event', body => {
+    body.innerHTML = `<div class="term-wf"><form class="pp-form flat" onsubmit="event.preventDefault(); caSaveEvent()">
+      <label><span>Title</span><input id="ce-title" required placeholder="What’s happening"></label>
+      <div class="term-wf-grid">
+        <label><span>Date</span><input id="ce-date" type="date" value="${dStr}" required></label>
+        <label><span>Starts</span><input id="ce-start" type="time" value="${tStr}" required></label>
+        <label><span>Ends</span><input id="ce-end" type="time" value="${eStr}"></label>
+      </div>
+      <label><span>Notes <em>optional</em></span><textarea id="ce-notes" rows="3" placeholder="Agenda, link, who’s coming"></textarea></label>
+      <div class="pp-form-msg" id="ce-msg"></div>
+      <button class="pp-btn solid big" type="submit">${ico(ICON.plus)}Add to the calendar</button>
+      <p class="pp-muted">Everyone on the network sees the shared calendar.</p>
+    </form></div>`;
+    setTimeout(() => document.getElementById('ce-title')?.focus(), 50);
+  });
+}
+async function caSaveEvent() {
+  const v = id => document.getElementById(id)?.value || '';
+  const start = new Date(`${v('ce-date')}T${v('ce-start')}`);
+  const end = v('ce-end') ? new Date(`${v('ce-date')}T${v('ce-end')}`) : null;
+  const { error } = await sb.rpc('calendar_add', { p_title: v('ce-title'), p_starts_at: start.toISOString(), p_ends_at: end?.toISOString() || null, p_notes: v('ce-notes') });
+  if (error) { document.getElementById('ce-msg').textContent = error.message; return; }
+  closeOverlay();
+  toast('Added to the calendar.');
+  CA.start = mondayOf(start);
+  renderCalendarPanel();
+}
+
+// Tracker folders get their own colour, kept stable per contract.
+const FOLDER_COLORS = ['#FF2D95', '#FF7A1A', '#E8B923', '#3B82F6', '#10B981', '#8B5CF6'];
+
 // ── Profile — the chip at the bottom of the sidebar, and the page it opens ──
 // The page slides over the OS (which stays put, dimmed, behind it). Every
 // figure on it is read from the member's own records.
@@ -9228,7 +10190,7 @@ function renderSbMe() {
   const nm = document.getElementById('term-sb-me-name');
   if (nm) nm.textContent = operator.peer_name || 'Member';
   const id = document.getElementById('term-sb-me-id');
-  if (id) id.textContent = memberIds?.[operator.id]?.member_id || tier(operator.total_logs);
+  if (id) id.textContent = operator.is_genesis ? 'Executive Operator' : (memberIds?.[operator.id]?.member_id || tier(operator.total_logs));
 }
 
 function profileOpen() { return !!document.getElementById('pf')?.classList.contains('on'); }
@@ -9313,9 +10275,9 @@ async function renderProfilePanel() {
         <div class="pf-name">${esc(op.peer_name || 'Member')}</div>
         <div class="pf-sub">
           <span>${esc(handle)}</span>
-          <span class="pf-pill tier">${esc(TIER_STEPS[k][0])}</span>
+          ${op.is_genesis ? '<span class="pf-pill tier">Executive Operator</span>' : ''}
+          <span class="pf-pill ${op.is_genesis ? '' : 'tier'}">${esc(TIER_STEPS[k][0])}${op.is_genesis ? ' tier' : ''}</span>
           <span class="pf-pill">${esc(op.standing || 'active')}</span>
-          ${op.is_genesis ? '<span class="pf-pill">Genesis</span>' : ''}
           ${op.region ? `<span>${esc(op.region)}</span>` : ''}
         </div>
         ${op.contact_email ? `<div class="pf-sub">${esc(op.contact_email)}</div>` : ''}
@@ -9378,8 +10340,6 @@ async function renderProfilePanel() {
           ${icon('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>')}<span>Edit details</span><small class="desc">photo, bio, skills, contact, wallet</small></button>
         <button class="pf-row" onclick="openMemberRecord(operator.id)">
           ${icon('<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>')}<span>Full record</span><small class="desc">ledger, execution log, cycle audit</small></button>
-        ${op.is_genesis ? `<button class="pf-row" onclick="openGenesisConsole()">
-          ${icon('<path d="M12 3 4 7v6c0 4 3.5 7 8 8 4.5-1 8-4 8-8V7z"/>')}<span>Genesis Console</span><small class="desc">members, PINs, central wallet</small></button>` : ''}
         <button class="pf-row danger" onclick="closeProfilePanel(); doLogout()">
           ${icon('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>')}<span>Sign out</span></button>
       </div>
@@ -9433,8 +10393,10 @@ function toggleTermSidebar(force) {
 }
 
 function setTermView(view) {
-  const navView = view === 'decomposed' ? 'tracker' : view;
+  const navView = view === 'decomposed' ? 'tracker' : ['notifications', 'chat', 'calendar'].includes(view) ? 'clients' : view;
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
+  document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
+  if (view !== 'chat') clearInterval(CH.timer);
   const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
   if (view !== 'browser') stopBrowserArt();
@@ -9449,6 +10411,10 @@ function setTermView(view) {
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'browser') renderBrowserPanel();
     else if (view === 'decomposed') renderDecomposedPanel();
+    else if (view === 'clients') renderClientsPanel();
+    else if (view === 'notifications') renderNotificationsPanel();
+    else if (view === 'chat') renderChatPanel();
+    else if (view === 'calendar') { CA._scrolled = false; renderCalendarPanel(); }
   }
   toggleTermSidebar(false);
 }
@@ -10096,7 +11062,7 @@ async function renderTrackerBoard() {
     <div class="term-tabs">
       ${tabs.map(t => {
         const n = t.key === 'all' ? trackerState.leaves.length : trackerState.leaves.filter(l => l.status === t.key).length;
-        return `<button class="term-tab ${t.key === active ? 'active' : ''}" onclick="setTrackerFilter('${t.key}')">${t.label} <span class="term-tab-count">${n}</span></button>`;
+        return `<button class="term-tab ${t.key === active ? 'active' : ''}" data-k="${t.key}" onclick="setTrackerFilter('${t.key}')"><i class="tdot"></i>${t.label} <span class="term-tab-count">${n}</span></button>`;
       }).join('')}
     </div>
     ${body}`;
@@ -10160,7 +11126,7 @@ function renderLeafCard(l) {
     ? req.map(c => `${esc(c)}${statusOf(c) === 'delivered' ? ' ✓' : ` (${esc(statusOf(c) || 'missing')})`}`).join(', ')
     : 'nothing — start here';
   return `
-    <div class="term-card ${l.kind === 'genesis' ? 'genesis' : l.kind === 'outcome' ? 'outcome' : ''} ${l.is_key ? 'key' : ''}" data-leaf="${esc(l.id)}">
+    <div class="term-card ${l.kind === 'genesis' ? 'genesis' : l.kind === 'outcome' ? 'outcome' : ''} ${l.is_key ? 'key' : ''}" data-leaf="${esc(l.id)}" data-st="${l.status === 'delivered' ? 'done' : submitted ? 'review' : l.status === 'in progress' ? 'progress' : waiting.length ? 'wait' : 'ready'}">
       ${(l.kind === 'genesis' || l.kind === 'outcome' || l.is_key) ? `<div class="term-card-badges">
         ${l.kind === 'genesis' ? '<span class="term-badge genesis">◆ Genesis</span>' : ''}
         ${l.kind === 'outcome' ? '<span class="term-badge outcome">● Outcome</span>' : ''}
@@ -11080,12 +12046,14 @@ async function renderMapFolders() {
     .order('created_at', { ascending: false });
   if (!maps || maps.length < 2) return '';
 
-  const folderSvg = `<svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>`;
+  const folderSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path class="back" d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h4.3l2 2h8.7A1.5 1.5 0 0 1 21 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/><path class="front" d="M3 10a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/></svg>`;
+  // Oldest contract keeps the first colour, so a folder's colour never shifts.
+  const colorOf = id => FOLDER_COLORS[[...maps].reverse().findIndex(m => m.id === id) % FOLDER_COLORS.length];
 
   return `
     <div class="term-folders">
       ${maps.map(m => `
-        <button class="term-folder ${m.id === trackerState.mapId ? 'active' : ''}" onclick="switchToMap('${esc(m.id)}')" title="${esc(m.goal)}">
+        <button class="term-folder ${m.id === trackerState.mapId ? 'active' : ''}" style="--fc:${colorOf(m.id)}" onclick="switchToMap('${esc(m.id)}')" title="${esc(m.goal)}">
           ${folderSvg}
           <span class="term-folder-label">${esc(m.goal)}</span>
           <span class="term-folder-date">${fmtDate(m.created_at)}</span>
@@ -13690,9 +14658,9 @@ async function renderProfileTransactions() {
 // the top of the PIN system migration re: client-side gating). ──
 function openGenesisConsole() {
   if (!operator?.is_genesis) return;
-  openOverlay('Genesis Console', (body) => {
+  openOverlay('Network tools', (body) => {
     body.innerHTML = `
-      <div class="section-lbl" style="position:relative;top:0">Add Operator</div>
+      <div style="display:none">
       <div class="prof-field">
         <div class="prof-field-lbl">Name</div>
         <input class="prof-field-input" id="gc-invite-name" placeholder="Full name"/>
@@ -13711,9 +14679,8 @@ function openGenesisConsole() {
         </select>
       </div>
       <div style="padding:0 18px 18px">
-        <button class="act-btn-sm" onclick="genesisCreateInvite()">Generate PIN</button>
-        <div id="gc-invite-result" style="margin-top:14px"></div>
-      </div>
+        <div id="gc-invite-result"></div>
+      </div></div>
 
       <div class="section-lbl" style="position:relative;top:0">PIN Recovery Requests</div>
       <div id="gc-recovery-list" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>

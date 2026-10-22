@@ -24,6 +24,7 @@ try {
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.17.0/dist/ethers.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
@@ -560,6 +561,15 @@ html.theme-light{
 .sk-pay-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);}
 .sk-amount{font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream);}
 .sk-amount span{font-family:var(--mono);font-size:9px;color:var(--grey);font-weight:400;margin-left:4px;}
+.escrow-panel{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:4px 0 10px}
+.escrow-panel .form-input{margin-top:4px}
+.escrow-muted{font-family:var(--mono);font-size:10.5px;color:var(--grey);line-height:1.6}
+.escrow-lines{display:grid;gap:6px;margin:8px 0}
+.escrow-line{display:flex;justify-content:space-between;gap:10px;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-family:var(--sans);font-size:12.5px;color:var(--cream)}
+.escrow-sum{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:11.5px;color:var(--soft);margin:6px 0 10px}
+.escrow-sum b{color:var(--cream)}
+.escrow-stage{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line)}
+.escrow-stage.s4{background:var(--green);color:#0F2A0A;border-color:var(--green)}
 .sk-pay-btn{padding:10px 20px;background:var(--green);color:#0F2A0A;border:none;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;cursor:pointer;}
 .sk-pay-btn:active{transform:scale(.97);}
 .sk-verify-btn{margin-top:10px;width:100%;padding:10px;background:none;border:1px solid var(--line2);color:var(--soft);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;cursor:pointer;}
@@ -3375,6 +3385,9 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
     <!-- Operator mode — hidden until switched -->
     <div id="gate-op" style="display:none">
       <div id="gate-op-pin">
+        <button class="gate-btn" id="g-wallet-btn" onclick="doWalletLogin()">Sign in with MetaMask</button>
+        <div class="gate-err" id="g-wallet-err"></div>
+        <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;margin:14px 0 10px">or use your PIN</div>
         <label class="gate-label" for="g-pin">PIN</label>
         <input class="gate-input" id="g-pin" type="password" inputmode="numeric" maxlength="7"
           placeholder="7-digit PIN" autocomplete="off"
@@ -4405,6 +4418,58 @@ async function doPinLogin() {
     btn.disabled = false;
     btn.textContent = 'Enter';
     document.getElementById('g-pin').value = '';
+  }
+}
+
+// ── WALLET LOGIN — sign a one-time message in MetaMask (no gas, no money).
+// The wallet-login edge function checks the signature and opens the same kind
+// of session a PIN does (migration 0014). The PIN stays as a backup.
+let walletLogging = false;
+async function doWalletLogin() {
+  if (walletLogging) return;
+  const err = document.getElementById('g-wallet-err');
+  const btn = document.getElementById('g-wallet-btn');
+  err.classList.remove('show');
+  if (!window.ethereum) {
+    err.textContent = 'No wallet found. Open this in Chrome with MetaMask installed, or use your PIN.';
+    err.classList.add('show'); return;
+  }
+  walletLogging = true;
+  btn.disabled = true;
+  btn.textContent = 'Check MetaMask…';
+  initSB();
+  try {
+    const [address] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!address) throw new Error('No account was shared from MetaMask.');
+    const { data: message, error: chErr } = await sb.rpc('wallet_login_challenge', { p_address: address });
+    if (chErr || !message) throw new Error(chErr?.message || 'Could not start wallet sign-in.');
+    const nonce = (message.match(/Nonce: ([0-9a-f]{32})/) || [])[1];
+    const signature = await window.ethereum.request({ method: 'personal_sign', params: [message, address] });
+    btn.textContent = 'Verifying…';
+    const res = await fetch(`${SB_URL}/functions/v1/wallet-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+      body: JSON.stringify({ address, nonce, signature }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.token || !body.operator) throw new Error(body.error || 'Wallet sign-in failed.');
+    operator = body.operator;
+    opSessionToken = body.token;
+    startSessionHeartbeat();
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${operator.peer_name || 'Operator'} signed in`,
+      p_payload: 'Operator session started (wallet).', p_source_entity: 'Auth', p_source_id: operator.id,
+      p_recipients: operator.peer_name ? [operator.peer_name] : null, p_critical: false,
+    }));
+    enterShell();
+  } catch (e) {
+    // 4001 = the person pressed Cancel in MetaMask.
+    err.textContent = e?.code === 4001 ? 'Sign-in cancelled in MetaMask.' : (e?.message || 'Wallet sign-in failed.');
+    err.classList.add('show');
+  } finally {
+    walletLogging = false;
+    btn.disabled = false;
+    btn.textContent = 'Sign in with MetaMask';
   }
 }
 
@@ -6628,6 +6693,7 @@ function openProject(id) {
         <div class="form-lbl">Relation</div>
         <div style="font-family:var(--mono);font-size:13px;color:var(--soft)">${esc(r.relation_name || r.relation_code)}</div>
       </div>
+      <div id="proj-escrow-${id}" class="escrow-panel"><div class="escrow-muted">Loading escrow…</div></div>
       ${graphHTML ? `
         <div class="section-lbl" style="position:relative;top:0">Dependency Map</div>
         <div class="proj-graph">${graphHTML}</div>` : ''}
@@ -6640,7 +6706,174 @@ function openProject(id) {
       <button class="act-btn" onclick="openAddScope('${id}')">+ Add Scope</button>
       <button class="act-btn-sm" style="margin:0 18px 14px" onclick="exportProjectMap('${id}')">Export Map (PDF)</button>
       ${confirmed && scopes.length ? `<button class="act-btn" onclick="settleProject('${id}')">Confirm Settlement</button>` : ''}`;
+    renderEscrowPanel(id, r);
   }, null, null);
+}
+
+// ── ESCROW (Hedera) — money for a job lives in one BixxEngagement contract.
+// Genesis creates it from MetaMask; every line is one assigned scope, paid to
+// that member when the operator seals it. Members, the auditor and the client
+// stamp in the escrow dapp page with their own wallets. The database only
+// records which contract belongs to which job (migration 0014).
+let escrowArtifact = null;
+async function loadEscrowArtifact() {
+  if (!escrowArtifact) escrowArtifact = await (await fetch('dapp/escrow-artifact.json', { cache: 'no-store' })).json();
+  return escrowArtifact;
+}
+const escrowReader = () => new ethers.JsonRpcProvider(ESCROW_NET.rpc, ESCROW_NET.chainId, { staticNetwork: true });
+const escrowUsd = cents => '$' + (Number(cents) / 100).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const escrowLink = addr => `dapp/index.html?net=${ESCROW_NET.key}&engagement=${addr}`;
+const ESCROW_STAGES = ['Open', 'Delivered', 'Audited', 'Authorized', 'Sealed'];
+const ESCROW_STATUSES = ['Created', 'Funded', 'Cancelled', 'Closed'];
+
+async function renderEscrowPanel(projectId, r) {
+  const el = document.getElementById('proj-escrow-' + projectId);
+  if (!el) return;
+  try {
+    const [{ data: escrows, error: e1 }, { data: settings, error: e2 }] = await Promise.all([
+      sb.rpc('escrow_for_project', { p_project: projectId }), sb.rpc('escrow_settings')]);
+    if (e1 || e2) throw (e1 || e2);
+    if (escrows?.length) return renderEscrowStatus(el, escrows[0]);
+    if (!operator?.is_genesis) {
+      el.innerHTML = `<div class="form-lbl">Escrow · ${ESCROW_NET.name}</div><div class="escrow-muted">No escrow for this job yet. Genesis creates it.</div>`;
+      return;
+    }
+    if (r.status === 'settled') {
+      el.innerHTML = `<div class="form-lbl">Escrow</div><div class="escrow-muted">This job settled before escrow existed.</div>`;
+      return;
+    }
+    await renderEscrowCreate(el, projectId, r, settings);
+  } catch (e) {
+    console.error(e);
+    el.innerHTML = `<div class="form-lbl">Escrow</div><div class="escrow-muted">Could not load escrow: ${esc(e.message || 'error')}</div>`;
+  }
+}
+
+// What the escrow would be: one line per assigned scope, at the rate fixed at assignment.
+async function renderEscrowCreate(el, projectId, r, settings) {
+  const { data: plan, error } = await sb.rpc('escrow_plan', { p_project: projectId });
+  if (error) throw error;
+  const lines = plan || [];
+  if (!lines.length) {
+    el.innerHTML = `<div class="form-lbl">Escrow · ${ESCROW_NET.name}</div><div class="escrow-muted">Assign the scopes first. Each assigned scope becomes one escrow line.</div>`;
+    return;
+  }
+  const labor = lines.reduce((n, l) => n + Number(l.labor_cents), 0);
+  const price = Math.floor((labor * 4 + 2) / 3);
+  const roles = escrowRoles(lines, settings);
+  const missing = lines.filter(l => !l.payee_wallet);
+  window._escrowDraft = { projectId, lines, settings, roles };
+  el.innerHTML = `
+    <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
+    <div class="escrow-lines">${lines.map((l, i) => `
+      <div class="escrow-line">
+        <div><b>Line ${i + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || '—')} · ${Number(l.log_size)} LOG × ${escrowUsd(l.rate_cents)}</span></div>
+        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-muted" style="${l.payee_wallet ? '' : 'color:var(--red)'}">${l.payee_wallet ? shortAddr(l.payee_wallet) : 'no wallet on file'}</span></div>
+      </div>`).join('')}</div>
+    <div class="escrow-sum"><span>Labor ${escrowUsd(labor)} + Reserve ${escrowUsd(price - labor)}</span><b>Price ${escrowUsd(price)}</b></div>
+    <label class="form-lbl" for="esc-client">Client wallet (pays and authorizes)</label>
+    <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(r.wallet_addr || '')}" spellcheck="false"/>
+    <label class="form-lbl" for="esc-treasury" style="margin-top:10px">Treasury wallet (receives the 25% reserve)</label>
+    <input class="form-input" id="esc-treasury" placeholder="0x…" value="${esc(settings.treasury_wallet || '')}" spellcheck="false"/>
+    <div class="escrow-muted" style="margin-top:8px">Audits and seals: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
+    ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${missing.length} line${missing.length > 1 ? 's have' : ' has'} no member wallet on file. Each member adds theirs in their profile.</div>` : ''}
+    <div class="gate-err" id="esc-err"></div>
+    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
+    <div class="escrow-muted" style="padding:0 18px 12px">Your MetaMask deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
+}
+
+// Genesis audits and seals; on a line where Genesis is the worker, another
+// member with a wallet does (a worker can never audit or seal their own line).
+function escrowRoles(lines, settings) {
+  const payees = new Set(lines.map(l => l.payee_wallet).filter(Boolean));
+  const g = settings.genesis_wallet;
+  if (g && !payees.has(g)) return { name: 'Genesis', wallet: g };
+  const alt = (settings.members || []).find(m => m.wallet && m.wallet !== g && !payees.has(m.wallet));
+  if (alt) return { name: alt.name, wallet: alt.wallet };
+  return { error: g ? 'Genesis is a worker on this job, and no other member has a wallet on file to audit and seal.' : 'Genesis has no wallet on file.' };
+}
+
+async function createEscrow() {
+  const d = window._escrowDraft;
+  const err = document.getElementById('esc-err');
+  const btn = document.getElementById('esc-create');
+  const say = m => { err.textContent = m; err.classList.add('show'); };
+  err.classList.remove('show');
+  const client = (document.getElementById('esc-client').value || '').trim().toLowerCase();
+  const treasury = (document.getElementById('esc-treasury').value || '').trim().toLowerCase();
+  const isAddr = a => /^0x[0-9a-f]{40}$/.test(a);
+  if (!isAddr(client)) return say('Enter the client’s wallet address.');
+  if (!isAddr(treasury)) return say('Enter the treasury wallet address.');
+  const payees = d.lines.map(l => l.payee_wallet);
+  if (payees.includes(client)) return say('The client can’t also be a worker on this job.');
+  if (client === d.roles.wallet) return say('The client can’t also audit this job.');
+  if (d.lines.length > 32) return say('An escrow holds at most 32 lines.');
+  const ok = await osConfirm(`Create the escrow on ${ESCROW_NET.name}? MetaMask will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
+  if (!ok) return;
+  btn.disabled = true;
+  try {
+    btn.textContent = 'Connecting MetaMask…';
+    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    await ensureHederaNetwork();
+    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+    if (treasury !== d.settings.treasury_wallet) await sb.rpc('escrow_set_treasury', { p_wallet: treasury });
+    const art = await loadEscrowArtifact();
+    btn.textContent = 'Confirm the deploy in MetaMask…';
+    const labors = d.lines.map(l => BigInt(l.labor_cents) * 10000n); // cents → USDC units (6 decimals)
+    const contract = await new ethers.ContractFactory(art.abi, art.bytecode, signer)
+      .deploy(ESCROW_NET.usdc, client, d.roles.wallet, d.roles.wallet, treasury, payees, labors);
+    btn.textContent = 'Deploying…';
+    await contract.waitForDeployment();
+    const address = (await contract.getAddress()).toLowerCase();
+    const deployTx = contract.deploymentTransaction().hash;
+    btn.textContent = 'Confirm the USDC link in MetaMask…';
+    await (await contract.associateToken()).wait();
+    const labor = d.lines.reduce((n, l) => n + Number(l.labor_cents), 0);
+    const { error } = await sb.rpc('escrow_record', {
+      p_project: d.projectId, p_network: ESCROW_NET.key, p_chain_id: ESCROW_NET.chainId, p_contract: address,
+      p_token: ESCROW_NET.usdc, p_client: client, p_auditor: d.roles.wallet, p_operator: d.roles.wallet, p_treasury: treasury,
+      p_labor_cents: labor, p_deploy_tx: deployTx,
+      p_lines: d.lines.map((l, i) => ({ line_index: i, bid_id: l.bid_id, payee_operator_id: l.payee_operator_id, payee_wallet: l.payee_wallet, labor_cents: Number(l.labor_cents) })),
+    });
+    if (error) throw new Error(`The contract is live at ${address}, but saving it failed: ${error.message}`);
+    toast('Escrow created on Hedera.');
+    renderEscrowPanel(d.projectId, {});
+  } catch (e) {
+    console.error(e);
+    say(e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in MetaMask.' : (e?.shortMessage || e?.message || 'Could not create the escrow.'));
+    btn.disabled = false;
+    btn.textContent = `Create escrow on ${ESCROW_NET.name}`;
+  }
+}
+
+// Live status, read straight from the contract.
+async function renderEscrowStatus(el, x) {
+  el.innerHTML = `<div class="form-lbl">Escrow · ${ESCROW_NET.name}</div><div class="escrow-muted">Reading the contract…</div>`;
+  let sum = null, onchain = [];
+  try {
+    const art = await loadEscrowArtifact();
+    const c = new ethers.Contract(x.contract_address, art.abi, escrowReader());
+    sum = await c.summary();
+    onchain = await Promise.all(x.lines.map(l => c.line(l.line_index)));
+  } catch (e) { console.error(e); }
+  const me = (operator?.wallet_address || '').toLowerCase();
+  const myLines = x.lines.filter(l => l.payee_wallet === me).length;
+  el.innerHTML = `
+    <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
+    <div class="escrow-sum"><span>${sum ? `${ESCROW_STATUSES[Number(sum._status)]} · ${Number(sum._sealedCount)} of ${Number(sum._lineCount)} lines sealed` : 'Could not read the chain right now'}</span><b>Price ${escrowUsd(x.price_cents)}</b></div>
+    ${sum ? `<div class="escrow-muted">Held in the contract now: ${escrowUsd(Number(sum._held) / 10000)}</div>` : ''}
+    <div class="escrow-lines">${x.lines.map((l, i) => `
+      <div class="escrow-line">
+        <div><b>Line ${l.line_index + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || shortAddr(l.payee_wallet))}${onchain[i]?.startedAt > 0n && Number(onchain[i].stage) === 0 ? ' · started' : ''}</span></div>
+        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-stage s${onchain[i] ? Number(onchain[i].stage) : 0}">${onchain[i] ? ESCROW_STAGES[Number(onchain[i].stage)] : '—'}</span></div>
+      </div>`).join('')}</div>
+    <div class="escrow-muted">Client ${shortAddr(x.client_wallet)} · audits &amp; seals ${shortAddr(x.operator_wallet)} · treasury ${shortAddr(x.treasury_wallet)}</div>
+    ${myLines ? `<div class="escrow-muted" style="color:var(--green)">You are the worker on ${myLines} line${myLines > 1 ? 's' : ''}.</div>` : ''}
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
+      <a class="act-btn-sm" href="${escrowLink(x.contract_address)}" target="_blank" rel="noopener">Open escrow to stamp →</a>
+      <a class="act-btn-sm" href="${ESCROW_NET.explorer}/contract/${x.contract_address}" target="_blank" rel="noopener">HashScan →</a>
+      <button class="act-btn-sm" onclick="navigator.clipboard.writeText(new URL('${escrowLink(x.contract_address)}', location.href).href).then(() => toast('Escrow link copied. Send it to the client.'))">Copy link for the client</button>
+    </div>`;
 }
 
 function buildProjScopeNode(s, projectId, isKey) {
@@ -7956,18 +8189,40 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
 }
 
 // ── PAYMENT LEDGER ──
-const USDC_BASE_CONTRACT = '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'; // real USDC on Base — same contract already used for the wallet balance check
+// Money moves only through the Hedera escrow (wallet-first, decided 2026-10-22).
+// Testnet until the Executive Operator says mainnet.
+const ESCROW_NET = {
+  key: 'hedera-testnet', name: 'Hedera Testnet', chainId: 296, chainHex: '0x128',
+  rpc: 'https://testnet.hashio.io/api', explorer: 'https://hashscan.io/testnet',
+  usdc: '0x0000000000000000000000000000000000068cda', usdcId: '0.0.429274',
+  currency: { name: 'HBAR', symbol: 'HBAR', decimals: 18 },
+};
 
+// USDC balance on Hedera (6 decimals), read through the public RPC.
 async function fetchUsdcBalance(address) {
   const data = '0x70a08231000000000000000000000000' + address.toLowerCase().replace(/^0x/, '');
-  const res = await fetch('https://mainnet.base.org', {
+  const res = await fetch(ESCROW_NET.rpc, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: USDC_BASE_CONTRACT, data }, 'latest'] }),
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: ESCROW_NET.usdc, data }, 'latest'] }),
   });
   const json = await res.json();
   if (json.error || !json.result || json.result === '0x') return null;
   return parseInt(json.result, 16) / 1e6;
+}
+
+// Adds Hedera to MetaMask if needed and switches to it.
+async function ensureHederaNetwork() {
+  if (!window.ethereum) throw new Error('No wallet found. Open this in Chrome with MetaMask installed.');
+  const current = await window.ethereum.request({ method: 'eth_chainId' });
+  if (parseInt(current, 16) === ESCROW_NET.chainId) return;
+  await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+    chainId: ESCROW_NET.chainHex, chainName: ESCROW_NET.name, nativeCurrency: ESCROW_NET.currency,
+    rpcUrls: [ESCROW_NET.rpc], blockExplorerUrls: [ESCROW_NET.explorer],
+  }] });
+  if (parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16) !== ESCROW_NET.chainId) {
+    throw new Error(`Switch MetaMask to ${ESCROW_NET.name} and try again.`);
+  }
 }
 
 async function checkProfileWalletBalance() {
@@ -7986,7 +8241,7 @@ async function checkProfileWalletBalance() {
     return;
   }
 
-  status.textContent = 'Checking balance on Base…';
+  status.textContent = `Checking balance on ${ESCROW_NET.name}…`;
   status.style.color = 'var(--grey)';
   try {
     const balance = await fetchUsdcBalance(addr);
@@ -7994,7 +8249,7 @@ async function checkProfileWalletBalance() {
       status.textContent = 'Valid address format, but could not read a balance.';
       status.style.color = 'var(--orange)';
     } else {
-      status.textContent = `✓ Verified — $${balance.toLocaleString(undefined,{maximumFractionDigits:2})} USDC on Base`;
+      status.textContent = `✓ Verified — $${balance.toLocaleString(undefined,{maximumFractionDigits:2})} USDC on ${ESCROW_NET.name}`;
       status.style.color = 'var(--green)';
     }
   } catch(e) {
@@ -8033,17 +8288,15 @@ async function loadMemberLedger(operatorId, walletAddress, isSelf) {
     }
 
     el.innerHTML = payments.map(p => {
-      const canPay = p.status !== 'paid' && !isSelf;
       return `
         <div class="ledger-pay-row">
           <div>
             <div class="ledger-pay-title">$${Number(p.amount_usd).toLocaleString()}${p.logs ? ` · ${p.logs} LOG` : ''}</div>
             <div class="ledger-pay-meta">${esc(p.source || 'manual')} · ${fmtDate(p.created_at)}${p.notes ? ' · ' + esc(p.notes) : ''}</div>
-            ${p.tx_hash ? `<a class="ledger-pay-tx" href="https://basescan.org/tx/${esc(p.tx_hash)}" target="_blank" rel="noopener">View on Basescan →</a>` : ''}
+            ${p.tx_hash ? `<a class="ledger-pay-tx" href="${ESCROW_NET.explorer}/transaction/${esc(p.tx_hash)}" target="_blank" rel="noopener">View on HashScan →</a>` : ''}
           </div>
           <div class="ledger-pay-right">
             <div class="pay-badge ${esc(p.status)}">${esc(p.status)}</div>
-            ${canPay ? `<button class="pay-btn" onclick="payMemberWithWallet('${p.id}','${esc(walletAddress||'')}',${p.amount_usd},'${esc(p.status)}')">Pay with wallet</button>` : ''}
           </div>
         </div>`;
     }).join('');
@@ -8108,62 +8361,6 @@ async function submitRecordPayment(operatorId) {
   toast('Payment recorded.');
   overlayBack();
 }
-
-// Encode an ERC-20 transfer(address,uint256) call for USDC (6 decimals)
-function encodeUSDCTransfer(toAddress, amountUsd) {
-  const selector = 'a9059cbb';
-  const addr = toAddress.toLowerCase().replace(/^0x/, '').padStart(64, '0');
-  const units = BigInt(Math.round(amountUsd * 1e6));
-  const amountHex = units.toString(16).padStart(64, '0');
-  return '0x' + selector + addr + amountHex;
-}
-
-async function payMemberWithWallet(paymentId, toAddress, amountUsd, currentStatus) {
-  if (!toAddress) { toast('This member has no wallet address on file yet.'); return; }
-  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
-
-  const ok = await osConfirm(`Send $${Number(amountUsd).toLocaleString()} USDC on Base to ${toAddress}? This is a real on-chain transaction you'll confirm in your own wallet.`);
-  if (!ok) return;
-
-  try {
-    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const from = accts[0];
-    try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
-    } catch(se) {
-      if (se.code === 4902) {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name:'Ether', symbol:'ETH', decimals:18 }, rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org'] }],
-        });
-      }
-    }
-
-    const data = encodeUSDCTransfer(toAddress, amountUsd);
-    const txHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [{ from, to: USDC_BASE_CONTRACT, data }],
-    });
-
-    await sb.rpc('mark_payment_paid', { p_payment_id: paymentId, p_tx_hash: txHash, p_paid_by: from });
-
-    fireAndForget(sb.rpc('emit_event', {
-      p_type: 'PAYMENT_CONFIRMED', p_title: `$${Number(amountUsd).toLocaleString()} USDC sent to ${toAddress.slice(0,6)}…${toAddress.slice(-4)}`,
-      p_payload: `Sent on Base from ${from}. Tx: ${txHash}`,
-      p_source_entity: 'Ledger', p_source_id: paymentId,
-      p_recipients: window._profOp?.peer_name ? [window._profOp.peer_name] : null, p_critical: true,
-    }));
-
-    toast('Payment submitted — check Basescan to confirm it lands.');
-
-    const opId = window._profOp?.id;
-    if (opId) loadMemberLedger(opId, toAddress, false);
-  } catch(e) {
-    console.error(e);
-    toast('Payment cancelled or failed.');
-  }
-}
-
 
 function renderProfileEdit() {
   const op     = window._profOp;
@@ -14486,9 +14683,9 @@ async function renderPortfolioAndMarkets() {
       portEl.innerHTML = '<div style="font-family:var(--sans);font-size:12px;color:var(--grey)">Connect a wallet above to see holdings.</div>';
     } else {
       try {
-        const [ethMain, ethBase, usdcBase, usdcMain] = await Promise.all([
+        const [ethMain, hbar, usdcHedera, usdcMain] = await Promise.all([
           fetchNativeEthBalance(ETH_MAINNET_RPC, addr).catch(() => null),
-          fetchNativeEthBalance('https://mainnet.base.org', addr).catch(() => null),
+          fetchNativeEthBalance(ESCROW_NET.rpc, addr).catch(() => null),
           fetchUsdcBalance(addr).catch(() => null),
           fetchErc20Balance(ETH_MAINNET_RPC, USDC_MAINNET_CONTRACT, addr, 6).catch(() => null),
         ]);
@@ -14496,8 +14693,9 @@ async function renderPortfolioAndMarkets() {
         const ethIcon = prices?.ethereum?.image, usdcIcon = prices?.['usd-coin']?.image;
         const rows = [
           { label: 'ETH · Ethereum', bal: ethMain, sym: 'ETH', usd: ethMain != null && ethPrice != null ? ethMain * ethPrice : null, icon: ethIcon },
-          { label: 'ETH · Base',     bal: ethBase, sym: 'ETH', usd: ethBase != null && ethPrice != null ? ethBase * ethPrice : null, icon: ethIcon },
-          { label: 'USDC · Base',    bal: usdcBase, sym: 'USDC', usd: usdcBase, icon: usdcIcon },
+          // Testnet HBAR and USDC are test money: shown, but worth $0.
+          { label: `HBAR · ${ESCROW_NET.name}`, bal: hbar, sym: 'HBAR', usd: ESCROW_NET.key === 'hedera-testnet' ? 0 : null },
+          { label: `USDC · ${ESCROW_NET.name}`, bal: usdcHedera, sym: 'USDC', usd: ESCROW_NET.key === 'hedera-testnet' ? 0 : usdcHedera, icon: usdcIcon },
           { label: 'USDC · Ethereum', bal: usdcMain, sym: 'USDC', usd: usdcMain, icon: usdcIcon },
         ].filter(r => r.bal != null);
 
@@ -14962,7 +15160,7 @@ function renderSidekickList() {
         ${isVerified && !isPaid ? `
         <div class="sk-pay-row">
           <div class="sk-amount">$${amount.toLocaleString()}<span>USDC est.</span></div>
-          <button class="sk-pay-btn" onclick="paySidekickDeal('${d.id}', ${amount})">Pay</button>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--grey);max-width:180px;text-align:right">Paid through the job's Hedera escrow when the operator seals this line.</div>
         </div>` : ''}
         ${isPaid ? `<div style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:10px">Paid · tx ${esc((d.paid_tx_hash || '').slice(0, 10))}…</div>` : ''}
       </div>`;
@@ -15025,52 +15223,6 @@ async function markDealVerified(scopeId) {
   } catch(e) {
     console.error(e);
     toast('Could not mark verified.');
-  }
-}
-
-async function paySidekickDeal(scopeId, amountUsd) {
-  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
-
-  // Look up the assignee's wallet on file
-  const { data: ops } = await sb.rpc('list_operators');
-  const me = (ops || []).find(o => (o.peer_name || '').toLowerCase() === currentIdentityLabel().toLowerCase());
-  const toAddress = me?.wallet_address;
-  if (!toAddress) { toast('No wallet address on file for this payout yet.'); return; }
-
-  const ok = await osConfirm(`Send $${Number(amountUsd).toLocaleString()} USDC on Base to ${toAddress}? This is a real on-chain transaction you'll confirm in your own wallet.`);
-  if (!ok) return;
-
-  try {
-    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const from = accts[0];
-    try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
-    } catch(se) {
-      if (se.code === 4902) {
-        await window.ethereum.request({
-          method: 'wallet_addEthereumChain',
-          params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name: 'Ether', symbol: 'ETH', decimals: 18 }, rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org'] }],
-        });
-      }
-    }
-    const data = encodeUSDCTransfer(toAddress, amountUsd);
-    const txHash = await window.ethereum.request({
-      method: 'eth_sendTransaction',
-      params: [{ from, to: USDC_BASE_CONTRACT, data }],
-    });
-
-    await sb.rpc('mark_scope_paid', { p_scope_id: scopeId, p_tx_hash: txHash, p_paid_by: from });
-    fireAndForget(sb.rpc('emit_event', {
-      p_type: 'PAYMENT_CONFIRMED', p_title: `$${Number(amountUsd).toLocaleString()} USDC sent for a closed deal`,
-      p_payload: `Sent on Base from ${from}. Tx: ${txHash}`, p_source_entity: 'Sidekick', p_source_id: scopeId,
-      p_recipients: [currentIdentityLabel()], p_critical: true,
-    }));
-
-    toast('Payment submitted — check Basescan to confirm it lands.');
-    await renderSidekick(document.getElementById('uni-body'));
-  } catch(e) {
-    console.error(e);
-    toast('Payment cancelled or failed.');
   }
 }
 
@@ -15275,24 +15427,11 @@ async function connectRelWallet() {
   try {
     const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
     relWallet.addr = accts[0];
-    // Switch to Base so the balance reads on the right network
-    try {
-      await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: '0x2105' }] });
-    } catch(se) {
-      if (se.code === 4902) {
-        try {
-          await window.ethereum.request({
-            method: 'wallet_addEthereumChain',
-            params: [{ chainId: '0x2105', chainName: 'Base', nativeCurrency: { name:'Ether', symbol:'ETH', decimals:18 }, rpcUrls: ['https://mainnet.base.org'], blockExplorerUrls: ['https://basescan.org'] }],
-          });
-        } catch(ae) {}
-      }
-    }
-    const data = '0x70a08231000000000000000000000000' + relWallet.addr.slice(2);
-    const res = await window.ethereum.request({ method: 'eth_call', params: [{ to: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913', data }, 'latest'] });
-    relWallet.usdc = (res && res !== '0x') ? parseInt(res, 16) / 1e6 : 0;
+    // Put MetaMask on Hedera so the balance reads on the right network.
+    await ensureHederaNetwork();
+    relWallet.usdc = (await fetchUsdcBalance(relWallet.addr)) ?? 0;
     relWallet.confirmed = true;
-    toast('Wallet connected on Base.');
+    toast(`Wallet connected on ${ESCROW_NET.name}.`);
     renderRelIntakeStep();
   } catch(e) {
     console.error(e);

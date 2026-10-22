@@ -1,0 +1,62 @@
+// Human-readable ABIs, shared by the page and the Node scripts so they can't
+// drift apart. test.js checks these against the compiled contracts.
+export const ENGAGEMENT_ABI = [
+  'function MAX_LINES() view returns (uint256)',
+  'function token() view returns (address)',
+  'function client() view returns (address)',
+  'function auditor() view returns (address)',
+  'function operator() view returns (address)',
+  'function treasury() view returns (address)',
+  'function laborTotal() view returns (uint256)',
+  'function price() view returns (uint256)',
+  'function reserve() view returns (uint256)',
+  'function status() view returns (uint8)',
+  'function anyDelivered() view returns (bool)',
+  'function sealedCount() view returns (uint256)',
+  'function lineCount() view returns (uint256)',
+  'function line(uint256 i) view returns (address payee, uint256 labor, uint8 stage, uint64 startedAt, uint64 deliveredAt, uint64 auditedAt, uint64 authorizedAt, uint64 sealedAt)',
+  'function summary() view returns (uint8 _status, uint256 _price, uint256 _laborTotal, uint256 _reserve, uint256 _lineCount, uint256 _sealedCount, bool _anyDelivered, uint256 _held)',
+  'function associateToken()',
+  'function fund()',
+  'function markStarted(uint256 i)',
+  'function markDelivered(uint256 i)',
+  'function markAudited(uint256 i)',
+  'function authorize(uint256 i)',
+  'function seal(uint256 i)',
+  'function releaseReserve()',
+  'function cancel()',
+  'event Funded(address indexed client, uint256 amount)',
+  'event Started(uint256 indexed line, address indexed by, uint64 at)',
+  'event Stamped(uint256 indexed line, uint8 indexed stage, address indexed by, uint64 at)',
+  'event LinePaid(uint256 indexed line, address indexed payee, uint256 amount)',
+  'event ReserveReleased(address indexed treasury, uint256 amount)',
+  'event Cancelled(address indexed by, uint256 refunded)',
+  'event TokenAssociated(address indexed token)',
+  'error ZeroAddress()',
+  'error ZeroLabor()',
+  'error BadLines()',
+  'error RolesOverlap()',
+  'error NotAllowed()',
+  'error WrongStatus(uint8 current)',
+  'error WrongStage(uint256 line, uint8 current)',
+  'error NoSuchLine(uint256 line)',
+  'error AlreadyStarted(uint256 line)',
+  'error NotAllSealed(uint256 sealedLines, uint256 totalLines)',
+  'error TransferFailed()',
+  'error AssociationFailed(int64 responseCode)',
+];
+
+export const TOKEN_ABI = [
+  'function name() view returns (string)',
+  'function symbol() view returns (string)',
+  'function decimals() view returns (uint8)',
+  'function balanceOf(address) view returns (uint256)',
+  'function allowance(address, address) view returns (uint256)',
+  'function approve(address, uint256) returns (bool)',
+  'function transfer(address, uint256) returns (bool)',
+  'function mint(address, uint256)',
+];
+
+// Same order as the contract's enums.
+export const STATUSES = ['Created', 'Funded', 'Cancelled', 'Closed'];
+export const STAGES = ['Open', 'Delivered', 'Audited', 'Authorized', 'Sealed'];

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Engagement Escrow — Bixxville (testnet)</title>
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/ethers@6.17.0/dist/ethers.umd.min.js"></script>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><span class="glyph"></span>ESCROW <small>testnet</small></div>
+  <div class="netbox">
+    <span class="badge" id="net-badge">No wallet</span>
+    <button class="btn small" id="switch-hedera">Switch to Hedera testnet</button>
+    <button class="btn small ghost" id="connect">Connect wallet</button>
+  </div>
+</header>
+<main>
+  <div class="banner warn" id="wrong-net" hidden></div>
+  <div class="banner" id="no-wallet" hidden>No browser wallet found. Install MetaMask (or another EVM wallet) to use this page.</div>
+
+  <section class="card">
+    <div class="row">
+      <label class="field grow"><span>Engagement contract</span><input type="text" id="engagement" placeholder="0x…" spellcheck="false" autocomplete="off"></label>
+      <label class="field"><span>Network</span><select id="target"></select></label>
+    </div>
+    <button class="btn" id="load">Load engagement</button>
+    <p class="muted" id="load-msg"></p>
+  </section>
+
+  <section id="view" hidden>
+    <section class="card">
+      <h2>Engagement</h2>
+      <p class="state">Status: <b id="state">—</b></p>
+      <div class="actions" id="eng-actions"></div>
+    </section>
+
+    <section class="card">
+      <h2>Lines</h2>
+      <p class="muted">Each line is stamped and paid on its own: Started (optional) → Delivered → Audited → Authorized → Sealed.</p>
+      <div id="lines"></div>
+    </section>
+
+    <section class="card">
+      <h2>Money</h2>
+      <dl class="kv" id="money"></dl>
+      <p class="muted">Money moves only when the operator seals a line: that line's payee is paid. The reserve goes to the treasury after every line is sealed.</p>
+    </section>
+
+    <section class="card">
+      <h2>People</h2>
+      <dl class="kv" id="people"></dl>
+    </section>
+
+    <section class="card">
+      <h2>You</h2>
+      <p class="muted" id="you"></p>
+      <p class="err" id="err"></p>
+    </section>
+  </section>
+
+  <section class="card" id="logcard" hidden>
+    <h2>Transactions</h2>
+    <ol class="log" id="log"></ol>
+  </section>
+</main>
+<script type="module" src="app.js"></script>
+</body>
+</html>

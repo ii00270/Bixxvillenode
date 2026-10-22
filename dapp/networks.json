@@ -1,0 +1,30 @@
+{
+  "local": {
+    "name": "Local (ganache)",
+    "chainId": 1337,
+    "rpc": "http://127.0.0.1:8545",
+    "explorer": null,
+    "currency": {
+      "name": "Ether",
+      "symbol": "ETH",
+      "decimals": 18
+    }
+  },
+  "hedera-testnet": {
+    "name": "Hedera Testnet",
+    "chainId": 296,
+    "rpc": "https://testnet.hashio.io/api",
+    "explorer": "https://hashscan.io/testnet",
+    "currency": {
+      "name": "HBAR",
+      "symbol": "HBAR",
+      "decimals": 18
+    },
+    "faucet": "https://portal.hedera.com/faucet",
+    "usdc": {
+      "tokenId": "0.0.429274",
+      "address": "0x0000000000000000000000000000000000068cda",
+      "source": "Circle (developers.circle.com/stablecoins/usdc-contract-addresses); faucet 10 USDC / 24h"
+    }
+  }
+}

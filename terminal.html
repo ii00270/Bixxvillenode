@@ -561,6 +561,87 @@ html.theme-light{
 .sk-pay-row{display:flex;align-items:center;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);}
 .sk-amount{font-family:var(--display);font-size:20px;font-weight:800;color:var(--cream);}
 .sk-amount span{font-family:var(--mono);font-size:9px;color:var(--grey);font-weight:400;margin-left:4px;}
+/* home: prompt + next-up cards */
+#dash-prompt{display:block}
+.np-wrap{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;font-family:var(--sans)}
+.np-ask{display:flex;align-items:center;gap:10px;background:#141416;border:1px solid #2A2A2D;border-radius:14px;padding:6px 6px 6px 14px}
+.np-ask:focus-within{border-color:#FF2D95;box-shadow:0 0 0 4px rgba(255,45,149,.15)}
+.np-spark{background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent;font-size:18px}
+.np-ask input{flex:1;background:transparent;border:0;outline:0;color:#EDEDEB;font-family:var(--sans);font-size:15px;padding:8px 0;min-width:0}
+.np-ask input::placeholder{color:#7A7A7D}
+.np-ask button{appearance:none;border:0;background:var(--neon);color:#0A0A0A;font-family:var(--mono);font-weight:700;font-size:12px;border-radius:10px;padding:10px 16px;cursor:pointer}
+.np-chips{display:flex;flex-wrap:wrap;gap:6px;margin:10px 0 14px}
+.np-chips button{appearance:none;background:#141416;border:1px solid #26262A;color:#C8C6C2;border-radius:999px;padding:6px 11px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.np-chips button:hover{border-color:#FF7A1A;color:#fff}
+.np-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:10px}
+.np-card{background:#111113;border:1px solid #1C1C1E;border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;min-height:120px}
+.np-card.ghost,.np-card.calm{min-height:0}
+.np-tag{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#FF9D5C}
+.np-card.k-verify .np-tag{color:#C4B5FD}.np-card.k-escrow .np-tag{color:#FF7AB8}.np-card.k-wallet .np-tag{color:#FFEA00}
+.np-q{font-size:13.5px;line-height:1.45;color:#EDEDEB}
+.np-go{appearance:none;margin-top:auto;align-self:flex-start;background:transparent;border:1px solid #FF2D95;color:#FF7AB8;border-radius:10px;padding:7px 12px;font-family:var(--mono);font-size:11px;cursor:pointer}
+.np-go:hover{background:#FF2D95;color:#0A0A0A}
+.np-fig{display:flex;align-items:center;gap:8px}
+.np-fig small{font-family:var(--mono);font-size:10px;color:#8A8A88}
+.np-mini{flex:1;height:5px;background:#222;border-radius:999px;overflow:hidden}
+.np-mini i{display:block;height:100%;background:var(--neon)}
+/* ── infographics (In progress / Delivered / home prompts): always dark, brand neon ── */
+.ig-board{display:grid;gap:16px;margin-top:12px}
+.ig-card{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-family:var(--sans)}
+.ig-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:12px}
+.ig-head b{display:block;font-size:15px;font-weight:600;line-height:1.3}
+.ig-code{font-family:var(--mono);font-size:10px;letter-spacing:.12em;color:#8A8A88;display:block;margin-bottom:2px}
+.ig-state{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border:1px solid #2B2B2B;border-radius:999px;padding:4px 9px;white-space:nowrap;color:#C8C6C2}
+.ig-state.live{border-color:#FF7A1A;color:#FFB27A}
+.ig-state.live i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF7A1A;margin-right:6px;box-shadow:0 0 8px #FF7A1A;animation:igPulse 1.4s infinite}
+.ig-state.review{border-color:#8B5CF6;color:#C4B5FD}
+.ig-state.ok{border-color:#10B981;color:#6EE7B7}
+@keyframes igPulse{50%{opacity:.35}}
+.ig-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.ig-tile,.ig-spot{background:#111113;border:1px solid #1C1C1E;border-radius:14px;padding:12px;min-height:170px;display:flex;flex-direction:column}
+.ig-k{font-family:var(--mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:#8A8A88;margin-bottom:8px}
+.ig-muted{font-family:var(--mono);font-size:10.5px;color:#8A8A88;margin-top:auto}
+.ig-ring{position:relative;width:128px;height:128px;margin:0 auto}
+.ig-ring-svg{width:128px;height:128px;display:block}
+.ig-ring-mid{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ig-ring-mid b{font-family:var(--display);font-size:30px;font-weight:400;line-height:1}
+.ig-ring-mid small,.ig-dial-mid small{font-family:var(--mono);font-size:9.5px;color:#8A8A88;margin-top:4px;text-align:center}
+.ig-ring-mid small{max-width:72px;line-height:1.3}
+.ig-clock{font-family:var(--mono);font-size:26px;font-weight:600;letter-spacing:.02em;margin:10px 0 12px;background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ig-clock.late{background:none;color:#FF5A4F}
+.ig-bar{height:6px;background:#222;border-radius:999px;overflow:hidden;margin-bottom:10px}
+.ig-bar i{display:block;height:100%;background:var(--neon);border-radius:999px;transition:width .6s}
+.ig-bar i.over{background:#FF5A4F}
+.ig-bar.wide{margin:6px 0}
+.ig-dial{position:relative;width:200px;max-width:100%;margin:0 auto}
+.ig-dial-svg{width:100%;display:block}
+.ig-dial-mid{position:absolute;left:0;right:0;bottom:2px;display:flex;flex-direction:column;align-items:center}
+.ig-dial-mid b{font-family:var(--mono);font-size:22px;font-weight:600}
+.ig-spot-who{display:flex;align-items:center;gap:10px}
+.ig-spot-who b{display:block;font-size:14px}
+.ig-spot-who small{font-family:var(--mono);font-size:10px;color:#8A8A88}
+.ig-av{width:40px;height:40px;border-radius:50%;background:var(--neon);color:#0A0A0A;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;overflow:hidden;flex-shrink:0}
+.ig-av.sm{width:24px;height:24px;font-size:10px;vertical-align:middle}
+.ig-av img{width:100%;height:100%;object-fit:cover}
+.ig-tier{margin-left:auto;font-family:var(--mono);font-size:9.5px;text-transform:uppercase;letter-spacing:.08em;border:1px solid #3A3A3A;border-radius:999px;padding:3px 8px;color:#FFB27A}
+.ig-spot-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:12px 0}
+.ig-spot-stats div{background:#0B0B0C;border-radius:10px;padding:8px 6px;text-align:center}
+.ig-spot-stats b{display:block;font-family:var(--mono);font-size:16px}
+.ig-spot-stats small{font-family:var(--mono);font-size:9px;color:#8A8A88;text-transform:uppercase;letter-spacing:.08em}
+.ig-btn{appearance:none;border:1px solid #FF2D95;background:#FF2D95;color:#0A0A0A;border-radius:10px;padding:9px 12px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer}
+.ig-btn.ghost{background:transparent;color:#FF7AB8;margin-top:auto}
+.ig-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.ig-foot .term-card-btn{background:#161618;color:#EDEDEB;border-color:#2B2B2B}
+.ig-foot .term-card-btn.primary{background:#FF2D95;color:#0A0A0A;border-color:#FF2D95}
+.ig-gates{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin:4px 0 12px;padding:0}
+.ig-gates li{background:#111113;border:1px solid #1C1C1E;border-radius:12px;padding:10px;position:relative}
+.ig-gates li.ok{border-color:rgba(16,185,129,.45)}
+.ig-gate-dot{display:inline-flex;width:18px;height:18px;border-radius:50%;background:#10B981;color:#04140D;font-size:11px;font-weight:700;align-items:center;justify-content:center;margin-bottom:6px}
+.ig-gates li:not(.ok) .ig-gate-dot{background:#2B2B2B;color:#555}
+.ig-gates b{display:block;font-size:12.5px}
+.ig-gates small{font-family:var(--mono);font-size:10px;color:#8A8A88}
+.ig-done-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;align-items:end}
+.ig-big{font-family:var(--mono);font-size:20px;display:block}
 .escrow-panel{padding:14px 18px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:4px 0 10px}
 .escrow-panel .form-input{margin-top:4px}
 .escrow-muted{font-family:var(--mono);font-size:10.5px;color:var(--grey);line-height:1.6}
@@ -3472,8 +3553,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" onclick="setTrackerFilter('in progress'); setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('delivered'); setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
-        <button class="term-sb-subitem" onclick="openCurrentMapFile()">Map <span class="term-sb-count" id="term-sb-map-mark">—</span></button>
-        <button class="term-sb-subitem" onclick="setTermView('decomposed')">Decomposed <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
+        <button class="term-sb-subitem" onclick="setTermView('decomposed')">Map <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
       </div>
     </div>
     <div class="term-sb-group" data-group="clients">
@@ -3489,16 +3569,6 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" data-sub="chat" onclick="setTermView('chat')">Chat <span class="term-sb-count" id="sb-chat-count"></span></button>
         <button class="term-sb-subitem" data-sub="calendar" onclick="setTermView('calendar')">Calendar</button>
       </div>
-    </div>
-    <div class="term-sb-group" data-group="browser">
-      <div class="term-sb-row">
-      <button class="term-sb-item" data-view="browser" onclick="setTermView('browser')">
-        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-        <span>Browser</span>
-      </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('browser')" aria-label="Collapse Browser">−</button>
-      </div>
-      <div class="term-sb-sub" id="term-sb-browser-sub"></div>
     </div>
     <button class="term-sb-me" id="term-sb-me" onclick="openProfilePanel()" aria-label="Open your profile">
       <span class="term-sb-me-av" id="term-sb-me-av"></span>
@@ -9579,6 +9649,8 @@ async function renderDashboard() {
       </div>
 `;
   }
+  if (!document.getElementById('dash-prompt')) d.insertAdjacentHTML('afterbegin', '<div class="dash-row" id="dash-prompt"></div>');
+  renderDashPrompt();
   renderDashMe();
   if (!memberIds) loadMemberIds().then(renderDashMe).catch(() => {});
   renderDashCycle();
@@ -9596,13 +9668,136 @@ async function renderDashboard() {
   }, 120000);
 }
 
+// ── Home asks instead of making you search ──────────────────────────────
+// A prompt that takes plain words ("start my next step", "add a wallet"),
+// and cards that each ask for the one input something is waiting on.
+async function renderDashPrompt() {
+  const el = document.getElementById('dash-prompt');
+  if (!el || !operator) return;
+  const first = (operator.peer_name || '').split(' ')[0] || 'there';
+  const chips = [['Start my next step', 'start'], ['What’s in progress?', 'in progress'], ['Show delivered work', 'delivered'],
+    ['Add a wallet', 'wallet'], ['Upload a contract', 'upload'], ['Message someone', 'message']];
+  el.innerHTML = `<div class="np-wrap">
+    <form class="np-ask" onsubmit="event.preventDefault(); routePrompt(this.q.value); this.q.value=''">
+      <span class="np-spark">✦</span>
+      <input name="q" autocomplete="off" placeholder="What do you need, ${esc(first)}?" aria-label="What do you need?">
+      <button type="submit">Go</button>
+    </form>
+    <div class="np-chips">${chips.map(([l, q]) => `<button onclick="routePrompt('${q}')">${l}</button>`).join('')}</div>
+    <div class="np-cards" id="np-cards"><div class="np-card ghost"><span class="np-q">Checking what needs you…</span></div></div>
+  </div>`;
+  const items = await buildNextUp().catch(e => { console.error(e); return []; });
+  window._nextUp = items;
+  const box = document.getElementById('np-cards');
+  if (!box) return;
+  box.innerHTML = items.length ? items.slice(0, 6).map((x, i) => `
+    <div class="np-card k-${x.kind}">
+      <div class="np-tag">${esc(x.tag)}</div>
+      ${x.figure ? `<div class="np-fig">${x.figure}</div>` : ''}
+      <div class="np-q">${esc(x.q)}</div>
+      <button class="np-go" onclick="runNextUp(${i})">${esc(x.btn)} →</button>
+    </div>`).join('')
+    : `<div class="np-card calm"><div class="np-tag">All clear</div><div class="np-q">Nothing is waiting on you right now. Ask above, or pick a suggestion.</div></div>`;
+}
+
+function runNextUp(i) { const x = (window._nextUp || [])[i]; if (x) x.run(); }
+
+async function buildNextUp() {
+  const out = [];
+  const short = t => (t || '').length > 70 ? t.slice(0, 68) + '…' : (t || '');
+  // Work that's waiting on you
+  for (const a of await loadAttention()) {
+    if (a.kind === 'verify') out.push({ kind: 'verify', tag: 'Review', q: `${short(a.title.replace(/^Verify\s+/, ''))} — proof is in. Review it now?`, btn: 'Review', run: () => openAttentionItem(a) });
+    if (a.kind === 'start') out.push({ kind: 'start', tag: 'Your work', q: `${short(a.title.replace(/^Granted to you:\s+/, ''))} is yours. Ready to start?`, btn: 'Start', run: () => openAttentionItem(a) });
+    if (a.kind === 'continue') out.push({ kind: 'continue', tag: 'Your work', q: `You’re mid-way on ${short(a.title.replace(/^In progress:\s+/, ''))}. Pick it back up?`, btn: 'Continue', run: () => openAttentionItem(a) });
+  }
+  // Wallets
+  if (!operator.wallet_address) out.push({ kind: 'wallet', tag: 'Wallet', q: 'Add your wallet so you can sign in with it and get paid through escrow.', btn: 'Add wallet', run: openAddWallet });
+  if (isExec()) {
+    try { await loadPeople(); } catch (e) {}
+    const noWallet = (CL.members || []).filter(m => !m.wallet_address && m.active !== false);
+    if (noWallet.length) out.push({ kind: 'wallet', tag: 'Members', q: `${noWallet.length} member${noWallet.length > 1 ? 's' : ''} can’t be paid yet — no wallet on file (${short(noWallet.map(m => m.peer_name).join(', '))}). Add them?`, btn: 'Add wallets', run: () => { CL.tab = 'members'; setTermView('clients'); } });
+  }
+  // Escrow steps that are waiting on you, read live from Hedera
+  try {
+    const { data: list } = await sb.rpc('escrow_list');
+    const me = (operator.wallet_address || '').toLowerCase();
+    if (list?.length) {
+      const art = await loadEscrowArtifact();
+      const rd = escrowReader();
+      await Promise.all(list.slice(0, 8).map(async x => {
+        const c = new ethers.Contract(x.contract_address, art.abi, rd);
+        const sum = await c.summary();
+        const st = Number(sum._status);
+        const open = () => openProject(x.project_id);
+        const ring = (n, of) => `<span class="np-mini"><i style="width:${of ? Math.round(n / of * 100) : 0}%"></i></span><small>${n} of ${of} paid</small>`;
+        if (st === 0 && isExec()) out.push({ kind: 'escrow', tag: 'Escrow', q: `${short(x.title)}: waiting for ${x.client || 'the client'} to fund ${escrowUsd(x.price_cents)}. Send them the link?`, btn: 'Copy link',
+          run: () => navigator.clipboard.writeText(new URL(escrowLink(x.contract_address), location.href).href).then(() => toast('Escrow link copied. Send it to the client.')) });
+        if (st !== 1) return;
+        const lines = await Promise.all(x.lines.map(l => c.line(l.line_index)));
+        const fig = ring(Number(sum._sealedCount), x.lines.length);
+        x.lines.forEach((l, i) => {
+          const stage = Number(lines[i].stage), t = short(l.title || `line ${l.line_index + 1}`);
+          if (stage === 0 && l.payee_wallet === me) out.push({ kind: 'escrow', tag: 'Escrow', figure: fig, q: `“${t}” is funded. Mark it delivered when it’s done?`, btn: 'Open job', run: open });
+          if (stage === 1 && x.auditor_wallet === me) out.push({ kind: 'escrow', tag: 'Audit', figure: fig, q: `“${t}” was delivered. Audit the work?`, btn: 'Open job', run: open });
+          if (stage === 3 && x.operator_wallet === me) out.push({ kind: 'escrow', tag: 'Pay', figure: fig, q: `“${t}” is approved. Seal it and pay ${escrowUsd(l.labor_cents)}?`, btn: 'Open job', run: open });
+        });
+        if (Number(sum._sealedCount) === x.lines.length && x.operator_wallet === me) out.push({ kind: 'escrow', tag: 'Reserve', figure: fig, q: `${short(x.title)}: every line is paid. Release the reserve to the treasury?`, btn: 'Open job', run: open });
+      }));
+    }
+  } catch (e) { console.error(e); }
+  const order = { verify: 0, escrow: 1, continue: 2, start: 3, wallet: 4 };
+  return out.sort((a, b) => (order[a.kind] ?? 9) - (order[b.kind] ?? 9));
+}
+
+// Plain words → the right place. Anything it doesn't recognise goes to BIX AI.
+function routePrompt(text) {
+  const q = (text || '').trim().toLowerCase();
+  if (!q) return;
+  const go = f => { window._trackerFilter = f; setTermView('tracker'); };
+  const rules = [
+    [/\b(next|start|ready|my work|to.?do|todo)\b/, () => { const a = (window._nextUp || []).find(x => x.kind === 'start' || x.kind === 'continue'); a ? a.run() : go('to-do'); }],
+    [/progress|working|ongoing|countdown|meter/, () => go('in progress')],
+    [/deliver|finished|done|completed/, () => go('delivered')],
+    [/wallet|metamask|hashpack|connect/, () => openAddWallet()],
+    [/upload|contract|worksheet|pdf/, () => document.getElementById('term-upload-file').click()],
+    [/\bmap\b|decompos/, () => setTermView('decomposed')],
+    [/message|chat|dm|talk/, () => setTermView('chat')],
+    [/calendar|schedule|meeting|event/, () => setTermView('calendar')],
+    [/notif|alert|attention/, () => setTermView('notifications')],
+    [/member|client|people|add (a )?(member|client)|network/, () => setTermView('clients')],
+    [/review|verify|proof/, () => { const a = (window._nextUp || []).find(x => x.kind === 'verify'); a ? a.run() : setTermView('notifications'); }],
+    [/escrow|fund|pay|seal|audit/, () => { const a = (window._nextUp || []).find(x => x.kind === 'escrow'); a ? a.run() : toast('No escrow steps are waiting on you.'); }],
+    [/profile|statement|ledger/, () => openProfilePanel()],
+  ];
+  for (const [re, run] of rules) if (re.test(q)) return run();
+  toggleAgent(true);
+  agentSend(text);
+}
+
+// Put a wallet on file from MetaMask (HashPack joins this once it's set up).
+async function openAddWallet() {
+  if (!window.ethereum) { toast('No wallet found. Use Chrome with MetaMask installed.'); return; }
+  try {
+    const [a] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!a) return;
+    const ok = await osConfirm(`Put ${a.slice(0, 6)}…${a.slice(-4)} on file as your wallet? You’ll sign in with it and be paid to it through escrow.`);
+    if (!ok) return;
+    const { data, error } = await sb.rpc('set_member_wallet', { p_operator_id: operator.id, p_wallet: a });
+    if (error) { toast(error.message); return; }
+    operator.wallet_address = data;
+    toast('Wallet saved.');
+    renderDashboard();
+  } catch (e) { toast(e?.code === 4001 ? 'Cancelled in MetaMask.' : 'Couldn’t connect the wallet.'); }
+}
+
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
   if (!el) return;
   const addr = operator?.wallet_address;
   const short = addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : null;
   el.innerHTML = `
-    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">USDC · Base</span></div>
+    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">USDC · ${ESCROW_NET.name}</span></div>
     <div class="dash-big" id="dash-bal-v">${addr ? '…' : '—'}</div>
     <div class="dash-bar"><i style="width:100%"></i></div>
     <div class="dash-sub">${addr ? `Wallet ${esc(short)}` : 'No wallet on file yet.'}</div>
@@ -9613,7 +9808,11 @@ async function renderDashBalance() {
   if (addr) {
     const b = termBalanceCache ?? await fetchUsdcBalance(addr).catch(() => null);
     const v = document.getElementById('dash-bal-v');
-    if (v) v.textContent = b != null ? '$' + b.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'Unavailable';
+    if (v) v.textContent = b != null ? '$' + b.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00';
+    if (b == null) {
+      const sub = el.querySelector('.dash-sub');
+      if (sub) sub.textContent = `Wallet ${short} isn’t on ${ESCROW_NET.name} yet — sending it a little HBAR creates it.`;
+    }
   }
 }
 
@@ -10232,8 +10431,8 @@ async function ntOpen(id) {
   if (e?.type === 'MESSAGE' && e.source_id) { setTermView('chat'); await chatOpenConversation(e.source_id); return; }
   renderNotificationsPanel();
 }
-async function ntOpenAttention(i) {
-  const a = NT.attention[i];
+async function ntOpenAttention(i) { return openAttentionItem(NT.attention[i]); }
+async function openAttentionItem(a) {
   if (!a) return;
   if (trackerState?.mapId !== a.map) await loadWorkMap(a.map);
   setTermView('tracker');
@@ -10742,7 +10941,8 @@ function setTermView(view) {
   if (view !== 'chat') clearInterval(CH.timer);
   const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
-  if (view !== 'browser') stopBrowserArt();
+  if (view === 'browser') view = 'decomposed'; // Browser was folded into Map
+  clearInterval(progressTimer);
   if (view === 'terminal') {
     home.style.display = '';
     panel.style.display = 'none';
@@ -10752,7 +10952,6 @@ function setTermView(view) {
     panel.style.display = 'block';
     if (view === 'tracker') renderTrackerBoard();
     else if (view === 'statements') renderStatementsTimeline();
-    else if (view === 'browser') renderBrowserPanel();
     else if (view === 'decomposed') renderDecomposedPanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
@@ -10774,8 +10973,6 @@ function updateSidebarCounts() {
       ? [...trackerState.branches].sort((a, b) => byLeafCode(a.code, b.code)).map(b => `<button class="term-sb-subitem" onclick="setTermView('statements')"><span>${esc(b.code)}</span><span class="term-sb-count">${b.leaf_count}</span></button>`).join('')
       : '';
   }
-  const mapMark = document.getElementById('term-sb-map-mark');
-  if (mapMark) mapMark.textContent = (live && (trackerState.map?.source_html || trackerState.map?.source_raw)) ? '●' : '—';
 }
 
 // ── Opening an uploaded worksheet back up — a real file, a real tab ─────
@@ -10831,127 +11028,8 @@ function openCurrentMapFile() {
   viewContractOriginal(trackerState.mapId);
 }
 
-// ── Browser — every uploaded decomposition worksheet, listed and openable ──
-async function renderBrowserPanel() {
-  const panel = document.getElementById('term-panel');
-  panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
-
-  const { data: maps, error } = await sb.from('work_maps')
-    .select('id,goal,source_filename,created_at')
-    .or('source_html.not.is.null,source_raw.not.is.null')
-    .order('created_at', { ascending: false });
-
-  const uploadRow = `
-    <button class="term-browser-upload" onclick="document.getElementById('term-upload-file').click()">
-      <span class="term-browser-upload-icon">+</span>
-      <span>Upload a contract — PDF, HTML, or worksheet JSON</span>
-    </button>`;
-
-  if (error || !maps?.length) {
-    panel.innerHTML = `
-      <canvas id="term-browser-art"></canvas>
-      <div class="term-panel-head">Browser</div>
-      ${uploadRow}
-      <div class="term-panel-empty">No uploaded files yet — they'll show up here once you upload one.</div>`;
-    const sub = document.getElementById('term-sb-browser-sub');
-    if (sub) sub.innerHTML = '';
-    startBrowserArt();
-    return;
-  }
-
-  panel.innerHTML = `
-    <canvas id="term-browser-art"></canvas>
-    <div class="term-panel-head">Browser — uploaded decomposition worksheets</div>
-    ${uploadRow}
-    ${maps.map(m => `
-      <div class="term-timeline-cp" style="position:relative;z-index:1;">
-        <div class="term-timeline-head">
-          <span class="term-timeline-title">${esc(m.source_filename || 'worksheet.html')}</span>
-          <span class="term-timeline-due">${fmtDate(m.created_at)}</span>
-        </div>
-        <div class="term-timeline-meta">${esc(m.goal)}</div>
-        <button class="term-timeline-dl" onclick="openBrowserFile('${esc(m.id)}')">Open</button>
-      </div>`).join('')}`;
-
-  const sub = document.getElementById('term-sb-browser-sub');
-  if (sub) {
-    sub.innerHTML = maps.map(m => `<button class="term-sb-subitem" onclick="setTermView('browser')"><span>${esc(m.source_filename || 'worksheet.html')}</span></button>`).join('');
-  }
-  window._browserFiles = maps;
-  startBrowserArt();
-}
-
-// Quiet, interactive generative backdrop — overlapping sine/cosine waves,
-// phase nudged by pointer position. Decorative only: pointer-events:none
-// on the canvas itself, so it never steals a click from the real controls
-// drawn on top of it.
-let _browserArtRAF = null;
-let _browserArtRO = null;
-function stopBrowserArt() {
-  cancelAnimationFrame(_browserArtRAF);
-  _browserArtRAF = null;
-  _browserArtRO?.disconnect();
-  _browserArtRO = null;
-  const panel = document.getElementById('term-panel');
-  if (panel) panel.onpointermove = null;
-}
-function startBrowserArt() {
-  stopBrowserArt();
-  const canvas = document.getElementById('term-browser-art');
-  if (!canvas) return;
-  const panel = document.getElementById('term-panel');
-  const ctx = canvas.getContext('2d');
-  let mx = 0.5, my = 0.5;
-
-  function resize() {
-    canvas.width = panel.clientWidth;
-    canvas.height = panel.scrollHeight;
-  }
-  resize();
-  _browserArtRO = new ResizeObserver(resize);
-  _browserArtRO.observe(panel);
-
-  panel.onpointermove = (e) => {
-    const r = panel.getBoundingClientRect();
-    mx = (e.clientX - r.left) / r.width;
-    my = (e.clientY - r.top) / r.height;
-  };
-
-  const colors = ['rgba(14,136,134,.35)', 'rgba(168,115,11,.28)', 'rgba(217,58,43,.22)'];
-  // Dark theme uses the lime/orange/red trio instead — read live so a
-  // theme toggle mid-view still looks right next render.
-  const colorsLive = () => currentTheme() === 'light'
-    ? ['rgba(14,136,134,.35)', 'rgba(168,115,11,.28)', 'rgba(217,58,43,.22)']
-    : ['rgba(255,45,149,.22)', 'rgba(232,136,74,.18)', 'rgba(224,82,82,.14)'];
-
-  let t = 0;
-  function frame() {
-    t += 0.01;
-    const w = canvas.width, h = canvas.height;
-    ctx.clearRect(0, 0, w, h);
-    const cols = colorsLive();
-    for (let i = 0; i < 3; i++) {
-      ctx.beginPath();
-      const amp = h * (0.06 + i * 0.03) * (0.6 + mx * 0.8);
-      const freq = 0.004 + i * 0.0015 + my * 0.002;
-      const yBase = h * (0.25 + i * 0.28);
-      for (let x = 0; x <= w; x += 6) {
-        const y = yBase + Math.sin(x * freq + t * (1 + i * 0.4)) * amp
-                         + Math.cos(x * freq * 0.6 + t * 0.7) * amp * 0.4;
-        if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
-      }
-      ctx.strokeStyle = cols[i];
-      ctx.lineWidth = 1.4;
-      ctx.stroke();
-    }
-    _browserArtRAF = requestAnimationFrame(frame);
-  }
-  frame();
-}
-
-async function openBrowserFile(mapId) { await viewContractOriginal(mapId); }
-
-// ── Decomposed — every contract, drawn as a Decomposition Report ───────
+// ── Map — every contract, drawn as its decomposition map (Map and
+// Decomposed are one view; uploads and original files live here too) ──
 // The report is regenerated from the live database each time, so it always
 // shows current status — whatever format the contract was uploaded in.
 async function refreshDecomposedCount() {
@@ -10974,17 +11052,17 @@ async function renderDecomposedPanel() {
     sb.from('work_leaves').select('map_id,logs,status'),
   ]);
   if (error) {
-    panel.innerHTML = `<div class="term-panel-head">Decomposed</div>${uploadRow}
+    panel.innerHTML = `<div class="term-panel-head">Map</div>${uploadRow}
       <div class="term-panel-empty">Couldn't load contracts — if this keeps happening, sign out and back in.</div>`;
     return;
   }
   if (!maps?.length) {
-    panel.innerHTML = `<div class="term-panel-head">Decomposed</div>${uploadRow}
-      <div class="term-panel-empty">Nothing decomposed yet.</div>`;
+    panel.innerHTML = `<div class="term-panel-head">Map</div>${uploadRow}
+      <div class="term-panel-empty">No contracts mapped yet. Upload one to see its map.</div>`;
     return;
   }
   panel.innerHTML = `
-    <div class="term-panel-head">Decomposed — ${maps.length} contract${maps.length === 1 ? '' : 's'}</div>
+    <div class="term-panel-head">Map — ${maps.length} contract${maps.length === 1 ? '' : 's'}</div>
     ${uploadRow}
     ${maps.map(m => {
       const ls = (leaves || []).filter(l => l.map_id === m.id);
@@ -10994,7 +11072,7 @@ async function renderDecomposedPanel() {
       <div class="term-timeline-cp term-decomp-card" onclick="openDecomposition('${esc(m.id)}')">
         <div class="term-timeline-head">
           <span class="term-timeline-title">${esc(m.goal)}</span>
-          <span class="term-decomp-tag">Decomposed</span>
+          <span class="term-decomp-tag">${trackerState?.mapId === m.id ? 'Open in Tracker' : 'Map'}</span>
         </div>
         <div class="term-timeline-meta">${esc(m.prepared_for || 'Client not recorded')} · ${esc(m.contract_date || fmtDate(m.date_mapped))}</div>
         <div class="term-timeline-meta">${ls.length} executions · ${logs} LOGs · ${done} of ${ls.length} delivered</div>
@@ -11012,9 +11090,9 @@ async function openDecomposition(mapId) {
   const hasOriginal = !!(data.map.source_html || data.map.source_raw);
   panel.innerHTML = `
     <div class="term-decomp-bar">
-      <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All decomposed</button>
+      <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All maps</button>
       <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
-      <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Decomposition</button>
+      <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Map</button>
       <button class="term-timeline-dl" data-dv="team" onclick="setDecompView('team')">Team plan</button>
       ${data.map.team_plan_raw ? `<button class="term-timeline-dl" data-dv="calc" onclick="setDecompView('calc')">Calculated plan</button>` : ''}
       <button class="term-timeline-dl" onclick="document.getElementById('term-decomp-frame').contentWindow.print()">Print / save PDF</button>
@@ -11388,6 +11466,10 @@ async function renderTrackerBoard() {
       rows.push(`<div class="term-tier-row"><div class="term-tier-lbl">${t === 0 ? 'START' : 'T' + (t + 1)}</div><div class="term-board-flat">${ls.map(renderLeafCard).join('')}</div></div>`);
     }
     body = rows.join('<div class="term-tier-conn">↓</div>');
+  } else if (active === 'in progress' && items.length) {
+    body = await renderProgressBoard(items);
+  } else if (active === 'delivered' && items.length) {
+    body = await renderDeliveredBoard(items);
   } else {
     body = `<div class="term-board-flat">${items.map(renderLeafCard).join('') || '<div class="term-panel-empty">Nothing here.</div>'}</div>`;
   }
@@ -11410,6 +11492,8 @@ async function renderTrackerBoard() {
     </div>
     ${body}`;
   updateSidebarCounts();
+  clearInterval(progressTimer);
+  if (active === 'in progress') { tickProgress(); progressTimer = setInterval(tickProgress, 1000); }
 }
 
 // Each step's level in the decomposition map: Genesis is 0, everything else
@@ -11431,6 +11515,31 @@ function leafDepths(leaves) {
 
 const byLeafCode = (a, b) => a.length - b.length || a.localeCompare(b);
 
+// The buttons a step offers the signed-in member (shared by every card style).
+function leafActionsHtml(l) {
+  const grantee = l.assigned_to || l.claimed_by;
+  const me = operator?.id, isG = !!operator?.is_genesis, mine = !!grantee && grantee === me;
+  const all = trackerState.leaves || [];
+  const statusOf = c => all.find(x => x.leaf_code === c)?.status;
+  const waiting = (l.requires || []).filter(c => statusOf(c) !== 'delivered');
+  const submitted = l.status === 'in progress' && !!l.submitted_at;
+  const id = esc(l.id);
+  const script = scriptStatusOf(l.id);
+  return [
+    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openAssignLeaf('${id}')">${grantee ? 'Change grant' : 'Grant…'}</button>` : '',
+    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openScriptEditor('${id}')">${script === 'approved' ? 'Script ✓' : script === 'draft' ? 'Script — draft' : 'Write script'}</button>` : '',
+    l.status === 'to-do' && mine && !waiting.length
+      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`
+                               : `<button class="term-card-btn" disabled title="Genesis approves the step's script before work starts">Start — script pending</button>`) : '',
+    l.status === 'in progress' && !submitted && mine
+      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Continue</button>`
+                               : `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>`) : '',
+    submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
+    submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
+    l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
+  ].join('');
+}
+
 function renderLeafCard(l) {
   const rateCents = l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
   const payout = ((rateCents / 100) * l.logs).toFixed(2);
@@ -11450,21 +11559,7 @@ function renderLeafCard(l) {
               : l.status === 'in progress' ? '<span class="term-card-state progress">In progress</span>'
               : waiting.length ? `<span class="term-card-state wait">Waiting on ${esc(waiting.join(', '))}</span>`
               : '<span class="term-card-state ready">Ready to start</span>';
-  const id = esc(l.id);
-  const script = scriptStatusOf(l.id);
-  const actions = [
-    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openAssignLeaf('${id}')">${grantee ? 'Change grant' : 'Grant…'}</button>` : '',
-    l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openScriptEditor('${id}')">${script === 'approved' ? 'Script ✓' : script === 'draft' ? 'Script — draft' : 'Write script'}</button>` : '',
-    l.status === 'to-do' && mine && !waiting.length
-      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`
-                               : `<button class="term-card-btn" disabled title="Genesis approves the step's script before work starts">Start — script pending</button>`) : '',
-    l.status === 'in progress' && !submitted && mine
-      ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Continue</button>`
-                               : `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>`) : '',
-    submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
-    submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
-    l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
-  ].join('');
+  const actions = leafActionsHtml(l);
   const reqLine = req.length
     ? req.map(c => `${esc(c)}${statusOf(c) === 'delivered' ? ' ✓' : ` (${esc(statusOf(c) || 'missing')})`}`).join(', ')
     : 'nothing — start here';
@@ -11504,6 +11599,183 @@ function renderLeafCard(l) {
         <div>Payout potential — $${payout}${l.scoped_rate_cents ? ' (scoped rate)' : ''}</div>
       </div>
     </div>`;
+}
+
+// ── Infographics: In progress and Delivered ─────────────────────────────
+// Each in-progress step shows: a ring filling with work hours against its
+// LOG budget (1 LOG = 1 hour), a countdown to its due date (or the hours
+// left when there's no due date), a dial of pay earned so far (hours worked
+// × the step's locked rate, never past its full pay), and who's doing it.
+// An open work session makes all of it tick live.
+let progressTimer = null;
+const HOUR = 36e5;
+const leafRateCents = l => l.scoped_rate_cents ?? ((CANON.TIER_RATES[l.tier] ?? 0) * 100);
+const igMoney = c => '$' + (c / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const igClock = ms => {
+  const t = Math.max(0, Math.floor(ms / 1000)), d = Math.floor(t / 86400), h = Math.floor(t % 86400 / 3600), m = Math.floor(t % 3600 / 60), sec = t % 60;
+  return (d ? `${d}d ` : '') + [h, m, sec].map(n => String(n).padStart(2, '0')).join(':');
+};
+const igHrs = ms => { const m = Math.round(ms / 60000); return `${Math.floor(m / 60)}h ${String(m % 60).padStart(2, '0')}m`; };
+
+async function loadLeafWork(ids) {
+  if (!ids.length) return {};
+  const { data } = await sb.from('leaf_work_sessions').select('leaf_id,started_at,ended_at').in('leaf_id', ids);
+  const out = {};
+  for (const w of data || []) {
+    const o = (out[w.leaf_id] ||= { closedMs: 0, openSince: 0 });
+    if (w.ended_at) o.closedMs += new Date(w.ended_at) - new Date(w.started_at);
+    else o.openSince = Math.max(o.openSince, +new Date(w.started_at));
+  }
+  return out;
+}
+
+// Segmented ring, like a fuel gauge: 60 ticks, lit in the brand gradient.
+function igRing(frac, over) {
+  const N = 60, lit = Math.round(Math.min(1, frac) * N), R1 = 46, R2 = 58, c = 64;
+  const col = i => over ? '#FF5A4F' : i / N < 0.5 ? `rgb(255,${Math.round(234 - (i / N) * 2 * 112)},${Math.round((i / N) * 2 * 26)})`
+    : `rgb(255,${Math.round(122 - (i / N - 0.5) * 2 * 77)},${Math.round(26 + (i / N - 0.5) * 2 * 123)})`;
+  let ticks = '';
+  for (let i = 0; i < N; i++) {
+    const a = -Math.PI / 2 + (i / N) * Math.PI * 2;
+    ticks += `<line x1="${c + R1 * Math.cos(a)}" y1="${c + R1 * Math.sin(a)}" x2="${c + R2 * Math.cos(a)}" y2="${c + R2 * Math.sin(a)}" stroke="${i < lit ? col(i) : '#2B2B2B'}" stroke-width="3" stroke-linecap="round"/>`;
+  }
+  return `<svg viewBox="0 0 128 128" class="ig-ring-svg" aria-hidden="true">${ticks}</svg>`;
+}
+
+// Half-dial of capsules, like a speedometer, for pay earned.
+function igDial(frac) {
+  const N = 22, lit = Math.round(Math.min(1, frac) * N), c = 100, R1 = 62, R2 = 86;
+  let bars = '';
+  for (let i = 0; i < N; i++) {
+    const a = Math.PI + (i / (N - 1)) * Math.PI;
+    bars += `<line x1="${c + R1 * Math.cos(a)}" y1="${c + R1 * Math.sin(a)}" x2="${c + R2 * Math.cos(a)}" y2="${c + R2 * Math.sin(a)}" stroke="${i < lit ? 'url(#igDialGrad)' : '#262626'}" stroke-width="9" stroke-linecap="round"/>`;
+  }
+  return `<svg viewBox="0 0 200 108" class="ig-dial-svg" aria-hidden="true"><defs><linearGradient id="igDialGrad" x1="0" x2="1"><stop offset="0" stop-color="#FFEA00"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FF2D95"/></linearGradient></defs>${bars}</svg>`;
+}
+
+function igSpotlight(m, l) {
+  if (!m) return `<div class="ig-spot"><div class="ig-k">Spotlight</div><div class="ig-muted">Not granted yet.</div></div>`;
+  const t = tier(m.total_logs);
+  return `<div class="ig-spot">
+    <div class="ig-k">Spotlight</div>
+    <div class="ig-spot-who">
+      <span class="ig-av">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(m.peer_name))}</span>
+      <div><b>${esc(m.peer_name)}</b><small>${esc(m.member_id || m.handle || 'Member')}</small></div>
+      <span class="ig-tier">${m.is_genesis ? 'Executive' : esc(t)}</span>
+    </div>
+    <div class="ig-spot-stats">
+      <div><b>${(m.total_logs || 0).toLocaleString()}</b><small>LOGs</small></div>
+      <div><b>${m.steps_verified ?? 0}</b><small>Verified</small></div>
+      <div><b>${m.steps_active ?? 0}</b><small>Active</small></div>
+    </div>
+    ${m.id !== operator?.id ? `<button class="ig-btn ghost" onclick="openChatWith('${esc(m.id)}')">Message ${esc((m.peer_name || '').split(' ')[0])}</button>` : '<div class="ig-muted">This is you.</div>'}
+  </div>`;
+}
+
+async function renderProgressBoard(items) {
+  try { await loadPeople(); } catch (e) {}
+  const work = await loadLeafWork(items.map(l => l.id));
+  const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
+  window._igLive = {};
+  return `<div class="ig-board">${items.map(l => {
+    const w = work[l.id] || { closedMs: 0, openSince: 0 };
+    const rate = leafRateCents(l), budgetMs = l.logs * HOUR;
+    const due = l.target_date ? +new Date(l.target_date + 'T23:59:59') : 0;
+    window._igLive[l.id] = { closedMs: w.closedMs, openSince: w.openSince, budgetMs, rate, cap: rate * l.logs, due, started: l.started_at ? +new Date(l.started_at) : 0 };
+    const grantee = l.assigned_to || l.claimed_by;
+    const submitted = !!l.submitted_at;
+    return `<article class="ig-card" data-ig="${esc(l.id)}">
+      <header class="ig-head">
+        <div><span class="ig-code">${esc(l.leaf_code)}</span><b>${esc(l.task)}</b></div>
+        <span class="ig-state ${w.openSince ? 'live' : submitted ? 'review' : ''}">${w.openSince ? '<i></i>Working now' : submitted ? 'Awaiting verification' : 'In progress'}</span>
+      </header>
+      <div class="ig-grid">
+        <section class="ig-tile">
+          <div class="ig-k">Work hours</div>
+          <div class="ig-ring"><div data-ring></div><div class="ig-ring-mid"><b data-pct>—</b><small data-used>—</small></div></div>
+        </section>
+        <section class="ig-tile">
+          <div class="ig-k" data-cd-label>${due ? 'Due in' : 'Hours left'}</div>
+          <div class="ig-clock" data-cd>—</div>
+          <div class="ig-bar"><i data-cd-bar></i></div>
+          <div class="ig-muted">${due ? `Due ${esc(fmtDate(l.target_date))}` : 'No due date set'} · budget ${l.logs} LOG</div>
+        </section>
+        <section class="ig-tile">
+          <div class="ig-k">Pay earned so far</div>
+          <div class="ig-dial"><div data-dial></div><div class="ig-dial-mid"><b data-earn>—</b><small>of ${igMoney(rate * l.logs)} · ${igMoney(rate)}/LOG</small></div></div>
+        </section>
+        ${igSpotlight(people[grantee], l)}
+      </div>
+      <footer class="ig-foot">${leafActionsHtml(l) || ''}</footer>
+    </article>`;
+  }).join('')}</div>`;
+}
+
+function tickProgress() {
+  const live = window._igLive || {};
+  const now = Date.now();
+  if (!document.querySelector('.ig-card[data-ig]')) { clearInterval(progressTimer); return; }
+  for (const [id, x] of Object.entries(live)) {
+    const card = document.querySelector(`.ig-card[data-ig="${CSS.escape(id)}"]`);
+    if (!card) continue;
+    const worked = x.closedMs + (x.openSince ? now - x.openSince : 0);
+    const frac = x.budgetMs ? worked / x.budgetMs : 0, over = worked > x.budgetMs;
+    const set = (sel, v) => { const e = card.querySelector(sel); if (e && e.textContent !== v) e.textContent = v; };
+    const ringEl = card.querySelector('[data-ring]');
+    const lit = Math.round(Math.min(1, frac) * 60);
+    if (ringEl && ringEl.dataset.lit !== String(lit) + over) { ringEl.innerHTML = igRing(frac, over); ringEl.dataset.lit = String(lit) + over; }
+    set('[data-pct]', `${Math.round(frac * 100)}%`);
+    set('[data-used]', over ? `over by ${igHrs(worked - x.budgetMs)}` : `${igHrs(worked)} of ${igHrs(x.budgetMs)}`);
+    // countdown: to the due date, or the work hours left
+    const left = x.due ? x.due - now : x.budgetMs - worked;
+    set('[data-cd]', left > 0 ? igClock(left) : x.due ? 'Past due' : 'Budget used');
+    card.querySelector('[data-cd]')?.classList.toggle('late', left <= 0);
+    const span = x.due && x.started ? Math.max(1, x.due - x.started) : x.budgetMs;
+    const cdBar = card.querySelector('[data-cd-bar]');
+    if (cdBar) cdBar.style.width = `${Math.max(0, Math.min(100, 100 - (left / span) * 100))}%`;
+    // pay earned so far, never past the step's full pay
+    const earned = Math.min(x.cap, (worked / HOUR) * x.rate);
+    set('[data-earn]', igMoney(earned));
+    const dialEl = card.querySelector('[data-dial]');
+    const dl = Math.round((x.cap ? earned / x.cap : 0) * 22);
+    if (dialEl && dialEl.dataset.lit !== String(dl)) { dialEl.innerHTML = igDial(x.cap ? earned / x.cap : 0); dialEl.dataset.lit = String(dl); }
+  }
+}
+
+// Delivered: only what was delivered, with every gate it passed stamped.
+async function renderDeliveredBoard(items) {
+  try { await loadPeople(); } catch (e) {}
+  const work = await loadLeafWork(items.map(l => l.id));
+  const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
+  const when = d => d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
+  return `<div class="ig-board">${items.map(l => {
+    const w = work[l.id] || { closedMs: 0 };
+    const rate = leafRateCents(l), budgetMs = l.logs * HOUR;
+    const m = people[l.assigned_to || l.claimed_by];
+    const gates = [
+      ['Granted', l.date_claimed || null, m ? m.peer_name : ''],
+      ['Started', l.started_at],
+      ['Proof submitted', l.submitted_at],
+      ['Verified', l.verified_at, l.verified_by ? handleOf(l.verified_by) : ''],
+      ['Delivered', l.delivered_at],
+    ].filter(g => g[1] !== undefined);
+    const frac = budgetMs ? w.closedMs / budgetMs : 0;
+    return `<article class="ig-card done" data-ig-done="${esc(l.id)}">
+      <header class="ig-head">
+        <div><span class="ig-code">${esc(l.leaf_code)}</span><b>${esc(l.task)}</b></div>
+        <span class="ig-state ok">✓ Delivered</span>
+      </header>
+      <ol class="ig-gates">${gates.map(([n, t, by]) => t
+        ? `<li class="ok"><span class="ig-gate-dot">✓</span><b>${n}</b><small>${esc(when(t))}${by ? ` · ${esc(by)}` : ''}</small></li>`
+        : `<li class="skip" title="This step was finished before this gate was recorded."><span class="ig-gate-dot">–</span><b>${n}</b><small>Not recorded</small></li>`).join('')}</ol>
+      <div class="ig-done-row">
+        <div><div class="ig-k">Hours vs budget</div><div class="ig-bar wide"><i style="width:${Math.min(100, frac * 100)}%" class="${frac > 1 ? 'over' : ''}"></i></div><small class="ig-muted">${igHrs(w.closedMs)} of ${l.logs} LOG</small></div>
+        <div><div class="ig-k">Pay</div><b class="ig-big">${igMoney(rate * l.logs)}</b><small class="ig-muted">${l.logs} LOG × ${igMoney(rate)}</small></div>
+        <div><div class="ig-k">By</div>${m ? `<span class="ig-av sm">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(m.peer_name))}</span> <b>${esc(m.peer_name)}</b>` : '<span class="ig-muted">—</span>'}</div>
+      </div>
+      ${leafActionsHtml(l) ? `<footer class="ig-foot">${leafActionsHtml(l)}</footer>` : ''}
+    </article>`;
+  }).join('')}</div>`;
 }
 
 function setTrackerFilter(key) {
@@ -12703,7 +12975,7 @@ async function uploadOneContract(file) {
       });
       if (dErr) termPrint(`Saved the contract, but not its details — ${dErr.message}`, 'err');
     }
-    termPrint(`Decomposed: "${contract.goal}" — open it under Tracker → Decomposed.`, 'system');
+    termPrint(`Decomposed: "${contract.goal}" — open it under Tracker → Map.`, 'system');
     return 1;
   } catch (e) {
     console.error(e);

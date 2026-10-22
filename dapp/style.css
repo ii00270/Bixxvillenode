@@ -57,3 +57,17 @@ input:focus,select:focus{border-color:var(--ink)}
 .log li.fail{border-color:var(--bad)}
 .log a{color:var(--ink)}
 @media (max-width:560px){.stamps{grid-template-columns:repeat(2,1fr)}.netbox{width:100%}}
+
+/* next-step card */
+.card.next{border-color:var(--ink);box-shadow:0 1px 0 var(--ink)}
+.step{display:flex;justify-content:space-between;align-items:center;gap:14px;border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:10px}
+.step b{display:block;font-size:14px}
+.step small{color:var(--dim);font-size:12px}
+.step .btn{white-space:nowrap}
+.step.minor{border-style:dashed}
+.step.minor .btn{background:transparent;color:var(--ink)}
+.help{background:var(--soft);border-radius:12px;padding:12px 14px;margin-top:10px;font-size:13px}
+.help .btn{margin:8px 8px 0 0}
+.nothing{font-size:14px;margin-top:6px}
+.btn.busy{position:relative;opacity:.8}
+@media (max-width:560px){.step{flex-direction:column;align-items:stretch}.step .btn{width:100%}}

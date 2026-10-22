@@ -570,6 +570,9 @@ html.theme-light{
 .escrow-sum b{color:var(--cream)}
 .escrow-stage{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;border:1px solid var(--line)}
 .escrow-stage.s4{background:var(--green);color:#0F2A0A;border-color:var(--green)}
+.escrow-next{border:1px solid var(--line);border-radius:10px;padding:12px 12px 4px;margin:10px 0}
+.escrow-next .act-btn,.escrow-next .act-btn-sm{display:block;width:100%;margin:0 0 8px}
+.escrow-done{font-family:var(--sans);font-size:13px;color:var(--green);margin:8px 0}
 .sk-pay-btn{padding:10px 20px;background:var(--green);color:#0F2A0A;border:none;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border-radius:4px;cursor:pointer;}
 .sk-pay-btn:active{transform:scale(.97);}
 .sk-verify-btn{margin-top:10px;width:100%;padding:10px;background:none;border:1px solid var(--line2);color:var(--soft);font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;border-radius:4px;cursor:pointer;}
@@ -4654,6 +4657,8 @@ function closeOverlay() {
   overlayCurrent = null;
   document.getElementById('overlay').classList.remove('open');
   setTimeout(() => {
+    // Clear after the close animation, unless something reopened it meanwhile.
+    if (document.getElementById('overlay').classList.contains('open')) return;
     document.getElementById('ov-body').innerHTML = '';
     document.getElementById('ov-title').textContent = '';
   }, 300);
@@ -6762,6 +6767,8 @@ async function renderEscrowCreate(el, projectId, r, settings) {
   const price = Math.floor((labor * 4 + 2) / 3);
   const roles = escrowRoles(lines, settings);
   const missing = lines.filter(l => !l.payee_wallet);
+  const { data: who } = await sb.rpc('escrow_client_for_project', { p_project: projectId });
+  const clientWallet = who?.wallet || r.wallet_addr || '';
   window._escrowDraft = { projectId, lines, settings, roles };
   el.innerHTML = `
     <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
@@ -6771,12 +6778,13 @@ async function renderEscrowCreate(el, projectId, r, settings) {
         <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-muted" style="${l.payee_wallet ? '' : 'color:var(--red)'}">${l.payee_wallet ? shortAddr(l.payee_wallet) : 'no wallet on file'}</span></div>
       </div>`).join('')}</div>
     <div class="escrow-sum"><span>Labor ${escrowUsd(labor)} + Reserve ${escrowUsd(price - labor)}</span><b>Price ${escrowUsd(price)}</b></div>
-    <label class="form-lbl" for="esc-client">Client wallet (pays and authorizes)</label>
-    <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(r.wallet_addr || '')}" spellcheck="false"/>
+    <label class="form-lbl" for="esc-client">${esc(who?.name || 'Client')} wallet (pays and authorizes)</label>
+    <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(clientWallet)}" spellcheck="false"/>
+    ${clientWallet ? '' : `<div class="escrow-muted">No wallet on file for this client yet. Paste it here, or add it on the Clients page.</div>`}
     <label class="form-lbl" for="esc-treasury" style="margin-top:10px">Treasury wallet (receives the 25% reserve)</label>
     <input class="form-input" id="esc-treasury" placeholder="0x…" value="${esc(settings.treasury_wallet || '')}" spellcheck="false"/>
     <div class="escrow-muted" style="margin-top:8px">Audits and seals: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
-    ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${missing.length} line${missing.length > 1 ? 's have' : ' has'} no member wallet on file. Each member adds theirs in their profile.</div>` : ''}
+    ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
     <div class="gate-err" id="esc-err"></div>
     <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
     <div class="escrow-muted" style="padding:0 18px 12px">Your MetaMask deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
@@ -6846,7 +6854,7 @@ async function createEscrow() {
   }
 }
 
-// Live status, read straight from the contract.
+// Live status, read straight from the contract, with this member's next step.
 async function renderEscrowStatus(el, x) {
   el.innerHTML = `<div class="form-lbl">Escrow · ${ESCROW_NET.name}</div><div class="escrow-muted">Reading the contract…</div>`;
   let sum = null, onchain = [];
@@ -6856,24 +6864,96 @@ async function renderEscrowStatus(el, x) {
     sum = await c.summary();
     onchain = await Promise.all(x.lines.map(l => c.line(l.line_index)));
   } catch (e) { console.error(e); }
+  window._escrowRows = { ...(window._escrowRows || {}), [x.project_id]: x };
   const me = (operator?.wallet_address || '').toLowerCase();
-  const myLines = x.lines.filter(l => l.payee_wallet === me).length;
+  const status = sum ? Number(sum._status) : null;
+  const stage = i => (onchain[i] ? Number(onchain[i].stage) : null);
+  const line = i => `line ${x.lines[i].line_index + 1}`;
+
+  // What this member can do now, and who everyone is waiting on.
+  const mine = [], waiting = [];
+  if (status === 0) waiting.push(`the client to fund ${escrowUsd(x.price_cents)}`);
+  if (status === 1) {
+    x.lines.forEach((l, i) => {
+      const st = stage(i), isPayee = l.payee_wallet === me;
+      if (st === 0) {
+        if (isPayee) {
+          if (!(onchain[i]?.startedAt > 0n)) mine.push(['markStarted', i, `Start ${line(i)}`, 'ghost']);
+          mine.push(['markDelivered', i, `Mark ${line(i)} delivered`]);
+        } else waiting.push(`${esc(l.assignee || 'the worker')} to deliver ${line(i)}`);
+      }
+      if (st === 1) { if (x.auditor_wallet === me) mine.push(['markAudited', i, `Audit ${line(i)} (approve the work)`]); else waiting.push(`the auditor on ${line(i)}`); }
+      if (st === 2) { if (x.client_wallet === me) mine.push(['authorize', i, `Authorize ${line(i)}`]); else waiting.push(`the client to authorize ${line(i)}`); }
+      if (st === 3) { if (x.operator_wallet === me) mine.push(['seal', i, `Seal ${line(i)} and pay ${escrowUsd(l.labor_cents)}`]); else waiting.push(`the operator to seal ${line(i)}`); }
+    });
+    if (sum && Number(sum._sealedCount) === x.lines.length) {
+      if (x.operator_wallet === me) mine.push(['releaseReserve', null, `Release the ${escrowUsd(x.price_cents - x.labor_cents)} reserve to the treasury`]);
+      else waiting.push('the operator to release the reserve');
+    }
+  }
+  const done = status === 3 ? 'Complete — every line paid and the reserve released.' : status === 2 ? 'Cancelled — the client was refunded.' : '';
+
   el.innerHTML = `
     <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
-    <div class="escrow-sum"><span>${sum ? `${ESCROW_STATUSES[Number(sum._status)]} · ${Number(sum._sealedCount)} of ${Number(sum._lineCount)} lines sealed` : 'Could not read the chain right now'}</span><b>Price ${escrowUsd(x.price_cents)}</b></div>
+    <div class="escrow-sum"><span>${sum ? `${ESCROW_STATUSES[status]} · ${Number(sum._sealedCount)} of ${Number(sum._lineCount)} lines paid` : 'Could not read the chain right now'}</span><b>Price ${escrowUsd(x.price_cents)}</b></div>
     ${sum ? `<div class="escrow-muted">Held in the contract now: ${escrowUsd(Number(sum._held) / 10000)}</div>` : ''}
+    ${mine.length ? `<div class="escrow-next">
+        <div class="form-lbl" style="margin:0 0 8px">Your next step</div>
+        ${mine.map(([fn, i, label, kind]) => `<button class="${kind === 'ghost' ? 'act-btn-sm' : 'act-btn'} escrow-go" onclick="escrowAct(this,'${x.project_id}','${fn}',${i})">${esc(label)}</button>`).join('')}
+        <div class="gate-err" id="esc-act-err-${x.project_id}"></div>
+      </div>` : ''}
+    ${done ? `<div class="escrow-done">${done}</div>` : waiting.length ? `<div class="escrow-muted" style="margin:6px 0">Waiting for ${waiting.slice(0, 3).join(' · ')}${waiting.length > 3 ? ` · +${waiting.length - 3} more` : ''}</div>` : ''}
     <div class="escrow-lines">${x.lines.map((l, i) => `
       <div class="escrow-line">
-        <div><b>Line ${l.line_index + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || shortAddr(l.payee_wallet))}${onchain[i]?.startedAt > 0n && Number(onchain[i].stage) === 0 ? ' · started' : ''}</span></div>
-        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-stage s${onchain[i] ? Number(onchain[i].stage) : 0}">${onchain[i] ? ESCROW_STAGES[Number(onchain[i].stage)] : '—'}</span></div>
+        <div><b>Line ${l.line_index + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || shortAddr(l.payee_wallet))}${l.payee_wallet === me ? ' · you' : ''}${onchain[i]?.startedAt > 0n && stage(i) === 0 ? ' · started' : ''}</span></div>
+        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-stage s${stage(i) ?? 0}">${stage(i) === 4 ? 'Paid' : stage(i) != null ? ESCROW_STAGES[stage(i)] : '—'}</span></div>
       </div>`).join('')}</div>
     <div class="escrow-muted">Client ${shortAddr(x.client_wallet)} · audits &amp; seals ${shortAddr(x.operator_wallet)} · treasury ${shortAddr(x.treasury_wallet)}</div>
-    ${myLines ? `<div class="escrow-muted" style="color:var(--green)">You are the worker on ${myLines} line${myLines > 1 ? 's' : ''}.</div>` : ''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
-      <a class="act-btn-sm" href="${escrowLink(x.contract_address)}" target="_blank" rel="noopener">Open escrow to stamp →</a>
+      ${status === 0 || x.client_wallet === me ? `<button class="act-btn-sm" onclick="navigator.clipboard.writeText(new URL('${escrowLink(x.contract_address)}', location.href).href).then(() => toast('Escrow link copied. Send it to the client to fund and approve.'))">Copy link for the client</button>` : ''}
+      <a class="act-btn-sm" href="${escrowLink(x.contract_address)}" target="_blank" rel="noopener">Open escrow page →</a>
       <a class="act-btn-sm" href="${ESCROW_NET.explorer}/contract/${x.contract_address}" target="_blank" rel="noopener">HashScan →</a>
-      <button class="act-btn-sm" onclick="navigator.clipboard.writeText(new URL('${escrowLink(x.contract_address)}', location.href).href).then(() => toast('Escrow link copied. Send it to the client.'))">Copy link for the client</button>
     </div>`;
+}
+
+// One stamp from this member's MetaMask, right here in the OS.
+async function escrowAct(btn, projectId, fn, lineIndex) {
+  const x = window._escrowRows?.[projectId];
+  const err = document.getElementById('esc-act-err-' + projectId);
+  const say = m => { err.textContent = m; err.classList.add('show'); };
+  err.classList.remove('show');
+  const label = btn.textContent;
+  document.querySelectorAll('.escrow-go').forEach(b => { b.disabled = true; });
+  try {
+    if (!window.ethereum) throw new Error('No wallet found. Use Chrome with MetaMask installed.');
+    btn.textContent = 'Open MetaMask…';
+    const [acct] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const want = (operator?.wallet_address || '').toLowerCase();
+    if ((acct || '').toLowerCase() !== want) {
+      throw new Error(`MetaMask is on ${shortAddr(acct)}. Switch to your account ${shortAddr(want)} in MetaMask and try again.`);
+    }
+    await ensureHederaNetwork();
+    const art = await loadEscrowArtifact();
+    const c = new ethers.Contract(x.contract_address, art.abi, await new ethers.BrowserProvider(window.ethereum).getSigner());
+    const args = lineIndex == null ? [] : [lineIndex];
+    await c[fn].staticCall(...args); // a refusal shows its reason before anything is signed
+    btn.textContent = 'Confirm in MetaMask…';
+    const tx = await c[fn](...args);
+    btn.textContent = 'Recording on Hedera…';
+    await tx.wait();
+    toast(`${label.replace(/\s*\(.*\)$/, '')} — done.`);
+    renderEscrowStatus(document.getElementById('proj-escrow-' + projectId), x);
+  } catch (e) {
+    console.error(e);
+    const reason = e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in MetaMask.'
+      : e?.revert?.name === 'NotAllowed' ? 'Your wallet isn’t the one for this step.'
+      : e?.revert?.name ? 'This step isn’t available right now — refresh the job.'
+      : /insufficient|balance/i.test(e?.message || '') ? `Your wallet needs a little ${ESCROW_NET.currency.symbol} for the fee.`
+      : (e?.shortMessage || e?.message || 'That didn’t go through.');
+    say(reason);
+    btn.textContent = label;
+    document.querySelectorAll('.escrow-go').forEach(b => { b.disabled = false; });
+  }
 }
 
 function buildProjScopeNode(s, projectId, isKey) {
@@ -9840,8 +9920,8 @@ async function renderClientsPanel() {
 let clSearchTimer = null;
 function clSearchSoon() { clearTimeout(clSearchTimer); CL._typing = true; clSearchTimer = setTimeout(renderClientsPanel, 180); }
 
-function clFundsHtml(addr) {
-  if (!addr) return '<span class="pp-muted">No wallet</span>';
+function clFundsHtml(addr, add) {
+  if (!addr) return add ? `<button class="pp-btn" onclick="${add}">${ico(ICON.wallet)}Add wallet</button>` : '<span class="pp-muted">No wallet</span>';
   const f = CL.funds[addr];
   const amt = f === undefined ? '<span class="pp-muted">checking…</span>'
     : f === null ? '<span class="pp-muted">unavailable</span>'
@@ -9872,7 +9952,7 @@ function clMemberRow(m) {
       <div><b>${esc(m.peer_name)}</b>${m.is_genesis ? '<span class="pp-exec">Executive Operator</span>' : ''}<small>${esc(m.region || m.handle || 'Member')}</small></div></div></td>
     <td>${clContactHtml(m.email, m.phone)}</td>
     <td class="hide-md"><div class="pp-ids"><span>${esc(m.member_id || '—')}</span><small>${esc(m.bix_id || 'no BIX ID')}</small></div></td>
-    <td>${clFundsHtml(m.wallet_address)}</td>
+    <td>${clFundsHtml(m.wallet_address, (isExec() || m.id === operator.id) ? `openWalletDrawer('member','${esc(m.id)}')` : '')}</td>
     <td><span class="pp-tier ${m.is_genesis ? 'exec' : TIER_COLOR[t]}">${m.is_genesis ? 'Executive' : t}</span><small class="pp-logs">${(m.total_logs || 0).toLocaleString()} LOGs</small></td>
     <td class="hide-md"><div class="pp-work"><span title="Granted">${m.steps_granted}</span><span class="act" title="In progress">${m.steps_active}</span><span class="ok" title="Verified">${m.steps_verified}</span></div></td>
     <td><button class="pp-icbtn" aria-label="Actions for ${esc(m.peer_name)}" onclick="clMemberMenu(this,'${esc(m.id)}')">${ico(ICON.dots)}</button></td>
@@ -9885,6 +9965,7 @@ function clMemberMenu(btn, id) {
   if (id !== operator.id) items.push({ label: 'Message', run: () => openChatWith(id) });
   if (m.member_id) items.push({ label: 'Copy member ID', run: () => copyText(m.member_id, 'Member ID') });
   if (m.email) items.push({ label: 'Copy email', run: () => copyText(m.email, 'Email') });
+  if (isExec() || id === operator.id) items.push({ label: m.wallet_address ? 'Change wallet' : 'Add wallet', run: () => openWalletDrawer('member', id) });
   openRowMenu(btn, items);
 }
 
@@ -9894,7 +9975,7 @@ function clClientRow(c) {
       <div><b>${esc(c.name)}</b><small>${c.handle ? esc(c.handle) : 'Client since ' + esc(fmtDate(c.created_at))}</small></div></div></td>
     <td>${clContactHtml(c.email, c.phone)}</td>
     ${isExec() ? `<td class="hide-md">${c.code ? `<div class="pp-contact"><code class="pp-code">${esc(c.code)}</code><button class="pp-copy" onclick="copyText('${esc(c.code)}','Sign-in code')">${ico(ICON.copy)}Copy</button></div>` : '—'}</td>` : ''}
-    <td>${clFundsHtml(c.wallet_address)}</td>
+    <td>${clFundsHtml(c.wallet_address, isExec() ? `openWalletDrawer('client','${esc(c.id)}')` : '')}</td>
     <td><div class="pp-ids"><span>${c.projects} project${c.projects === 1 ? '' : 's'}</span><small>${c.settled} settled${c.settled_value ? ' · $' + Number(c.settled_value).toLocaleString('en-US', { maximumFractionDigits: 2 }) : ''}</small></div></td>
     <td><span class="pp-standing ${esc(c.standing)}">${esc(c.standing)}</span></td>
     <td><button class="pp-icbtn" aria-label="Actions for ${esc(c.name)}" onclick="clClientMenu(this,'${esc(c.id)}')">${ico(ICON.dots)}</button></td>
@@ -9907,8 +9988,66 @@ function clClientMenu(btn, id) {
   if (c.code) items.push({ label: 'Copy sign-in code', run: () => copyText(c.code, 'Sign-in code') });
   if (c.email) items.push({ label: 'Copy email', run: () => copyText(c.email, 'Email') });
   if (c.wallet_address) items.push({ label: 'Copy wallet address', run: () => copyText(c.wallet_address, 'Wallet address') });
+  if (isExec()) items.push({ label: c.wallet_address ? 'Change wallet' : 'Add wallet', run: () => openWalletDrawer('client', id) });
   if (!items.length) items.push({ label: 'Nothing to copy yet', run: () => {} });
   openRowMenu(btn, items);
+}
+
+// ── Put a wallet on file — a member's (theirs or Genesis's doing) or a client's.
+// Escrow pays members' wallets and is funded from the client's.
+function openWalletDrawer(kind, id) {
+  const person = kind === 'member' ? CL.members.find(x => x.id === id) : CL.clients.find(x => x.id === id);
+  if (!person) return;
+  const name = person.peer_name || person.name;
+  const self = kind === 'member' && id === operator.id;
+  let d = document.getElementById('pp-drawer');
+  if (!d) {
+    const scrim = document.createElement('div');
+    scrim.id = 'pp-scrim';
+    scrim.onclick = closeAddPerson;
+    d = document.createElement('aside');
+    d.id = 'pp-drawer';
+    document.body.append(scrim, d);
+  }
+  d.setAttribute('aria-label', 'Wallet on file');
+  d.innerHTML = `
+    <div class="pp-dr-top"><b>${person.wallet_address ? 'Change' : 'Add'} wallet</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>
+    <p class="pp-dr-lead">${self ? 'Your wallet is where escrow pays you, and how you sign in with MetaMask.'
+      : kind === 'member' ? `${esc(name)} is paid here when a line of their work is sealed, and can sign in with it.`
+      : `${esc(name)} funds and approves their jobs from this wallet.`}</p>
+    <form class="pp-form" onsubmit="event.preventDefault(); saveWallet('${kind}','${esc(id)}')">
+      <label><span>Wallet address</span><input id="wd-addr" autocomplete="off" spellcheck="false" placeholder="0x…" value="${esc(person.wallet_address || '')}"></label>
+      ${self ? `<button type="button" class="pp-btn" onclick="walletFromMetaMask()">${ico(ICON.wallet)}Use my connected MetaMask</button>`
+             : `<p class="pp-muted">In MetaMask, they tap their account name at the top to copy it. It starts with 0x.</p>`}
+      <div class="pp-form-msg" id="wd-msg"></div>
+      <button class="pp-btn solid big" id="wd-go" type="submit">Save wallet</button>
+      ${person.wallet_address ? `<button type="button" class="pp-btn big" onclick="document.getElementById('wd-addr').value='';saveWallet('${kind}','${esc(id)}')">Remove wallet</button>` : ''}
+    </form>`;
+  requestAnimationFrame(() => { d.classList.add('on'); document.getElementById('pp-scrim').classList.add('on'); document.getElementById('wd-addr').focus(); });
+}
+async function walletFromMetaMask() {
+  if (!window.ethereum) { toast('No wallet found. Use Chrome with MetaMask installed.'); return; }
+  try {
+    const [a] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (a) document.getElementById('wd-addr').value = a.toLowerCase();
+  } catch (e) { toast('MetaMask didn’t share an account.'); }
+}
+async function saveWallet(kind, id) {
+  const msg = document.getElementById('wd-msg'), go = document.getElementById('wd-go');
+  const addr = (document.getElementById('wd-addr').value || '').trim();
+  msg.textContent = '';
+  if (addr && !/^0x[0-9a-fA-F]{40}$/.test(addr)) { msg.textContent = 'That isn’t a wallet address. It starts with 0x and has 40 more letters and numbers.'; return; }
+  go.disabled = true;
+  const { data, error } = kind === 'member'
+    ? await sb.rpc('set_member_wallet', { p_operator_id: id, p_wallet: addr || null })
+    : await sb.rpc('set_client_wallet', { p_relation_id: id, p_wallet: addr || null });
+  go.disabled = false;
+  if (error) { msg.textContent = error.message; return; }
+  if (kind === 'member' && id === operator.id) operator.wallet_address = data || null;
+  closeAddPerson();
+  toast(data ? 'Wallet saved.' : 'Wallet removed.');
+  await loadPeople(true);
+  if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) renderClientsPanel();
 }
 
 // The PIN-recovery queue, central wallet and payment audit, from the old console.
@@ -9952,7 +10091,8 @@ function renderAddPerson(kind, done) {
       <label><span>Email</span><input id="ap-email" type="email" autocomplete="off" ${isM ? 'required' : ''} placeholder="name@example.com"></label>
       ${isM ? `<div class="pp-field"><span>Starting tier</span><div class="pp-tierpick">
         ${tiers.map(([t, rate, logs], i) => `<label class="pp-tieropt ${TIER_COLOR[t]}"><input type="radio" name="ap-tier" value="${t}" ${i === 0 ? 'checked' : ''}><b>${t}</b><small>$${rate} per LOG · starts at ${logs.toLocaleString()} LOGs</small></label>`).join('')}
-      </div></div>` : `
+      </div></div>
+      <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" spellcheck="false" placeholder="0x… (their MetaMask address)"></label>` : `
       <label><span>Phone <em>optional</em></span><input id="ap-phone" autocomplete="off" placeholder="+1 340 …"></label>
       <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" placeholder="0x…"></label>`}
       <div class="pp-form-msg" id="ap-msg"></div>
@@ -9969,6 +10109,12 @@ async function submitAddPerson(kind) {
       const t = document.querySelector('input[name="ap-tier"]:checked')?.value;
       const { data, error } = await sb.rpc('invite_member', { p_name: val('ap-name'), p_email: val('ap-email'), p_tier: t });
       if (error) throw error;
+      let walletNote = '';
+      if (val('ap-wallet')) {
+        const { error: wErr } = await sb.rpc('set_member_wallet', { p_operator_id: data.id, p_wallet: val('ap-wallet') });
+        walletNote = wErr ? `<p class="pp-muted" style="color:var(--red)">Added, but the wallet wasn’t saved: ${esc(wErr.message)} Add it from their row.</p>`
+                          : `<p class="pp-muted">Wallet on file — they can sign in with MetaMask and be paid through escrow.</p>`;
+      }
       const welcome = `Welcome to Bixxville, ${data.name}.\nYour member ID: ${data.member_id}\nYour PIN: ${data.pin}\nSign in at ${location.origin}${location.pathname.replace(/[^/]*$/, '')}terminal.html`;
       window._apWelcome = welcome;
       renderAddPerson('member', `
@@ -9978,6 +10124,7 @@ async function submitAddPerson(kind) {
           <div class="pp-secret"><small>Member ID</small><b>${esc(data.member_id)}</b><button class="pp-copy" onclick="copyText('${esc(data.member_id)}','Member ID')">${ico(ICON.copy)}Copy</button></div>
           <div class="pp-secret pin"><small>PIN — shown once</small><b>${esc(data.pin)}</b><button class="pp-copy" onclick="copyText('${esc(data.pin)}','PIN')">${ico(ICON.copy)}Copy</button></div>
           <p class="pp-muted">Copy the PIN now — it isn’t stored anywhere it can be read back. If it’s lost, they can request a reset from the sign-in screen.</p>
+          ${walletNote}
           <button class="pp-btn solid big" onclick="copyText(window._apWelcome,'Welcome message')">${ico(ICON.copy)}Copy a welcome message</button>
           <button class="pp-btn big" onclick="closeAddPerson()">Done</button>
         </div>`);

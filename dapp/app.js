@@ -112,7 +112,12 @@ async function load() {
       i, payee: l.payee, labor: l.labor, stage: Number(l.stage),
       times: [l.startedAt, l.deliveredAt, l.auditedAt, l.authorizedAt, l.sealedAt].map(Number),
     }))));
-    S.info = { addr, token, symbol, decimals, status: Number(sum._status), price: sum._price, labor: sum._laborTotal, reserve: sum._reserve,
+    let balances = null;
+    if (S.account) {
+      const [tb, gb] = await Promise.all([t.balanceOf(S.account).catch(() => 0n), p.getBalance(S.account).catch(() => 0n)]);
+      balances = { token: tb, gas: Number(ethers.formatEther(gb)) };
+    }
+    S.info = { addr, token, symbol, decimals, balances, status: Number(sum._status), price: sum._price, labor: sum._laborTotal, reserve: sum._reserve,
       sealed: Number(sum._sealedCount), anyDelivered: sum._anyDelivered, held: sum._held, roles: { client, auditor, operator, treasury }, lines };
     $('view').hidden = false;
   } catch (e) {
@@ -125,8 +130,47 @@ async function load() {
 async function refresh() { if (S.info) await load(); else render(); }
 
 const same = (a, b) => !!a && !!b && a.toLowerCase() === b.toLowerCase();
-const button = (key, label, enabled, note) =>
-  `<div class="act"><span>${esc(label)}<br><small>${esc(note)}</small></span><button class="btn small" data-act="${key}" ${enabled ? '' : 'disabled'}>Go</button></div>`;
+const FAUCET = 'https://faucet.circle.com';
+
+// What the connected wallet can do right now, in the order a person would do it.
+function myActions(I) {
+  const me = S.account, R = I.roles, funded = I.status === 1;
+  const isClient = same(me, R.client), isOp = same(me, R.operator), isAud = same(me, R.auditor);
+  const u = v => `${fmt(v, I.decimals)} ${I.symbol}`;
+  const out = [];
+  if (isClient && I.status === 0 && I.symbol === 'mUSDC') out.push(['mint', `Get test ${I.symbol}`, 'Free test tokens for this demo.', true]);
+  if (isClient && I.status === 0) out.push(['fund', `Fund the escrow (${u(I.price)})`, 'MetaMask asks twice: allow the amount, then send it. The money stays in the contract until work is approved.']);
+  if (isOp && funded && I.sealed === I.lines.length) out.push(['release', 'Release the reserve to the treasury', `${u(I.reserve)} — the last step.`]);
+  for (const l of I.lines) {
+    const n = l.i + 1;
+    if (funded && same(me, l.payee) && l.stage === 0) {
+      if (!l.times[0]) out.push([`start:${l.i}`, `Start line ${n}`, 'Optional: records when you began. Moves no money.', true]);
+      out.push([`deliver:${l.i}`, `Mark line ${n} delivered`, 'Tell the auditor your work is ready to check.']);
+    }
+    if (funded && isAud && l.stage === 1) out.push([`audit:${l.i}`, `Audit line ${n}`, 'You checked the work and it meets the scope.']);
+    if (funded && isClient && l.stage === 2) out.push([`authorize:${l.i}`, `Authorize line ${n}`, 'You approve the work. Next, the operator pays it.']);
+    if (funded && isOp && l.stage === 3) out.push([`seal:${l.i}`, `Seal line ${n} and pay ${u(l.labor)}`, 'Pays the worker from the escrow.']);
+  }
+  const canCancel = (I.status === 0 || funded) && ((isClient && !I.anyDelivered) || (isOp && I.sealed === 0));
+  if (canCancel) out.push(['cancel', 'Cancel and refund the client', I.status === 0 ? 'Nothing has been paid in yet.' : `Returns all ${u(I.price)} to the client.`, true]);
+  return out;
+}
+
+// Who everyone is waiting on, in plain words.
+function waitingOn(I) {
+  if (I.status === 0) return 'Waiting for the client to fund the escrow.';
+  if (I.status === 2) return 'Cancelled. The client was refunded.';
+  if (I.status === 3) return 'Complete. Every line is paid and the reserve is released.';
+  const who = [];
+  for (const l of I.lines) {
+    if (l.stage === 0) who.push(`the worker to deliver line ${l.i + 1}`);
+    if (l.stage === 1) who.push(`the auditor on line ${l.i + 1}`);
+    if (l.stage === 2) who.push(`the client to authorize line ${l.i + 1}`);
+    if (l.stage === 3) who.push(`the operator to seal line ${l.i + 1}`);
+  }
+  if (!who.length) return 'Waiting for the operator to release the reserve.';
+  return `Waiting for ${who.slice(0, 3).join(', ')}${who.length > 3 ? ` and ${who.length - 3} more` : ''}.`;
+}
 
 function render() {
   const badge = $('net-badge');
@@ -140,53 +184,65 @@ function render() {
   const wrong = $('wrong-net');
   wrong.hidden = !window.ethereum || onRightNetwork();
   if (!wrong.hidden) {
-    wrong.innerHTML = `Your wallet is on <b>${esc(nameOf(S.chainId))}</b>. This engagement is on <b>${esc(net().name)}</b>. Actions are blocked until you switch.<br>
+    wrong.innerHTML = `Your wallet is on <b>${esc(nameOf(S.chainId))}</b>. This escrow is on <b>${esc(net().name)}</b>.<br>
       <button class="btn small" id="switch-target">Switch to ${esc(net().name)}</button>`;
     $('switch-target').onclick = () => switchTo(S.target);
   }
   if (!S.info) return;
   const I = S.info, R = I.roles, me = S.account;
-  const live = onRightNetwork() && !S.busy;
-  const funded = I.status === 1;
   const u = v => `${fmt(v, I.decimals)} ${esc(I.symbol)}`;
-  const gate = (isRole, ok, roleName, why) => [live && isRole && ok, !onRightNetwork() ? 'Wrong network' : !isRole ? `Only the ${roleName}` : !ok ? why : why];
 
-  $('state').textContent = `${STATUSES[I.status]} · ${I.sealed} of ${I.lines.length} line${I.lines.length === 1 ? '' : 's'} sealed`
-    + (I.status === 3 ? ' · reserve released' : '');
+  // ── your next step ──
+  const mine = Object.entries(R).filter(([, a]) => same(me, a)).map(([r]) => r);
+  const myLines = I.lines.filter(l => same(me, l.payee)).map(l => l.i + 1);
+  if (myLines.length) mine.push(`worker on line ${myLines.join(', ')}`);
+  $('you').textContent = !me ? 'Connect your wallet to see what you can do.' : mine.length ? `You are the ${mine.join(' and ')}.` : 'This wallet has no part in this escrow. Switch accounts in MetaMask if you have another.';
+  const acts = onRightNetwork() && me ? myActions(I) : [];
+  $('next').innerHTML = !me ? `<button class="btn" id="connect-2">Connect wallet</button>`
+    : !onRightNetwork() ? `<p class="nothing">Switch your wallet to ${esc(net().name)} first (button above).</p>`
+    : acts.length ? acts.map(([k, label, why, minor]) => `
+        <div class="step ${minor ? 'minor' : ''}"><span><b>${esc(label)}</b><small>${esc(why)}</small></span>
+        <button class="btn" data-act="${k}" ${S.busy ? 'disabled' : ''}>${S.busy === k ? 'Working…' : minor ? 'Do it' : 'Go'}</button></div>`).join('')
+    : I.status >= 2 ? `<p class="nothing">${esc(waitingOn(I))}</p>`
+    : mine.length ? `<p class="nothing">Nothing for you right now. ${esc(waitingOn(I))}</p>` : '';
+  const c2 = $('connect-2'); if (c2) c2.onclick = connect;
 
-  // Engagement-wide actions
-  const isClient = same(me, R.client), isOp = same(me, R.operator);
-  const canCancel = (I.status === 0 || funded) && ((isClient && !I.anyDelivered) || (isOp && I.sealed === 0));
-  const acts = [
-    ['mint', `Get test ${I.symbol}`, ...gate(isClient, I.status === 0 && I.symbol === 'mUSDC', 'client', 'Test token only, before funding')],
-    ['fund', `Fund escrow (${u(I.price)})`, ...gate(isClient, I.status === 0, 'client', 'Client, before funding')],
-    ['release', 'Release reserve to treasury', ...gate(isOp, funded && I.sealed === I.lines.length, 'operator', 'Operator, after every line is sealed')],
-    ['cancel', 'Cancel and refund client', live && (isClient || isOp) && canCancel,
-      !onRightNetwork() ? 'Wrong network' : 'Client before any Delivered; operator before any Sealed'],
-  ];
-  $('eng-actions').innerHTML = acts.map(([k, l, en, note]) => button(k, l, en, note)).join('');
+  // Wallet help: USDC for the client, HBAR for fees.
+  const help = [];
+  if (me && onRightNetwork() && I.balances) {
+    if (same(me, R.client) && I.status === 0 && I.balances.token < I.price) {
+      help.push(`You have <b>${u(I.balances.token)}</b>; funding needs <b>${u(I.price)}</b>.
+        ${net().key === 'hedera-testnet' && I.symbol === 'USDC' ? `Get free test USDC from Circle (choose <b>Hedera Testnet</b> and paste <code>${esc(me)}</code>).<br><a class="btn small" href="${FAUCET}" target="_blank" rel="noopener">Get test USDC</a>` : ''}`);
+    }
+    if (I.symbol === 'USDC' && (same(me, R.client) || myLines.length || same(me, R.treasury))) {
+      help.push(`<button class="btn small ghost" id="watch-usdc">Show USDC in MetaMask</button>`);
+    }
+    if (mine.length && I.balances.gas < 0.5 && I.status < 2) {
+      help.push(`Your wallet has ${I.balances.gas.toFixed(2)} ${esc(net().currency.symbol)}. Each step costs a small network fee, so add a few ${esc(net().currency.symbol)}${net().faucet ? ` (free on testnet: <a href="${net().faucet}" target="_blank" rel="noopener">Hedera faucet</a>)` : ''}.`);
+    }
+  }
+  $('wallet-help').innerHTML = help.map(h => `<div class="help">${h}</div>`).join('');
+  const w = $('watch-usdc'); if (w) w.onclick = watchToken;
 
-  // Lines
+  // ── engagement ──
+  $('state').textContent = `${STATUSES[I.status]} · ${I.sealed} of ${I.lines.length} line${I.lines.length === 1 ? '' : 's'} paid`;
+  // Arrived by link: the contract is known, so the loader box is just noise.
+  const viaLink = params.get('engagement') && same(params.get('engagement'), I.addr);
+  $('load-card').hidden = !!viaLink;
+  $('contract-line').innerHTML = `Escrow ${addrLink(I.addr)}${viaLink ? ` · <a href="#" id="show-loader">open a different one</a>` : ''}`;
+  const sl = $('show-loader'); if (sl) sl.onclick = ev => { ev.preventDefault(); $('load-card').hidden = false; sl.remove(); };
+  $('waiting').textContent = waitingOn(I);
   const names = ['Started', 'Delivered', 'Audited', 'Authorized', 'Sealed'];
-  const by = ['payee', 'payee', 'auditor', 'client', 'operator'];
+  const by = ['worker', 'worker', 'auditor', 'client', 'operator'];
   $('lines').innerHTML = I.lines.map(l => {
-    const isPayee = same(me, l.payee);
     const chips = names.map((n, k) => {
       const done = l.times[k] > 0;
-      const next = funded && ((k === 0 && l.stage === 0 && !done) || (k > 0 && l.stage === k - 1));
+      const next = I.status === 1 && ((k === 0 && l.stage === 0 && !done) || (k > 0 && l.stage === k - 1));
       return `<li class="${done ? 'done' : ''} ${next ? 'next' : ''} ${k === 0 ? 'opt' : ''}" data-stamp="${n}"><b>${n}</b><small>${by[k]}${k === 0 ? ' · optional' : ''}${done ? '<br>' + new Date(l.times[k] * 1000).toLocaleString() : ''}</small></li>`;
     }).join('');
-    const la = [
-      [`start:${l.i}`, 'Stamp Started (optional)', ...gate(isPayee, funded && l.stage === 0 && !l.times[0], 'payee', 'Payee, before Delivered')],
-      [`deliver:${l.i}`, 'Stamp Delivered', ...gate(isPayee, funded && l.stage === 0, 'payee', 'Payee, after funding')],
-      [`audit:${l.i}`, 'Stamp Audited', ...gate(same(me, R.auditor), funded && l.stage === 1, 'auditor', 'Auditor, after Delivered')],
-      [`authorize:${l.i}`, 'Stamp Authorized', ...gate(isClient, funded && l.stage === 2, 'client', 'Client, after Audited')],
-      [`seal:${l.i}`, `Seal and pay ${u(l.labor)}`, ...gate(isOp, funded && l.stage === 3, 'operator', 'Operator, after Authorized')],
-    ];
     return `<div class="lineCard" data-line="${l.i}">
-      <div class="lineHead"><span><b>Line ${l.i + 1}</b> · ${u(l.labor)}</span><span>payee ${addrLink(l.payee)}${isPayee ? '<span class="you">YOU</span>' : ''}</span></div>
-      <ol class="stamps">${chips}</ol>
-      <div class="actions">${la.map(([k, lb, en, note]) => button(k, lb, en, note)).join('')}</div></div>`;
+      <div class="lineHead"><span><b>Line ${l.i + 1}</b> · ${u(l.labor)}</span><span>worker ${addrLink(l.payee)}${same(me, l.payee) ? '<span class="you">YOU</span>' : ''}</span></div>
+      <ol class="stamps">${chips}</ol></div>`;
   }).join('');
 
   $('money').innerHTML = `
@@ -197,12 +253,14 @@ function render() {
     <dt>Token</dt><dd>${addrLink(I.token)}</dd>`;
   const tag = a => (same(me, a) ? '<span class="you">YOU</span>' : '');
   $('people').innerHTML = Object.entries(R).map(([r, a]) => `<dt>${r}</dt><dd>${addrLink(a)}${tag(a)}</dd>`).join('');
-
-  const mine = Object.entries(R).filter(([, a]) => same(me, a)).map(([r]) => r);
-  const myLines = I.lines.filter(l => same(me, l.payee)).map(l => l.i + 1);
-  if (myLines.length) mine.push(`payee on line ${myLines.join(', ')}`);
-  $('you').textContent = !me ? 'Connect your wallet to act.' : mine.length ? `You are the ${mine.join(' and ')}.` : 'Your wallet has no role on this engagement.';
   document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act));
+}
+
+// Lets MetaMask show the escrow's token (Circle USDC) in the wallet.
+async function watchToken() {
+  try {
+    await window.ethereum.request({ method: 'wallet_watchAsset', params: { type: 'ERC20', options: { address: S.info.token, symbol: S.info.symbol, decimals: S.info.decimals } } });
+  } catch (e) { $('err').textContent = e.message; }
 }
 
 async function act(key) {
@@ -231,7 +289,7 @@ async function act(key) {
     release: [['release reserve', call('releaseReserve')]],
     cancel: [['cancel', call('cancel')]],
   }[name];
-  S.busy = true; render();
+  S.busy = key; render();
   try {
     for (const [label, send] of steps) {
       const tx = await send();

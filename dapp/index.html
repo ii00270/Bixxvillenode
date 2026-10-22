@@ -24,7 +24,7 @@
   <div class="banner warn" id="wrong-net" hidden></div>
   <div class="banner" id="no-wallet" hidden>No browser wallet found. Install MetaMask (or another EVM wallet) to use this page.</div>
 
-  <section class="card">
+  <section class="card" id="load-card">
     <div class="row">
       <label class="field grow"><span>Engagement contract</span><input type="text" id="engagement" placeholder="0x…" spellcheck="false" autocomplete="off"></label>
       <label class="field"><span>Network</span><select id="target"></select></label>
@@ -34,33 +34,31 @@
   </section>
 
   <section id="view" hidden>
-    <section class="card">
-      <h2>Engagement</h2>
-      <p class="state">Status: <b id="state">—</b></p>
-      <div class="actions" id="eng-actions"></div>
+    <section class="card next" id="next-card">
+      <h2>Your next step</h2>
+      <p class="muted" id="you"></p>
+      <div id="next"></div>
+      <div id="wallet-help"></div>
+      <p class="err" id="err" role="alert"></p>
     </section>
 
     <section class="card">
-      <h2>Lines</h2>
-      <p class="muted">Each line is stamped and paid on its own: Started (optional) → Delivered → Audited → Authorized → Sealed.</p>
+      <h2>Engagement</h2>
+      <p class="muted" id="contract-line" style="margin:0 0 8px;word-break:break-all"></p>
+      <p class="state">Status: <b id="state">—</b></p>
+      <p class="muted" id="waiting"></p>
       <div id="lines"></div>
     </section>
 
     <section class="card">
       <h2>Money</h2>
       <dl class="kv" id="money"></dl>
-      <p class="muted">Money moves only when the operator seals a line: that line's payee is paid. The reserve goes to the treasury after every line is sealed.</p>
+      <p class="muted">Money moves only when the operator seals a line: that line's worker is paid. The reserve goes to the treasury after every line is sealed.</p>
     </section>
 
     <section class="card">
       <h2>People</h2>
       <dl class="kv" id="people"></dl>
-    </section>
-
-    <section class="card">
-      <h2>You</h2>
-      <p class="muted" id="you"></p>
-      <p class="err" id="err"></p>
     </section>
   </section>
 

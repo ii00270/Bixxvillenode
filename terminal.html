@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<link rel="icon" type="image/png" href="icon-192.png">
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
 <meta name="theme-color" content="#000000"/>
@@ -9906,8 +9907,7 @@ function renderTeamPlanReport({ map, leaves }) {
   const windows = [...new Set([P.criticalPath, round4(P.criticalPath * 1.25), round4(P.criticalPath * 1.5), round4(P.criticalPath * 2)])].sort((a, b) => a - b);
   const bsize = n => (n / 4).toFixed(n % 4 ? 2 : 0).replace(/\.?0+$/, '');
 
-  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><link rel="icon" type="image/png" href="icon-192.png">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  return `<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Team Plan · ${e(map.goal)}</title>
 <link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
 <style>${REPORT_CSS}</style></head><body><div class="page">

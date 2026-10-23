@@ -585,6 +585,18 @@ html.theme-light{
 .np-fig small{font-family:var(--mono);font-size:10px;color:#8A8A88}
 .np-mini{flex:1;height:5px;background:#222;border-radius:999px;overflow:hidden}
 .np-mini i{display:block;height:100%;background:var(--neon)}
+/* live markets */
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#FF2D95;margin-right:6px;vertical-align:1px;box-shadow:0 0 0 0 rgba(255,45,149,.6);animation:liveRing 1.6s infinite}
+@keyframes liveRing{70%{box-shadow:0 0 0 7px rgba(255,45,149,0)}100%{box-shadow:0 0 0 0 rgba(255,45,149,0)}}
+.dash-mid-v.tick-up{animation:tickUp 1.2s ease-out}
+.dash-mid-v.tick-down{animation:tickDown 1.2s ease-out}
+@keyframes tickUp{0%{color:#10B981;text-shadow:0 0 14px rgba(16,185,129,.55)}100%{text-shadow:none}}
+@keyframes tickDown{0%{color:#FF5A4F;text-shadow:0 0 14px rgba(255,90,79,.55)}100%{text-shadow:none}}
+.dash-plot{position:relative}
+.dash-pulse{position:absolute;width:10px;height:10px;margin:-5px 0 0 -5px;border-radius:50%;background:#FF2D95;box-shadow:0 0 0 0 rgba(255,45,149,.6);animation:liveRing 1.6s infinite;pointer-events:none;transition:left .4s,top .4s}
+.dash-range{display:inline-flex;gap:2px;border:1px solid var(--term-line);border-radius:999px;padding:2px;margin:8px 0 0}
+.dash-range button{appearance:none;border:0;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:10.5px;padding:4px 11px;border-radius:999px;cursor:pointer}
+.dash-range button.on{background:var(--term-fg);color:var(--term-bg)}
 /* ── infographics (In progress / Delivered / home prompts): always dark, brand neon ── */
 .ig-board{display:grid;gap:16px;margin-top:12px}
 .ig-card{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-family:var(--sans)}
@@ -9638,6 +9650,45 @@ async function loadMarkets(force) {
   return MKT.loading;
 }
 
+// ── Live ticks: Bitcoin every ~8 s (Coinbase's public price), gold and silver
+// every ~30 s (that is how often gold-api.com updates). DXY and EUR/USD come
+// from the ECB's once-a-day reference rates, so they do not move intraday and
+// are not animated. Everything shown moving is a real price just fetched.
+const LIVE = { BTC: [], XAU: [], XAG: [] };
+const LIVE_MAX = 300;
+let liveTimer = null, liveGold = 0, dashRange = 'live', dashHover = false;
+async function liveTick() {
+  if (!MKT.data) return;
+  if (document.getElementById('term-home')?.style.display === 'none' || document.hidden) return;
+  const j = u => fetch(u, { cache: 'no-store' }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+  const now = Date.now(), fresh = [];
+  const btc = await j('https://api.coinbase.com/v2/prices/BTC-USD/spot');
+  const bp = parseFloat(btc?.data?.amount);
+  if (bp > 0) fresh.push(['BTC', bp]);
+  if (now - liveGold > 28000) {
+    liveGold = now;
+    const [xau, xag] = await Promise.all([j('https://api.gold-api.com/price/XAU'), j('https://api.gold-api.com/price/XAG')]);
+    if (xau?.price > 0) fresh.push(['XAU', xau.price]);
+    if (xag?.price > 0) fresh.push(['XAG', xag.price]);
+  }
+  if (!fresh.length) return;
+  MKT.prev = MKT.prev || {};
+  for (const [k, price] of fresh) {
+    const m = MKT.data[k];
+    MKT.prev[k] = m.price;
+    m.price = price;
+    const arr = LIVE[k];
+    arr.push([now, price]);
+    if (arr.length > LIVE_MAX) arr.shift();
+    // sparkline cards for gold and silver have no daily history; their live ticks are the line
+    if (k !== 'BTC') m.series = arr.slice();
+  }
+  MKT.liveAt = now;
+  renderDashMarkets(MKT.data);
+  if (!dashHover) renderDashChart(MKT.data);
+  updateTermMarketsTicker(MKT.data);
+}
+
 const mktFmt = (m) => m.price == null ? '—'
   : (m.usd ? '$' : '') + m.price.toLocaleString('en-US', { minimumFractionDigits: m.dp, maximumFractionDigits: m.dp });
 const chgHtml = c => c == null ? '' : `<span class="dash-chg ${c >= 0 ? 'up' : 'down'}">${c >= 0 ? '▲' : '▼'} ${Math.abs(c).toFixed(2)}%</span>`;
@@ -9693,11 +9744,15 @@ async function renderDashboard() {
   renderDashMarkets(m);
   renderDashChart(m);
   updateTermMarketsTicker(m);
+  clearInterval(liveTimer);
+  liveTick();
+  liveTimer = setInterval(liveTick, 8000);
   clearInterval(dashTimer);
   dashTimer = setInterval(async () => {
     if (document.getElementById('term-home')?.style.display === 'none' || document.hidden) return;
     const mm = await loadMarkets(true);
-    renderDashMarkets(mm); renderDashChart(mm); updateTermMarketsTicker(mm);
+    for (const k of ['XAU', 'XAG']) if (LIVE[k].length > 1 && mm?.[k]) mm[k].series = LIVE[k].slice();
+    renderDashMarkets(mm); if (!dashHover) renderDashChart(mm); updateTermMarketsTicker(mm);
   }, 120000);
 }
 
@@ -9866,9 +9921,11 @@ function renderDashMarkets(m) {
   el.innerHTML = ['DXY', 'EUR', 'BTC', 'XAU', 'XAG'].map(k => {
     const x = m[k];
     const sp = x.series.length > 1 ? `<svg class="dash-spark" viewBox="0 0 120 34" preserveAspectRatio="none"><path d="${sparkPath(x.series.slice(-30), 120, 34)}"/></svg>` : '';
+    const was = MKT.prev?.[k], dir = was != null && x.price != null && x.price !== was ? (x.price > was ? 'tick-up' : 'tick-down') : '';
+    const isLive = !!LIVE[k] && LIVE[k].length > 0;
     return `<button class="dash-card dash-mkt ${dashChartKey === k ? 'on' : ''}" ${x.series.length > 1 ? `onclick="dashChartKey='${k}';renderDashChart(MKT.data);renderDashMarkets(MKT.data)"` : ''}>
-      <div class="dash-lbl"><span><i class="dash-dot d-${k}"></i>${esc(x.name)}</span><span class="dash-chip">${esc(x.sym)}</span></div>
-      <div class="dash-mid-v">${mktFmt(x)}</div>
+      <div class="dash-lbl"><span><i class="dash-dot d-${k}"></i>${esc(x.name)}</span><span class="dash-chip">${isLive ? '<i class="live-dot"></i>' : ''}${esc(x.sym)}</span></div>
+      <div class="dash-mid-v ${dir}" ${dir ? 'data-flash' : ''}>${mktFmt(x)}</div>
       <div class="dash-mkt-foot">${chgHtml(x.change) || `<span class="dash-note">${esc(x.note)}</span>`}${x.change != null ? `<span class="dash-note">${esc(x.note)}</span>` : ''}</div>
       ${sp || (k === 'XAG' && ratio ? `<div class="dash-note">Gold/silver ratio <b>${ratio}</b></div>` : '')}
     </button>`;
@@ -9879,18 +9936,33 @@ function renderDashChart(m) {
   const el = document.getElementById('dash-chart');
   if (!el) return;
   const x = m?.[dashChartKey];
-  const keys = ['BTC', 'EUR', 'DXY'];
-  if (!x || x.series.length < 2) { el.innerHTML = '<div class="dash-empty">Chart data is unavailable right now.</div>'; return; }
-  const s = x.series, W = 640, H = 200;
-  const vs = s.map(p => p[1]), lo = Math.min(...vs), hi = Math.max(...vs);
+  const keys = [['BTC', 'BTC'], ['XAU', 'Gold'], ['XAG', 'Silver'], ['EUR', 'EUR/USD'], ['DXY', 'DXY']];
+  const liveArr = LIVE[dashChartKey];
+  // Live view when this market ticks and there is more than one tick; otherwise its 30-day history.
+  const live = dashRange === 'live' && liveArr && liveArr.length > 1;
+  const canLive = !!liveArr;
+  const s = live ? liveArr : x?.series || [];
+  if (!x || s.length < 2) {
+    el.innerHTML = `<div class="dash-empty">${canLive && dashRange === 'live' ? 'Waiting for the first live prices…' : 'Chart data is unavailable right now.'}</div>`;
+    if (canLive && dashRange === 'live') setTimeout(() => { if (LIVE[dashChartKey]?.length > 1) renderDashChart(MKT.data); }, 9000);
+    return;
+  }
+  const W = 640, H = 200;
+  const vs = s.map(p => p[1]), lo = Math.min(...vs), hi = Math.max(...vs), span = hi - lo || 1;
   const path = sparkPath(s, W, H, 6);
   const first = s[0][1], lastV = s[s.length - 1][1], period = (lastV / first - 1) * 100;
-  const fmtV = v => (x.usd ? '$' : '') + v.toLocaleString('en-US', { minimumFractionDigits: x.dp, maximumFractionDigits: x.dp });
+  const dp = live && dashChartKey === 'BTC' ? 0 : x.dp;
+  const fmtV = v => (x.usd ? '$' : '') + v.toLocaleString('en-US', { minimumFractionDigits: dp, maximumFractionDigits: dp });
   const fmtD = t => new Date(t).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  const fmtT = t => new Date(t).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', second: live ? '2-digit' : undefined });
+  const fmtX = live ? fmtT : fmtD;
+  const endX = W - 6, endY = H - 6 - (lastV - lo) / span * (H - 12);
+  const mins = live ? Math.max(1, Math.round((s[s.length - 1][0] - s[0][0]) / 60000)) : 30;
   el.innerHTML = `
-    <div class="dash-lbl"><span>${esc(x.name)} · last 30 days</span>
-      <span class="dash-tabs">${keys.map(k => `<button class="${k === dashChartKey ? 'on' : ''}" onclick="dashChartKey='${k}';renderDashChart(MKT.data);renderDashMarkets(MKT.data)">${k === 'EUR' ? 'EUR/USD' : k}</button>`).join('')}</span></div>
-    <div class="dash-chart-head"><b>${fmtV(lastV)}</b>${chgHtml(period)}<span class="dash-note">over the period · ${esc(x.note)}</span></div>
+    <div class="dash-lbl"><span>${esc(x.name)} · ${live ? `<i class="live-dot"></i>live · last ${mins} min` : 'last 30 days'}</span>
+      <span class="dash-tabs">${keys.map(([k, l]) => `<button class="${k === dashChartKey ? 'on' : ''}" onclick="dashChartKey='${k}';renderDashChart(MKT.data);renderDashMarkets(MKT.data)">${l}</button>`).join('')}</span></div>
+    ${canLive ? `<div class="dash-range"><button class="${live ? 'on' : ''}" onclick="dashRange='live';renderDashChart(MKT.data)">Live</button><button class="${!live ? 'on' : ''}" onclick="dashRange='30d';renderDashChart(MKT.data)">30 days</button></div>` : ''}
+    <div class="dash-chart-head"><b class="${live ? 'dash-live-num' : ''}">${fmtV(lastV)}</b>${chgHtml(period)}<span class="dash-note">${live ? `since ${fmtT(s[0][0])}` : 'over the period'} · ${esc(live ? 'updates about every ' + (dashChartKey === 'BTC' ? '8 seconds' : '30 seconds') : x.note)}</span></div>
     <div class="dash-plot" id="dash-plot">
       <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">
         <defs><linearGradient id="dashLine" x1="0" x2="1"><stop offset="0" stop-color="#FFEA00"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FF2D95"/></linearGradient>
@@ -9900,21 +9972,23 @@ function renderDashChart(m) {
         <path d="${path}" fill="none" stroke="url(#dashLine)" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
         <line id="dash-x" x1="0" x2="0" y1="0" y2="${H}" class="dash-cross" style="display:none" vector-effect="non-scaling-stroke"/>
       </svg>
+      ${live ? `<span class="dash-pulse" style="left:${(endX / W * 100).toFixed(2)}%;top:${(endY / H * 100).toFixed(2)}%"></span>` : ''}
       <div class="dash-tip" id="dash-tip" hidden></div>
-      <div class="dash-axis"><span>${fmtD(s[0][0])}</span><span>${fmtV(lo)} – ${fmtV(hi)}</span><span>${fmtD(s[s.length - 1][0])}</span></div>
+      <div class="dash-axis"><span>${fmtX(s[0][0])}</span><span>${fmtV(lo)} – ${fmtV(hi)}</span><span>${fmtX(s[s.length - 1][0])}</span></div>
     </div>`;
   const plot = el.querySelector('#dash-plot'), tip = el.querySelector('#dash-tip'), cross = el.querySelector('#dash-x');
   plot.addEventListener('pointermove', e => {
+    dashHover = true;
     const r = plot.getBoundingClientRect();
     const f = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
     const i = Math.round(f * (s.length - 1));
     const px = 6 + i / (s.length - 1) * (W - 12);
     cross.setAttribute('x1', px); cross.setAttribute('x2', px); cross.style.display = '';
     tip.hidden = false;
-    tip.innerHTML = `<b>${fmtV(s[i][1])}</b><span>${fmtD(s[i][0])}</span>`;
+    tip.innerHTML = `<b>${fmtV(s[i][1])}</b><span>${fmtX(s[i][0])}</span>`;
     tip.style.left = Math.min(r.width - 120, Math.max(0, f * r.width - 60)) + 'px';
   });
-  plot.addEventListener('pointerleave', () => { tip.hidden = true; cross.style.display = 'none'; });
+  plot.addEventListener('pointerleave', () => { dashHover = false; tip.hidden = true; cross.style.display = 'none'; });
 }
 
 function renderDashMe() {
@@ -11580,7 +11654,7 @@ function leafActionsHtml(l) {
                                : `<button class="term-card-btn" disabled title="Genesis approves the step's script before work starts">Start — script pending</button>`) : '',
     l.status === 'in progress' && !submitted && mine
       ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Continue</button>`
-                               : `<button class="term-card-btn primary" onclick="openWorkForm('${id}')">Log work &amp; proof</button>`) : '',
+                               : `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`) : '',
     submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
     submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
     l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
@@ -11932,9 +12006,8 @@ async function startLeafUI(leafId) {
   openWorkForm(leafId);
 }
 
-async function openWorkForm(leafId) {
-  openOverlay('Log work & proof', (body) => renderWorkForm(body, leafId));
-}
+// The old fill-in card is retired: every way into the work is the step-by-step walkthrough.
+async function openWorkForm(leafId) { return openGuided(leafId); }
 
 async function renderWorkForm(body, leafId) {
   const l = leafById(leafId);
@@ -12402,13 +12475,29 @@ const lsSet = (k, v) => { try { v == null ? localStorage.removeItem(k) : localSt
 async function openGuided(leafId) {
   const l = leafById(leafId);
   if (!l) return;
-  const { data: script, error } = await sb.rpc('get_leaf_script', { p_leaf: leafId });
+  const { data: scripted, error } = await sb.rpc('get_leaf_script', { p_leaf: leafId });
   if (error) { toast(error.message); return; }
-  if (!script || script.status !== 'approved') { toast('This step has no approved script yet.'); return; }
+  let script = scripted, synthetic = false;
+  if (!script || script.status !== 'approved') {
+    // Steps already under way without a script still get the walkthrough, with a default one.
+    if (l.status !== 'in progress') { toast('This step has no approved script yet.'); return; }
+    synthetic = true;
+    script = {
+      status: 'approved',
+      prompts: [
+        { title: 'What “done” looks like', body: l.done_criterion || 'Finish the step as described.' },
+        { title: 'Do the work', body: 'Work through the step. When you stop, the next screen logs your time.' },
+      ],
+      proof_items: [
+        { id: 'files', kind: 'file', label: 'Show the finished work', hint: 'Photos, PDFs or documents that prove it is done.', required: true },
+        { id: 'link', kind: 'link', label: 'A link to the work (optional)', hint: 'A page, folder or recording, if there is one.', required: false },
+      ],
+    };
+  }
   gw = {
-    leafId, script, work: null, i: 0, entered: false, submitted: false,
+    leafId, script, work: null, i: synthetic ? 0 : 0, entered: synthetic, submitted: false, synthetic,
     screens: [
-      { t: 'door' }, { t: 'intro' },
+      ...(synthetic ? [] : [{ t: 'door' }]), { t: 'intro' },
       ...script.prompts.map((_, k) => ({ t: 'prompt', k })),
       { t: 'time' },
       ...script.proof_items.map((_, k) => ({ t: 'proof', k })),
@@ -12420,6 +12509,10 @@ async function openGuided(leafId) {
   el.hidden = false;
   document.body.classList.add('gw-open');
   await gwLoadWork();
+  if (gw.synthetic) {
+    const saved = parseInt(lsGet(gwPosKey(leafId)) || '', 10);
+    if (saved > 0 && saved < gw.screens.length) gw.i = saved;
+  }
   gwRender();
 }
 
@@ -12431,6 +12524,8 @@ async function closeGuided() {
   gw = null;
   if (was?.entered) await refreshTrackerAfterWork();
 }
+
+const gwItemEv = (x, ev) => (gw?.synthetic ? (ev || []).filter(e => e.kind === (x.kind === 'link' ? 'link' : 'file')) : (ev || []).filter(e => e.proof_item === x.id));
 
 async function gwLoadWork() {
   const { data } = await sb.rpc('get_leaf_work', { p_leaf: gw.leafId });
@@ -12459,7 +12554,7 @@ function gwRender() {
   const evidence = gw.work?.evidence || [], sessions = gw.work?.sessions || [];
   const where = { door: 'Enter', intro: 'The step', time: 'Time worked', submit: 'Submit' }[sc.t]
     || (sc.t === 'prompt' ? `Prompt ${sc.k + 1} of ${prompts.length}` : `Proof ${sc.k + 1} of ${items.length}`);
-  let main = '', next = 'Next', back = gw.i > 1;
+  let main = '', next = 'Next', back = gw.i > (gw.synthetic ? 0 : 1);
 
   if (gw.submitted) {
     main = `<div class="gw-kicker">Submitted</div>
@@ -12517,7 +12612,7 @@ function gwRender() {
       <label class="gw-field"><span>Notes — what you did</span><textarea class="gw-input" id="gw-notes" rows="3"></textarea></label>
       <button class="gw-btn" onclick="gwSaveSession()">Save this session</button>`;
   } else if (sc.t === 'proof') {
-    const x = items[sc.k], got = evidence.filter(e => e.proof_item === x.id);
+    const x = items[sc.k], got = gwItemEv(x, evidence);
     const req = x.required !== false;
     let input;
     if (x.kind === 'link') {
@@ -12553,7 +12648,7 @@ function gwRender() {
       <div class="gw-list">
         <div class="gw-item"><div>Time worked</div><div class="${sessions.length ? 'gw-ok' : 'gw-miss'}">${sessions.length ? `✓ ${fmtDur(totalMs)}` : 'missing'}</div></div>
         ${items.map((x, k) => {
-          const ok = evidence.some(e => e.proof_item === x.id), req = x.required !== false;
+          const ok = gwItemEv(x, evidence).length > 0, req = x.required !== false;
           return `<div class="gw-item"><div><a href="#" onclick="gwGo(${gw.screens.findIndex(s => s.t === 'proof' && s.k === k)});return false;">${esc(x.label)}</a></div>
             <div class="${ok ? 'gw-ok' : req ? 'gw-miss' : 'gw-dim'}">${ok ? '✓' : req ? 'missing' : 'optional'}</div></div>`;
         }).join('')}
@@ -12629,7 +12724,7 @@ async function gwNext() {
     const pending = gwPendingInput(x);
     if (pending && !(await gwAttach({ stay: true }))) { busy(false); return; }
     busy(false);
-    const has = (gw.work?.evidence || []).some(e => e.proof_item === x.id);
+    const has = gwItemEv(x, gw.work?.evidence).length > 0;
     if (x.required !== false && !has) return gwMsg('This one’s required — attach it before going on.');
     return gwGo(gw.i + 1);
   }
@@ -12694,6 +12789,7 @@ async function gwAttach(opts = {}) {
   const x = gw.script.proof_items[gw.screens[gw.i].k];
   const caption = (document.getElementById('gw-caption')?.value || '').trim();
   const tag = async (id) => {
+    if (gw.synthetic) return;   // the default walkthrough has no script items to tag
     const { error } = await sb.rpc('set_evidence_item', { p_id: id, p_item: x.id });
     if (error) throw error;
   };

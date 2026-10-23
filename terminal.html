@@ -800,6 +800,38 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .ig-spot-stats small{font-family:var(--mono);font-size:9px;color:#8A8A88;text-transform:uppercase;letter-spacing:.08em}
 .ig-btn{appearance:none;border:1px solid #FF2D95;background:#FF2D95;color:#0A0A0A;border-radius:10px;padding:9px 12px;font-family:var(--mono);font-size:11px;font-weight:600;cursor:pointer}
 .ig-btn.ghost{background:transparent;color:#FF7AB8;margin-top:auto}
+
+.ck-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+.ck-chip{appearance:none;background:#161618;border:1px solid #2B2B2B;border-radius:999px;color:#EDEDEB;font:12px var(--mono);padding:5px 11px;cursor:pointer;display:inline-flex;gap:8px;align-items:center}
+.ck-chip span{color:#9A9894}.ck-chip.ok{border-color:#2E9D6B}.ck-chip.bad{border-color:#E5484D}
+/* checks: QR tags, plans, scanner */
+.ck-bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:0 0 14px}
+.ck-hint{font-size:11px;color:var(--term-dim);flex:1 1 220px}
+.ck-cam{position:relative;background:#000;border-radius:12px;overflow:hidden;aspect-ratio:1/1;max-width:380px;margin:0 auto 10px}
+.ck-cam video{width:100%;height:100%;object-fit:cover}
+.ck-frame{position:absolute;inset:18%;border:2px solid #FF2D95;border-radius:10px;box-shadow:0 0 0 999px rgba(0,0,0,.35);pointer-events:none}
+.ck-manual{display:flex;gap:8px}.ck-manual.stack{flex-direction:column}.ck-manual .sch-in{flex:1;min-width:0}
+.ck-qrbox{float:right;margin:0 0 8px 12px;background:#fff;padding:4px;border-radius:6px}.ck-qrbox svg{display:block}
+.ck-sub{font-size:13px;color:var(--term-fg);margin:4px 0 10px}
+.ck-pill{display:inline-block;font:11px var(--mono);padding:2px 8px;border-radius:999px;border:1px solid var(--term-line);color:var(--term-fg);text-transform:uppercase;letter-spacing:.04em}
+.ck-pill.s-measured{border-color:#E8B500;color:#E8B500}.ck-pill.s-confirmed{border-color:#2E9D6B;color:#2E9D6B}.ck-pill.s-void{opacity:.5}
+.ck-ok{color:#2E9D6B}.ck-bad{color:#E5484D}
+.ck-acts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0;clear:both}
+.ck-kv{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:6px 0;border-bottom:1px solid var(--term-line);font-size:13px}.ck-kv small{grid-column:1/-1;color:var(--term-dim)}.ck-kv.bad b,.ck-kv.bad small{color:#E5484D}
+.ck-hist{font-size:12px;color:var(--term-fg);padding:3px 0}
+.ck-fld{display:flex;flex-direction:column;gap:4px;margin-bottom:10px}.ck-fld span{font-size:12px;color:var(--term-fg)}.ck-fld i{color:var(--term-dim);font-style:normal}.ck-fld small{color:var(--term-dim);font-size:11px}
+.ck-import{margin:10px 0;border:1px solid var(--term-line);border-radius:10px;padding:8px 12px}.ck-import summary{cursor:pointer;font-size:12px}.ck-import textarea,.ck-import input{width:100%;margin:6px 0;box-sizing:border-box}
+.ck-plan{border:1px solid var(--term-line);border-radius:12px;padding:12px;margin:10px 0}.ck-plan-h{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}.ck-plan-h span{color:var(--term-dim);font-size:12px}
+.ck-prog{font-size:12px;color:var(--term-fg);margin-top:6px}
+.ck-code{display:block;word-break:break-all;font:11px var(--mono);color:var(--term-dim);margin:8px 0}
+.ck-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin:12px 0}
+.ck-lbl{appearance:none;background:#fff;color:#111;border:1px solid #ccc;border-radius:8px;padding:6px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;font:11px var(--mono)}
+.ck-res-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid var(--term-line);font-size:13px}.ck-res-row small{flex:1 1 100%;color:var(--term-dim)}
+.ck-frow{display:flex;flex-wrap:wrap;gap:6px;align-items:center;padding:8px 0;border-bottom:1px solid var(--term-line)}.ck-frow .sch-in{flex:1 1 130px;min-width:0}.ck-frow .sch-in.sm{flex:0 0 74px}
+.ca-pick-btn{appearance:none;display:block;width:100%;text-align:left;background:var(--term-bg);border:1px solid var(--term-line);border-radius:10px;color:var(--term-fg);padding:10px 12px;margin:6px 0;cursor:pointer}.ca-pick-btn small{display:block;color:var(--term-dim);margin-top:2px}
+
+.ck-fld .sch-in,.ck-frow .sch-in,.ck-manual .sch-in,.ck-import .sch-in{background:var(--term-bg);color:var(--term-fg);border:1px solid var(--term-line);color-scheme:normal}
+.ck-ok{color:#1F8A5B}.ck-bad{color:#D6303A}
 .ig-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .ig-foot .term-card-btn{background:#161618;color:#EDEDEB;border-color:#2B2B2B}
 .ig-foot .term-card-btn.primary{background:#FF2D95;color:#0A0A0A;border-color:#FF2D95}
@@ -11747,7 +11779,10 @@ async function renderGatesView() {
 const SCH_CLASSES = ['Mini', 'Micro', 'Minor', 'Medium', 'Major'];
 const SCH_COLORS = { Mini: '#94A3B8', Micro: '#3B82F6', Minor: '#8B5CF6', Medium: '#FF7A1A', Major: '#FF2D95' };
 // Working days a step of each class is allowed, before buffer: one BSize (4 hours) a day, the canon's grouping unit.
-const SCH_DEFAULT = { classDays: { Mini: 0.25, Micro: 1, Minor: 2, Medium: 4, Major: 8 }, buffer: { Mini: 0, Micro: 10, Minor: 15, Medium: 20, Major: 25 }, skipWeekends: false };
+// One pace for everything: hours of work in a day (default one BSize, 4). Any step from 1 to 32 hours
+// gets hours / pace days, so a 12-hour step takes 3 days and a 28-hour step 7, with no table to extend.
+// The class (Mini..Major) only decides how much buffer a step gets.
+const SCH_DEFAULT = { hoursPerDay: 4, buffer: { Mini: 0, Micro: 10, Minor: 15, Medium: 20, Major: 25 }, skipWeekends: false };
 const execClassOf = logs => { const e = Object.entries(CANON.EXECUTION_CLASSES).sort((a, b) => a[1] - b[1]); return (e.find(([, h]) => logs <= h) || e[e.length - 1])[0]; };
 
 // A bare "2026-11-05" must mean that day where the user is, not midnight UTC (which would be the evening before).
@@ -11772,7 +11807,8 @@ function schWorkDays(from, to, skip) {         // working days in (from, to]
 
 // Pure: leaves + branches + deadline + settings in, dates and findings out.
 function gmSchedule({ leaves, branches, deadline, today, settings, workedH }) {
-  const st = { ...SCH_DEFAULT, ...settings, classDays: { ...SCH_DEFAULT.classDays, ...(settings?.classDays || {}) }, buffer: { ...SCH_DEFAULT.buffer, ...(settings?.buffer || {}) } };
+  const st = { ...SCH_DEFAULT, ...settings, buffer: { ...SCH_DEFAULT.buffer, ...(settings?.buffer || {}) } };
+  st.hoursPerDay = Math.max(0.5, Math.min(24, +st.hoursPerDay || 4));
   const L = leaves.filter(l => l.logs > 0), byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
   const dependents = {}; L.forEach(l => (l.requires || []).forEach(c => { if (byCode[c]) (dependents[c] ||= []).push(l); }));
   const skip = st.skipWeekends, d0 = schDay(today), dl = schDay(deadline);
@@ -11781,7 +11817,7 @@ function gmSchedule({ leaves, branches, deadline, today, settings, workedH }) {
     if (l.status === 'delivered') return 0;
     if (l.status === 'in progress' && l.submitted_at) return 0.25;       // waiting on verification
     const cls = execClassOf(l.logs);
-    let d = st.classDays[cls] * (1 + st.buffer[cls] / 100);
+    let d = (l.logs / st.hoursPerDay) * (1 + st.buffer[cls] / 100);
     if (l.status === 'in progress') d *= Math.max(0.1, 1 - (workedH?.[l.id] || 0) / l.logs);   // part of it is already done
     return d;
   };
@@ -11836,7 +11872,7 @@ async function gmOpenSchedule() {
   const saved = d.map.schedule || {};
   window._gmSch = {
     deadline: d.map.deadline || '', skipWeekends: saved.skipWeekends ?? SCH_DEFAULT.skipWeekends,
-    classDays: { ...SCH_DEFAULT.classDays, ...(saved.classDays || {}) }, buffer: { ...SCH_DEFAULT.buffer, ...(saved.buffer || {}) },
+    hoursPerDay: saved.hoursPerDay ?? SCH_DEFAULT.hoursPerDay, buffer: { ...SCH_DEFAULT.buffer, ...(saved.buffer || {}) },
   };
   window._gmSchOpen = true;
   renderGatesView();
@@ -11846,6 +11882,7 @@ function gmSchSet(kind, key, val) {
   const S = window._gmSch;
   if (kind === 'deadline') S.deadline = val;
   else if (kind === 'weekends') S.skipWeekends = !!val;
+  else if (kind === 'pace') S.hoursPerDay = Math.max(0.5, Math.min(24, parseFloat(val) || SCH_DEFAULT.hoursPerDay));
   else S[kind][key] = Math.max(0, parseFloat(val) || 0);
   gmSchPreview();
 }
@@ -11862,14 +11899,14 @@ function gmSchHtml() {
   let out = `<div class="gm-card sch"><div class="gm-head"><div><h3>Create due dates</h3><p class="ig-muted">Set the deadline. The plan works backward from it, step by step, by execution class.</p></div><button class="ig-btn ghost" onclick="gmSchClose()">Close</button></div>
     <div class="sch-inputs">
       <label><span class="ig-k">Contract deadline</span><input type="date" class="sch-in" value="${esc(S.deadline)}" min="${schIso(new Date())}" oninput="gmSchSet('deadline',0,this.value)"></label>
+      <label><span class="ig-k">Hours of work a day</span><input type="number" class="sch-in sm" min="0.5" max="24" step="0.5" value="${S.hoursPerDay}" oninput="gmSchSet('pace',0,this.value)"></label>
       <label class="sch-chk"><input type="checkbox" ${S.skipWeekends ? 'checked' : ''} onchange="gmSchSet('weekends',0,this.checked)"> Skip weekends</label>
     </div>
-    <table class="sch-tbl"><tr><th>Class</th><th>Hours</th><th>Working days allowed</th><th>Buffer %</th><th>Steps</th></tr>
+    <table class="sch-tbl"><tr><th>Class</th><th>Up to</th><th>Buffer %</th><th>Steps</th></tr>
       ${SCH_CLASSES.map(c => `<tr><td><i style="background:${SCH_COLORS[c]}"></i>${c}</td><td>${CANON.EXECUTION_CLASSES[c]} h</td>
-        <td><input class="sch-in sm" type="number" step="0.25" min="0" value="${S.classDays[c]}" oninput="gmSchSet('classDays','${c}',this.value)"></td>
         <td><input class="sch-in sm" type="number" step="5" min="0" value="${S.buffer[c]}" oninput="gmSchSet('buffer','${c}',this.value)"></td>
         <td>${d.leaves.filter(l => l.logs > 0 && l.status !== 'delivered' && execClassOf(l.logs) === c).length}</td></tr>`).join('')}</table>
-    <p class="ig-muted">A step gets the days for its class plus its buffer. Defaults are 4 hours of work a day (one BSize); change any number and the plan updates.</p>`;
+    <p class="ig-muted">Any step from 1 to 32 hours works: it takes its hours divided by the pace, plus its class buffer (a 12-hour step at 4 hours a day is 3 days, plus Medium's buffer). Change the pace or a buffer and the plan updates.</p>`;
 
   return out + `<div id="sch-res">${gmSchResHtml()}</div></div>`;
 }
@@ -11917,7 +11954,7 @@ async function gmSchSave() {
   const leaves = Object.entries(plan.steps).filter(([, t]) => !t.done).map(([id, t]) => ({ id, date: t.due }));
   const branches = Object.entries(plan.gates).filter(([, g]) => !g.done).map(([id, g]) => ({ id, date: g.due }));
   const { error } = await sb.rpc('save_map_schedule', { p_map: d.map.id, p_deadline: S.deadline,
-    p_settings: { classDays: S.classDays, buffer: S.buffer, skipWeekends: S.skipWeekends }, p_leaves: leaves, p_branches: branches });
+    p_settings: { hoursPerDay: S.hoursPerDay, buffer: S.buffer, skipWeekends: S.skipWeekends }, p_leaves: leaves, p_branches: branches });
   if (error) return say(error.message);
   toast(`Due dates saved: ${leaves.length} steps, ${branches.length} gates.`);
   const { data } = await sb.rpc('get_work_map', { p_map: d.map.id });
@@ -12644,6 +12681,7 @@ function leafActionsHtml(l) {
                                : `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`) : '',
     submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
     submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
+    l.status !== 'delivered' && (isG || mine) ? `<button class="term-card-btn" onclick="ckOpenStep('${id}')">Checks</button>` : '',
     l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
   ].join('');
 }
@@ -12783,6 +12821,7 @@ function igSpotlight(m, l) {
 async function renderProgressBoard(items, keepLive) {
   try { await loadPeople(); } catch (e) {}
   const work = await loadLeafWork(items.map(l => l.id));
+  try { await loadStepChecks(items.map(l => l.id)); } catch (e) {}
   const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
   if (!keepLive) window._igLive = {};
   return `<div class="ig-board">${items.map(l => {
@@ -12814,7 +12853,8 @@ async function renderProgressBoard(items, keepLive) {
         </section>
         ${igSpotlight(people[grantee], l)}
       </div>
-      <footer class="ig-foot">${l.map_id && l.map_id !== trackerState.mapId
+      ${ckCardRow(l.id)}
+      <footer class="ig-foot">${(operator?.is_genesis || grantee === operator?.id || (CK.cache[l.id] || []).length) ? `<button class="term-card-btn" onclick="ckOpenStep('${esc(l.id)}')">Checks</button>` : ''}${l.map_id && l.map_id !== trackerState.mapId
         ? `<button class="term-card-btn primary" onclick="openFolderAt('${esc(l.map_id)}','in progress')">Open in its folder</button>`
         : (leafActionsHtml(l) || '')}</footer>
     </article>`;
@@ -12822,6 +12862,419 @@ async function renderProgressBoard(items, keepLive) {
 }
 
 // In progress across every folder (contract), each under its folder's header.
+// ── CHECKS: signed QR tags, check plans, scanner ─────────────────────────────
+// A check plan says what to record for one kind of check; its code is a hash of
+// its content. A tag is one physical sample / joint / reading point with its own
+// signed QR. Only this system can mint or verify a code (the key lives in the
+// database). Readings are typed or imported now; devices plug into the same record.
+const CK = { cache: {}, stream: null, raf: 0 };
+const CK_KINDS = { soil: 'Soil test', weld: 'Weld inspection', sample: 'Sample chain of custody', radiation: 'Radiation reading', heat: 'Heat reading', data: 'Data collection', custom: 'Custom' };
+const CK_TEMPLATES = {
+  soil: { instructions: 'Take the core at the marked point. Seal and label it before you leave the spot.', fields: [
+    { key: 'ph', label: 'pH', type: 'number', unit: 'pH', min: 6, max: 7.5 },
+    { key: 'moisture', label: 'Moisture', type: 'number', unit: '%', min: 10, max: 35 },
+    { key: 'temp_c', label: 'Soil temperature', type: 'number', unit: '°C', required: false },
+    { key: 'depth_cm', label: 'Depth of core', type: 'number', unit: 'cm', required: false },
+    { key: 'sealed', label: 'Sample sealed and labelled', type: 'check', pass_when: 'yes' },
+    { key: 'notes', label: 'Notes', type: 'text', required: false }] },
+  weld: { instructions: 'Inspect the joint against the spec for this job. Set the limits below from your welding spec before you issue labels.', fields: [
+    { key: 'joint', label: 'Joint / weld ID', type: 'text' },
+    { key: 'no_cracks', label: 'Free of cracks', type: 'check', pass_when: 'yes' },
+    { key: 'no_porosity', label: 'Free of porosity', type: 'check', pass_when: 'yes' },
+    { key: 'no_undercut', label: 'Undercut within limit', type: 'check', pass_when: 'yes' },
+    { key: 'bead_mm', label: 'Bead width', type: 'number', unit: 'mm', required: false },
+    { key: 'notes', label: 'Notes', type: 'text', required: false }] },
+  sample: { instructions: 'Scan when you take it, when it changes hands and when it arrives. Record the seal each time.', fields: [
+    { key: 'seal_id', label: 'Seal number', type: 'text' },
+    { key: 'sealed', label: 'Container sealed and intact', type: 'check', pass_when: 'yes' },
+    { key: 'condition', label: 'Condition', type: 'choice', options: ['Intact', 'Damaged'], pass_values: ['Intact'] },
+    { key: 'temp_c', label: 'Temperature', type: 'number', unit: '°C', required: false },
+    { key: 'notes', label: 'Notes', type: 'text', required: false }] },
+  radiation: { instructions: 'Take the reading at the tagged spot. Set the limit below from the safety standard that applies to this site before you issue labels.', fields: [
+    { key: 'dose_rate', label: 'Dose rate', type: 'number', unit: 'µSv/h' },
+    { key: 'instrument', label: 'Instrument used', type: 'text', required: false },
+    { key: 'notes', label: 'Notes', type: 'text', required: false }] },
+  heat: { instructions: 'Take the reading at the tagged spot. Set the limits below from the spec for this job before you issue labels.', fields: [
+    { key: 'temp_c', label: 'Temperature', type: 'number', unit: '°C' },
+    { key: 'humidity', label: 'Humidity', type: 'number', unit: '%', required: false },
+    { key: 'instrument', label: 'Instrument used', type: 'text', required: false }] },
+  data: { instructions: 'Record the value at the tagged point.', fields: [
+    { key: 'value', label: 'Value', type: 'number' },
+    { key: 'unit', label: 'Unit', type: 'text', required: false },
+    { key: 'instrument', label: 'Instrument used', type: 'text', required: false },
+    { key: 'notes', label: 'Notes', type: 'text', required: false }] },
+  custom: { instructions: '', fields: [{ key: 'value', label: 'Value', type: 'number' }] },
+};
+
+function ckScript(url, test) {
+  if (test()) return Promise.resolve();
+  return new Promise((res, rej) => {
+    const s = document.createElement('script'); s.src = url; s.onload = () => res(); s.onerror = () => rej(new Error('A needed library could not load. Check your connection.'));
+    document.head.appendChild(s);
+  });
+}
+const ckLoadQR = () => ckScript('https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js', () => window.qrcode);
+const ckLoadScan = () => ckScript('https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js', () => window.jsQR);
+function ckQrSvg(code, size) {
+  const q = window.qrcode(0, 'M'); q.addData(code); q.make();
+  return q.createSvgTag({ cellSize: 4, margin: 2, scalable: true }).replace('<svg ', `<svg width="${size || 160}" height="${size || 160}" `);
+}
+function ckHere() {
+  return new Promise(res => {
+    if (!navigator.geolocation) return res(null);
+    navigator.geolocation.getCurrentPosition(p => res({ lat: p.coords.latitude, lon: p.coords.longitude, acc: p.coords.accuracy }), () => res(null), { enableHighAccuracy: true, timeout: 6000, maximumAge: 20000 });
+  });
+}
+async function loadStepChecks(ids) {
+  if (!ids.length) return {};
+  const { data } = await sb.rpc('step_checks_for', { p_leaves: ids });
+  Object.assign(CK.cache, Object.fromEntries(ids.map(i => [i, []])), data || {});
+  return data || {};
+}
+const ckState = { issued: 'Issued', collected: 'Collected', measured: 'Measured', confirmed: 'Confirmed', void: 'Voided' };
+
+// Short row for a step card: what checks it carries and how far along they are.
+function ckCardRow(leafId) {
+  const list = CK.cache[leafId] || [];
+  if (!list.length) return '';
+  return `<div class="ck-row">${list.map(c => `<button class="ck-chip ${c.failed ? 'bad' : c.confirmed === c.total && c.total ? 'ok' : ''}" onclick="ckOpenStep('${esc(leafId)}')">
+    <b>${esc(c.name)}</b><span>${c.measured}/${c.total} measured${c.confirmed ? ` · ${c.confirmed} confirmed` : ''}${c.failed ? ` · ${c.failed} failed` : ''}</span></button>`).join('')}</div>`;
+}
+function ckToolbar() {
+  return `<div class="ck-bar"><button class="term-card-btn primary" onclick="ckOpenScanner()">Scan a code</button>
+    <button class="term-card-btn" onclick="ckEnterCode()">Enter a code</button>
+    ${operator?.is_genesis ? '<button class="term-card-btn" onclick="ckOpenPlans()">Check plans</button>' : ''}
+    <span class="ck-hint">Codes made here are signed by the system. Only this OS can read and confirm them.</span></div>`;
+}
+
+// ── scanner ──
+function ckStopCamera() {
+  cancelAnimationFrame(CK.raf); CK.raf = 0;
+  if (CK.stream) { CK.stream.getTracks().forEach(t => t.stop()); CK.stream = null; }
+}
+function ckOpenScanner() {
+  openOverlay('Scan a code', body => {
+    body.innerHTML = `<div class="term-wf"><div class="ck-cam"><video id="ck-video" playsinline muted></video><div class="ck-frame"></div></div>
+      <div class="pp-form-msg" id="ck-smsg">Starting the camera…</div>
+      <form class="ck-manual" onsubmit="event.preventDefault(); ckHandle(document.getElementById('ck-code').value)">
+        <input id="ck-code" class="sch-in" placeholder="…or type / paste a code (BXT1… or BXP1…)" autocomplete="off" spellcheck="false">
+        <button class="pp-btn solid" type="submit">Open</button></form></div>`;
+  });
+  ckStartCamera();
+}
+function ckEnterCode() {
+  openOverlay('Enter a code', body => {
+    body.innerHTML = `<div class="term-wf"><form class="ck-manual stack" onsubmit="event.preventDefault(); ckHandle(document.getElementById('ck-code').value)">
+      <p class="pp-muted">Paste a tag code (BXT1…) from a label, or a plan code (BXP1…) someone sent you.</p>
+      <input id="ck-code" class="sch-in" placeholder="BXT1.… or BXP1.…" autocomplete="off" spellcheck="false">
+      <div class="pp-form-msg" id="ck-smsg"></div><button class="pp-btn solid big" type="submit">Open</button></form></div>`;
+  });
+}
+async function ckStartCamera() {
+  const msg = () => document.getElementById('ck-smsg');
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser has no camera access. Type the code instead.');
+    await ckLoadScan();
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    const v = document.getElementById('ck-video');
+    if (!v) { stream.getTracks().forEach(t => t.stop()); return; }
+    CK.stream = stream; v.srcObject = stream; await v.play();
+    if (msg()) msg().textContent = 'Point the camera at a code.';
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    const det = window.BarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+    const tick = async () => {
+      if (!CK.stream) return;
+      if (v.readyState >= 2 && v.videoWidth) {
+        let text = null;
+        try {
+          if (det) { const r = await det.detect(v); text = r[0]?.rawValue || null; }
+          if (!text) {
+            const w = Math.min(640, v.videoWidth), h = Math.round(v.videoHeight * w / v.videoWidth); cv.width = w; cv.height = h;
+            cx.drawImage(v, 0, 0, w, h);
+            const q = window.jsQR(cx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'attemptBoth' });
+            text = q?.data || null;
+          }
+        } catch (e) {}
+        if (text && /^BX[TP]1\./.test(text.trim())) { ckStopCamera(); ckHandle(text); return; }
+      }
+      CK.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch (e) {
+    if (msg()) msg().textContent = (e.name === 'NotAllowedError' ? 'Camera permission was declined. Type the code instead.' : e.message || 'The camera could not start.');
+  }
+}
+async function ckHandle(raw) {
+  const code = String(raw || '').trim();
+  const msg = document.getElementById('ck-smsg');
+  ckStopCamera();
+  if (/^BXT1\./.test(code)) return ckTag(code);
+  if (/^BXP1\./.test(code)) return ckPlanFromCode(code);
+  if (msg) msg.textContent = 'That is not a Bixxville code.';
+  else toast('That is not a Bixxville code.');
+}
+
+// ── a tag: collect, record readings, confirm ──
+async function ckTag(code, push) {
+  const { data: r, error } = await sb.rpc('tag_resolve', { p_code: code });
+  if (error) { const m = document.getElementById('ck-smsg'); if (m) m.textContent = error.message; else toast(error.message); return; }
+  CK.tag = { code, r };
+  const t = r.tag, p = r.plan, st = r.step, lr = r.last_result;
+  const fieldRow = f => {
+    const v = lr?.readings?.[f.key];
+    const bad = (lr?.fails || []).find(x => x.key === f.key);
+    return `<div class="ck-kv ${bad ? 'bad' : ''}"><span>${esc(f.label)}</span><b>${v == null || v === '' ? '—' : esc(String(v))}${f.unit && v != null && v !== '' ? ' ' + esc(f.unit) : ''}</b>${bad ? `<small>${esc(bad.why)}</small>` : ''}</div>`;
+  };
+  openOverlay(`${t.label}`, body => {
+    body.innerHTML = `<div class="term-wf ck-tag">
+      <div class="ck-qrbox">${window.qrcode ? ckQrSvg(code, 120) : ''}</div>
+      <div class="ck-sub"><span class="ck-pill s-${esc(t.state)}">${esc(ckState[t.state] || t.state)}</span> ${esc(CK_KINDS[p.kind] || p.kind)} · ${esc(p.name)}</div>
+      <div class="ck-sub">For step <b>${esc(st.leaf_code)}</b> — ${esc(st.task)}${r.place ? ` · at ${esc(r.place.name)}` : ''}</div>
+      ${p.spec.instructions ? `<div class="form-block"><div class="form-lbl">How</div><div style="white-space:pre-wrap">${esc(p.spec.instructions)}</div></div>` : ''}
+      ${lr ? `<div class="form-block"><div class="form-lbl">Latest result — <span class="${lr.pass ? 'ck-ok' : 'ck-bad'}">${lr.pass ? 'Pass' : 'Fail'}</span> · ${esc(new Date(lr.at).toLocaleString())} · ${esc(lr.source)}</div>${p.spec.fields.map(fieldRow).join('')}</div>` : ''}
+      ${t.state === 'void' ? '' : `<div class="ck-acts">
+        ${t.state === 'issued' && r.can_measure ? '<button class="pp-btn solid" onclick="ckDo(\'collect\')">Collected — I have it</button>' : ''}
+        ${r.can_measure && t.state !== 'confirmed' ? '<button class="pp-btn solid" onclick="ckReadings()">Record readings</button>' : ''}
+        ${r.can_confirm ? `<button class="pp-btn" onclick="ckDo('confirm')">Confirm${lr && !lr.pass ? ' (failed result)' : ''}</button>` : ''}
+        ${operator?.is_genesis ? '<button class="pp-btn" onclick="ckDo(\'void\')">Void this tag</button>' : ''}
+      </div>`}
+      ${r.history.length ? `<div class="form-block"><div class="form-lbl">Chain of custody</div>${r.history.map(h => `<div class="ck-hist"><b>${esc(h.action)}</b> ${esc(h.who || '')} · ${esc(new Date(h.at).toLocaleString())}${h.inside_place === true ? ' · at the place' : h.inside_place === false ? ' · away from the place' : ''}${h.note ? ' · ' + esc(h.note) : ''}</div>`).join('')}</div>` : ''}
+      <div class="pp-form-msg" id="ck-tmsg"></div></div>`;
+  }, null, null, push);
+  if (!window.qrcode) ckLoadQR().then(() => { const b = document.querySelector('.ck-qrbox'); if (b && CK.tag?.code === code) b.innerHTML = ckQrSvg(code, 120); }).catch(() => {});
+}
+async function ckDo(action) {
+  const { code } = CK.tag, msg = document.getElementById('ck-tmsg');
+  if (action === 'void' && !confirm('Void this tag? It can no longer be scanned or recorded.')) return;
+  if (msg) msg.textContent = 'Working…';
+  const at = action === 'collect' ? await ckHere() : null;
+  const { error } = await sb.rpc('scan_tag', { p_code: code, p_action: action, p_lat: at?.lat ?? null, p_lon: at?.lon ?? null, p_acc: at?.acc ?? null, p_note: null });
+  if (error) { if (msg) msg.textContent = error.message; return; }
+  toast(action === 'collect' ? 'Collected.' : action === 'confirm' ? 'Confirmed.' : 'Voided.');
+  ckTag(code); ckRefreshBoard();
+}
+function ckRefreshBoard() { if (typeof renderTrackerBoard === 'function' && window._trackerFilter === 'in progress') { try { renderTrackerBoard(); } catch (e) {} } }
+
+function ckFieldInput(f, v) {
+  const id = `ckf-${f.key}`, val = v == null ? '' : String(v);
+  if (f.type === 'check') return `<select id="${id}" class="sch-in"><option value="">—</option><option value="yes" ${/^(yes|true)$/i.test(val) ? 'selected' : ''}>Yes</option><option value="no" ${/^(no|false)$/i.test(val) ? 'selected' : ''}>No</option></select>`;
+  if (f.type === 'choice') return `<select id="${id}" class="sch-in"><option value="">—</option>${(f.options || []).map(o => `<option ${o === val ? 'selected' : ''}>${esc(o)}</option>`).join('')}</select>`;
+  if (f.type === 'number') return `<input id="${id}" class="sch-in" type="number" step="any" inputmode="decimal" value="${esc(val)}">`;
+  return `<input id="${id}" class="sch-in" value="${esc(val)}">`;
+}
+function ckRange(f) {
+  if (f.type !== 'number' || (f.min == null && f.max == null)) return '';
+  return `<small>${f.min != null ? 'min ' + f.min : ''}${f.min != null && f.max != null ? ' · ' : ''}${f.max != null ? 'max ' + f.max : ''}${f.unit ? ' ' + esc(f.unit) : ''}</small>`;
+}
+function ckReadings() {
+  CK.imported = false;
+  const { code, r } = CK.tag, fields = r.plan.spec.fields, last = r.last_result?.readings || {};
+  openOverlay(`Readings — ${r.tag.label}`, body => {
+    body.innerHTML = `<div class="term-wf"><form class="pp-form flat" onsubmit="event.preventDefault(); ckSaveReadings()">
+      ${fields.map(f => `<label class="ck-fld"><span>${esc(f.label)}${f.required === false ? ' <i>(optional)</i>' : ''}${f.unit ? ` <i>${esc(f.unit)}</i>` : ''}</span>${ckFieldInput(f, last[f.key])}${ckRange(f)}</label>`).join('')}
+      <details class="ck-import"><summary>Import readings from an instrument</summary>
+        <p class="pp-muted">Paste a JSON object, <code>key=value</code> lines, or a CSV with a header row and one row of values. Keys: ${fields.map(f => `<code>${esc(f.key)}</code>`).join(' ')}</p>
+        <textarea id="ck-paste" class="sch-in" rows="4" placeholder="ph=6.8&#10;moisture=22"></textarea>
+        <input id="ck-device" class="sch-in" placeholder="Instrument name (optional)">
+        <button type="button" class="pp-btn" onclick="ckApplyImport()">Fill the form from this</button></details>
+      <div class="pp-form-msg" id="ck-rmsg"></div>
+      <button class="pp-btn solid big" type="submit">Save readings</button></form></div>`;
+  }, null, null, true);
+}
+function ckParseImport(txt) {
+  const t = txt.trim(); if (!t) return {};
+  if (t.startsWith('{')) { const o = JSON.parse(t); return Object.fromEntries(Object.entries(o).map(([k, v]) => [k, v == null ? '' : String(v)])); }
+  const lines = t.split(/\r?\n/).map(s => s.trim()).filter(Boolean);
+  if (lines.every(l => /^[A-Za-z_][\w]*\s*[=:]/.test(l))) return Object.fromEntries(lines.map(l => { const i = l.search(/[=:]/); return [l.slice(0, i).trim().toLowerCase(), l.slice(i + 1).trim()]; }));
+  if (lines.length >= 2 && lines[0].includes(',')) { const h = lines[0].split(',').map(s => s.trim().toLowerCase()), v = lines[1].split(',').map(s => s.trim()); return Object.fromEntries(h.map((k, i) => [k, v[i] ?? ''])); }
+  throw new Error('Could not read that. Use JSON, key=value lines, or a header row plus one row of values.');
+}
+function ckApplyImport() {
+  const msg = document.getElementById('ck-rmsg'); CK.imported = false;
+  try {
+    const o = ckParseImport(document.getElementById('ck-paste').value); let n = 0;
+    CK.tag.r.plan.spec.fields.forEach(f => {
+      if (o[f.key] == null) return;
+      const el = document.getElementById('ckf-' + f.key); if (!el) return;
+      let v = o[f.key];
+      if (f.type === 'check') v = /^(1|true|yes|pass|ok)$/i.test(v) ? 'yes' : /^(0|false|no|fail)$/i.test(v) ? 'no' : '';
+      el.value = v; n++;
+    });
+    CK.imported = n > 0;
+    msg.textContent = n ? `Filled ${n} field${n === 1 ? '' : 's'}. Check them, then save.` : 'None of those keys match this plan.';
+  } catch (e) { msg.textContent = e.message; }
+}
+async function ckSaveReadings() {
+  const { code, r } = CK.tag, msg = document.getElementById('ck-rmsg'), out = {};
+  r.plan.spec.fields.forEach(f => { const v = document.getElementById('ckf-' + f.key)?.value; if (v != null && v !== '') out[f.key] = v; });
+  msg.textContent = 'Saving…';
+  const at = await ckHere();
+  const device = document.getElementById('ck-device')?.value || null;
+  const { data, error } = await sb.rpc('record_result', { p_code: code, p_readings: out, p_source: CK.imported ? 'import' : 'manual', p_device: device,
+    p_lat: at?.lat ?? null, p_lon: at?.lon ?? null, p_acc: at?.acc ?? null, p_note: null });
+  if (error) { msg.textContent = error.message; return; }
+  toast(data.pass ? 'Saved — pass.' : `Saved — failed ${data.fails.length} check${data.fails.length === 1 ? '' : 's'}.`);
+  ckTag(code); ckRefreshBoard();
+}
+
+// ── a step's checks: attached plans, labels, results ──
+async function ckOpenStep(leafId, push) {
+  const { data: all } = await sb.rpc('step_checks_for', { p_leaves: [leafId] });
+  const list = all?.[leafId] || [];
+  CK.cache[leafId] = list;
+  const leaf = (trackerState.leaves || []).find(l => l.id === leafId) || (await sb.from('work_leaves').select('id,leaf_code,task').eq('id', leafId).single()).data;
+  let results = [];
+  if (list.length) { const r = await sb.rpc('list_results', { p_leaf: leafId }); results = r.data || []; }
+  openOverlay(`Checks — ${leaf?.leaf_code || ''}`, body => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="ck-sub">${esc(leaf?.task || '')}</div>
+      ${list.length ? list.map(c => `<div class="ck-plan"><div class="ck-plan-h"><b>${esc(c.name)}</b><span>${esc(CK_KINDS[c.kind] || c.kind)}</span></div>
+        <div class="ck-prog">${c.total} tags · ${c.collected} collected · ${c.measured} measured · ${c.confirmed} confirmed${c.failed ? ` · <span class="ck-bad">${c.failed} failed</span>` : ''}</div>
+        <div class="ck-acts"><button class="pp-btn" onclick="ckLabels('${esc(c.step_check_id)}','${esc(c.name)}')">Print labels</button>
+        ${operator?.is_genesis ? `<button class="pp-btn" onclick="ckAddTags('${esc(leafId)}','${esc(c.plan_id)}')">Add tags</button>` : ''}</div></div>`).join('')
+        : '<div class="term-panel-empty">No checks on this step yet.</div>'}
+      ${operator?.is_genesis ? `<button class="pp-btn solid big" onclick="ckAttach('${esc(leafId)}')">Add a check plan to this step</button>` : ''}
+      ${results.length ? `<div class="form-block"><div class="form-lbl">Results</div><div class="ck-res">${results.map(x => {
+        const rr = x.result;
+        return `<div class="ck-res-row"><b>${esc(x.tag)}</b><span class="ck-pill s-${esc(x.state)}">${esc(ckState[x.state] || x.state)}</span>
+          ${rr ? `<span class="${rr.pass ? 'ck-ok' : 'ck-bad'}">${rr.pass ? 'Pass' : 'Fail'}</span><small>${Object.entries(rr.readings).map(([k, v]) => `${esc(k)} ${esc(String(v))}`).join(' · ')} — ${esc(rr.by || '')}</small>` : '<small>no reading yet</small>'}</div>`;
+      }).join('')}</div></div>` : ''}</div>`;
+  }, null, null, push);
+}
+async function ckLabels(stepCheckId, name) {
+  await ckLoadQR();
+  const { data, error } = await sb.rpc('tags_for_step_check', { p_step_check: stepCheckId });
+  if (error) { toast(error.message); return; }
+  const cells = data.filter(t => t.state !== 'void').map(t => `<div class="lbl">${ckQrSvg(t.code, 150)}<b>${esc(t.label)}</b><small>${esc(name)}</small><code>${esc(t.code.slice(0, 13))}…</code></div>`).join('');
+  CK.labelsHtml = `<!doctype html><meta charset="utf-8"><title>Labels — ${esc(name)}</title><style>
+    body{font:12px system-ui,sans-serif;margin:16px}.g{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px}
+    .lbl{border:1px dashed #888;border-radius:6px;padding:8px;display:flex;flex-direction:column;align-items:center;gap:2px;break-inside:avoid}
+    code{font-size:9px;color:#666}small{color:#444}button{margin-bottom:12px;padding:8px 14px}@media print{button{display:none}}</style>
+    <button onclick="print()">Print</button><div class="g">${cells}</div>`;
+  openOverlay('Labels', body => {
+    body.innerHTML = `<div class="term-wf"><p class="pp-muted">${data.length} label${data.length === 1 ? '' : 's'}. Print them and stick one on each sample or joint. A phone camera can show the text, but only this OS can verify or use it.</p>
+      <div class="ck-grid">${data.filter(t => t.state !== 'void').map(t => `<button class="ck-lbl" onclick="ckTag('${esc(t.code)}', true)">${ckQrSvg(t.code, 96)}<b>${esc(t.label)}</b><small>${esc(ckState[t.state])}</small></button>`).join('')}</div>
+      <button class="pp-btn solid big" onclick="ckPrintLabels()">Open printable sheet</button></div>`;
+  }, null, null, true);
+}
+function ckPrintLabels() { const w = window.open('', '_blank'); if (!w) { toast('Allow pop-ups to print the sheet.'); return; } w.document.write(CK.labelsHtml); w.document.close(); }
+
+async function ckAttach(leafId, preset) {
+  const { data: plans } = await sb.rpc('plan_list');
+  CK.plans = plans || [];
+  openOverlay('Add a check plan', body => {
+    body.innerHTML = `<div class="term-wf"><form class="pp-form flat" onsubmit="event.preventDefault(); ckAttachGo('${esc(leafId)}')">
+      <label class="ck-fld"><span>Plan</span><select id="ck-plan" class="sch-in">${CK.plans.map(p => `<option value="${esc(p.id)}" ${p.id === preset ? 'selected' : ''}>${esc(p.name)} — ${esc(CK_KINDS[p.kind] || p.kind)}</option>`).join('') || '<option value="">No plans yet</option>'}</select></label>
+      <button type="button" class="pp-btn" onclick="ckOpenPlans(true)">Make or import a plan</button>
+      <label class="ck-fld"><span>How many tags (one per sample, joint or point)</span><input id="ck-n" class="sch-in" type="number" min="1" max="200" value="3"></label>
+      <label class="ck-fld"><span>Label name</span><input id="ck-prefix" class="sch-in" placeholder="e.g. Core, Joint, Point"></label>
+      <div class="pp-form-msg" id="ck-amsg"></div><button class="pp-btn solid big" type="submit" ${CK.plans.length ? '' : 'disabled'}>Issue tags</button></form></div>`;
+  }, null, null, true);
+}
+async function ckAttachGo(leafId) {
+  const plan = document.getElementById('ck-plan').value, n = parseInt(document.getElementById('ck-n').value, 10), msg = document.getElementById('ck-amsg');
+  const { error } = await sb.rpc('attach_plan', { p_leaf: leafId, p_plan: plan, p_samples: n, p_prefix: document.getElementById('ck-prefix').value || null });
+  if (error) { msg.textContent = error.message; return; }
+  toast(`${n} tag${n === 1 ? '' : 's'} issued.`); await loadStepChecks([leafId]); ckOpenStep(leafId); ckRefreshBoard();
+}
+function ckAddTags(leafId, planId) { ckAttach(leafId, planId); }
+
+// ── plans (Genesis) ──
+async function ckOpenPlans(push) {
+  const { data: plans, error } = await sb.rpc('plan_list');
+  if (error) { toast(error.message); return; }
+  CK.plans = plans || [];
+  openOverlay('Check plans', body => {
+    body.innerHTML = `<div class="term-wf">
+      <p class="pp-muted">A plan says what to record and how it passes. Its code is made from its content, so the same plan always has the same code. Share the code and anyone signed in can import it.</p>
+      <div class="ck-acts"><button class="pp-btn solid" onclick="ckEditPlan()">New plan</button><button class="pp-btn" onclick="ckEnterCode()">Import a plan code</button></div>
+      ${CK.plans.map(p => `<div class="ck-plan"><div class="ck-plan-h"><b>${esc(p.name)}</b><span>${esc(CK_KINDS[p.kind] || p.kind)} · ${p.spec.fields.length} fields · ${p.steps} step${p.steps === 1 ? '' : 's'}</span></div>
+        <code class="ck-code">${esc(p.code)}</code>
+        <div class="ck-acts"><button class="pp-btn" onclick="navigator.clipboard.writeText('${esc(p.code)}').then(()=>toast('Code copied.'))">Copy code</button>
+        <button class="pp-btn" onclick="ckPlanQr('${esc(p.id)}')">Show QR</button><button class="pp-btn" onclick="ckEditPlan('${esc(p.id)}')">Open</button></div></div>`).join('') || '<div class="term-panel-empty">No plans yet. Start from a template.</div>'}
+    </div>`;
+  }, null, null, push);
+}
+async function ckPlanQr(id) {
+  await ckLoadQR(); const p = CK.plans.find(x => x.id === id);
+  openOverlay(p.name, body => { body.innerHTML = `<div class="term-wf" style="text-align:center">${ckQrSvg(p.code, 220)}<p class="pp-muted">Scanning this imports the plan: ${esc(p.name)}.</p><code class="ck-code">${esc(p.code)}</code></div>`; }, null, null, true);
+}
+async function ckPlanFromCode(code) {
+  const { data: p, error } = await sb.rpc('plan_from_code', { p_code: code });
+  if (error) { const m = document.getElementById('ck-smsg'); if (m) m.textContent = error.message; else toast(error.message); return; }
+  openOverlay(p.name, body => {
+    body.innerHTML = `<div class="term-wf"><div class="ck-sub">${esc(CK_KINDS[p.kind] || p.kind)} plan — genuine, issued by this system.</div>
+      ${p.spec.instructions ? `<div class="form-block"><div class="form-lbl">How</div><div style="white-space:pre-wrap">${esc(p.spec.instructions)}</div></div>` : ''}
+      <div class="form-block"><div class="form-lbl">Records</div>${p.spec.fields.map(f => `<div class="ck-kv"><span>${esc(f.label)}</span><b>${esc(f.type)}${f.unit ? ' · ' + esc(f.unit) : ''}</b>${ckRange(f)}</div>`).join('')}</div>
+      ${operator?.is_genesis ? `<button class="pp-btn solid big" onclick="ckPickStep('${esc(p.id)}')">Attach to a step</button>` : ''}</div>`;
+  }, null, null, true);
+}
+async function ckPickStep(planId) {
+  const { data: leaves } = await sb.from('work_leaves').select('id,leaf_code,task,status,map_id').in('status', ['to-do', 'in progress']).order('leaf_code');
+  const { data: maps } = await sb.from('work_maps').select('id,goal');
+  const g = Object.fromEntries((maps || []).map(m => [m.id, m.goal]));
+  openOverlay('Attach to which step?', body => {
+    body.innerHTML = `<div class="term-wf">${(leaves || []).sort((a, b) => (g[a.map_id] || '').localeCompare(g[b.map_id] || '') || byLeafCode(a.leaf_code, b.leaf_code)).map(l => `<button class="ca-pick-btn" onclick="ckAttach('${esc(l.id)}','${esc(planId)}')"><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(g[l.map_id] || '')} · ${esc(l.status)}</small></button>`).join('') || '<div class="term-panel-empty">No open steps.</div>'}</div>`;
+  }, null, null, true);
+}
+
+// plan editor
+function ckEditPlan(id) {
+  const existing = id ? CK.plans.find(p => p.id === id) : null;
+  CK.draft = existing ? { name: existing.name, kind: existing.kind, spec: JSON.parse(JSON.stringify(existing.spec)) } : { name: '', kind: 'soil', spec: JSON.parse(JSON.stringify(CK_TEMPLATES.soil)) };
+  if (!existing) CK.draft.name = CK_KINDS.soil;
+  ckDrawEditor(true);
+}
+function ckKindChange(kind) {
+  const d = CK.draft; const wasTemplateName = d.name === CK_KINDS[d.kind] || !d.name;
+  d.kind = kind; d.spec = JSON.parse(JSON.stringify(CK_TEMPLATES[kind])); if (wasTemplateName) d.name = CK_KINDS[kind];
+  ckDrawEditor(false);
+}
+function ckDrawEditor(push) {
+  const d = CK.draft;
+  openOverlay('Check plan', body => {
+    body.innerHTML = `<div class="term-wf"><form class="pp-form flat" onsubmit="event.preventDefault(); ckSavePlan()">
+      <label class="ck-fld"><span>Name</span><input id="ckp-name" class="sch-in" value="${esc(d.name)}" maxlength="120"></label>
+      <label class="ck-fld"><span>Kind</span><select id="ckp-kind" class="sch-in" onchange="ckSyncDraft(); ckKindChange(this.value)">${Object.entries(CK_KINDS).map(([k, v]) => `<option value="${k}" ${k === d.kind ? 'selected' : ''}>${esc(v)}</option>`).join('')}</select></label>
+      <label class="ck-fld"><span>Instructions for whoever takes it</span><textarea id="ckp-ins" class="sch-in" rows="3" maxlength="1500">${esc(d.spec.instructions || '')}</textarea></label>
+      <div class="form-lbl">Fields — what gets recorded</div>
+      ${d.spec.fields.map((f, i) => `<div class="ck-frow">
+        <input class="sch-in" data-i="${i}" data-p="label" value="${esc(f.label)}" placeholder="Label">
+        <select class="sch-in" data-i="${i}" data-p="type" onchange="ckSyncDraft(); ckDrawEditor()">${['number', 'text', 'check', 'choice'].map(t => `<option ${t === f.type ? 'selected' : ''}>${t}</option>`).join('')}</select>
+        ${f.type === 'number' ? `<input class="sch-in sm" data-i="${i}" data-p="unit" value="${esc(f.unit || '')}" placeholder="unit"><input class="sch-in sm" data-i="${i}" data-p="min" type="number" step="any" value="${f.min ?? ''}" placeholder="min"><input class="sch-in sm" data-i="${i}" data-p="max" type="number" step="any" value="${f.max ?? ''}" placeholder="max">` : ''}
+        ${f.type === 'check' ? `<select class="sch-in" data-i="${i}" data-p="pass_when"><option value="yes" ${f.pass_when !== 'no' ? 'selected' : ''}>passes when Yes</option><option value="no" ${f.pass_when === 'no' ? 'selected' : ''}>passes when No</option></select>` : ''}
+        ${f.type === 'choice' ? `<input class="sch-in" data-i="${i}" data-p="options" value="${esc((f.options || []).join(', '))}" placeholder="options, comma separated"><input class="sch-in" data-i="${i}" data-p="pass_values" value="${esc((f.pass_values || []).join(', '))}" placeholder="accepted, comma separated">` : ''}
+        <label class="sch-chk"><input type="checkbox" data-i="${i}" data-p="required" ${f.required === false ? '' : 'checked'}>required</label>
+        <button type="button" class="term-card-btn" onclick="ckSyncDraft(); CK.draft.spec.fields.splice(${i},1); ckDrawEditor()">Remove</button></div>`).join('')}
+      <button type="button" class="pp-btn" onclick="ckSyncDraft(); CK.draft.spec.fields.push({key:'',label:'',type:'number'}); ckDrawEditor()">Add a field</button>
+      <p class="pp-muted">Limits start empty or as plain defaults. Set them from the spec or safety standard that applies to this job — the system only applies the numbers you put here.</p>
+      <div class="pp-form-msg" id="ckp-msg"></div><button class="pp-btn solid big" type="submit">Save plan and get its code</button></form></div>`;
+  }, null, null, push);
+}
+function ckSyncDraft() {
+  const d = CK.draft; if (!document.getElementById('ckp-name')) return;
+  d.name = document.getElementById('ckp-name').value; d.spec.instructions = document.getElementById('ckp-ins').value;
+  document.querySelectorAll('[data-p]').forEach(el => {
+    const f = d.spec.fields[+el.dataset.i]; if (!f) return; const p = el.dataset.p;
+    if (p === 'required') { if (el.checked) delete f.required; else f.required = false; return; }
+    if (p === 'min' || p === 'max') { if (el.value === '') delete f[p]; else f[p] = +el.value; return; }
+    if (p === 'options' || p === 'pass_values') { const a = el.value.split(',').map(s => s.trim()).filter(Boolean); if (a.length) f[p] = a; else delete f[p]; return; }
+    if (p === 'type') { f.type = el.value; return; }
+    if (p === 'unit') { if (el.value) f.unit = el.value; else delete f.unit; return; }
+    f[p] = el.value;
+  });
+}
+const ckKey = (label, used) => { let k = String(label).toLowerCase().replace(/[^a-z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 30) || 'field'; if (!/^[a-z]/.test(k)) k = 'f_' + k; let n = k, i = 2; while (used.has(n)) n = k.slice(0, 27) + '_' + i++; used.add(n); return n; };
+async function ckSavePlan() {
+  ckSyncDraft(); const d = CK.draft, msg = document.getElementById('ckp-msg');
+  const used = new Set(); d.spec.fields.forEach(f => { if (!f.key) f.key = ckKey(f.label, used); else used.add(f.key); });
+  d.kind = document.getElementById('ckp-kind').value;
+  if (!d.name.trim()) { msg.textContent = 'Give the plan a name.'; return; }
+  const { data, error } = await sb.rpc('plan_save', { p_name: d.name, p_kind: d.kind, p_spec: d.spec });
+  if (error) { msg.textContent = error.message; return; }
+  toast('Plan saved.'); await ckOpenPlans(false);
+}
+
 async function renderProgressFolders() {
   const [{ data: maps }, { data: stats }, { data: live }] = await Promise.all([
     sb.from('work_maps').select('id,goal,prepared_for,contract_date,date_mapped,created_at').order('created_at', { ascending: false }),
@@ -12829,7 +13282,7 @@ async function renderProgressFolders() {
     sb.from('work_leaves').select('*').eq('status', 'in progress'),
   ]);
   const inProg = live || [];
-  if (!inProg.length) return '<div class="term-panel-empty">Nothing is in progress in any folder.</div>';
+  if (!inProg.length) return ckToolbar() + '<div class="term-panel-empty">Nothing is in progress in any folder.</div>';
   const all = maps || [];
   const colorOf = id => FOLDER_COLORS[[...all].reverse().findIndex(m => m.id === id) % FOLDER_COLORS.length] || FOLDER_COLORS[0];
   const folderSvg = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path class="back" d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h4.3l2 2h8.7A1.5 1.5 0 0 1 21 8.5V18a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/><path class="front" d="M3 10a1.5 1.5 0 0 1 1.5-1.5h15A1.5 1.5 0 0 1 21 10v8a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 18z"/></svg>`;
@@ -12859,7 +13312,7 @@ async function renderProgressFolders() {
       ${await renderProgressBoard(items, true)}
     </section>`);
   }
-  return `<div class="ig-folders">${sections.join('')}</div>`;
+  return `${ckToolbar()}<div class="ig-folders">${sections.join('')}</div>`;
 }
 
 // Switch to a folder and show one of its tabs.
@@ -12904,6 +13357,7 @@ function tickProgress() {
 async function renderDeliveredBoard(items) {
   try { await loadPeople(); } catch (e) {}
   const work = await loadLeafWork(items.map(l => l.id));
+  try { await loadStepChecks(items.map(l => l.id)); } catch (e) {}
   const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
   const when = d => d ? new Date(d).toLocaleString('en-US', { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' }) : '';
   return `<div class="ig-board">${items.map(l => {

@@ -6858,7 +6858,7 @@ async function renderEscrowCreate(el, projectId, r, settings) {
   const clientWallet = who?.wallet || r.wallet_addr || '';
   window._escrowDraft = { projectId, lines, settings, roles };
   el.innerHTML = `
-    <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
+    <div class="form-lbl">Escrow · ${ESCROW_NET.name}</div>
     <div class="escrow-lines">${lines.map((l, i) => `
       <div class="escrow-line">
         <div><b>Line ${i + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || '—')} · ${Number(l.log_size)} LOG × ${escrowUsd(l.rate_cents)}</span></div>
@@ -6868,6 +6868,12 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     <label class="form-lbl" for="esc-client">${esc(who?.name || 'Client')} wallet (pays and authorizes)</label>
     <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(clientWallet)}" spellcheck="false"/>
     ${clientWallet ? '' : `<div class="escrow-muted">No wallet on file for this client yet. Paste it here, or add it on the Clients page.</div>`}
+    ${ESCROW_NET.testToken ? `<label class="form-lbl" for="esc-token" style="margin-top:10px">Money</label>
+    <select class="form-input" id="esc-token">
+      <option value="usdc">Circle USDC (real test USDC from Circle's faucet)</option>
+      <option value="test">Free test token (mUSDC) — for dry runs</option>
+    </select>
+    <div class="escrow-muted">The test token is free to mint and worth nothing. It lets you run the whole flow without the faucet.</div>` : ''}
     <label class="form-lbl" for="esc-treasury" style="margin-top:10px">Treasury wallet (receives the 25% reserve)</label>
     <input class="form-input" id="esc-treasury" placeholder="0x…" value="${esc(settings.treasury_wallet || '')}" spellcheck="false"/>
     <div class="escrow-muted" style="margin-top:8px">Audits and seals: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
@@ -6903,7 +6909,11 @@ async function createEscrow() {
   if (payees.includes(client)) return say('The client can’t also be a worker on this job.');
   if (client === d.roles.wallet) return say('The client can’t also audit this job.');
   if (d.lines.length > 32) return say('An escrow holds at most 32 lines.');
-  const ok = await osConfirm(`Create the escrow on ${ESCROW_NET.name}? MetaMask will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
+  const useTest = ESCROW_NET.testToken && document.getElementById('esc-token')?.value === 'test';
+  const tokenAddr = useTest ? ESCROW_NET.testToken : ESCROW_NET.usdc;
+  const ok = await osConfirm(useTest
+    ? `Create the escrow on ${ESCROW_NET.name} with the free test token? MetaMask will ask you to confirm one transaction (deploy). Nothing real is involved.`
+    : `Create the escrow on ${ESCROW_NET.name}? MetaMask will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
   if (!ok) return;
   btn.disabled = true;
   try {
@@ -6916,17 +6926,20 @@ async function createEscrow() {
     btn.textContent = 'Confirm the deploy in MetaMask…';
     const labors = d.lines.map(l => BigInt(l.labor_cents) * 10000n); // cents → USDC units (6 decimals)
     const contract = await new ethers.ContractFactory(art.abi, art.bytecode, signer)
-      .deploy(ESCROW_NET.usdc, client, d.roles.wallet, d.roles.wallet, treasury, payees, labors);
+      .deploy(tokenAddr, client, d.roles.wallet, d.roles.wallet, treasury, payees, labors);
     btn.textContent = 'Deploying…';
     await contract.waitForDeployment();
     const address = (await contract.getAddress()).toLowerCase();
     const deployTx = contract.deploymentTransaction().hash;
-    btn.textContent = 'Confirm the USDC link in MetaMask…';
-    await (await contract.associateToken()).wait();
+    if (!useTest) {
+      // Circle USDC is a native Hedera token: the escrow has to be linked to it before it can hold any.
+      btn.textContent = 'Confirm the USDC link in MetaMask…';
+      await (await contract.associateToken()).wait();
+    }
     const labor = d.lines.reduce((n, l) => n + Number(l.labor_cents), 0);
     const { error } = await sb.rpc('escrow_record', {
       p_project: d.projectId, p_network: ESCROW_NET.key, p_chain_id: ESCROW_NET.chainId, p_contract: address,
-      p_token: ESCROW_NET.usdc, p_client: client, p_auditor: d.roles.wallet, p_operator: d.roles.wallet, p_treasury: treasury,
+      p_token: tokenAddr, p_client: client, p_auditor: d.roles.wallet, p_operator: d.roles.wallet, p_treasury: treasury,
       p_labor_cents: labor, p_deploy_tx: deployTx,
       p_lines: d.lines.map((l, i) => ({ line_index: i, bid_id: l.bid_id, payee_operator_id: l.payee_operator_id, payee_wallet: l.payee_wallet, labor_cents: Number(l.labor_cents) })),
     });
@@ -6981,7 +6994,7 @@ async function renderEscrowStatus(el, x) {
   const done = status === 3 ? 'Complete — every line paid and the reserve released.' : status === 2 ? 'Cancelled — the client was refunded.' : '';
 
   el.innerHTML = `
-    <div class="form-lbl">Escrow · ${ESCROW_NET.name} · Circle USDC</div>
+    <div class="form-lbl">Escrow · ${ESCROW_NET.name} · ${x.token_address === (ESCROW_NET.testToken || '').toLowerCase() ? 'free test token (mUSDC)' : 'Circle USDC'}</div>
     <div class="escrow-sum"><span>${sum ? `${ESCROW_STATUSES[status]} · ${Number(sum._sealedCount)} of ${Number(sum._lineCount)} lines paid` : 'Could not read the chain right now'}</span><b>Price ${escrowUsd(x.price_cents)}</b></div>
     ${sum ? `<div class="escrow-muted">Held in the contract now: ${escrowUsd(Number(sum._held) / 10000)}</div>` : ''}
     ${mine.length ? `<div class="escrow-next">
@@ -8362,6 +8375,9 @@ const ESCROW_NET = {
   key: 'hedera-testnet', name: 'Hedera Testnet', chainId: 296, chainHex: '0x128',
   rpc: 'https://testnet.hashio.io/api', explorer: 'https://hashscan.io/testnet',
   usdc: '0x0000000000000000000000000000000000068cda', usdcId: '0.0.429274',
+  // Free test token for dry runs when Circle's faucet isn't delivering. Testnet only:
+  // anyone can mint it and it is worth nothing. Deployed 2026-10-22 (dapp/deployments/hedera-testnet.json).
+  testToken: '0xc14D81Add3876206818732F7B5e25c614B0f4aD0',
   currency: { name: 'HBAR', symbol: 'HBAR', decimals: 18 },
 };
 

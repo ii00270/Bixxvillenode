@@ -597,6 +597,67 @@ html.theme-light{
 .dash-range{display:inline-flex;gap:2px;border:1px solid var(--term-line);border-radius:999px;padding:2px;margin:8px 0 0}
 .dash-range button{appearance:none;border:0;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:10.5px;padding:4px 11px;border-radius:999px;cursor:pointer}
 .dash-range button.on{background:var(--term-fg);color:var(--term-bg)}
+/* places */
+.pl-wrap{max-width:1300px}
+.pl-split{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.pl-split{grid-template-columns:1fr}}
+.pl-mapbox{position:relative;border-radius:18px;overflow:hidden;border:1px solid var(--term-line)}
+#pl-map{height:560px;width:100%;background:#e9e7e2}
+@media (max-width:900px){#pl-map{height:380px}}
+#pl-map.picking{cursor:crosshair}
+html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
+.pl-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;background:#0B0B0C;color:#fff;font-family:var(--mono);font-size:11px;padding:7px 14px;border-radius:999px;border:1px solid #FF2D95;pointer-events:none}
+.pl-pin span{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--pc);color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45)}
+.pl-pin span.on{transform:scale(1.25);box-shadow:0 0 0 4px rgba(255,45,149,.5)}
+.pl-side{display:grid;gap:10px}
+.pl-empty,.pl-form,.pl-detail{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:16px;padding:14px;font-family:var(--sans)}
+.pl-detail{border-color:color-mix(in srgb,var(--pc) 55%,#1F1F21)}
+.pl-dh{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;margin-bottom:6px}
+.pl-dh b{display:block;font-size:15px}.pl-dh small{display:block;font-size:11px;color:#8A8A88;margin-top:2px}
+.pl-state{font-family:var(--mono);font-size:10px;border:1px solid var(--pc);color:var(--pc);border-radius:999px;padding:3px 9px;white-space:nowrap}
+.pl-steps{display:grid;gap:5px;margin:10px 0}
+.pl-row{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;background:#111113;border:1px solid #1C1C1E;border-radius:9px;padding:7px 10px;font-size:12.5px}
+.pl-row b{font-family:var(--mono);font-size:11px;color:#FFB27A}.pl-row small{display:block;font-family:var(--mono);font-size:10px;color:#8A8A88}
+.pl-row em{font-style:normal;font-family:var(--mono);font-size:10.5px;color:#C8C6C2}.pl-row em.late{color:#FF8A82}
+.pl-acts{display:flex;gap:8px;margin-top:8px}
+.pl-list{display:grid;gap:6px}
+.pl-item{appearance:none;display:flex;gap:10px;align-items:center;text-align:left;width:100%;background:var(--surface);color:var(--cream);border:1px solid var(--line);border-radius:12px;padding:10px 12px;cursor:pointer;font-family:var(--sans)}
+.pl-item.on{border-color:var(--green)}.pl-item i{width:12px;height:12px;border-radius:50%;flex-shrink:0}
+.pl-item b{display:block;font-size:13px}.pl-item small{font-family:var(--mono);font-size:10px;color:var(--grey)}
+.pl-form{display:grid;gap:10px}.pl-form label{display:grid;gap:5px;font-size:12px}.pl-form label span{font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:#8A8A88}
+.pl-form label em{text-transform:none;letter-spacing:0;color:#666}
+.pl-find{display:flex;gap:8px}.pl-find input{flex:1}
+.pl-res{appearance:none;text-align:left;background:#111113;color:#C8C6C2;border:1px solid #1C1C1E;border-radius:9px;padding:7px 10px;font-size:11.5px;cursor:pointer}
+.pl-res:hover{border-color:#FF2D95}
+.pl-results{display:grid;gap:5px}
+.pl-coords{font-family:var(--mono);font-size:11px;color:#6EE7B7}.pl-coords.unset{color:#FFB27A}
+.gm-where{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:12px;font-size:12px;color:#C8C6C2}
+.gm-where select{background:#141416;border:1px solid #2A2A2D;color:#EDEDEB;border-radius:8px;padding:5px 8px;font-family:var(--mono);font-size:11px;max-width:230px}
+.gm-step select{background:#141416;border:1px solid #2A2A2D;color:#C8C6C2;border-radius:8px;padding:3px 6px;font-family:var(--mono);font-size:10px;max-width:130px}
+/* due dates */
+.sch-strip{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.sch-inputs{display:flex;gap:18px;align-items:flex-end;flex-wrap:wrap;margin-bottom:12px}
+.sch-in{background:#141416;border:1px solid #2A2A2D;border-radius:10px;color:#EDEDEB;font-family:var(--mono);font-size:13px;padding:8px 10px;color-scheme:dark}
+.sch-in.sm{width:84px}.sch-chk{font-size:12px;color:#C8C6C2;display:flex;gap:8px;align-items:center;padding-bottom:8px}
+.sch-tbl{width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px}
+.sch-tbl th{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:#8A8A88;text-align:left;padding:4px 6px}
+.sch-tbl td{padding:5px 6px;border-top:1px solid #1C1C1E}.sch-tbl td i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:7px}
+.sch-sum{border-radius:12px;padding:12px 14px;margin:12px 0;font-size:13px;line-height:1.55;border:1px solid #1C1C1E;background:#111113}
+.sch-sum.ok{border-color:rgba(16,185,129,.5)}.sch-sum.bad{border-color:rgba(255,90,79,.6);background:rgba(255,90,79,.07)}
+.sch-sum .ig-btn{margin:4px 6px 4px 0}
+.sch-empty{padding:18px;text-align:center;color:#8A8A88;font-family:var(--mono);font-size:12px}
+.sch-gantt{display:grid;gap:10px}
+.sch-axis{display:flex;justify-content:space-between;font-family:var(--mono);font-size:10px;color:#8A8A88;padding:0 56px 0 70px}
+.sch-gate{background:#111113;border:1px solid #1C1C1E;border-radius:12px;padding:8px 10px}
+.sch-gh{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;margin-bottom:4px;font-size:12.5px}
+.sch-gh em{margin-left:auto;font-style:normal;font-family:var(--mono);font-size:10.5px;color:#8A8A88}.sch-gh em.late{color:#FF8A82}
+.sch-gh span{color:#8A8A88}
+.sch-row{display:grid;grid-template-columns:62px 1fr 52px;align-items:center;gap:8px;font-family:var(--mono);font-size:10.5px;padding:2px 0}
+.sch-lbl small{color:#8A8A88;font-size:9px}
+.sch-track{position:relative;height:12px;background:#1a1a1c;border-radius:6px}
+.sch-track i{position:absolute;top:1px;bottom:1px;border-radius:5px;opacity:.9}.sch-track i.late{outline:2px solid #FF5A4F}
+.sch-due{text-align:right;color:#C8C6C2}
+.sch-acts{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:12px}
 /* ── gates / intensity map ── */
 .gm{margin-top:10px;display:grid;gap:14px}
 .gm-card{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;font-family:var(--sans)}
@@ -650,7 +711,7 @@ html.theme-light{
 .gm-fbar i{display:block;height:100%;border-radius:999px}
 .gm-fac small{font-family:var(--mono);font-size:10px;color:#8A8A88}.gm-fac.na{opacity:.55}
 .gm-steps{display:grid;gap:6px;margin-top:12px}
-.gm-step{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;background:#111113;border:1px solid #1C1C1E;border-radius:10px;padding:8px 10px}
+.gm-step{display:grid;grid-template-columns:auto 1fr auto auto auto;gap:10px;align-items:center;background:#111113;border:1px solid #1C1C1E;border-radius:10px;padding:8px 10px}
 .gm-step b{font-size:13px;display:block}.gm-step small{font-family:var(--mono);font-size:10px;color:#8A8A88}
 .gm-chip{font-family:var(--mono);font-size:9.5px;color:#fff;border-radius:999px;padding:3px 8px}
 .gm-sh,.gm-sp{font-family:var(--mono);font-size:12px}.gm-sp{color:#FFB27A;min-width:48px;text-align:right}
@@ -3642,6 +3703,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" onclick="setTrackerFilter('delivered'); setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
         <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
         <button class="term-sb-subitem" onclick="setTermView('decomposed')">Map <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
+        <button class="term-sb-subitem" data-sub="places" onclick="setTermView('places')">Places</button>
       </div>
     </div>
     <div class="term-sb-group" data-group="clients">
@@ -9247,7 +9309,10 @@ function avatarHtml(peerName, avatarUrl, fontSize) {
 function fmtDate(str) {
   if (!str) return '—';
   try {
-    return new Date(str).toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
+    // A bare "2026-10-22" is that calendar day; new Date() would read it as midnight UTC and show the day before.
+    const m = typeof str === 'string' && str.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    const d = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(str);
+    return d.toLocaleDateString('en-US', { month:'short', day:'numeric', year:'numeric' });
   } catch { return '—'; }
 }
 
@@ -10783,8 +10848,8 @@ async function renderCalendarPanel() {
   const mine = CA.leaves.filter(l => l.assigned_to === operator.id && l.status !== 'delivered').sort((a, b) => (a.target_date || '9999').localeCompare(b.target_date || '9999'));
   const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
   const groups = [
-    ['This week', mine.filter(l => l.target_date && new Date(l.target_date) <= weekEnd)],
-    ['Later', mine.filter(l => l.target_date && new Date(l.target_date) > weekEnd)],
+    ['This week', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') <= weekEnd)],
+    ['Later', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') > weekEnd)],
     ['No due date', mine.filter(l => !l.target_date)],
   ].filter(g => g[1].length);
   panel.innerHTML = `<div class="ca-wrap">
@@ -11110,7 +11175,7 @@ function toggleTermSidebar(force) {
 }
 
 function setTermView(view) {
-  const navView = view === 'decomposed' ? 'tracker' : ['notifications', 'chat', 'calendar'].includes(view) ? 'clients' : view;
+  const navView = (view === 'decomposed' || view === 'places') ? 'tracker' : ['notifications', 'chat', 'calendar'].includes(view) ? 'clients' : view;
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
   if (view !== 'chat') clearInterval(CH.timer);
@@ -11128,6 +11193,7 @@ function setTermView(view) {
     if (view === 'tracker') renderTrackerBoard();
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'decomposed') renderDecomposedPanel();
+    else if (view === 'places') renderPlacesPanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
@@ -11385,8 +11451,17 @@ async function renderGatesView() {
     el.innerHTML = '<div class="gm-card"><div class="ig-muted">Reading the contract…</div></div>';
     work = window._gmWork[d.map.id] = await loadLeafWork(ids).catch(() => ({}));
   }
+  if (!window._gmPlaces) {
+    const { data: pd } = await sb.rpc('place_list');
+    window._gmPlaces = { places: pd?.places || [], gate: Object.fromEntries((pd?.gates || []).map(x => [x.id, x.place_id])) };
+  }
   const m = gmBuild(d, work);
   window._gm = m;
+  const dated = (d.leaves || []).filter(l => l.target_date && l.status !== 'delivered').length, openN = (d.leaves || []).filter(l => l.logs > 0 && l.status !== 'delivered').length;
+  const fmtD = iso => new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  const schedStrip = !isExec() ? '' : window._gmSchOpen ? `<div id="gm-sch">${gmSchHtml()}</div>`
+    : `<div class="gm-card sch-strip"><div><b>Due dates</b><div class="ig-muted">${d.map.deadline ? `Deadline ${esc(fmtD(d.map.deadline))} · ${dated} of ${openN} open steps dated${d.map.schedule?.saved_at ? ` · planned ${esc(fmtDate(d.map.schedule.saved_at))}` : ''}` : 'No deadline or due dates yet. Set a deadline and the OS plans every step and gate back from it.'}</div></div>
+      <button class="ig-btn" onclick="gmOpenSchedule()">${d.map.deadline ? 'Re-plan' : 'Create due dates'}</button></div>`;
   if (!m.gates.length) { el.innerHTML = '<div class="gm-card"><b>No gates yet.</b><div class="ig-muted">This contract has no checkpoints with steps.</div></div>'; return; }
   if (!window._gmSel || !m.gates.some(g => g.id === window._gmSel)) {
     window._gmSel = [...m.gates].sort((a, b) => (a.cleared - b.cleared) || b.risk - a.risk)[0].id;
@@ -11423,7 +11498,7 @@ async function renderGatesView() {
         <text x="${px(g).toFixed(1)}" y="${(py(g) + 3.5).toFixed(1)}" text-anchor="middle" class="gm-dl">${esc(g.code.replace(/^CP/, ''))}</text></g>`).join('')}
     </svg>`;
   const g = m.gates.find(x => x.id === window._gmSel);
-  el.innerHTML = `
+  el.innerHTML = `${schedStrip}
     <div class="gm-card">
       <div class="gm-head">
         <div><h3>Gates — risk and reward</h3><p class="ig-muted">${esc(d.map.goal)}</p></div>
@@ -11444,6 +11519,209 @@ async function renderGatesView() {
       </div>
     </div>
     ${g ? gmDetail(g, m, heat(g)) : ''}`;
+}
+
+// ── Due dates — worked backward from the deadline ──────────────────────────
+// Each step gets a duration from its execution class (the canon's Mini 1 h,
+// Micro 4, Minor 8, Medium 16, Major 32; 1 LOG = 1 hour). The plan walks the
+// `requires` chains backward from the contract's deadline: a step must finish
+// by the time the first step that needs it has to start. Walking forward from
+// today gives the earliest each step could finish; the gap is the slack. If
+// the longest chain is longer than the time left, the contract can't fit —
+// the canon's critical-path refusal gate.
+const SCH_CLASSES = ['Mini', 'Micro', 'Minor', 'Medium', 'Major'];
+const SCH_COLORS = { Mini: '#94A3B8', Micro: '#3B82F6', Minor: '#8B5CF6', Medium: '#FF7A1A', Major: '#FF2D95' };
+// Working days a step of each class is allowed, before buffer: one BSize (4 hours) a day, the canon's grouping unit.
+const SCH_DEFAULT = { classDays: { Mini: 0.25, Micro: 1, Minor: 2, Medium: 4, Major: 8 }, buffer: { Mini: 0, Micro: 10, Minor: 15, Medium: 20, Major: 25 }, skipWeekends: false };
+const execClassOf = logs => { const e = Object.entries(CANON.EXECUTION_CLASSES).sort((a, b) => a[1] - b[1]); return (e.find(([, h]) => logs <= h) || e[e.length - 1])[0]; };
+
+// A bare "2026-11-05" must mean that day where the user is, not midnight UTC (which would be the evening before).
+const schDay = d => {
+  const m = typeof d === 'string' && d.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  const x = m ? new Date(+m[1], +m[2] - 1, +m[3]) : new Date(d);
+  x.setHours(0, 0, 0, 0); return x;
+};
+const schIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const schIsWork = (d, skip) => !skip || (d.getDay() !== 0 && d.getDay() !== 6);
+function schAddWork(date, n, skip) {          // n whole working days forward (or back when negative)
+  const d = schDay(date), step = n < 0 ? -1 : 1;
+  for (let left = Math.abs(n); left > 0;) { d.setDate(d.getDate() + step); if (schIsWork(d, skip)) left--; }
+  return d;
+}
+function schWorkDays(from, to, skip) {         // working days in (from, to]
+  let n = 0; const d = schDay(from), end = schDay(to);
+  if (end <= d) { while (d > end) { if (schIsWork(d, skip)) n--; d.setDate(d.getDate() - 1); } return n; }
+  while (d < end) { d.setDate(d.getDate() + 1); if (schIsWork(d, skip)) n++; }
+  return n;
+}
+
+// Pure: leaves + branches + deadline + settings in, dates and findings out.
+function gmSchedule({ leaves, branches, deadline, today, settings, workedH }) {
+  const st = { ...SCH_DEFAULT, ...settings, classDays: { ...SCH_DEFAULT.classDays, ...(settings?.classDays || {}) }, buffer: { ...SCH_DEFAULT.buffer, ...(settings?.buffer || {}) } };
+  const L = leaves.filter(l => l.logs > 0), byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
+  const dependents = {}; L.forEach(l => (l.requires || []).forEach(c => { if (byCode[c]) (dependents[c] ||= []).push(l); }));
+  const skip = st.skipWeekends, d0 = schDay(today), dl = schDay(deadline);
+  const W = schWorkDays(d0, dl, skip);             // working days left (negative when past)
+  const dur = l => {
+    if (l.status === 'delivered') return 0;
+    if (l.status === 'in progress' && l.submitted_at) return 0.25;       // waiting on verification
+    const cls = execClassOf(l.logs);
+    let d = st.classDays[cls] * (1 + st.buffer[cls] / 100);
+    if (l.status === 'in progress') d *= Math.max(0.1, 1 - (workedH?.[l.id] || 0) / l.logs);   // part of it is already done
+    return d;
+  };
+  const memo = {};
+  const lsD = (l, seen = new Set()) => {         // latest start, as working days before the deadline
+    if (memo[l.leaf_code]) return memo[l.leaf_code];
+    if (seen.has(l.leaf_code)) return { ls: dur(l), lf: 0 };
+    seen.add(l.leaf_code);
+    const deps = dependents[l.leaf_code] || [];
+    const lf = deps.length ? Math.max(...deps.map(x => lsD(x, seen).ls)) : 0;
+    return (memo[l.leaf_code] = { lf, ls: lf + dur(l) });
+  };
+  const efm = {};
+  const ef = (l, seen = new Set()) => {          // earliest finish, working days from today
+    if (efm[l.leaf_code] != null) return efm[l.leaf_code];
+    if (seen.has(l.leaf_code)) return dur(l);
+    seen.add(l.leaf_code);
+    const reqs = (l.requires || []).filter(c => byCode[c] && byCode[c].status !== 'delivered');
+    return (efm[l.leaf_code] = (reqs.length ? Math.max(...reqs.map(c => ef(byCode[c], seen))) : 0) + dur(l));
+  };
+  const steps = {};
+  for (const l of L) {
+    const { lf, ls } = lsD(l), e = ef(l), done = l.status === 'delivered';
+    const lfPos = W - lf, lsPos = W - ls;       // working days from today
+    steps[l.id] = { code: l.leaf_code, cls: execClassOf(l.logs), dur: dur(l), done,
+      lfPos, lsPos, ef: e, slack: done ? null : lfPos - e,
+      due: done ? null : schIso(schAddWork(dl, -Math.ceil(lf - 1e-9), skip)) };
+  }
+  const open = L.filter(l => l.status !== 'delivered');
+  const longest = open.length ? open.reduce((m, l) => (steps[l.id].ef > steps[m.id].ef ? l : m), open[0]) : null;
+  const need = longest ? steps[longest.id].ef : 0;
+  const chain = [];                               // the critical chain, walked back from the longest
+  for (let c = longest; c;) { chain.unshift(c.leaf_code); const rs = (c.requires || []).map(x => byCode[x]).filter(x => x && x.status !== 'delivered'); c = rs.length ? rs.reduce((m, x) => (efm[x.leaf_code] > efm[m.leaf_code] ? x : m), rs[0]) : null; }
+  const gates = {};
+  for (const b of branches) {
+    const id = b.branch_id ?? b.id, mine = open.filter(l => l.branch_id === id);
+    if (!mine.length) { gates[id] = { done: true }; continue; }
+    const lf = Math.min(...mine.map(l => steps[l.id].lfPos));  // not used for the date; the last step's date is
+    const dates = mine.map(l => steps[l.id].due).sort();
+    gates[id] = { due: dates[dates.length - 1], slack: Math.min(...mine.map(l => steps[l.id].slack)), start: schIso(schAddWork(dl, -Math.ceil(Math.max(...mine.map(l => W - steps[l.id].lsPos)) - 1e-9), skip)) };
+  }
+  // people needed at once, if every step starts at its latest start
+  const ev = open.flatMap(l => [[steps[l.id].lsPos, 1], [steps[l.id].lfPos, -1]]).sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  let cur = 0, peak = 0; ev.forEach(([, k]) => { cur += k; peak = Math.max(peak, cur); });
+  const earliest = schIso(schAddWork(d0, Math.ceil(need - 1e-9), skip));
+  return { steps, gates, W, need, feasible: need <= W + 1e-9, shortfall: Math.max(0, Math.ceil(need - W - 1e-9)), chain, peak, earliest, settings: st };
+}
+window.gmSchedule = gmSchedule;
+
+async function gmOpenSchedule() {
+  const d = window._decompData;
+  const saved = d.map.schedule || {};
+  window._gmSch = {
+    deadline: d.map.deadline || '', skipWeekends: saved.skipWeekends ?? SCH_DEFAULT.skipWeekends,
+    classDays: { ...SCH_DEFAULT.classDays, ...(saved.classDays || {}) }, buffer: { ...SCH_DEFAULT.buffer, ...(saved.buffer || {}) },
+  };
+  window._gmSchOpen = true;
+  renderGatesView();
+}
+function gmSchClose() { window._gmSchOpen = false; renderGatesView(); }
+function gmSchSet(kind, key, val) {
+  const S = window._gmSch;
+  if (kind === 'deadline') S.deadline = val;
+  else if (kind === 'weekends') S.skipWeekends = !!val;
+  else S[kind][key] = Math.max(0, parseFloat(val) || 0);
+  gmSchPreview();
+}
+function gmSchPlan() {
+  const S = window._gmSch, d = window._decompData;
+  if (!S?.deadline) return null;
+  const work = window._gmWork?.[d.map.id] || {};
+  const workedH = Object.fromEntries(Object.entries(work).map(([id, w]) => [id, (w.closedMs + (w.openSince ? Date.now() - w.openSince : 0)) / HOUR]));
+  return gmSchedule({ leaves: d.leaves, branches: d.branches, deadline: S.deadline, today: new Date(), settings: S, workedH });
+}
+
+function gmSchHtml() {
+  const S = window._gmSch, d = window._decompData;
+  let out = `<div class="gm-card sch"><div class="gm-head"><div><h3>Create due dates</h3><p class="ig-muted">Set the deadline. The plan works backward from it, step by step, by execution class.</p></div><button class="ig-btn ghost" onclick="gmSchClose()">Close</button></div>
+    <div class="sch-inputs">
+      <label><span class="ig-k">Contract deadline</span><input type="date" class="sch-in" value="${esc(S.deadline)}" min="${schIso(new Date())}" oninput="gmSchSet('deadline',0,this.value)"></label>
+      <label class="sch-chk"><input type="checkbox" ${S.skipWeekends ? 'checked' : ''} onchange="gmSchSet('weekends',0,this.checked)"> Skip weekends</label>
+    </div>
+    <table class="sch-tbl"><tr><th>Class</th><th>Hours</th><th>Working days allowed</th><th>Buffer %</th><th>Steps</th></tr>
+      ${SCH_CLASSES.map(c => `<tr><td><i style="background:${SCH_COLORS[c]}"></i>${c}</td><td>${CANON.EXECUTION_CLASSES[c]} h</td>
+        <td><input class="sch-in sm" type="number" step="0.25" min="0" value="${S.classDays[c]}" oninput="gmSchSet('classDays','${c}',this.value)"></td>
+        <td><input class="sch-in sm" type="number" step="5" min="0" value="${S.buffer[c]}" oninput="gmSchSet('buffer','${c}',this.value)"></td>
+        <td>${d.leaves.filter(l => l.logs > 0 && l.status !== 'delivered' && execClassOf(l.logs) === c).length}</td></tr>`).join('')}</table>
+    <p class="ig-muted">A step gets the days for its class plus its buffer. Defaults are 4 hours of work a day (one BSize); change any number and the plan updates.</p>`;
+
+  return out + `<div id="sch-res">${gmSchResHtml()}</div></div>`;
+}
+
+function gmSchResHtml() {
+  const S = window._gmSch, d = window._decompData;
+  const plan = gmSchPlan();
+  const fmt = iso => iso ? new Date(iso + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : '—';
+  const gate = b => plan?.gates[b.branch_id ?? b.id];
+  let out = '';
+  if (!plan) return `<div class="sch-empty">Pick a deadline to see the plan.</div>`;
+  const span = Math.max(plan.W, plan.need, 1);
+  const pos = v => Math.max(0, Math.min(100, v / span * 100));
+  const open = d.leaves.filter(l => l.logs > 0 && l.status !== 'delivered');
+  const gates = [...d.branches].sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9) || byLeafCode(a.code, b.code)).filter(b => !gate(b)?.done);
+  out += `<div class="sch-sum ${plan.feasible ? 'ok' : 'bad'}">
+      ${plan.feasible
+        ? `<b>It fits.</b> The longest chain (${esc(plan.chain.join(' → '))}) needs ${plan.need.toFixed(1)} working days of the ${plan.W} available. ${plan.W - plan.need >= 1 ? `That leaves ${(plan.W - plan.need).toFixed(1)} days of room.` : 'There is almost no room to spare.'}`
+        : `<b>It can't fit.</b> The longest chain (${esc(plan.chain.join(' → '))}) needs ${plan.need.toFixed(1)} working days and only ${Math.max(0, plan.W)} remain before ${esc(fmt(S.deadline))}. The earliest it could finish is <b>${esc(fmt(plan.earliest))}</b>. <button class="ig-btn ghost" onclick="gmSchSet('deadline',0,'${plan.earliest}')">Use ${esc(fmt(plan.earliest))}</button> or shorten the steps on that chain.`}
+      <div class="ig-muted">At the latest start dates, up to <b>${plan.peak}</b> step${plan.peak === 1 ? '' : 's'} run at once, so you'd need that many people free at the same time.</div></div>
+    <div class="sch-gantt">
+      <div class="sch-axis"><span>Today</span><span>${esc(fmt(S.deadline))}</span></div>
+      ${gates.map(b => { const g = gate(b); const ls = open.filter(l => l.branch_id === (b.branch_id ?? b.id)).sort((a, c) => byLeafCode(a.leaf_code, c.leaf_code)); return `<div class="sch-gate">
+        <div class="sch-gh"><b>${esc(b.code)}</b><span>${esc(b.title || '')}</span><em class="${g.slack < 0 ? 'late' : ''}">due ${esc(fmt(g.due))}${g.slack < 0 ? ` · ${Math.abs(Math.ceil(g.slack))} day${Math.abs(Math.ceil(g.slack)) === 1 ? '' : 's'} behind` : ` · ${Math.floor(g.slack)} day${Math.floor(g.slack) === 1 ? '' : 's'} slack`}</em></div>
+        ${ls.map(l => { const t = plan.steps[l.id]; return `<div class="sch-row"><span class="sch-lbl">${esc(l.leaf_code)} <small>${t.cls}</small></span><span class="sch-track"><i class="${t.slack < 0 ? 'late' : ''}" style="left:${pos(t.lsPos)}%;width:${Math.max(1.2, pos(t.lfPos) - pos(t.lsPos))}%;background:${SCH_COLORS[t.cls]}" title="${esc(l.leaf_code)} · ${esc(l.task)} · ${t.cls} · finish by ${esc(fmt(t.due))}"></i></span><span class="sch-due">${esc(fmt(t.due))}</span></div>`; }).join('')}
+      </div>`; }).join('')}
+    </div>
+    <div class="sch-acts"><button class="ig-btn" onclick="gmSchSave()">Save these due dates</button>
+      <span class="ig-muted">Saves a due date on every open step and gate. Finished steps keep their dates. You can re-plan any time.</span></div>
+    <div class="gate-err" id="sch-err"></div>`;
+  return out;
+}
+function gmSchPreview() {
+  const el = document.getElementById('sch-res');
+  if (el) el.innerHTML = gmSchResHtml();
+  const dl = document.querySelector('#gm-sch input[type=date]');
+  if (dl && window._gmSch && dl.value !== window._gmSch.deadline) dl.value = window._gmSch.deadline;
+}
+
+async function gmSchSave() {
+  const S = window._gmSch, d = window._decompData, err = document.getElementById('sch-err'), plan = gmSchPlan();
+  const say = m => { if (err) { err.textContent = m; err.classList.add('show'); } };
+  if (!plan) return say('Pick a deadline first.');
+  if (!plan.feasible && !(await osConfirm(`This plan is already ${plan.shortfall} working day${plan.shortfall === 1 ? '' : 's'} behind the deadline, so some due dates will be in the past. Save it anyway?`))) return;
+  const leaves = Object.entries(plan.steps).filter(([, t]) => !t.done).map(([id, t]) => ({ id, date: t.due }));
+  const branches = Object.entries(plan.gates).filter(([, g]) => !g.done).map(([id, g]) => ({ id, date: g.due }));
+  const { error } = await sb.rpc('save_map_schedule', { p_map: d.map.id, p_deadline: S.deadline,
+    p_settings: { classDays: S.classDays, buffer: S.buffer, skipWeekends: S.skipWeekends }, p_leaves: leaves, p_branches: branches });
+  if (error) return say(error.message);
+  toast(`Due dates saved: ${leaves.length} steps, ${branches.length} gates.`);
+  const { data } = await sb.rpc('get_work_map', { p_map: d.map.id });
+  if (data?.map) window._decompData = data;
+  window._gmSchOpen = false;
+  if (trackerState?.mapId === d.map.id) refreshTrackerAfterWork?.();
+  renderGatesView();
+}
+
+function gmPinSelect(kind, id, placeId) {
+  const places = window._gmPlaces?.places || [];
+  return `<select aria-label="Pin to a place" onchange="plPin('${kind}','${esc(id)}',this.value)"><option value="">No place</option>${places.map(p => `<option value="${esc(p.id)}" ${p.id === placeId ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select>`;
+}
+function gmWhereHtml(kind, id, placeId, label) {
+  const places = window._gmPlaces?.places || [], pl = places.find(p => p.id === placeId);
+  if (!isExec() && !pl) return '';
+  return `<div class="gm-where"><span>${esc(label)}</span>${isExec() ? gmPinSelect(kind, id, placeId) : `<b>${esc(pl.name)}</b>`}
+    ${pl ? `<a href="#" onclick="PL.sel='${esc(pl.id)}';setTermView('places');return false" style="color:#FF7AB8">See on the map →</a>` : ''}
+    ${isExec() && !places.length ? '<span class="ig-muted">No places yet. Add one under Map → Places.</span>' : ''}</div>`;
 }
 
 function gmSelect(id) { window._gmSel = id; renderGatesView(); }
@@ -11484,16 +11762,226 @@ function gmDetail(g, m, color) {
         <div class="ig-muted">${g.unlocksSteps.length ? `Clearing it unlocks ${g.unlocksSteps.length} step${g.unlocksSteps.length === 1 ? '' : 's'} in ${g.unlocksGates.length ? g.unlocksGates.join(', ') : 'later gates'}` : 'Nothing later depends on it'}</div>
         <div class="ig-muted">Clearing a gate opens the next tier's work for the rest of the contract.</div></section>
     </div>
+    ${gmWhereHtml('gate', g.id, window._gmPlaces?.gate?.[g.id], 'This gate is pinned to')}
     <div class="gm-steps">${g.L.map(l => {
       const t = GM_TIER[l.tier] || GM_TIER.apprentice, w = (g.worked[l.id] || 0) / HOUR;
       const wait = (l.requires || []).filter(c => (window._decompData.leaves.find(x => x.leaf_code === c)?.status) !== 'delivered');
       return `<div class="gm-step"><span class="gm-chip" style="background:${t.c}">${t.n}</span>
         <div><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${l.is_key ? '★ key · ' : ''}${esc(l.status)}${wait.length ? ` · waiting on ${esc(wait.join(', '))}` : ''}${w ? ` · ${w.toFixed(1)} h worked` : ''}</small></div>
-        <span class="gm-sh">${l.logs} h</span><span class="gm-sp">$${(l.logs * g.rate(l)).toFixed(0)}</span></div>`;
+        <span class="gm-sh">${l.logs} h</span><span class="gm-sp">$${(l.logs * g.rate(l)).toFixed(0)}</span>
+        ${isExec() ? gmPinSelect('step', l.id, l.place_id) : ''}</div>`;
     }).join('')}</div>
     <details class="gm-how"><summary>How this is scored</summary>
       <p>Risk is a blend of five things, each 0–100: waiting on other gates (${pct(GM_W.dep)}%), key steps still open (${pct(GM_W.key)}%), hardness (${pct(GM_W.hard)}%), length against the other gates (${pct(GM_W.len)}%) and schedule pressure (${pct(GM_W.sched)}%, only when a due date exists; otherwise the rest scale up). Going over the hours budgeted adds 10. Hardness is 70% tier mix (Apprentice 1 to Operator 4, weighted by hours) and 30% how much of the work is one unbroken chain. Schedule pressure is hours still open divided by days left, against ${GM_PACE_MAX} h a day. Reward is pay at each step's locked rate. These weights are a first version.</p>
     </details></div>`;
+}
+
+// ── Places — where the work is ──────────────────────────────────────────
+// A place is a point and a radius (a real outline from a building schematic
+// can replace the radius later; nothing pinned to it changes). Steps and
+// gates are pinned to places; the map shows each place with the work there.
+let leafletLoading = null;
+function loadLeaflet() {
+  if (window.L) return Promise.resolve(window.L);
+  if (leafletLoading) return leafletLoading;
+  leafletLoading = new Promise((resolve, reject) => {
+    const css = document.createElement('link');
+    css.rel = 'stylesheet'; css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
+    document.head.appendChild(css);
+    const sc = document.createElement('script');
+    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
+    sc.onload = () => resolve(window.L); sc.onerror = () => { leafletLoading = null; reject(new Error('The map could not load. Check your connection.')); };
+    document.head.appendChild(sc);
+  });
+  return leafletLoading;
+}
+
+const PL = { map: null, data: null, layers: [], sel: null, pick: null, draft: null };
+const AYEAYE = [17.7275, -64.747];   // the network's home region (St. Croix)
+
+async function loadPlaces() {
+  const { data, error } = await sb.rpc('place_list');
+  if (error) throw error;
+  PL.data = data;
+  return data;
+}
+
+// What's going on at a place, from the steps and gates pinned to it.
+function placeSummary(pl) {
+  const steps = (PL.data.steps || []).filter(x => x.place_id === pl.id), gates = (PL.data.gates || []).filter(x => x.place_id === pl.id);
+  const open = steps.filter(x => x.status !== 'delivered'), today = schIso(new Date());
+  const dates = [...open.map(x => x.target_date), ...gates.map(g => g.due_date)].filter(Boolean).sort();
+  const overdue = open.filter(x => x.target_date && x.target_date < today).length;
+  const state = !steps.length && !gates.length ? 'empty' : overdue ? 'late' : open.some(x => x.status === 'in progress') ? 'active' : open.length ? 'waiting' : 'done';
+  return { steps, gates, open, overdue, state, next: dates[0] || null, prog: open.filter(x => x.status === 'in progress').length };
+}
+const PL_COLOR = { empty: '#8A8A88', waiting: '#3B82F6', active: '#FF7A1A', late: '#FF5A4F', done: '#10B981' };
+const PL_LABEL = { empty: 'Nothing pinned', waiting: 'Waiting to start', active: 'Work under way', late: 'Overdue', done: 'All delivered' };
+
+async function renderPlacesPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading the map…</div>';
+  try { await Promise.all([loadLeaflet(), loadPlaces(), window._opNameCache ? 0 : sb.rpc('list_operators').then(({ data }) => { window._opNameCache = {}; (data || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); }); })]); }
+  catch (e) { panel.innerHTML = `<div class="term-panel-empty">${esc(e.message || 'Could not load places.')}</div>`; return; }
+  const places = PL.data.places;
+  panel.innerHTML = `<div class="pl-wrap">
+    <div class="pp-head"><div><h2>Places</h2><p>Where the work is. Each place is a point and a radius; steps and gates are pinned to them.</p></div>
+      <div class="pp-head-acts">${isExec() ? `<button class="pp-btn solid" onclick="plStartAdd()">${ico(ICON.plus)}Add place</button>` : ''}</div></div>
+    <div class="pl-split"><div class="pl-mapbox"><div id="pl-map"></div><div class="pl-hint" id="pl-hint" hidden></div></div>
+      <div class="pl-side" id="pl-side"></div></div></div>`;
+  plInitMap();
+  plRenderSide();
+}
+
+function plInitMap() {
+  const L = window.L;
+  if (PL.map) { PL.map.remove(); PL.map = null; }
+  PL.map = L.map('pl-map', { zoomControl: true, attributionControl: true }).setView(AYEAYE, 12);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' }).addTo(PL.map);
+  PL.map.on('click', e => { if (PL.pick) PL.pick(e.latlng); });
+  plDrawPins(true);
+}
+
+function plDrawPins(fit) {
+  const L = window.L;
+  PL.layers.forEach(l => l.remove()); PL.layers = [];
+  const pts = [];
+  for (const pl of PL.data.places) {
+    const sm = placeSummary(pl), col = PL_COLOR[sm.state];
+    const circle = L.circle([pl.lat, pl.lon], { radius: pl.radius_m, color: col, weight: 2, fillColor: col, fillOpacity: 0.15 }).addTo(PL.map);
+    const icon = L.divIcon({ className: 'pl-pin', html: `<span style="--pc:${col}" class="${PL.sel === pl.id ? 'on' : ''}">${sm.steps.length + sm.gates.length || ''}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] });
+    const mk = L.marker([pl.lat, pl.lon], { icon, title: pl.name }).addTo(PL.map);
+    mk.on('click', () => plSelect(pl.id));
+    circle.on('click', () => plSelect(pl.id));
+    PL.layers.push(circle, mk); pts.push([pl.lat, pl.lon]);
+  }
+  if (fit && pts.length) PL.map.fitBounds(pts.length === 1 ? L.latLng(pts[0]).toBounds(Math.max(400, PL.data.places[0].radius_m * 6)) : pts, { padding: [40, 40], maxZoom: 17 });
+}
+
+function plSelect(id) {
+  PL.sel = id; plDrawPins(false); plRenderSide();
+  const pl = PL.data.places.find(x => x.id === id);
+  if (pl && PL.map) PL.map.flyTo([pl.lat, pl.lon], Math.max(PL.map.getZoom(), 16), { duration: 0.6 });
+}
+
+function plRenderSide() {
+  const side = document.getElementById('pl-side');
+  if (!side) return;
+  if (PL.draft) { side.innerHTML = plForm(); return; }
+  const places = PL.data.places;
+  if (!places.length) { side.innerHTML = `<div class="pl-empty"><b>No places yet.</b><p>${isExec() ? 'Add the first one: a name, a spot on the map and a radius.' : 'Genesis adds places.'}</p></div>`; return; }
+  const sel = places.find(x => x.id === PL.sel);
+  const handle = id => (window._opNameCache || {})[id] || 'member';
+  side.innerHTML = (sel ? plDetail(sel, handle) : '') + `<div class="pl-list">${places.map(pl => {
+    const sm = placeSummary(pl);
+    return `<button class="pl-item ${pl.id === PL.sel ? 'on' : ''}" onclick="plSelect('${esc(pl.id)}')"><i style="background:${PL_COLOR[sm.state]}"></i>
+      <span><b>${esc(pl.name)}</b><small>${esc(PL_LABEL[sm.state])} · ${sm.steps.length} step${sm.steps.length === 1 ? '' : 's'}${sm.gates.length ? ` · ${sm.gates.length} gate${sm.gates.length === 1 ? '' : 's'}` : ''}${sm.next ? ` · next due ${esc(fmtDate(sm.next))}` : ''}</small></span></button>`;
+  }).join('')}</div>`;
+}
+
+function plDetail(pl, handle) {
+  const sm = placeSummary(pl);
+  return `<div class="pl-detail" style="--pc:${PL_COLOR[sm.state]}">
+    <div class="pl-dh"><div><span class="ig-code">PLACE</span><b>${esc(pl.name)}</b>${pl.address ? `<small>${esc(pl.address)}</small>` : ''}</div>
+      <span class="pl-state">${esc(PL_LABEL[sm.state])}</span></div>
+    <div class="ig-muted">${pl.lat.toFixed(5)}, ${pl.lon.toFixed(5)} · ${pl.radius_m} m radius${pl.notes ? ` · ${esc(pl.notes)}` : ''}</div>
+    <div class="pl-steps">${sm.gates.map(g => `<div class="pl-row"><b>${esc(g.code)}</b><span>${esc(g.title || 'Gate')}</span><em>${g.due_date ? 'due ' + esc(fmtDate(g.due_date)) : 'gate'}</em></div>`).join('')}
+      ${sm.steps.map(x => `<div class="pl-row"><b>${esc(x.leaf_code)}</b><span>${esc(x.task)}<small>${esc(x.status)}${x.assigned_to ? ' · ' + esc(handle(x.assigned_to)) : ''}${x.is_key ? ' · ★ key' : ''}</small></span><em class="${x.target_date && x.status !== 'delivered' && x.target_date < schIso(new Date()) ? 'late' : ''}">${x.target_date ? esc(fmtDate(x.target_date)) : x.logs + ' h'}</em></div>`).join('') || (sm.gates.length ? '' : '<div class="ig-muted">Nothing is pinned here yet. Pin a step or gate from its contract (Map → Gates).</div>')}</div>
+    ${isExec() ? `<div class="pl-acts"><button class="ig-btn ghost" onclick="plStartEdit('${esc(pl.id)}')">Edit</button><button class="ig-btn ghost" onclick="plDelete('${esc(pl.id)}')">Delete</button></div>` : ''}
+  </div>`;
+}
+
+// ── adding / editing a place ──
+function plForm() {
+  const d = PL.draft;
+  return `<form class="pl-form" onsubmit="event.preventDefault(); plSave()">
+    <div class="ig-k">${d.id ? 'Edit place' : 'Add a place'}</div>
+    <label><span>Name</span><input id="pl-name" class="sch-in" value="${esc(d.name)}" placeholder="e.g. Land of Geb studio" autocomplete="off" required></label>
+    <label><span>Address <em>optional</em></span><div class="pl-find"><input id="pl-addr" class="sch-in" value="${esc(d.address)}" placeholder="Search an address or place" autocomplete="off"><button type="button" class="ig-btn ghost" onclick="plFind()">Find</button></div></label>
+    <div class="pl-results" id="pl-results"></div>
+    <div class="pl-coords ${d.lat == null ? 'unset' : ''}" id="pl-coords">${d.lat == null ? 'Click the map to drop the point, or find an address.' : `Point: ${d.lat.toFixed(5)}, ${d.lon.toFixed(5)} — click the map to move it.`}</div>
+    <label><span>Radius: <b id="pl-rv">${d.radius_m}</b> m</span><input type="range" min="5" max="500" step="5" value="${Math.min(500, d.radius_m)}" oninput="plRadius(this.value)"></label>
+    <label><span>Notes <em>optional</em></span><input id="pl-notes" class="sch-in" value="${esc(d.notes)}" maxlength="300" autocomplete="off"></label>
+    <div class="gate-err" id="pl-err"></div>
+    <div class="pl-acts"><button class="ig-btn" type="submit">Save place</button><button type="button" class="ig-btn ghost" onclick="plCancel()">Cancel</button></div>
+  </form>`;
+}
+function plStartAdd() {
+  PL.draft = { id: null, name: '', address: '', lat: null, lon: null, radius_m: 30, notes: '' };
+  plBeginPick(); plRenderSide();
+}
+function plStartEdit(id) {
+  const pl = PL.data.places.find(x => x.id === id);
+  PL.draft = { id, name: pl.name, address: pl.address || '', lat: pl.lat, lon: pl.lon, radius_m: pl.radius_m, notes: pl.notes || '' };
+  plBeginPick(); plRenderSide(); plDraftLayer();
+}
+function plBeginPick() {
+  const hint = document.getElementById('pl-hint');
+  if (hint) { hint.hidden = false; hint.textContent = 'Click the map to place the point'; }
+  document.getElementById('pl-map')?.classList.add('picking');
+  PL.pick = ll => { PL.draft.lat = ll.lat; PL.draft.lon = ll.lng; plDraftLayer(); plCoords(); };
+}
+function plEndPick() {
+  PL.pick = null; PL.draft = null;
+  if (PL.draftLayers) { PL.draftLayers.forEach(l => l.remove()); PL.draftLayers = null; }
+  const hint = document.getElementById('pl-hint'); if (hint) hint.hidden = true;
+  document.getElementById('pl-map')?.classList.remove('picking');
+}
+function plDraftLayer() {
+  const L = window.L, d = PL.draft;
+  if (PL.draftLayers) PL.draftLayers.forEach(l => l.remove());
+  if (d.lat == null) { PL.draftLayers = null; return; }
+  PL.draftLayers = [L.circle([d.lat, d.lon], { radius: d.radius_m, color: '#FF2D95', weight: 2, dashArray: '6 6', fillColor: '#FF2D95', fillOpacity: 0.12 }).addTo(PL.map),
+    L.circleMarker([d.lat, d.lon], { radius: 6, color: '#fff', weight: 2, fillColor: '#FF2D95', fillOpacity: 1 }).addTo(PL.map)];
+}
+function plCoords() { const e = document.getElementById('pl-coords'), d = PL.draft; if (e && d.lat != null) { e.classList.remove('unset'); e.textContent = `Point: ${d.lat.toFixed(5)}, ${d.lon.toFixed(5)} — click the map to move it.`; } }
+function plRadius(v) { PL.draft.radius_m = +v; document.getElementById('pl-rv').textContent = v; plDraftLayer(); }
+async function plFind() {
+  const q = document.getElementById('pl-addr').value.trim(), out = document.getElementById('pl-results');
+  if (!q) return;
+  out.innerHTML = '<div class="ig-muted">Searching…</div>';
+  try {
+    const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=5&q=${encodeURIComponent(q)}`, { headers: { Accept: 'application/json' } });
+    const rows = await r.json();
+    out.innerHTML = rows.length ? rows.map((x, i) => `<button type="button" class="pl-res" onclick="plPickResult(${i})">${esc(x.display_name)}</button>`).join('') : '<div class="ig-muted">No match. Try a nearby landmark, or click the map.</div>';
+    PL.found = rows;
+  } catch (e) { out.innerHTML = '<div class="ig-muted">The address search is unavailable. Click the map instead.</div>'; }
+}
+function plPickResult(i) {
+  const x = PL.found[i], d = PL.draft;
+  d.lat = +x.lat; d.lon = +x.lon; d.address = x.display_name;
+  document.getElementById('pl-addr').value = x.display_name;
+  document.getElementById('pl-results').innerHTML = '';
+  plDraftLayer(); plCoords(); PL.map.flyTo([d.lat, d.lon], 17, { duration: 0.6 });
+}
+function plCancel() { plEndPick(); plRenderSide(); }
+async function plSave() {
+  const d = PL.draft, err = document.getElementById('pl-err');
+  d.name = document.getElementById('pl-name').value.trim(); d.address = document.getElementById('pl-addr').value.trim(); d.notes = document.getElementById('pl-notes').value.trim();
+  const say = m => { err.textContent = m; err.classList.add('show'); };
+  if (!d.name) return say('Give the place a name.');
+  if (d.lat == null) return say('Click the map or find an address to set the point.');
+  const { data, error } = await sb.rpc('place_save', { p_id: d.id, p_name: d.name, p_address: d.address, p_lat: d.lat, p_lon: d.lon, p_radius: d.radius_m, p_notes: d.notes });
+  if (error) return say(error.message);
+  plEndPick(); await loadPlaces(); PL.sel = data;
+  plDrawPins(false); plRenderSide(); toast('Place saved.');
+}
+async function plDelete(id) {
+  const pl = PL.data.places.find(x => x.id === id), sm = placeSummary(pl);
+  if (!(await osConfirm(`Delete "${pl.name}"?${sm.steps.length + sm.gates.length ? ` ${sm.steps.length + sm.gates.length} pinned item(s) will just be unpinned.` : ''}`))) return;
+  const { error } = await sb.rpc('place_delete', { p_id: id });
+  if (error) { toast(error.message); return; }
+  PL.sel = null; await loadPlaces(); plDrawPins(false); plRenderSide(); toast('Place deleted.');
+}
+
+// Pin a step or a gate to a place (from the Gates view).
+async function plPin(kind, id, placeId) {
+  const { error } = await sb.rpc('set_place', { p_kind: kind, p_id: id, p_place: placeId || null });
+  if (error) { toast(error.message); return; }
+  window._gmPlaces = null;
+  const { data } = await sb.rpc('get_work_map', { p_map: window._decompData.map.id });
+  if (data?.map) window._decompData = data;
+  renderGatesView(); toast(placeId ? 'Pinned.' : 'Unpinned.');
 }
 
 // Team plan shows the uploaded plan when there is one (the plan it was

@@ -597,6 +597,65 @@ html.theme-light{
 .dash-range{display:inline-flex;gap:2px;border:1px solid var(--term-line);border-radius:999px;padding:2px;margin:8px 0 0}
 .dash-range button{appearance:none;border:0;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:10.5px;padding:4px 11px;border-radius:999px;cursor:pointer}
 .dash-range button.on{background:var(--term-fg);color:var(--term-bg)}
+/* ── gates / intensity map ── */
+.gm{margin-top:10px;display:grid;gap:14px}
+.gm-card{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;font-family:var(--sans)}
+.gm-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.gm-head h3{font-size:16px;font-weight:600}
+.gm-card .dash-range{border-color:#2B2B2B}.gm-card .dash-range button{color:#8A8A88}.gm-card .dash-range button.on{background:#EDEDEB;color:#0A0A0A}
+.gm-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:8px;margin-bottom:14px}
+.gm-tiles div{background:#111113;border:1px solid #1C1C1E;border-radius:12px;padding:10px 12px}
+.gm-tiles small{display:block;font-family:var(--mono);font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#8A8A88}
+.gm-tiles b{display:block;font-family:var(--mono);font-size:19px;margin:3px 0}
+.gm-tiles span{font-family:var(--mono);font-size:10px;color:#8A8A88}
+.gm-split{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr);gap:14px;align-items:start}
+@media (max-width:900px){.gm-split{grid-template-columns:1fr}}
+.gm-mapwrap{overflow-x:auto;padding-bottom:6px}
+.gm-map{display:flex;gap:10px;align-items:flex-end;min-width:max-content}
+.gm-col{appearance:none;border:1px solid #1C1C1E;background:#111113;color:#EDEDEB;border-radius:14px;padding:10px 8px;width:92px;display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;font-family:var(--mono);position:relative;box-shadow:0 0 22px -8px var(--hc)}
+.gm-col:hover{border-color:var(--hc)}
+.gm-col.on{border-color:var(--hc);box-shadow:0 0 26px -4px var(--hc);background:#141416}
+.gm-col.cleared{opacity:.65}
+.gm-pay{font-size:11px;background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent;font-weight:700}
+.gm-stack{display:flex;flex-direction:column-reverse;justify-content:flex-start;gap:3px;width:100%}
+.gm-blk{display:flex;align-items:center;justify-content:center;border-radius:6px;width:100%;position:relative;font-style:normal;font-size:10px;color:#fff}
+.gm-blk b{font-size:10px;margin:0 2px}
+.gm-blk.st-todo{opacity:.55}.gm-blk.st-prog{background-image:repeating-linear-gradient(45deg,rgba(255,255,255,.22) 0 6px,transparent 6px 12px)}.gm-blk.st-done{opacity:.9}
+.gm-heat{height:5px;width:100%;border-radius:999px;background:var(--hc);box-shadow:0 0 10px var(--hc)}
+.gm-code{font-size:12px;font-weight:700}.gm-sub{font-size:9.5px;color:#8A8A88;text-align:center}
+.gm-legend{display:flex;flex-wrap:wrap;gap:10px;margin-top:10px;font-family:var(--mono);font-size:10px;color:#8A8A88}
+.gm-legend i{display:inline-block;width:9px;height:9px;border-radius:3px;margin-right:5px}
+.gm-l-note{flex-basis:100%}
+.gm-scatter{width:100%;max-width:420px;display:block}
+.gm-q{font-family:var(--mono);font-size:8.5px;fill:#6a8f80;text-transform:uppercase;letter-spacing:.1em}
+.gm-ax{font-family:var(--mono);font-size:9px;fill:#8A8A88}
+.gm-dl{font-family:var(--mono);font-size:10px;font-weight:700;fill:#0A0A0A;pointer-events:none}
+.gm-dot:hover circle{stroke:#fff;stroke-width:2}
+.gm-detail{border-color:color-mix(in srgb,var(--hc) 45%,#1F1F21)}
+.gm-dh{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.gm-dh b{display:block;font-size:16px}
+.gm-flags{display:flex;gap:6px;flex-wrap:wrap}
+.gm-flag{font-family:var(--mono);font-size:10px;border:1px solid #2B2B2B;border-radius:999px;padding:3px 9px;color:#C8C6C2}
+.gm-flag.ok{border-color:#10B981;color:#6EE7B7}.gm-flag.bad{border-color:#FF5A4F;color:#FF8A82}.gm-flag.warn{border-color:#FF7A1A;color:#FFB27A}
+.gm-quad{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px}
+.gm-quad section{background:#111113;border:1px solid #1C1C1E;border-radius:14px;padding:12px}
+.gm-big{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.1;margin:4px 0 8px}
+.gm-big small{font-size:13px;color:#8A8A88}
+.gm-tierbar{display:flex;height:9px;border-radius:999px;overflow:hidden;gap:2px;margin-bottom:8px}.gm-tierbar i{display:block}
+.gm-detail .ig-muted{margin:4px 0 0;line-height:1.5}
+.gm-facs{display:grid;gap:9px}
+.gm-fac>div:first-child{display:flex;justify-content:space-between;font-size:12px}
+.gm-fac em{font-style:normal;font-family:var(--mono)}
+.gm-fbar{height:5px;background:#222;border-radius:999px;overflow:hidden;margin:4px 0}
+.gm-fbar i{display:block;height:100%;border-radius:999px}
+.gm-fac small{font-family:var(--mono);font-size:10px;color:#8A8A88}.gm-fac.na{opacity:.55}
+.gm-steps{display:grid;gap:6px;margin-top:12px}
+.gm-step{display:grid;grid-template-columns:auto 1fr auto auto;gap:10px;align-items:center;background:#111113;border:1px solid #1C1C1E;border-radius:10px;padding:8px 10px}
+.gm-step b{font-size:13px;display:block}.gm-step small{font-family:var(--mono);font-size:10px;color:#8A8A88}
+.gm-chip{font-family:var(--mono);font-size:9.5px;color:#fff;border-radius:999px;padding:3px 8px}
+.gm-sh,.gm-sp{font-family:var(--mono);font-size:12px}.gm-sp{color:#FFB27A;min-width:48px;text-align:right}
+.gm-how{margin-top:12px;font-size:12px;color:#9a9a98}.gm-how summary{cursor:pointer;font-family:var(--mono);font-size:11px}
+.gm-how p{margin-top:8px;line-height:1.6}
 /* ── infographics (In progress / Delivered / home prompts): always dark, brand neon ── */
 .ig-board{display:grid;gap:16px;margin-top:12px}
 .ig-card{background:#0B0B0C;color:#EDEDEB;border:1px solid #1F1F21;border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18);font-family:var(--sans)}
@@ -11210,17 +11269,231 @@ async function openDecomposition(mapId) {
     <div class="term-decomp-bar">
       <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All maps</button>
       <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
-      <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Map</button>
+      <button class="term-timeline-dl" data-dv="gates" onclick="setDecompView('gates')">Gates</button>
+      <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Report</button>
       <button class="term-timeline-dl" data-dv="team" onclick="setDecompView('team')">Team plan</button>
       ${data.map.team_plan_raw ? `<button class="term-timeline-dl" data-dv="calc" onclick="setDecompView('calc')">Calculated plan</button>` : ''}
       <button class="term-timeline-dl" onclick="document.getElementById('term-decomp-frame').contentWindow.print()">Print / save PDF</button>
       ${hasOriginal ? `<button class="term-timeline-dl" onclick="viewContractOriginal('${esc(mapId)}')">Original file</button>` : ''}
     </div>
-    <iframe id="term-decomp-frame" sandbox="allow-same-origin allow-modals" class="term-decomp-frame" title="Decomposition Report"></iframe>`;
+    <div id="term-gates" class="gm" hidden></div>
+    <iframe id="term-decomp-frame" sandbox="allow-same-origin allow-modals" class="term-decomp-frame" title="Decomposition Report" hidden></iframe>`;
   const frame = document.getElementById('term-decomp-frame');
   frame.onload = () => { try { frame.style.height = frame.contentDocument.documentElement.scrollHeight + 'px'; } catch (e) {} };
   window._decompData = data;
-  setDecompView('report');
+  window._gmSel = null;
+  setDecompView('gates');
+}
+
+// ── Gates — the intensity map ──────────────────────────────────────────────
+// A gate is a checkpoint: clearing it opens the next tier's work (canon, "The
+// gate"). For each one this shows how hard it is, how long it should take,
+// what could go wrong (risk) and what it pays (reward), from the contract's
+// own steps — every number traces to the canon: 1 LOG = 1 hour, the tier
+// rates, the `requires` chains, and the refusal gates' effort-vs-critical-path.
+const GM_TIER = { apprentice: { n: 'Apprentice', rank: 1, c: '#64748B' }, wrangler: { n: 'Wrangler', rank: 2, c: '#3B82F6' }, architect: { n: 'Architect', rank: 3, c: '#8B5CF6' }, operator: { n: 'Operator', rank: 4, c: '#FF7A1A' } };
+// What counts toward risk, and how much (first version, open to tuning). When a
+// gate has no due date, the schedule share is left out and the rest rescale.
+const GM_W = { dep: 0.30, key: 0.15, hard: 0.20, len: 0.15, sched: 0.20 };
+const GM_PACE_MAX = 8;   // hours a day treated as the most one person can reasonably put in
+window._gmLens = window._gmLens || 'risk';
+
+function gmRiskColor(v) {   // 0..1: green → yellow → orange → red
+  const st = [[0, [16, 185, 129]], [0.35, [255, 234, 0]], [0.65, [255, 122, 26]], [1, [255, 90, 79]]];
+  v = Math.max(0, Math.min(1, v));
+  for (let i = 1; i < st.length; i++) if (v <= st[i][0]) {
+    const [a, ca] = st[i - 1], [b, cb] = st[i], t = (v - a) / (b - a);
+    return `rgb(${ca.map((x, k) => Math.round(x + (cb[k] - x) * t)).join(',')})`;
+  }
+  return 'rgb(255,90,79)';
+}
+const gmNeon = v => { v = Math.max(0, Math.min(1, v)); return v < 0.5 ? `rgb(255,${Math.round(234 - v * 2 * 112)},${Math.round(v * 2 * 26)})` : `rgb(255,${Math.round(122 - (v - 0.5) * 2 * 77)},${Math.round(26 + (v - 0.5) * 2 * 123)})`; };
+
+function gmBuild(d, work) {
+  const leaves = (d.leaves || []).filter(l => l.logs > 0);
+  const gateOf = Object.fromEntries(leaves.map(l => [l.leaf_code, l.branch_id]));
+  const statusOf = Object.fromEntries(leaves.map(l => [l.leaf_code, l.status]));
+  const bid = b => b.branch_id ?? b.id;
+  const branches = [...(d.branches || [])].sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9) || byLeafCode(a.code, b.code));
+  const now = Date.now();
+  const gates = branches.map(b => {
+    const L = leaves.filter(l => l.branch_id === bid(b)).sort((a, c) => byLeafCode(a.leaf_code, c.leaf_code));
+    if (!L.length) return null;
+    const E = L.reduce((n, l) => n + l.logs, 0);
+    // longest chain of steps inside this gate (hours), if everyone worked in parallel
+    const memo = {}, byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
+    const cp = (l, seen = new Set()) => {
+      if (memo[l.leaf_code] != null) return memo[l.leaf_code];
+      if (seen.has(l.leaf_code)) return l.logs;
+      seen.add(l.leaf_code);
+      return (memo[l.leaf_code] = l.logs + Math.max(0, ...(l.requires || []).filter(c => byCode[c]).map(c => cp(byCode[c], seen))));
+    };
+    const CP = Math.max(...L.map(l => cp(l)));
+    const rate = l => leafRateCents(l) / 100;
+    const pay = L.reduce((n, l) => n + l.logs * rate(l), 0);
+    const tierHours = {}; L.forEach(l => { tierHours[l.tier] = (tierHours[l.tier] || 0) + l.logs; });
+    const tierW = L.reduce((n, l) => n + l.logs * (GM_TIER[l.tier]?.rank || 1), 0) / E;
+    const top = L.reduce((m, l) => Math.max(m, GM_TIER[l.tier]?.rank || 1), 1);
+    const done = L.filter(l => l.status === 'delivered').length, cleared = done === L.length;
+    const open = L.filter(l => l.status !== 'delivered');
+    const waitExt = open.filter(l => (l.requires || []).some(c => gateOf[c] !== bid(b) && statusOf[c] !== 'delivered'));
+    const keys = open.filter(l => l.is_key);
+    const worked = Object.fromEntries(L.map(l => { const w = work[l.id]; return [l.id, w ? w.closedMs + (w.openSince ? now - w.openSince : 0) : 0]; }));
+    const workedMs = L.reduce((n, l) => n + worked[l.id], 0);
+    const overrun = open.filter(l => worked[l.id] > l.logs * HOUR);
+    const awaiting = L.filter(l => l.status === 'in progress' && l.submitted_at).length;
+    const dueStr = b.due_date || L.map(l => l.target_date).filter(Boolean).sort()[0] || null;
+    const dueMs = dueStr ? +new Date(dueStr + 'T23:59:59') : 0;
+    const remH = open.reduce((n, l) => n + l.logs, 0);
+    const daysLeft = dueMs ? Math.ceil((dueMs - now) / 864e5) : null;
+    const pace = dueMs && remH ? remH / Math.max(daysLeft, 0.25) : null;
+    const unlocksSteps = leaves.filter(x => gateOf[x.leaf_code] !== bid(b) && (x.requires || []).some(c => byCode[c]));
+    const unlocksGates = [...new Set(unlocksSteps.map(x => branches.find(z => bid(z) === gateOf[x.leaf_code])?.code).filter(Boolean))];
+    return { id: bid(b), code: b.code, title: b.title, L, E, CP, pay, tierHours, tierW, top, done, cleared, open, waitExt, keys, worked, workedMs, overrun, awaiting,
+      dueStr, daysLeft, pace, remH, unlocksSteps, unlocksGates, rate };
+  }).filter(Boolean);
+  const maxE = Math.max(1, ...gates.map(g => g.E)), maxPay = Math.max(1, ...gates.map(g => g.pay));
+  for (const g of gates) {
+    const f = {
+      dep: g.open.length ? g.waitExt.length / g.open.length : 0,
+      key: g.open.length ? g.keys.length / g.open.length : 0,
+      hard: 0.7 * (g.tierW - 1) / 3 + 0.3 * (g.E ? g.CP / g.E : 0),
+      len: g.E / maxE,
+      sched: g.pace == null ? null : (g.daysLeft < 0 ? 1 : Math.min(1, g.pace / GM_PACE_MAX)),
+    };
+    const used = Object.keys(GM_W).filter(k => f[k] != null);
+    const wsum = used.reduce((n, k) => n + GM_W[k], 0);
+    let r = used.reduce((n, k) => n + GM_W[k] * f[k], 0) / wsum;
+    if (g.overrun.length) r = Math.min(1, r + 0.1);
+    g.f = f; g.riskN = g.cleared ? 0 : r; g.risk = Math.round(g.riskN * 100);
+    g.hardN = f.hard; g.hard = Math.round(f.hard * 100);
+    g.rewardN = g.pay / maxPay;
+    g.effortN = g.E / maxE;
+    g.perHour = g.E ? g.pay / g.E : 0;
+  }
+  return { gates, maxE, maxPay };
+}
+
+async function renderGatesView() {
+  const el = document.getElementById('term-gates');
+  const d = window._decompData;
+  if (!el || !d) return;
+  if (!window._gmWork) window._gmWork = {};
+  const ids = (d.leaves || []).filter(l => l.status !== 'to-do').map(l => l.id);
+  let work = window._gmWork[d.map.id];
+  if (!work) {
+    el.innerHTML = '<div class="gm-card"><div class="ig-muted">Reading the contract…</div></div>';
+    work = window._gmWork[d.map.id] = await loadLeafWork(ids).catch(() => ({}));
+  }
+  const m = gmBuild(d, work);
+  window._gm = m;
+  if (!m.gates.length) { el.innerHTML = '<div class="gm-card"><b>No gates yet.</b><div class="ig-muted">This contract has no checkpoints with steps.</div></div>'; return; }
+  if (!window._gmSel || !m.gates.some(g => g.id === window._gmSel)) {
+    window._gmSel = [...m.gates].sort((a, b) => (a.cleared - b.cleared) || b.risk - a.risk)[0].id;
+  }
+  const lens = window._gmLens;
+  const heat = g => lens === 'risk' ? gmRiskColor(g.cleared ? 0 : g.riskN) : lens === 'reward' ? gmNeon(g.rewardN) : gmNeon(g.effortN);
+  const totalH = m.gates.reduce((n, g) => n + g.E, 0), totalPay = m.gates.reduce((n, g) => n + g.pay, 0);
+  const hardest = [...m.gates].sort((a, b) => b.hard - a.hard)[0], riskiest = [...m.gates].filter(g => !g.cleared).sort((a, b) => b.risk - a.risk)[0];
+  const longest = [...m.gates].sort((a, b) => b.E - a.E)[0], best = [...m.gates].filter(g => !g.cleared).sort((a, b) => (b.rewardN - b.riskN) - (a.rewardN - a.riskN))[0];
+  const colH = 230;
+  const col = g => {
+    const blocks = g.L.map(l => {
+      const h = Math.max(16, l.logs / m.maxE * (colH - 20) * 1.0);
+      const t = GM_TIER[l.tier] || GM_TIER.apprentice;
+      return `<i class="gm-blk st-${l.status === 'delivered' ? 'done' : l.status === 'in progress' ? 'prog' : 'todo'}" style="height:${h.toFixed(0)}px;background:${t.c}" title="${esc(l.leaf_code)} · ${esc(l.task)} · ${t.n} · ${l.logs} h${l.is_key ? ' · key step' : ''}">${l.is_key ? '<b>★</b>' : ''}${l.status === 'delivered' ? '<b>✓</b>' : ''}</i>`;
+    }).join('');
+    return `<button class="gm-col ${g.id === window._gmSel ? 'on' : ''} ${g.cleared ? 'cleared' : ''}" style="--hc:${heat(g)}" onclick="gmSelect('${esc(g.id)}')">
+      <span class="gm-pay">$${Math.round(g.pay).toLocaleString()}</span>
+      <span class="gm-stack" style="height:${colH}px">${blocks}</span>
+      <span class="gm-heat"></span>
+      <span class="gm-code">${esc(g.code)}</span>
+      <span class="gm-sub">${g.E} h · ${g.cleared ? 'cleared' : `risk ${g.risk}`}</span>
+    </button>`;
+  };
+  // risk vs reward chart
+  const SW = 360, SH = 220, px = g => 30 + g.riskN * (SW - 50), py = g => SH - 26 - g.rewardN * (SH - 50);
+  const scatter = `<svg viewBox="0 0 ${SW} ${SH}" class="gm-scatter" role="img" aria-label="Risk against reward for each gate">
+      <rect x="30" y="24" width="${(SW - 50) / 2}" height="${(SH - 50) / 2}" fill="rgba(16,185,129,.07)"/>
+      <line x1="30" y1="${SH - 26}" x2="${SW - 20}" y2="${SH - 26}" stroke="#2B2B2B"/><line x1="30" y1="24" x2="30" y2="${SH - 26}" stroke="#2B2B2B"/>
+      <line x1="${30 + (SW - 50) / 2}" y1="24" x2="${30 + (SW - 50) / 2}" y2="${SH - 26}" stroke="#222" stroke-dasharray="3 4"/><line x1="30" y1="${24 + (SH - 50) / 2}" x2="${SW - 20}" y2="${24 + (SH - 50) / 2}" stroke="#222" stroke-dasharray="3 4"/>
+      <text x="36" y="38" class="gm-q">take first</text><text x="${SW - 24}" y="${SH - 32}" text-anchor="end" class="gm-q">think twice</text>
+      <text x="${SW / 2 + 5}" y="${SH - 8}" text-anchor="middle" class="gm-ax">risk →</text><text x="10" y="${SH / 2}" transform="rotate(-90 10 ${SH / 2})" text-anchor="middle" class="gm-ax">reward →</text>
+      ${m.gates.map(g => `<g class="gm-dot ${g.id === window._gmSel ? 'on' : ''}" onclick="gmSelect('${esc(g.id)}')" style="cursor:pointer"><circle cx="${px(g).toFixed(1)}" cy="${py(g).toFixed(1)}" r="${(7 + g.effortN * 9).toFixed(1)}" fill="${gmRiskColor(g.riskN)}" fill-opacity=".85" stroke="${g.id === window._gmSel ? '#fff' : 'none'}" stroke-width="2"/>
+        <text x="${px(g).toFixed(1)}" y="${(py(g) + 3.5).toFixed(1)}" text-anchor="middle" class="gm-dl">${esc(g.code.replace(/^CP/, ''))}</text></g>`).join('')}
+    </svg>`;
+  const g = m.gates.find(x => x.id === window._gmSel);
+  el.innerHTML = `
+    <div class="gm-card">
+      <div class="gm-head">
+        <div><h3>Gates — risk and reward</h3><p class="ig-muted">${esc(d.map.goal)}</p></div>
+        <div class="dash-range">${[['risk', 'Risk'], ['reward', 'Reward'], ['effort', 'Effort']].map(([k, l]) => `<button class="${lens === k ? 'on' : ''}" onclick="window._gmLens='${k}';renderGatesView()">${l}</button>`).join('')}</div>
+      </div>
+      <div class="gm-tiles">
+        <div><small>Total effort</small><b>${totalH} h</b><span>${(totalH / 4).toFixed(1)} BSizes</span></div>
+        <div><small>Total pay</small><b>$${Math.round(totalPay).toLocaleString()}</b><span>at locked rates</span></div>
+        <div><small>Hardest</small><b>${esc(hardest.code)}</b><span>hardness ${hardest.hard}/100</span></div>
+        <div><small>Riskiest</small><b>${riskiest ? esc(riskiest.code) : '—'}</b><span>${riskiest ? `risk ${riskiest.risk}/100` : 'all cleared'}</span></div>
+        <div><small>Longest</small><b>${esc(longest.code)}</b><span>${longest.E} h</span></div>
+        <div><small>Best value</small><b>${best ? esc(best.code) : '—'}</b><span>most reward for the risk</span></div>
+      </div>
+      <div class="gm-split">
+        <div class="gm-mapwrap"><div class="gm-map">${m.gates.map(col).join('')}</div>
+          <div class="gm-legend">${Object.values(GM_TIER).map(t => `<span><i style="background:${t.c}"></i>${t.n}</span>`).join('')}<span class="gm-l-note">block height = hours · ★ key step · ✓ delivered · glow = ${lens}</span></div></div>
+        <div class="gm-scwrap"><div class="ig-k">Risk against reward · dot size = hours</div>${scatter}</div>
+      </div>
+    </div>
+    ${g ? gmDetail(g, m, heat(g)) : ''}`;
+}
+
+function gmSelect(id) { window._gmSel = id; renderGatesView(); }
+
+function gmDetail(g, m, color) {
+  const f = g.f, pct = v => Math.round(v * 100);
+  const fac = [
+    ['Waiting on other gates', f.dep, GM_W.dep, g.waitExt.length ? `${g.waitExt.length} of ${g.open.length} open step${g.open.length === 1 ? '' : 's'} need work from another gate first` : 'nothing outside this gate holds it up'],
+    ['Key steps still open', f.key, GM_W.key, g.keys.length ? `${g.keys.length} key step${g.keys.length === 1 ? '' : 's'} (${g.keys.map(l => l.leaf_code).join(', ')})` : 'none'],
+    ['Hardness', f.hard, GM_W.hard, `tier mix ${g.tierW.toFixed(1)} of 4 · ${Math.round(g.E ? g.CP / g.E * 100 : 0)}% of the work is one chain`],
+    ['Length vs the other gates', f.len, GM_W.len, `${g.E} h against the longest gate at ${m.maxE} h`],
+    ['Schedule pressure', f.sched, GM_W.sched, f.sched == null ? 'no due date set, so it isn’t counted' : g.daysLeft < 0 ? `past due with ${g.remH} h still open` : `${g.remH} h in ${g.daysLeft} day${g.daysLeft === 1 ? '' : 's'} = ${g.pace.toFixed(1)} h a day`],
+  ];
+  const flags = [
+    g.cleared && ['ok', 'Cleared — every step delivered'],
+    g.overrun.length && ['bad', `${g.overrun.length} step${g.overrun.length === 1 ? '' : 's'} over the hours budgeted`],
+    g.awaiting && ['warn', `${g.awaiting} awaiting verification`],
+    g.daysLeft != null && g.daysLeft < 0 && !g.cleared && ['bad', 'Past due'],
+    g.dueStr == null && !g.cleared && ['info', 'No due date set'],
+  ].filter(Boolean);
+  const lowTier = Object.entries(g.tierHours).sort((a, b) => (GM_TIER[a[0]]?.rank || 0) - (GM_TIER[b[0]]?.rank || 0));
+  const cpDays = g.CP, hrsWorked = g.workedMs / HOUR;
+  return `<div class="gm-card gm-detail" style="--hc:${color}">
+    <div class="gm-dh"><div><span class="ig-code">${esc(g.code)}</span><b>${esc(g.title)}</b></div>
+      <div class="gm-flags">${flags.map(([k, t]) => `<span class="gm-flag ${k}">${esc(t)}</span>`).join('')}</div></div>
+    <div class="gm-quad">
+      <section><div class="ig-k">How hard</div><div class="gm-big">${g.hard}<small>/100</small></div>
+        <div class="gm-tierbar">${lowTier.map(([t, h]) => `<i style="flex:${h};background:${GM_TIER[t]?.c || '#555'}" title="${GM_TIER[t]?.n || t}: ${h} h"></i>`).join('')}</div>
+        <div class="ig-muted">${lowTier.map(([t, h]) => `${GM_TIER[t]?.n || t} ${h} h`).join(' · ')}</div>
+        <div class="ig-muted">Top tier needed: ${GM_TIER[Object.keys(GM_TIER).find(k => GM_TIER[k].rank === g.top)].n}</div></section>
+      <section><div class="ig-k">How long it should take</div><div class="gm-big">${g.E}<small> h</small></div>
+        <div class="ig-muted">Fastest about <b>${cpDays} h</b> with everyone working in parallel; <b>${g.E} h</b> with one person doing it all (1 LOG = 1 hour).</div>
+        <div class="ig-muted">${hrsWorked ? `Worked so far: ${hrsWorked.toFixed(1)} h · ` : ''}${g.cleared ? 'done' : `${g.remH} h to go`}${g.daysLeft != null ? ` · due in ${g.daysLeft} d` : ''}</div></section>
+      <section><div class="ig-k">Risk — what could go wrong</div><div class="gm-big" style="color:${gmRiskColor(g.riskN)}">${g.cleared ? '—' : g.risk}<small>${g.cleared ? '' : '/100'}</small></div>
+        <div class="gm-facs">${fac.map(([n, v, w, why]) => `<div class="gm-fac ${v == null ? 'na' : ''}"><div><span>${n}</span><em>${v == null ? 'n/a' : pct(v)}</em></div><div class="gm-fbar"><i style="width:${v == null ? 0 : pct(v)}%;background:${gmRiskColor(v || 0)}"></i></div><small>${esc(why)}</small></div>`).join('')}</div></section>
+      <section><div class="ig-k">Reward</div><div class="gm-big" style="background:var(--neon);-webkit-background-clip:text;background-clip:text;color:transparent">$${Math.round(g.pay).toLocaleString()}</div>
+        <div class="ig-muted">$${g.perHour.toFixed(2)} an hour at the locked rates</div>
+        <div class="ig-muted">${g.unlocksSteps.length ? `Clearing it unlocks ${g.unlocksSteps.length} step${g.unlocksSteps.length === 1 ? '' : 's'} in ${g.unlocksGates.length ? g.unlocksGates.join(', ') : 'later gates'}` : 'Nothing later depends on it'}</div>
+        <div class="ig-muted">Clearing a gate opens the next tier's work for the rest of the contract.</div></section>
+    </div>
+    <div class="gm-steps">${g.L.map(l => {
+      const t = GM_TIER[l.tier] || GM_TIER.apprentice, w = (g.worked[l.id] || 0) / HOUR;
+      const wait = (l.requires || []).filter(c => (window._decompData.leaves.find(x => x.leaf_code === c)?.status) !== 'delivered');
+      return `<div class="gm-step"><span class="gm-chip" style="background:${t.c}">${t.n}</span>
+        <div><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${l.is_key ? '★ key · ' : ''}${esc(l.status)}${wait.length ? ` · waiting on ${esc(wait.join(', '))}` : ''}${w ? ` · ${w.toFixed(1)} h worked` : ''}</small></div>
+        <span class="gm-sh">${l.logs} h</span><span class="gm-sp">$${(l.logs * g.rate(l)).toFixed(0)}</span></div>`;
+    }).join('')}</div>
+    <details class="gm-how"><summary>How this is scored</summary>
+      <p>Risk is a blend of five things, each 0–100: waiting on other gates (${pct(GM_W.dep)}%), key steps still open (${pct(GM_W.key)}%), hardness (${pct(GM_W.hard)}%), length against the other gates (${pct(GM_W.len)}%) and schedule pressure (${pct(GM_W.sched)}%, only when a due date exists; otherwise the rest scale up). Going over the hours budgeted adds 10. Hardness is 70% tier mix (Apprentice 1 to Operator 4, weighted by hours) and 30% how much of the work is one unbroken chain. Schedule pressure is hours still open divided by days left, against ${GM_PACE_MAX} h a day. Reward is pay at each step's locked rate. These weights are a first version.</p>
+    </details></div>`;
 }
 
 // Team plan shows the uploaded plan when there is one (the plan it was
@@ -11229,6 +11502,15 @@ function setDecompView(view) {
   const frame = document.getElementById('term-decomp-frame');
   const d = window._decompData;
   if (!frame || !d) return;
+  const gates = document.getElementById('term-gates');
+  if (gates) gates.hidden = view !== 'gates';
+  frame.hidden = view === 'gates';
+  if (view === 'gates') {
+    document.querySelectorAll('.term-decomp-bar [data-dv]').forEach(b => b.classList.toggle('on', b.dataset.dv === 'gates'));
+    window._decompView = 'gates';
+    renderGatesView();
+    return;
+  }
   const uploaded = d.map.team_plan_raw;
   if (view === 'team' && uploaded && d.map.team_plan_mime === 'application/pdf') {
     const bin = atob(uploaded), bytes = new Uint8Array(bin.length);

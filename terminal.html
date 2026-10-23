@@ -841,6 +841,12 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .site-card{border:1px solid var(--term-line);border-radius:12px;padding:10px 12px;margin:0 0 12px}.site-card h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--term-dim)}
 .site-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--term-line)}.site-row:last-child{border:0}.site-row small{color:var(--term-dim)}
 .site-dot{width:12px;height:12px;border-radius:50%;background:#2F7CF6;border:2px solid #fff;box-shadow:0 0 0 2px rgba(47,124,246,.4)}
+
+#off-chip{position:fixed;right:12px;bottom:12px;z-index:9998;appearance:none;display:flex;gap:7px;align-items:center;background:var(--term-bg);color:var(--term-dim);border:1px solid var(--term-line);border-radius:999px;padding:6px 12px;font:11px var(--mono);cursor:pointer}
+#off-chip i{width:7px;height:7px;border-radius:50%;background:#2E9D6B}
+#off-chip.off{color:#0A0A0A;background:#E8B500;border-color:#E8B500}#off-chip.off i{background:#0A0A0A}
+#off-chip.wait{border-color:#E8B500}#off-chip.wait i{background:#E8B500}
+@media(max-width:560px){#off-chip{bottom:64px}}
 .ig-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .ig-foot .term-card-btn{background:#161618;color:#EDEDEB;border-color:#2B2B2B}
 .ig-foot .term-card-btn.primary{background:#FF2D95;color:#0A0A0A;border-color:#FF2D95}
@@ -4499,6 +4505,363 @@ let currentSurface = 'home';
 let overlayStack = [];  // track what's in the overlay for back navigation
 let overlayCurrent = null;
 
+// ── OFFLINE COPY ─────────────────────────────────────────────────────────────
+// Every 4 hours (one BSize) while online, this device downloads what its member
+// needs to keep going: the screens they use, their steps, plans, places and the
+// tag codes for their checks. With no internet the app reads from that copy.
+// Check-ins, tag scans and readings made offline are saved on the device and
+// sent, in order, when the connection returns; the database then applies its own
+// rules to each one. Everything else says it needs a connection.
+const OFF_SYNC_MS = 4 * 3600e3;
+const OFF_LOGIN_HOURS = 72;          // offline sign-in works this long after the last online sign-in
+const OFF_MAX_ENTRIES = 700;
+const OFF_MAX_BYTES = 2.5e6;
+const OFF_READ_EXTRA = new Set(['calendar_list', 'can_review_business', 'map_script_status', 'my_site_summary', 'my_team', 'network_clients', 'network_members',
+  'place_list', 'plan_list', 'plan_from_code', 'share_state', 'site_presence', 'step_checks_for', 'tag_resolve', 'tags_for_step_check', 'validate_relation_code', 'escrow_list']);
+const OFF_QUEUE_FN = { check_in: 'Check-in', scan_tag: 'Tag scan', record_result: 'Readings' };
+const OFF = { db: null, online: true, lastSync: 0, queued: 0, failed: 0, syncing: false, replaying: null, session: null, entries: 0 };
+const offIsReadFn = fn => (/^(get_|list_)/.test(fn) && fn !== 'get_or_create_conversation') || OFF_READ_EXTRA.has(fn);
+
+function offDb() {
+  if (OFF.db) return OFF.db;
+  OFF.db = new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('no indexedDB'));
+    const r = indexedDB.open('bixx-offline', 1);
+    r.onupgradeneeded = () => { const d = r.result; d.createObjectStore('reads'); d.createObjectStore('queue', { keyPath: 'id', autoIncrement: true }); d.createObjectStore('meta'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  OFF.db.catch(() => {});
+  return OFF.db;
+}
+const offReq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+async function offStore(name, mode) { return (await offDb()).transaction(name, mode || 'readonly').objectStore(name); }
+const offGet = async (s, k) => { try { return await offReq((await offStore(s)).get(k)); } catch (e) { return undefined; } };
+const offSet = async (s, k, v) => { try { await offReq((await offStore(s, 'readwrite')).put(v, k)); } catch (e) {} };
+const offDel = async (s, k) => { try { await offReq((await offStore(s, 'readwrite')).delete(k)); } catch (e) {} };
+async function offEntries(s) {
+  try { const st = await offStore(s); const [keys, vals] = await Promise.all([offReq(st.getAllKeys()), offReq((await offStore(s)).getAll())]); return keys.map((k, i) => [k, vals[i]]); } catch (e) { return []; }
+}
+const offQueueAll = async () => { try { return (await offReq((await offStore('queue')).getAll())).sort((a, b) => a.id - b.id); } catch (e) { return []; } };
+const offQueuePut = async v => { try { return await offReq((await offStore('queue', 'readwrite')).put(v)); } catch (e) {} };
+const offQueueDel = async id => { try { await offReq((await offStore('queue', 'readwrite')).delete(id)); } catch (e) {} };
+
+function offCanon(v) { if (Array.isArray(v)) return v.map(offCanon); if (v && typeof v === 'object') return Object.fromEntries(Object.keys(v).sort().map(k => [k, offCanon(v[k])])); return v; }
+const offRpcKey = (fn, args) => operator.id + '|rpc|' + fn + '|' + JSON.stringify(offCanon(args || {}));
+function offClassify(url, opts) {
+  if (!operator) return null;
+  const u = String(url), m = u.match(/\/rest\/v1\/(rpc\/)?([a-z_0-9]+)(\?.*)?$/);
+  if (!m) return null;
+  const method = (opts?.method || 'GET').toUpperCase();
+  if (m[1]) {
+    if (method !== 'POST' || typeof opts?.body !== 'string') return null;
+    let args; try { args = JSON.parse(opts.body); } catch (e) { return null; }
+    const fn = m[2];
+    if (offIsReadFn(fn)) return { kind: 'read', fn, args, key: offRpcKey(fn, args) };
+    if (OFF_QUEUE_FN[fn]) return { kind: 'write', fn, args, key: offRpcKey(fn, args) };
+    return null;
+  }
+  if (method !== 'GET') return null;
+  const h = new Headers(opts?.headers || {});
+  return { kind: 'read', fn: 'table:' + m[2], path: u.replace(SB_URL, ''), accept: h.get('accept') || '', key: operator.id + '|get|' + u.replace(SB_URL, '') + '|' + (h.get('accept') || '') };
+}
+const offNetErr = e => e instanceof TypeError || /timeout|network|failed to fetch/i.test(e?.message || '');
+function offTimeout(p, ms) { return new Promise((res, rej) => { const t = setTimeout(() => rej(new TypeError('timeout')), ms); p.then(v => { clearTimeout(t); res(v); }, e => { clearTimeout(t); rej(e); }); }); }
+
+async function offPut(c, text, ct) {
+  if (!text || text.length > OFF_MAX_BYTES) return;
+  await offSet('reads', c.key, { text, ct: ct || 'application/json', at: Date.now(), fn: c.fn, args: c.args || null, path: c.path || null, accept: c.accept || null });
+}
+function offJson(body, status) { return new Response(JSON.stringify(body), { status: status || 200, headers: { 'Content-Type': 'application/json' } }); }
+
+// The fetch the app's database client uses. Reads are kept and, with no network, answered from the copy.
+async function offFetch(url, opts) {
+  const c = offClassify(url, opts);
+  if (!c) return fetch(url, opts);
+  if (c.kind === 'read') {
+    const have = OFF.session || OFF.online === false;
+    try {
+      const res = await (have ? offTimeout(fetch(url, opts), 6000) : fetch(url, opts));
+      OFF.online = true;
+      if (res.ok) res.clone().text().then(t => offPut(c, t, res.headers.get('content-type'))).catch(() => {});
+      return res;
+    } catch (e) {
+      if (!offNetErr(e)) throw e;
+      OFF.online = false; offStatus();
+      return offServe(c, e);
+    }
+  }
+  try { const res = await fetch(url, opts); OFF.online = true; return res; }
+  catch (e) {
+    if (!offNetErr(e)) throw e;
+    OFF.online = false;
+    try { return await offQueueWrite(c); }
+    catch (err) { return offJson({ message: err.message || 'Could not save that offline.' }, 400); }
+  }
+}
+async function offServe(c, origErr) {
+  let rec = await offGet('reads', c.key);
+  if (!rec && c.fn === 'calendar_list') {
+    const prefix = operator.id + '|rpc|calendar_list|';
+    const all = (await offEntries('reads')).filter(([k]) => k.startsWith(prefix)).sort((a, b) => b[1].at - a[1].at);
+    rec = all[0]?.[1];
+  }
+  if (rec) return new Response(rec.text, { status: 200, headers: { 'Content-Type': rec.ct || 'application/json', 'X-Bixx-Offline': String(rec.at) } });
+  return offJson({ message: "That isn't in this device's offline copy yet. Connect and update it.", code: 'OFFLINE' }, 503);
+}
+
+// ── eval_plan, the same rules the database applies ──
+function offEvalPlan(spec, readings) {
+  const fails = [];
+  for (const f of spec.fields || []) {
+    const raw = readings?.[f.key], v = raw == null ? '' : String(raw).trim();
+    if (!v) { if (f.required !== false) fails.push({ key: f.key, why: 'missing' }); continue; }
+    if (f.type === 'number') {
+      const n = Number(v);
+      if (!isFinite(n) || !/^[-+]?(\d+\.?\d*|\.\d+)([eE][-+]?\d+)?$/.test(v)) { fails.push({ key: f.key, why: 'not a number' }); continue; }
+      if (f.min != null && n < Number(f.min)) fails.push({ key: f.key, why: 'below ' + f.min });
+      if (f.max != null && n > Number(f.max)) fails.push({ key: f.key, why: 'above ' + f.max });
+    } else if (f.type === 'check') {
+      const l = v.toLowerCase();
+      if (['true', 'yes', 'pass', 'ok', '1'].includes(l)) { if ((f.pass_when || 'yes') === 'no') fails.push({ key: f.key, why: 'found' }); }
+      else if (['false', 'no', 'fail', '0'].includes(l)) { if ((f.pass_when || 'yes') === 'yes') fails.push({ key: f.key, why: 'no' }); }
+      else fails.push({ key: f.key, why: 'not yes or no' });
+    } else if (f.type === 'choice') {
+      if (f.pass_values && !f.pass_values.includes(v)) fails.push({ key: f.key, why: 'not an accepted choice' });
+    }
+  }
+  return { pass: fails.length === 0, fails };
+}
+
+// ── offline writes: check, apply to the local copy, queue ──
+async function offQueueWrite(c) {
+  const a = c.args; let out;
+  if (c.fn === 'check_in') {
+    out = { kind: a.p_kind, place: null, inside: null, distance_m: null };
+  } else {
+    const code = a.p_code, tk = { fn: 'tag_resolve', args: { p_code: code }, key: offRpcKey('tag_resolve', { p_code: code }) };
+    const rec = await offGet('reads', tk.key);
+    if (!rec) throw new Error("This tag isn't in this device's offline copy, so it can't be checked without a connection.");
+    const r = JSON.parse(rec.text), me = operator.peer_name || 'me', now = new Date().toISOString();
+    if (r.tag.state === 'void') throw new Error('This tag has been voided.');
+    if (c.fn === 'scan_tag') {
+      if (!['collect', 'confirm', 'void'].includes(a.p_action)) throw new Error('Unknown action.');
+      if (a.p_action !== 'collect' && !operator.is_genesis) throw new Error('Genesis only.');
+      if (a.p_action === 'collect' && !r.can_measure) throw new Error('Only the member holding this step collects its samples.');
+      if (a.p_action === 'collect' && r.tag.state !== 'issued') throw new Error(`This tag is already ${r.tag.state}.`);
+      if (a.p_action === 'confirm' && !['collected', 'measured'].includes(r.tag.state)) throw new Error(`There is nothing to confirm yet (the tag is ${r.tag.state}).`);
+      const st = { collect: 'collected', confirm: 'confirmed', void: 'void' }[a.p_action];
+      r.tag.state = st; r.history.push({ action: a.p_action, at: now, who: me, inside_place: null, note: a.p_note || null });
+      if (st === 'confirmed') r.can_confirm = false;
+      out = { state: st, inside_place: null };
+    } else {
+      if (!r.can_measure) throw new Error('Only the member holding this step records its readings.');
+      if (r.tag.state === 'confirmed') throw new Error('This result was already confirmed and is locked.');
+      if (typeof a.p_readings !== 'object' || !a.p_readings) throw new Error('Send the readings as key and value pairs.');
+      const ev = offEvalPlan(r.plan.spec, a.p_readings);
+      r.last_result = { readings: a.p_readings, pass: ev.pass, fails: ev.fails, source: a.p_source || 'manual', device: a.p_device || null, at: now, id: null, scan_id: null };
+      r.tag.state = 'measured'; r.can_confirm = !!operator.is_genesis;
+      r.history.push({ action: 'measure', at: now, who: me, inside_place: null, note: a.p_note || null });
+      out = { ...ev, inside_place: null, state: 'measured' };
+    }
+    await offSet('reads', tk.key, { ...rec, text: JSON.stringify(r), at: Date.now() });
+  }
+  await offQueuePut({ fn: c.fn, args: a, at: Date.now(), operator_id: operator.id, status: 'pending' });
+  await offCount(); offStatus();
+  return offJson({ ...out, queued: true });
+}
+async function offCount() {
+  const q = (await offQueueAll()).filter(x => x.operator_id === operator?.id);
+  OFF.queued = q.filter(x => x.status === 'pending').length; OFF.failed = q.filter(x => x.status === 'failed').length;
+  OFF.entries = (await offEntries('reads')).filter(([k]) => k.startsWith((operator?.id || '') + '|')).length;
+}
+
+// ── send what was done offline, in order ──
+async function offRawRpc(fn, args) {
+  const res = await offTimeout(fetch(`${SB_URL}/rest/v1/rpc/${fn}`, { method: 'POST', headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'Content-Type': 'application/json', 'x-bixx-session': opSessionToken || '' }, body: JSON.stringify(args || {}) }), 15000);
+  const text = await res.text();
+  return { ok: res.ok, status: res.status, text, ct: res.headers.get('content-type') };
+}
+async function offReauth() {
+  if (opSessionToken) return true;
+  try {
+    if (OFF.session?.kind === 'pin') await startOperatorSession(OFF.session.secret);
+    else await startOperatorSessionFromAuth();
+  } catch (e) {}
+  return !!opSessionToken;
+}
+function offReplay() {
+  if (!operator) return Promise.resolve();
+  if (OFF.replaying) return OFF.replaying;     // one sender at a time, so nothing goes twice
+  OFF.replaying = offReplayRun().finally(() => { OFF.replaying = null; });
+  return OFF.replaying;
+}
+async function offReplayRun() {
+  const items = (await offQueueAll()).filter(x => x.operator_id === operator.id && x.status === 'pending');
+  if (!items.length) return;
+  if (!(await offReauth())) return;
+  let sent = 0;
+  try {
+    for (const it of items) {
+      let r;
+      try { r = await offRawRpc(it.fn, it.args); } catch (e) { OFF.online = false; break; }
+      if (r.ok) { await offQueueDel(it.id); sent++; continue; }
+      let msg = ''; try { msg = JSON.parse(r.text).message || ''; } catch (e) {}
+      if (r.status === 401 || /not signed in/i.test(msg)) break;
+      await offQueuePut({ ...it, status: 'failed', error: msg || 'Error ' + r.status, failedAt: Date.now() });
+    }
+  } finally { await offCount(); offStatus(); }
+  if (sent) toast(`${sent} offline action${sent === 1 ? '' : 's'} sent.`);
+  if (OFF.failed) toast('Some offline actions were refused. Tap the offline chip to see them.');
+}
+
+// ── the 4-hour download ──
+async function offCall(fn, args) {   // read through the network, keep the answer
+  const r = await offRawRpc(fn, args);
+  if (!r.ok) return null;
+  await offPut({ fn, args, key: offRpcKey(fn, args) }, r.text, r.ct);
+  try { return JSON.parse(r.text); } catch (e) { return null; }
+}
+async function offTable(path, accept, key) {
+  const res = await offTimeout(fetch(SB_URL + path, { headers: { apikey: SB_KEY, Authorization: 'Bearer ' + SB_KEY, 'x-bixx-session': opSessionToken || '', ...(accept ? { Accept: accept } : {}) } }), 15000);
+  if (!res.ok) return null;
+  const text = await res.text();
+  await offPut({ fn: 'table', path, accept, key: key || operator.id + '|get|' + path + '|' + (accept || '') }, text, res.headers.get('content-type'));
+  try { return JSON.parse(text); } catch (e) { return null; }
+}
+const offPool = async (items, n, fn) => { const q = items.slice(); await Promise.all(Array.from({ length: n }, async () => { for (let x; (x = q.shift()) !== undefined;) { try { await fn(x); } catch (e) {} } })); };
+async function offSnapshot(manual) {
+  if (OFF.syncing || !operator || !sb) return false;
+  if (!(await offReauth())) { if (manual) toast('Sign in again to update the offline copy.'); return false; }
+  OFF.syncing = true; offStatus();
+  const me = operator.id;
+  try {
+    await offReplay();
+    // what this member has already looked at, refreshed (most recent first)
+    const seen = (await offEntries('reads')).filter(([k, v]) => k.startsWith(me + '|') && v.fn !== 'tag_resolve').sort((a, b) => b[1].at - a[1].at).slice(0, 150);
+    await offPool(seen, 4, async ([k, v]) => { if (v.path) await offTable(v.path, v.accept, k); else if (v.fn) await offCall(v.fn, v.args); });
+    // the baseline: what this app's screens read
+    const base = ['place_list', 'plan_list', 'list_operators', 'my_team', 'list_open_steps', 'get_events'];
+    await offPool(base, 4, fn => offCall(fn, undefined));
+    // the same queries the folders, calendar and tracker make, through the app's own client so the copy matches
+    const q = [
+      () => sb.from('work_maps').select('id,goal,prepared_for,contract_date,date_mapped,created_at').order('created_at', { ascending: false }),
+      () => sb.from('work_leaves').select('map_id,status,logs'),
+      () => sb.from('work_leaves').select('*').eq('status', 'in progress'),
+      () => sb.from('work_leaves').select('id,map_id,branch_id,leaf_code,task,target_date,status,assigned_to,logs,tier,is_key,claim_open,claim_closes_at'),
+    ];
+    await offPool(q, 2, f => f());
+    const maps = (await sb.from('work_maps').select('id').order('created_at', { ascending: false })).data || [];
+    const leafIds = [];
+    await offPool(maps, 3, async m => {
+      const d = await offCall('get_work_map', { p_map: m.id }); (d?.leaves || []).forEach(l => leafIds.push(l.id));
+      await offCall('map_script_status', { p_map: m.id });
+    });
+    // checks: every step's plans, its tags, and every tag's own record so a scan can be read with no signal
+    const ids = [...new Set(leafIds)].sort();
+    const withChecks = (await offCall('step_checks_for', { p_leaves: ids })) || {};
+    const live = (await sb.from('work_leaves').select('id').eq('status', 'in progress')).data || [];
+    await offCall('step_checks_for', { p_leaves: live.map(x => x.id).sort() });
+    const codes = [];
+    await offPool(Object.entries(withChecks), 3, async ([leaf, list]) => {
+      await offCall('step_checks_for', { p_leaves: [leaf] }); await offCall('list_results', { p_leaf: leaf });
+      for (const c of list) { const t = await offCall('tags_for_step_check', { p_step_check: c.step_check_id }); (t || []).forEach(x => codes.push(x.code)); }
+    });
+    await offPool(codes.slice(0, 500), 4, code => offCall('tag_resolve', { p_code: code }));
+    // keep the copy to a sensible size
+    const all = (await offEntries('reads')).sort((a, b) => b[1].at - a[1].at);
+    await Promise.all(all.slice(OFF_MAX_ENTRIES).map(([k]) => offDel('reads', k)));
+    OFF.lastSync = Date.now(); await offSet('meta', 'sync:' + me, { at: OFF.lastSync });
+    OFF.online = true;
+    if (manual) toast('Offline copy updated.');
+    return true;
+  } catch (e) {
+    if (manual) toast('Could not finish updating the offline copy.');
+    return false;
+  } finally { OFF.syncing = false; await offCount(); offStatus(); }
+}
+async function offGoOnline() {
+  OFF.online = true; offStatus();
+  if (!operator) return;
+  await offReplay();
+  if (Date.now() - OFF.lastSync >= OFF_SYNC_MS) offSnapshot();
+}
+async function offTick() {
+  if (!operator || OFF.syncing || navigator.onLine === false) return;
+  if (OFF.session && !opSessionToken) { if (await offReauth()) offGoOnline(); return; }
+  if (Date.now() - OFF.lastSync >= OFF_SYNC_MS) offSnapshot();
+  else if (OFF.queued) offReplay();
+  offStatus();
+}
+async function offOnSignedIn() {
+  if (!operator) return;
+  const m = await offGet('meta', 'sync:' + operator.id); OFF.lastSync = m?.at || 0;
+  await offCount(); offStatus();
+  if (!window._offTimer) {
+    window._offTimer = setInterval(offTick, 60000);
+    addEventListener('online', offGoOnline);
+    addEventListener('offline', () => { OFF.online = false; offStatus(); });
+  }
+  if (opSessionToken) setTimeout(() => { if (Date.now() - OFF.lastSync >= OFF_SYNC_MS || OFF.queued) offSnapshot(); }, 4000);
+}
+
+// ── signing in with no signal ──
+async function offHash(secret, salt) {
+  const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 200000 }, k, 256);
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
+}
+async function offSaveLogin(kind, secret, op, email) {
+  try {
+    const salt = crypto.getRandomValues(new Uint8Array(16)), o = { ...op };
+    delete o.pin_hash; delete o.access_key;
+    await offSet('meta', 'auth:' + op.id, { kind, email: email || null, salt: Array.from(salt), hash: await offHash(secret, salt), op: o, savedAt: Date.now() });
+  } catch (e) {}
+}
+async function offTryLogin(kind, secret, email) {
+  try {
+    for (const [k, rec] of await offEntries('meta')) {
+      if (!k.startsWith('auth:') || rec.kind !== kind || (kind === 'genesis' && rec.email !== email)) continue;
+      if (Date.now() - rec.savedAt > OFF_LOGIN_HOURS * 3600e3) continue;
+      if (await offHash(secret, new Uint8Array(rec.salt)) === rec.hash) { OFF.session = kind === 'pin' ? { kind, secret } : { kind }; return rec.op; }
+    }
+  } catch (e) {}
+  return null;
+}
+async function offClearFor(opId) {          // sign-out: nothing readable stays on the device
+  for (const [k] of await offEntries('reads')) if (k.startsWith(opId + '|')) await offDel('reads', k);
+  await offDel('meta', 'auth:' + opId); await offDel('meta', 'sync:' + opId);
+}
+
+// ── the chip and its dialog ──
+const offAgo = t => { if (!t) return 'never'; const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 1440 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' d ago'; };
+function offStatus() {
+  let chip = document.getElementById('off-chip');
+  if (!operator) { chip?.remove(); return; }
+  if (!chip) { chip = document.createElement('button'); chip.id = 'off-chip'; chip.onclick = offDialog; document.body.appendChild(chip); }
+  const off = OFF.online === false || navigator.onLine === false;
+  chip.className = off ? 'off' : OFF.queued || OFF.failed ? 'wait' : '';
+  chip.innerHTML = `<i></i>` + (OFF.syncing ? 'Updating offline copy…'
+    : off ? `Offline · copy from ${offAgo(OFF.lastSync)}${OFF.queued ? ` · ${OFF.queued} waiting` : ''}`
+    : `Offline copy · ${offAgo(OFF.lastSync)}${OFF.queued ? ` · ${OFF.queued} waiting` : ''}${OFF.failed ? ` · ${OFF.failed} refused` : ''}`);
+}
+async function offDialog() {
+  await offCount();
+  const q = (await offQueueAll()).filter(x => x.operator_id === operator.id);
+  const next = OFF.lastSync ? new Date(OFF.lastSync + OFF_SYNC_MS) : null;
+  openOverlay('Offline copy', body => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="ck-kv"><span>Connection</span><b>${OFF.online === false || navigator.onLine === false ? 'Offline' : 'Online'}</b></div>
+      <div class="ck-kv"><span>Copy last updated</span><b>${esc(offAgo(OFF.lastSync))}</b></div>
+      <div class="ck-kv"><span>Next automatic update</span><b>${next ? (next < new Date() ? 'when you are online' : esc(next.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))) : 'at the next sync'}</b></div>
+      <div class="ck-kv"><span>Stored on this device</span><b>${OFF.entries} screens and records</b></div>
+      <p class="pp-muted">Every 4 hours, while you are online, this device refreshes its copy of your steps, plans, places and tags. Offline you can read it, check in, scan tags and record readings. Those are sent when you reconnect and the database checks each one. Signing out removes the copy from this device.</p>
+      ${q.length ? `<div class="form-block"><div class="form-lbl">Waiting to send / refused</div>${q.map(x => `<div class="ck-hist"><b>${esc(OFF_QUEUE_FN[x.fn] || x.fn)}</b> · ${esc(new Date(x.at).toLocaleString())}${x.status === 'failed' ? ` · <span class="ck-bad">refused: ${esc(x.error)}</span> <button class="term-card-btn" onclick="offDismiss(${x.id})">Dismiss</button>` : ' · waiting'}</div>`).join('')}</div>` : ''}
+      <div class="ck-acts"><button class="pp-btn solid" onclick="offSnapshot(true).then(() => offDialog())">Update now</button>
+        ${OFF.queued ? '<button class="pp-btn" onclick="offReplay().then(() => offDialog())">Send waiting actions</button>' : ''}</div></div>`;
+  });
+}
+async function offDismiss(id) { await offQueueDel(id); await offCount(); offStatus(); offDialog(); }
+
 function initSB() {
   if (!sb && window.supabase) sb = window.supabase.createClient(SB_URL, SB_KEY, {
     global: { fetch: (url, opts = {}) => {
@@ -4508,7 +4871,7 @@ function initSB() {
         h.set('x-bixx-session', opSessionToken);
         opts = { ...opts, headers: h };
       }
-      return fetch(url, opts);
+      return offFetch(url, opts);
     } },
   });
   return sb;
@@ -4615,6 +4978,16 @@ async function doLogin() {
 
   try {
     const { data, error } = await sb.auth.signInWithPassword({ email, password: pw });
+    if (error && /fetch|network|timeout|load failed/i.test(error.message || '')) {
+      const off = await offTryLogin('genesis', pw, email);
+      if (!off) {
+        err.textContent = "You're offline, and this device has no offline sign-in for that account (or it has expired). Connect once to sign in.";
+        err.classList.add('show'); return;
+      }
+      operator = { ...off, email }; OFF.online = false;
+      toast('Signed in offline, with the copy from ' + offAgo((await offGet('meta', 'sync:' + off.id))?.at) + '.');
+      enterShell(); return;
+    }
     if (error || !data?.user) {
       err.textContent = 'Email or password not recognised.';
       err.classList.add('show'); return;
@@ -4632,6 +5005,8 @@ async function doLogin() {
 
     operator = { ...op, email };
     await startOperatorSessionFromAuth();
+    OFF.session = { kind: 'genesis' };
+    offSaveLogin('genesis', pw, op, email);
     localStorage.setItem('bx_last_email', email);
     fireAndForget(sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${op.peer_name || email} signed in`,
@@ -4697,6 +5072,16 @@ async function doPinLogin() {
     const { data, error } = await sb.rpc('login_with_pin', { p_pin: pin });
     const op = Array.isArray(data) ? data[0] : data;
 
+    if (error && /fetch|network|timeout|load failed/i.test(error.message || '')) {
+      const off = await offTryLogin('pin', pin);
+      if (!off) {
+        err.textContent = "You're offline, and this device has no offline sign-in for that PIN (or it has expired). Connect once to sign in.";
+        err.classList.add('show'); return;
+      }
+      operator = off; OFF.online = false;
+      toast('Signed in offline, with the copy from ' + offAgo((await offGet('meta', 'sync:' + off.id))?.at) + '.');
+      enterShell(); return;
+    }
     if (error || !op) {
       err.textContent = 'Incorrect PIN.';
       err.classList.add('show'); return;
@@ -4706,6 +5091,8 @@ async function doPinLogin() {
 
     operator = op;
     await startOperatorSession(pin);
+    OFF.session = { kind: 'pin', secret: pin };
+    offSaveLogin('pin', pin, op);
     fireAndForget(sb.rpc('emit_event', {
       p_type: 'SYSTEM', p_title: `${op.peer_name || 'Operator'} signed in`,
       p_payload: 'Operator session started (PIN).', p_source_entity: 'Auth', p_source_id: op.id,
@@ -4827,8 +5214,11 @@ async function doLogout() {
   // Fire-and-forget — a slow or hung network call must never block getting back to the gate
   if (sb) fireAndForget(sb.auth.signOut());
   endOperatorSession();
+  if (operator) { const oid = operator.id; fireAndForget(offClearFor(oid)); }
+  OFF.session = null; OFF.lastSync = 0; OFF.queued = 0; OFF.failed = 0;
 
   operator = null;
+  offStatus();
   closeAdminMode();
   document.getElementById('uni-shell').classList.remove('in');
   document.getElementById('gate').classList.remove('out');
@@ -4840,6 +5230,7 @@ async function doLogout() {
 // ── SHELL ENTRY ──
 async function enterShell() {
   // operator data already loaded at login
+  offOnSignedIn();
 
   const cycle   = getActiveCycle();
   const now     = new Date();
@@ -13057,6 +13448,7 @@ function ckHere() {
   });
 }
 async function loadStepChecks(ids) {
+  ids = [...ids].sort();
   if (!ids.length) return {};
   const { data } = await sb.rpc('step_checks_for', { p_leaves: ids });
   Object.assign(CK.cache, Object.fromEntries(ids.map(i => [i, []])), data || {});

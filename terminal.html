@@ -847,6 +847,16 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 #off-chip.off{color:#0A0A0A;background:#E8B500;border-color:#E8B500}#off-chip.off i{background:#0A0A0A}
 #off-chip.wait{border-color:#E8B500}#off-chip.wait i{background:#E8B500}
 @media(max-width:560px){#off-chip{bottom:64px}}
+
+/* analog */
+.an-wrap{padding:0 0 40px}.an-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;margin:0 0 12px}.an-card h4{margin:0 0 8px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--term-dim)}
+.an-kv{display:flex;justify-content:space-between;gap:10px;font-size:13px;padding:4px 0}.an-kv code{font-size:10px;word-break:break-all;color:var(--term-dim)}
+.an-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:12px;padding:5px 0;border-bottom:1px solid var(--term-line)}.an-row:last-child{border:0}.an-row span{flex:1 1 160px;color:var(--term-dim)}.an-row code{font-size:11px}
+.an-dot{width:8px;height:8px;border-radius:50%;background:var(--term-line);flex:0 0 8px}.an-dot.on{background:#2E9D6B}.an-dot.bad{background:#D6303A}
+.an-stats{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.an-stats div{flex:1 1 70px;border:1px solid var(--term-line);border-radius:10px;padding:8px;text-align:center}.an-stats b{display:block;font-size:20px}.an-stats small{color:var(--term-dim);font-size:11px}
+.an-qr{display:inline-block;background:#fff;padding:8px;border-radius:10px;margin:8px 0}.an-qr svg{display:block;max-width:100%;height:auto}
+.an-rec{border:1px solid var(--term-line);border-radius:12px;padding:10px 12px;margin:0 0 10px}.an-rec-h{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.an-rec-h code{color:var(--term-dim);font-size:11px}
+.an-badge{font:11px var(--mono);padding:2px 8px;border-radius:999px;border:1px solid #2E9D6B;color:#2E9D6B}.an-badge.pending{border-color:#E8B500;color:#B58900}.an-badge.gap,.an-badge.fork{border-color:#D6303A;color:#D6303A}
 .ig-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .ig-foot .term-card-btn{background:#161618;color:#EDEDEB;border-color:#2B2B2B}
 .ig-foot .term-card-btn.primary{background:#FF2D95;color:#0A0A0A;border-color:#FF2D95}
@@ -3804,6 +3814,12 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
         <button class="term-sb-subitem" data-sub="chat" onclick="setTermView('chat')">Chat <span class="term-sb-count" id="sb-chat-count"></span></button>
         <button class="term-sb-subitem" data-sub="calendar" onclick="setTermView('calendar')">Calendar</button>
       </div>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="analog" onclick="setTermView('analog')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 12.5a4 4 0 0 1 8 0"/><circle cx="12" cy="12.5" r="1.2"/><path d="M12 14v6"/></svg>
+        <span>Analog</span>
+      </button>
     </div>
     <button class="term-sb-me" id="term-sb-me" onclick="openProfilePanel()" aria-label="Open your profile">
       <span class="term-sb-me-av" id="term-sb-me-av"></span>
@@ -11858,12 +11874,24 @@ function setTermView(view) {
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'decomposed') renderDecomposedPanel();
     else if (view === 'places') renderPlacesPanel();
+    else if (view === 'analog') renderAnalogPanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
     else if (view === 'calendar') { CA._scrolled = false; renderCalendarPanel(); }
   }
   toggleTermSidebar(false);
+}
+
+
+// ── ANALOG: signed records that move with no internet (see analog/ANALOG.md) ──
+async function renderAnalogPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Loading Analog…</div>';
+  try {
+    const m = await import('./analog/src/ui.js');
+    await m.renderAnalog(panel, { openOverlay, closeOverlay, toast, esc, operator: () => operator });
+  } catch (e) { panel.innerHTML = `<div class="term-panel-empty">Analog could not load: ${esc(e.message)}</div>`; }
 }
 
 function updateSidebarCounts() {

@@ -11,9 +11,11 @@
 // Database calls (Supabase) are never handled here. The page keeps its own
 // offline copy of data (see "OFFLINE COPY" in terminal.html).
 
-const CACHE_NAME = 'bixxville-v5';   // bump busts every older cache on activate
+const CACHE_NAME = 'bixxville-v6';   // bump busts every older cache on activate
 const LIB_CACHE = 'bixxville-libs-v1';
-const SHELL = ['./', './index.html', './terminal.html', './manifest.json'];
+const SHELL = ['./', './index.html', './terminal.html', './manifest.json',
+  './analog/src/ui.js', './analog/src/canon.js', './analog/src/schema.js', './analog/src/keys.js', './analog/src/store.js', './analog/src/record.js', './analog/src/log.js',
+  './analog/src/bundle.js', './analog/src/frames.js', './analog/src/sync.js', './analog/src/rtc.js', './analog/src/qr.js'];
 const LIBS = [
   'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0',
   'https://cdn.jsdelivr.net/npm/ethers@6.17.0/dist/ethers.umd.min.js',

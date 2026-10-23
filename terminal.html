@@ -832,6 +832,15 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 
 .ck-fld .sch-in,.ck-frow .sch-in,.ck-manual .sch-in,.ck-import .sch-in{background:var(--term-bg);color:var(--term-fg);border:1px solid var(--term-line);color-scheme:normal}
 .ck-ok{color:#1F8A5B}.ck-bad{color:#D6303A}
+
+#site-pill{position:fixed;left:12px;bottom:12px;z-index:9999;display:flex;gap:8px;align-items:center;background:#0A0A0A;color:#EDEDEB;border:1px solid #FF2D95;border-radius:999px;padding:7px 8px 7px 12px;font:12px var(--mono);box-shadow:0 4px 18px rgba(0,0,0,.4)}
+#site-pill i{width:8px;height:8px;border-radius:50%;background:#FF2D95;animation:sitepulse 1.6s infinite}
+#site-pill button{appearance:none;background:#FF2D95;color:#0A0A0A;border:0;border-radius:999px;font:12px var(--mono);padding:4px 10px;cursor:pointer}
+@keyframes sitepulse{50%{opacity:.25}}
+.site-terms{margin:10px 0 16px;padding-left:18px;font-size:13px;line-height:1.5}.site-terms li{margin:6px 0}
+.site-card{border:1px solid var(--term-line);border-radius:12px;padding:10px 12px;margin:0 0 12px}.site-card h4{margin:0 0 6px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;color:var(--term-dim)}
+.site-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--term-line)}.site-row:last-child{border:0}.site-row small{color:var(--term-dim)}
+.site-dot{width:12px;height:12px;border-radius:50%;background:#2F7CF6;border:2px solid #fff;box-shadow:0 0 0 2px rgba(47,124,246,.4)}
 .ig-foot{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .ig-foot .term-card-btn{background:#161618;color:#EDEDEB;border-color:#2B2B2B}
 .ig-foot .term-card-btn.primary{background:#FF2D95;color:#0A0A0A;border-color:#FF2D95}
@@ -4957,6 +4966,7 @@ function closeOverlay() {
 // ── LOAD ALL ──
 function populateSidebar() {
   if (!operator) return;
+  try { siteLoadShare(); } catch (e) {}
   const cycle  = getActiveCycle();
   const repNum = operator.reputation_score != null ? Number(operator.reputation_score) : null;
   const repStr = repNum != null ? repNum.toFixed(3) : '—';
@@ -7748,12 +7758,14 @@ async function generateCycleAudit(cycleNum) {
   const range = getCycleDateRange(cycleNum);
   if (!range) return null;
 
-  const [logsRes, claimsRes, settledRes, paymentsRes] = await Promise.all([
+  const [logsRes, claimsRes, settledRes, paymentsRes, siteRes] = await Promise.all([
     sb.rpc('get_execution_logs', { p_operator_id: operator.id }),
     sb.rpc('get_my_claims', { p_operator_id: operator.id }),
     sb.rpc('get_settled_projects'),
     sb.rpc('get_member_payments', { p_operator_id: operator.id }),
+    sb.rpc('my_site_summary', { p_from: range.start.toISOString(), p_to: range.end.toISOString() }),
   ]);
+  const site = siteRes.data || [];
 
   const logs    = (logsRes.data || []).filter(l => l.cycle_number === cycleNum);
   const claims  = (claimsRes.data || []).filter(c => c.cycle_number === cycleNum);
@@ -7792,7 +7804,7 @@ async function generateCycleAudit(cycleNum) {
   const totalHours  = logs.reduce((n, l) => n + Number(l.actual_hours || l.agreed_hours || 0), 0);
   const fulfillRate = claims.length ? Math.round((fulfilled.length / claims.length) * 100) : null;
 
-  return { cycleNum, start: range.start, end: range.end, logs, claims, fulfilled, missed, stillOpen, settled, payments, totalHours, fulfillRate };
+  return { cycleNum, start: range.start, end: range.end, logs, claims, fulfilled, missed, stillOpen, settled, payments, site, totalHours, fulfillRate };
 }
 
 function openCycleAudit(cycleNum) {
@@ -7839,6 +7851,15 @@ function openCycleAudit(cycleNum) {
           </div>
           <div class="log-row-right"><div class="log-row-hours">${p.total_logs_confirmed || 0} LOG</div></div>
         </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">Nothing settled this cycle.</div></div>'}
+
+      <div class="section-lbl" style="position:relative;top:0">Site Presence (${(report.site || []).length})</div>
+      ${(report.site || []).length ? report.site.map(x => `
+        <div class="log-row">
+          <div class="log-row-main">
+            <div class="log-row-title">${esc(x.leaf_code)} — ${esc(x.task)}</div>
+            <div class="log-row-meta">${esc((x => `${x.arrivals ? x.arrivals + ' arrival' + (x.arrivals === 1 ? '' : 's') + (x.outside_arrivals ? ' (' + x.outside_arrivals + ' away from the place)' : '') + ' · ' : ''}${x.days} day${x.days === 1 ? '' : 's'} on record${x.minutes_inside ? ' · ' + siteMins(x.minutes_inside) + ' on site' : ''}`)(x))}${x.place ? ' · ' + esc(x.place) : ''}</div>
+          </div>
+        </div>`).join('') : '<div class="empty" style="padding:16px 18px"><div class="empty-msg">No check-ins or shared location this cycle.</div></div>'}
 
       <div class="section-lbl" style="position:relative;top:0">Payments This Cycle (${report.payments.length})</div>
       ${report.payments.length ? report.payments.map(p => `
@@ -7950,6 +7971,11 @@ function downloadCycleAuditPDF() {
   drawSection('SETTLED THIS CYCLE', report.settled.map(p => ({
     title: p.title || p.relation_name || 'Project', subtitle: p.relation_name || p.relation_code || '-',
     right: `${p.total_logs_confirmed || 0} LOG`, bg: [17,17,19], bar: [255,45,149], sub: [168,166,162],
+  })));
+
+  drawSection('SITE PRESENCE', (report.site || []).map(x => ({
+    title: `${x.leaf_code} — ${x.task}`, subtitle: (x => `${x.arrivals ? x.arrivals + ' arrival' + (x.arrivals === 1 ? '' : 's') + (x.outside_arrivals ? ' (' + x.outside_arrivals + ' away from the place)' : '') + ' · ' : ''}${x.days} day${x.days === 1 ? '' : 's'} on record${x.minutes_inside ? ' · ' + siteMins(x.minutes_inside) + ' on site' : ''}`)(x) + (x.place ? ' · ' + x.place : ''),
+    right: '', bg: [17,17,19], bar: [47,124,246], sub: [168,166,162],
   })));
 
   drawSection('PAYMENTS THIS CYCLE', report.payments.map(p => ({
@@ -12083,6 +12109,33 @@ async function renderPlacesPanel() {
       <div class="pl-side" id="pl-side"></div></div></div>`;
   plInitMap();
   plRenderSide();
+  sitePresenceLoad();
+}
+
+async function sitePresenceLoad() {
+  if (!isExec()) return;
+  const { data, error } = await sb.rpc('site_presence');
+  if (error || !data) return;
+  PL.presence = data; plDrawLive(); plRenderSide();
+  clearTimeout(PL.presTimer);
+  PL.presTimer = setTimeout(() => { if (document.getElementById('pl-map')) sitePresenceLoad(); }, 30000);
+}
+function plDrawLive() {
+  const L = window.L; if (!L || !PL.map) return;
+  (PL.liveLayers || []).forEach(l => l.remove()); PL.liveLayers = [];
+  (PL.presence?.live || []).forEach(p => {
+    const mk = L.marker([p.lat, p.lon], { icon: L.divIcon({ className: '', html: '<div class="site-dot"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }), title: p.who }).addTo(PL.map);
+    mk.bindTooltip(`${p.who} · ${p.leaf_code}`);
+    const acc = L.circle([p.lat, p.lon], { radius: Math.max(5, p.accuracy_m || 10), color: '#2F7CF6', weight: 1, fillOpacity: 0.1 }).addTo(PL.map);
+    PL.liveLayers.push(mk, acc);
+  });
+}
+function sitePresenceHtml() {
+  const d = PL.presence; if (!d) return '';
+  const live = d.live || [], ci = (d.checkins || []).slice(0, 8);
+  if (!live.length && !ci.length) return `<div class="site-card"><h4>On site</h4><div class="pp-muted">Nobody is sharing a location, and nobody has checked in in the last 24 hours.</div></div>`;
+  return `<div class="site-card"><h4>On site now</h4>${live.length ? live.map(p => `<div class="site-row"><span><b>${esc(p.who)}</b> · ${esc(p.leaf_code)} ${esc(p.task || '')}</span><small>${p.inside === true ? 'at the place' : p.inside === false ? 'away from the place' : 'no place set'} · ${esc(siteAgo(p.at))}</small></div>`).join('') : '<div class="pp-muted">Nobody is sharing a location right now.</div>'}</div>
+    ${ci.length ? `<div class="site-card"><h4>Check-ins, last 24 hours</h4>${ci.map(c => `<div class="site-row"><span><b>${esc(c.who)}</b> ${c.kind === 'arrive' ? 'arrived' : 'left'}${c.leaf_code ? ' · ' + esc(c.leaf_code) : ''}</span><small>${c.inside === true ? 'at the place' : c.inside === false ? `${Math.round(c.distance_m)} m away` : ''} · ${esc(siteAgo(c.at))}</small></div>`).join('')}</div>` : ''}`;
 }
 
 function plInitMap() {
@@ -12124,7 +12177,7 @@ function plRenderSide() {
   if (!places.length) { side.innerHTML = `<div class="pl-empty"><b>No places yet.</b><p>${isExec() ? 'Add the first one: a name, a spot on the map and a radius.' : 'Genesis adds places.'}</p></div>`; return; }
   const sel = places.find(x => x.id === PL.sel);
   const handle = id => (window._opNameCache || {})[id] || 'member';
-  side.innerHTML = (sel ? plDetail(sel, handle) : '') + `<div class="pl-list">${places.map(pl => {
+  side.innerHTML = sitePresenceHtml() + (sel ? plDetail(sel, handle) : '') + `<div class="pl-list">${places.map(pl => {
     const sm = placeSummary(pl);
     return `<button class="pl-item ${pl.id === PL.sel ? 'on' : ''}" onclick="plSelect('${esc(pl.id)}')"><i style="background:${PL_COLOR[sm.state]}"></i>
       <span><b>${esc(pl.name)}</b><small>${esc(PL_LABEL[sm.state])} · ${sm.steps.length} step${sm.steps.length === 1 ? '' : 's'}${sm.gates.length ? ` · ${sm.gates.length} gate${sm.gates.length === 1 ? '' : 's'}` : ''}${sm.next ? ` · next due ${esc(fmtDate(sm.next))}` : ''}</small></span></button>`;
@@ -12682,6 +12735,7 @@ function leafActionsHtml(l) {
     submitted && isG ? `<button class="term-card-btn primary" onclick="openReview('${id}')">Review proof</button>` : '',
     submitted && mine && !isG ? `<button class="term-card-btn" onclick="openReview('${id}')">View submission</button>` : '',
     l.status !== 'delivered' && (isG || mine) ? `<button class="term-card-btn" onclick="ckOpenStep('${id}')">Checks</button>` : '',
+    siteButtons(l, mine),
     l.status === 'delivered' && l.verified_at && (mine || isG) ? `<button class="term-card-btn" onclick="openReview('${id}')">View proof</button>` : '',
   ].join('');
 }
@@ -12822,6 +12876,7 @@ async function renderProgressBoard(items, keepLive) {
   try { await loadPeople(); } catch (e) {}
   const work = await loadLeafWork(items.map(l => l.id));
   try { await loadStepChecks(items.map(l => l.id)); } catch (e) {}
+  try { await siteLoadShare(); } catch (e) {}
   const people = Object.fromEntries((CL.members || []).map(m => [m.id, m]));
   if (!keepLive) window._igLive = {};
   return `<div class="ig-board">${items.map(l => {
@@ -12862,6 +12917,82 @@ async function renderProgressBoard(items, keepLive) {
 }
 
 // In progress across every folder (contract), each under its folder's header.
+
+// ── SITE PRESENCE: "I'm here" check-ins and opt-in live location ─────────────
+// A check-in is a tap. Live location is off by default, belongs to one step the
+// member holds, runs only while that step is in progress and this page is open,
+// and only Genesis sees it. Raw positions are deleted after 24 hours; a summary
+// (arrivals, days, minutes on site) stays and prints in the cycle statement.
+const SITE = { share: null, watch: null, lastSent: 0, loadedFor: null };
+async function siteCheckIn(leafId, kind) {
+  toast(kind === 'arrive' ? 'Finding you…' : 'Noting that you are leaving…');
+  const at = await ckHere();
+  const { data, error } = await sb.rpc('check_in', { p_leaf: leafId, p_kind: kind, p_lat: at?.lat ?? null, p_lon: at?.lon ?? null, p_acc: at?.acc ?? null });
+  if (error) { toast(error.message); return; }
+  const where = data.place ? ` at ${data.place}` : '';
+  toast(!at ? `Recorded${where} (no location from this device).`
+      : data.inside === true ? `Checked ${kind === 'arrive' ? 'in' : 'out'}${where}.`
+      : data.inside === false ? `Recorded — you are about ${data.distance_m} m from ${data.place || 'the place'}.`
+      : `Recorded${where}.`);
+}
+async function siteLoadShare() {
+  if (!operator || SITE.loadedFor === operator.id) return;
+  SITE.loadedFor = operator.id;
+  try { const { data } = await sb.rpc('share_state'); SITE.share = data || null; } catch (e) { SITE.share = null; }
+  siteSync();
+}
+function siteSync() {
+  let pill = document.getElementById('site-pill');
+  if (!SITE.share) {
+    pill?.remove();
+    if (SITE.watch != null) { navigator.geolocation.clearWatch(SITE.watch); SITE.watch = null; }
+    return;
+  }
+  if (!pill) { pill = document.createElement('div'); pill.id = 'site-pill'; document.body.appendChild(pill); }
+  const l = (trackerState?.leaves || []).find(x => x.id === SITE.share.leaf_id);
+  pill.innerHTML = `<i></i><span>Sharing your location${l ? ' for ' + esc(l.leaf_code) : ''}</span><button onclick="siteShareStop()">Stop</button>`;
+  if (SITE.watch == null && navigator.geolocation) {
+    SITE.watch = navigator.geolocation.watchPosition(async pos => {
+      if (!SITE.share || Date.now() - SITE.lastSent < 30000) return;
+      SITE.lastSent = Date.now();
+      const { error } = await sb.rpc('share_position', { p_leaf: SITE.share.leaf_id, p_lat: pos.coords.latitude, p_lon: pos.coords.longitude, p_acc: pos.coords.accuracy });
+      if (error) { SITE.share = null; siteSync(); toast(error.message); }
+    }, () => { toast('This device would not give a location. Sharing is off.'); siteShareStop(); }, { enableHighAccuracy: true, maximumAge: 15000, timeout: 20000 });
+  }
+}
+function siteShareAsk(leafId) {
+  if (SITE.share?.leaf_id === leafId) { siteShareStop(); return; }
+  openOverlay('Share your location', body => {
+    body.innerHTML = `<div class="term-wf"><p>Genesis will see where you are while you work this step, so a crew and a client can tell the job is on site.</p>
+      <ul class="site-terms"><li>It is off until you start it, and it is for this one step.</li>
+        <li>It only runs while the step is in progress and this page is open. Stop it any time from the pill at the bottom of the screen.</li>
+        <li>Only Genesis can see it. Other members cannot.</li>
+        <li>Your exact positions are deleted after 24 hours. A summary stays in your cycle statement: the days, arrivals and minutes you were on site. No coordinates.</li></ul>
+      <button class="pp-btn solid big" onclick="siteShareStart('${esc(leafId)}')">Start sharing</button></div>`;
+  });
+}
+async function siteShareStart(leafId) {
+  if (!navigator.geolocation) { toast('This device cannot share a location.'); return; }
+  const { error } = await sb.rpc('share_start', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  SITE.share = { leaf_id: leafId }; SITE.lastSent = 0; closeOverlay(); siteSync(); toast('Sharing your location for this step.');
+  if (typeof renderTrackerBoard === 'function' && window._trackerFilter === 'in progress') renderTrackerBoard();
+}
+async function siteShareStop() {
+  SITE.share = null; siteSync();
+  const { error } = await sb.rpc('share_stop');
+  if (error) toast(error.message); else toast('Location sharing stopped.');
+  if (typeof renderTrackerBoard === 'function' && window._trackerFilter === 'in progress') renderTrackerBoard();
+}
+function siteButtons(l, mine) {
+  if (!mine || !l.place_id || l.status === 'delivered') return '';
+  const id = esc(l.id);
+  return `<button class="term-card-btn" onclick="siteCheckIn('${id}','arrive')">I'm here</button><button class="term-card-btn" onclick="siteCheckIn('${id}','leave')">Leaving</button>`
+    + (l.status === 'in progress' ? `<button class="term-card-btn ${SITE.share?.leaf_id === l.id ? 'primary' : ''}" onclick="siteShareAsk('${id}')">${SITE.share?.leaf_id === l.id ? 'Stop sharing location' : 'Share my location'}</button>` : '');
+}
+const siteAgo = at => { const m = Math.max(0, Math.round((Date.now() - +new Date(at)) / 60000)); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago'; };
+const siteMins = m => m >= 60 ? `${Math.floor(m / 60)} h ${Math.round(m % 60)} min` : `${Math.round(m)} min`;
+
 // ── CHECKS: signed QR tags, check plans, scanner ─────────────────────────────
 // A check plan says what to record for one kind of check; its code is a hash of
 // its content. A tag is one physical sample / joint / reading point with its own

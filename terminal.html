@@ -597,6 +597,44 @@ html.theme-light{
 .dash-range{display:inline-flex;gap:2px;border:1px solid var(--term-line);border-radius:999px;padding:2px;margin:8px 0 0}
 .dash-range button{appearance:none;border:0;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:10.5px;padding:4px 11px;border-radius:999px;cursor:pointer}
 .dash-range button.on{background:var(--term-fg);color:var(--term-bg)}
+/* work auction in the calendar */
+.ca-chip.open{--cc:#FF2D95}
+button.ca-chip{appearance:none;text-align:left;cursor:pointer;font:inherit;width:100%}
+.ca-chip.open,.ca-chip.step.open{border:1px solid #FF2D95;background:rgba(255,45,149,.12);color:var(--term-fg)}
+.ca-legend .open{--lc:#FF2D95}
+.ca-todo.open i{background:#FF2D95}.ca-todo.open.mine{border-color:#10B981}.ca-todo.dim{opacity:.55}
+.ca-closes{color:var(--green)!important}
+.ca-pill{font-style:normal;font-family:var(--mono);font-size:9.5px;border:1px solid var(--term-line);border-radius:999px;padding:2px 8px;white-space:nowrap;margin-left:auto}
+.ca-pill.ok{border-color:#10B981;color:#10B981}.ca-pill.late{border-color:#FF5A4F;color:#FF5A4F}
+.ca-wide{width:100%;justify-content:center;margin-bottom:10px}
+.ca-callout{background:rgba(255,45,149,.08);border:1px solid rgba(255,45,149,.35);border-radius:12px;padding:10px 12px;font-size:12.5px;line-height:1.5;margin:8px 0}
+.ca-callout.late{background:rgba(255,90,79,.08);border-color:rgba(255,90,79,.4)}
+.ca-av{width:34px;height:34px;border-radius:50%;background:var(--neon);color:#0A0A0A;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;overflow:hidden;flex-shrink:0}
+.ca-av.sm{width:26px;height:26px;font-size:10px}.ca-av img{width:100%;height:100%;object-fit:cover}
+.ca-tier{font-style:normal;font-family:var(--mono);font-size:9.5px;color:#fff;border-radius:999px;padding:3px 9px;margin-left:auto;white-space:nowrap}
+.ca-mate{border:1px solid var(--term-line);border-radius:14px;padding:10px;margin-bottom:8px}.ca-mate.me{border-color:var(--green)}
+.ca-mate-h{display:flex;gap:10px;align-items:center}.ca-mate-h b{display:block;font-size:13px}.ca-mate-h small{font-family:var(--mono);font-size:10px;color:var(--term-dim)}
+.ca-mate-s{display:flex;gap:12px;flex-wrap:wrap;font-family:var(--mono);font-size:10.5px;color:var(--term-dim);margin:8px 0}.ca-mate-s b{color:var(--term-fg)}
+.ca-mate-step{appearance:none;display:block;width:100%;text-align:left;background:transparent;border:0;border-top:1px solid var(--term-line);padding:6px 2px;font-size:12px;color:var(--term-fg);cursor:pointer}
+.ca-mate-step b{font-family:var(--mono);color:var(--green);margin-right:4px}.ca-mate-step small{display:block;font-family:var(--mono);font-size:9.5px;color:var(--term-dim)}
+.ca-facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:6px}
+.ca-facts div{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:8px 10px}.ca-facts small{display:block;font-family:var(--mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--grey)}.ca-facts b{font-size:13px}
+.ca-claim{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:10px;display:grid;gap:8px}
+.ca-claim-h{display:flex;gap:10px;align-items:center}.ca-claim-h b{display:block}.ca-claim-h small{font-family:var(--mono);font-size:10px;color:var(--grey)}
+.ca-claim-s{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:11px;color:var(--grey)}.ca-claim-s b{color:var(--cream)}.ca-claim-s .late{color:#FF5A4F}
+.ca-claim-n{font-size:13px;font-style:italic;color:var(--soft)}
+.ca-row{display:flex;gap:8px}.ca-row select{flex:1}
+.ca-pick{display:flex;gap:10px;align-items:flex-start;padding:7px 4px;border-bottom:1px solid var(--line);cursor:pointer}.ca-pick b{display:block;font-size:13px}.ca-pick small{font-family:var(--mono);font-size:10px;color:var(--grey)}
+.ca-view{margin:0 8px}
+.ca-teamgrid{overflow:auto;border:1px solid var(--term-line);border-radius:14px;max-height:calc(100vh - 260px)}
+.ca-tg{display:grid;grid-template-columns:170px repeat(7,minmax(92px,1fr));min-width:800px}
+.ca-tg-h{padding:8px 10px;font-family:var(--mono);font-size:10px;color:var(--term-dim);border-bottom:1px solid var(--term-line);position:sticky;top:0;background:var(--term-bg);z-index:2}
+.ca-tg-h b{color:var(--term-fg);font-size:14px;margin-right:4px}.ca-tg-h.today b{color:var(--green)}.ca-tg-h.first{left:0;z-index:3}
+.ca-tr-l{display:flex;gap:8px;align-items:center;padding:10px;border-bottom:1px solid var(--term-line);position:sticky;left:0;background:var(--term-bg);z-index:1}
+.ca-tr-l b{display:block;font-size:12.5px}.ca-tr-l small{font-family:var(--mono);font-size:9.5px;color:var(--term-dim)}
+.ca-tc{padding:6px;border-bottom:1px solid var(--term-line);border-left:1px solid var(--term-line);display:grid;gap:4px;align-content:start;min-height:56px}.ca-tc.today{background:rgba(var(--green-rgb),.05)}
+.ca-tchip{appearance:none;text-align:left;border:1px solid var(--term-line);border-left:3px solid #3B82F6;background:var(--surface);color:var(--term-fg);border-radius:8px;padding:4px 6px;font-size:10.5px;cursor:pointer;overflow:hidden}
+.ca-tchip.prog{border-left-color:#FF7A1A}.ca-tchip b{font-family:var(--mono);margin-right:4px}.ca-tchip span{color:var(--term-dim)}
 /* places */
 .pl-wrap{max-width:1300px}
 .pl-split{display:grid;grid-template-columns:minmax(0,1.7fr) minmax(280px,1fr);gap:14px;align-items:start}
@@ -10806,23 +10844,29 @@ async function chatSend() {
 }
 
 // ── Calendar ─────────────────────────────────────────────────────────
-const CA = { start: null, side: 'todo', events: [], due: [], cps: [] };
+const CA = { start: null, side: 'todo', view: 'week', events: [], due: [], cps: [], open: [], team: [] };
 const dayStart = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const mondayOf = d => { const x = dayStart(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
 const sameDay = (a, b) => dayStart(a).getTime() === dayStart(b).getTime();
 const CA_H0 = 0, CA_H1 = 24, CA_ROW = 48;
 
 async function renderCalendarPanel() {
+  const seq = CA.seq = (CA.seq || 0) + 1;   // an older load that finishes late must not overwrite a newer one
   if (!CA.start) CA.start = mondayOf(new Date());
   const panel = document.getElementById('term-panel');
   if (!panel.querySelector('.ca-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
   const from = new Date(CA.start), to = new Date(CA.start); to.setDate(to.getDate() + 7);
-  const [ev, leaves, branches, maps] = await Promise.all([
+  const [ev, leaves, branches, maps, open, team] = await Promise.all([
     sb.rpc('calendar_list', { p_from: from.toISOString(), p_to: to.toISOString() }),
-    sb.from('work_leaves').select('id,map_id,leaf_code,task,target_date,status,assigned_to'),
+    sb.from('work_leaves').select('id,map_id,branch_id,leaf_code,task,target_date,status,assigned_to,logs,tier,is_key,claim_open,claim_closes_at'),
     sb.from('work_branches').select('id,map_id,code,title,due_date').not('due_date', 'is', null),
     sb.from('work_maps').select('id,goal'),
+    sb.rpc('list_open_steps'),
+    sb.rpc('my_team'),
   ]);
+
+  if (seq !== CA.seq) return;
+  CA.open = open.data || []; CA.team = team.data || [];
   if (ev.error) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the calendar — ${esc(ev.error.message)}</div>`; return; }
   const goal = Object.fromEntries((maps.data || []).map(m => [m.id, m.goal]));
   CA.events = ev.data || [];
@@ -10832,8 +10876,10 @@ async function renderCalendarPanel() {
   const today = new Date();
   const cyc = getActiveCycle();
   const cycEnd = new Date(cyc.end); cycEnd.setDate(cycEnd.getDate() - 1);
+  const openIds = new Set(CA.open.map(o => o.id));
   const allDay = d => [
-    ...CA.leaves.filter(l => l.target_date && sameDay(new Date(l.target_date + 'T12:00:00'), d)).map(l => ({ cls: 'step', t: `${l.leaf_code} due`, s: l.task })),
+    ...CA.open.filter(o => sameDay(new Date(o.closes_at), d)).map(o => ({ cls: 'open', t: `${o.leaf_code} claims ${o.closed ? 'closed' : 'close'}`, s: o.task, act: `caOpenWork('${esc(o.id)}')` })),
+    ...CA.leaves.filter(l => l.target_date && sameDay(new Date(l.target_date + 'T12:00:00'), d)).map(l => ({ cls: openIds.has(l.id) ? 'step open' : 'step', t: `${l.leaf_code} due`, s: l.task, act: openIds.has(l.id) ? `caOpenWork('${esc(l.id)}')` : null })),
     ...CA.cps.filter(b => sameDay(new Date(b.due_date + 'T12:00:00'), d)).map(b => ({ cls: 'cp', t: `${b.code} due`, s: b.title })),
     ...(sameDay(cycEnd, d) ? [{ cls: 'cycle', t: `C${cyc.num} settles`, s: 'Last day of the cycle' }] : []),
     ...(sameDay(cyc.end, d) ? [{ cls: 'cycle', t: `C${cyc.num + 1} begins`, s: 'A new 28-day cycle' }] : []),
@@ -10856,8 +10902,11 @@ async function renderCalendarPanel() {
     <aside class="ca-side">
       <div class="ca-today"><b>Today</b><span>${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span></div>
       <div class="pp-tabs slim"><button class="pp-chip ${CA.side === 'todo' ? 'on' : ''}" onclick="CA.side='todo';renderCalendarPanel()">To-do <em>${mine.length}</em></button>
+        <button class="pp-chip ${CA.side === 'open' ? 'on' : ''}" onclick="CA.side='open';renderCalendarPanel()">Open <em>${CA.open.length}</em></button>
+        <button class="pp-chip ${CA.side === 'team' ? 'on' : ''}" onclick="CA.side='team';renderCalendarPanel()">Team <em>${CA.team.length}</em></button>
         <button class="pp-chip ${CA.side === 'events' ? 'on' : ''}" onclick="CA.side='events';renderCalendarPanel()">Events <em>${CA.events.length}</em></button></div>
-      ${CA.side === 'todo'
+      ${CA.side === 'open' ? caOpenSideHtml() : CA.side === 'team' ? caTeamSideHtml() : ''}
+      ${CA.side === 'open' || CA.side === 'team' ? '' : CA.side === 'todo'
         ? (groups.map(([n, ls]) => `<div class="ca-grp"><h5>${n}</h5>${ls.map(l => `<button class="ca-todo ${l.status === 'in progress' ? 'prog' : ''}" onclick="caOpenStep('${esc(l.map_id)}','${esc(l.id)}')">
             <i></i><span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.goal || '')}${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span></button>`).join('')}</div>`).join('')
            || '<div class="pp-empty">Nothing granted to you is open.</div>')
@@ -10870,14 +10919,17 @@ async function renderCalendarPanel() {
           <button class="pp-btn" onclick="CA.start=mondayOf(new Date());renderCalendarPanel()">Today</button>
           <button class="pp-icbtn" onclick="CA.start.setDate(CA.start.getDate()+7);renderCalendarPanel()" aria-label="Next week">›</button>
           <h2>${esc(label)}</h2></div>
-        <div class="ca-legend"><span class="ev">Event</span><span class="step">Step due</span><span class="cp">Checkpoint</span><span class="cycle">Cycle</span></div>
+        <div class="pp-tabs slim ca-view"><button class="pp-chip ${CA.view !== 'team' ? 'on' : ''}" onclick="CA.view='week';renderCalendarPanel()">Week</button><button class="pp-chip ${CA.view === 'team' ? 'on' : ''}" onclick="CA.view='team';renderCalendarPanel()">Team</button></div>
+        <div class="ca-legend"><span class="ev">Event</span><span class="step">Step due</span><span class="open">Open to claim</span><span class="cp">Checkpoint</span><span class="cycle">Cycle</span></div>
         <button class="pp-btn solid" onclick="caAddEvent()">${ico(ICON.plus)}Add event</button>
       </div>
-      <div class="ca-grid-wrap"><div class="ca-grid">
+      ${CA.view === 'team' ? caTeamGridHtml(days) : `<div class="ca-grid-wrap"><div class="ca-grid">
         <div class="ca-corner">UTC−4</div>
         ${days.map(d => `<div class="ca-dh ${sameDay(d, today) ? 'today' : ''}"><b>${d.getDate()}</b><span>${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</span></div>`).join('')}
         <div class="ca-allday-l">All day</div>
-        ${days.map(d => `<div class="ca-allday">${allDay(d).map(a => `<div class="ca-chip ${a.cls}" title="${esc(a.s)}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></div>`).join('')}</div>`).join('')}
+        ${days.map(d => `<div class="ca-allday">${allDay(d).map(a => a.act
+          ? `<button class="ca-chip ${a.cls}" title="${esc(a.s)}" onclick="${a.act}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></button>`
+          : `<div class="ca-chip ${a.cls}" title="${esc(a.s)}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></div>`).join('')}</div>`).join('')}
         <div class="ca-hours">${Array.from({ length: CA_H1 - CA_H0 }, (_, i) => `<div style="height:${CA_ROW}px">${fmtH(CA_H0 + i)}</div>`).join('')}</div>
         ${days.map(d => `<div class="ca-col ${sameDay(d, today) ? 'today' : ''}" style="height:${(CA_H1 - CA_H0) * CA_ROW}px" ondblclick="caAddEvent('${d.toISOString()}', event)">
           ${Array.from({ length: CA_H1 - CA_H0 }, () => `<div class="ca-slot" style="height:${CA_ROW}px"></div>`).join('')}
@@ -10889,11 +10941,174 @@ async function renderCalendarPanel() {
           }).join('')}
           ${sameDay(d, today) ? `<i class="ca-now" style="top:${(today.getHours() + today.getMinutes() / 60 - CA_H0) * CA_ROW}px"></i>` : ''}
         </div>`).join('')}
-      </div></div>
+      </div></div>`}
     </section></div>`;
   const gw = panel.querySelector('.ca-grid-wrap');
   // Open on the working day (7 AM), or an hour before now if that's later.
   if (gw && !CA._scrolled) { gw.scrollTop = Math.max(7, Math.min(today.getHours() - 1, 17)) * CA_ROW; CA._scrolled = true; }
+}
+// ── The work auction, in the calendar ────────────────────────────────────
+// Genesis opens steps for claims (with a close time) or grants them directly.
+// Eligible members claim; Genesis sees the claims side by side and awards one.
+// Open steps show on the calendar (the day claims close, and the day they're due).
+const CA_TIER = ['Apprentice', 'Wrangler', 'Architect', 'Operator'];
+const caTierColor = r => ['#64748B', '#3B82F6', '#8B5CF6', '#FF7A1A'][r] || '#64748B';
+const caHandle = t => t.handle || '@' + (t.name || '').replace(/\s/g, '').toUpperCase();
+const caMoney = c => '$' + (Number(c) / 100).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const caWhen = iso => new Date(iso).toLocaleString('en-US', { weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const caLeft = iso => { const ms = new Date(iso) - Date.now(); if (ms <= 0) return 'closed'; const h = Math.floor(ms / 36e5); return h >= 48 ? `${Math.floor(h / 24)} days left` : h >= 1 ? `${h} h left` : `${Math.max(1, Math.round(ms / 6e4))} min left`; };
+const caAv = (t, sm) => `<span class="ca-av ${sm ? 'sm' : ''}">${t.avatar_url ? `<img src="${esc(t.avatar_url)}" alt="">` : esc(initials(t.name || t.peer_name))}</span>`;
+
+function caOpenSideHtml() {
+  const isG = isExec();
+  const open = CA.open, eligible = open.filter(o => o.eligible && !o.my_claim && !o.closed);
+  const unassigned = isG ? CA.leaves.filter(l => l.status === 'to-do' && !l.assigned_to && !l.claim_open) : [];
+  const card = o => {
+    const mine = !!o.my_claim, st = o.closed ? 'Closed' : mine ? 'You claimed' : o.eligible ? 'Open to you' : isG ? `${o.claims} claim${o.claims === 1 ? '' : 's'}` : 'Not your tier';
+    return `<button class="ca-todo open ${mine ? 'mine' : ''} ${!o.eligible && !isG ? 'dim' : ''}" onclick="caOpenWork('${esc(o.id)}')">
+      <i></i><span><b>${esc(o.leaf_code)} — ${esc(o.task)}</b>
+      <small>${esc(o.goal || '')}${o.gate ? ' · ' + esc(o.gate) : ''} · ${CA_TIER[CA_TIER.map(x => x.toLowerCase()).indexOf(o.tier)] || o.tier} · ${o.logs} h${o.target_date ? ' · due ' + esc(fmtDate(o.target_date)) : ''}</small>
+      <small class="ca-closes">${o.closed ? 'Claims closed' : 'Claims close ' + esc(caWhen(o.closes_at)) + ' · ' + esc(caLeft(o.closes_at))}</small></span>
+      <em class="ca-pill ${mine ? 'ok' : o.closed ? 'late' : ''}">${esc(st)}${isG && !o.closed ? '' : ''}</em></button>`;
+  };
+  return `<div class="ca-open">
+    ${isG ? `<button class="pp-btn solid ca-wide" onclick="caOpenClaimsDialog()">${ico(ICON.plus)}Open work for claims</button>` : ''}
+    ${!isG && eligible.length ? `<div class="ca-callout"><b>${eligible.length} step${eligible.length === 1 ? '' : 's'} you can claim.</b> Tap one, add a note and the day you could start.</div>` : ''}
+    ${open.length ? `<div class="ca-grp"><h5>Open for claims</h5>${open.map(card).join('')}</div>` : `<div class="pp-empty">${isG ? 'Nothing is open for claims. Open work above, or grant steps directly from the tracker.' : 'Nothing is open for claims right now. You’ll be notified when work opens.'}</div>`}
+    ${unassigned.length ? `<div class="ca-grp"><h5>Not granted yet · ${unassigned.length}</h5>${unassigned.slice(0, 12).map(l => `<button class="ca-todo" onclick="caOpenClaimsDialog(['${esc(l.id)}'])"><i></i><span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.goal || '')} · ${l.logs} h${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span><em class="ca-pill">Open</em></button>`).join('')}${unassigned.length > 12 ? `<div class="pp-muted">+ ${unassigned.length - 12} more. Use “Open work for claims”.</div>` : ''}</div>` : ''}
+  </div>`;
+}
+
+function caTeamSideHtml() {
+  const team = CA.team;
+  if (!team.length) return '<div class="pp-empty">You aren’t on a team yet. When you hold a step on a contract, the people working it show here.</div>';
+  const hrs = t => t.steps.reduce((n, x) => n + x.logs, 0);
+  return `<div class="ca-grp"><h5>${isExec() ? 'Everyone on the network' : 'Your team'} · ${team.length}</h5>${team.map(t => `<div class="ca-mate ${t.me ? 'me' : ''}">
+    <div class="ca-mate-h">${caAv(t)}<span><b>${esc(t.name)}${t.me ? ' (you)' : ''}</b><small>${esc(caHandle(t))}</small></span>
+      <em class="ca-tier" style="background:${t.is_genesis ? '#FF2D95' : caTierColor(t.tier_rank)}">${t.is_genesis ? 'Executive' : CA_TIER[t.tier_rank]}</em></div>
+    <div class="ca-mate-s"><span><b>${t.steps.length}</b> open step${t.steps.length === 1 ? '' : 's'}</span><span><b>${hrs(t)}</b> h</span>${t.reputation != null ? `<span>standing <b>${Number(t.reputation).toFixed(2)}</b></span>` : ''}</div>
+    ${t.steps.slice(0, 4).map(x => `<button class="ca-mate-step" onclick="caOpenStep('${esc(x.map_id)}','${esc(x.id)}')"><b>${esc(x.leaf_code)}</b> ${esc(x.task)}<small>${esc(x.status)}${x.target_date ? ' · due ' + esc(fmtDate(x.target_date)) : ''}</small></button>`).join('')}
+    ${t.steps.length > 4 ? `<div class="pp-muted">+ ${t.steps.length - 4} more</div>` : ''}</div>`).join('')}</div>`;
+}
+
+// Team week: a row per person, a column per day, their steps in the cells.
+function caTeamGridHtml(days) {
+  const today = new Date();
+  const rows = CA.team.filter(t => t.steps.length || t.me || !t.is_genesis);
+  if (!CA.team.length) return '<div class="ca-teamgrid"><div class="pp-empty" style="padding:30px">No team to show yet.</div></div>';
+  const cell = (t, d) => {
+    const items = t.steps.filter(x => x.target_date && sameDay(new Date(x.target_date + 'T12:00:00'), d));
+    return `<div class="ca-tc ${sameDay(d, today) ? 'today' : ''}">${items.map(x => `<button class="ca-tchip ${x.status === 'in progress' ? 'prog' : ''}" title="${esc(x.task)}" onclick="caOpenStep('${esc(x.map_id)}','${esc(x.id)}')"><b>${esc(x.leaf_code)}</b><span>${esc(x.task)}</span></button>`).join('')}</div>`;
+  };
+  const undated = t => t.steps.filter(x => !x.target_date).length;
+  return `<div class="ca-teamgrid"><div class="ca-tg">
+    <div class="ca-tg-h first">Team</div>${days.map(d => `<div class="ca-tg-h ${sameDay(d, today) ? 'today' : ''}"><b>${d.getDate()}</b> ${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</div>`).join('')}
+    ${rows.map(t => `<div class="ca-tr-l">${caAv(t, true)}<span><b>${esc(t.name)}${t.me ? ' (you)' : ''}</b><small>${t.is_genesis ? 'Executive' : CA_TIER[t.tier_rank]} · ${t.steps.reduce((n, x) => n + x.logs, 0)} h open${undated(t) ? ` · ${undated(t)} undated` : ''}</small></span></div>${days.map(d => cell(t, d)).join('')}`).join('')}
+  </div></div>`;
+}
+
+// Open a step in the auction: members see it and claim; Genesis sees the claims and awards.
+async function caOpenWork(leafId) {
+  const { data: fresh } = await sb.rpc('list_open_steps');   // always what the database says now
+  if (fresh) CA.open = fresh;
+  const o = CA.open.find(x => x.id === leafId);
+  if (!o) { toast('That step is no longer open for claims.'); return; }
+  const isG = isExec();
+  let claims = [];
+  if (isG) { const { data } = await sb.rpc('list_step_claims', { p_leaf: leafId }); claims = data || []; }
+  const tierName = CA_TIER[CA_TIER.map(x => x.toLowerCase()).indexOf(o.tier)] || o.tier;
+  openOverlay(`${o.leaf_code} — ${o.task}`, body => {
+    const facts = `<div class="ca-facts"><div><small>Contract</small><b>${esc(o.goal || '')}</b></div><div><small>Gate</small><b>${esc(o.gate || '—')}</b></div>
+      <div><small>Tier</small><b>${esc(tierName)}</b></div><div><small>Hours</small><b>${o.logs} h</b></div>
+      <div><small>Pays</small><b>${caMoney(o.pay_cents)}</b></div><div><small>Due</small><b>${o.target_date ? esc(fmtDate(o.target_date)) : 'no date yet'}</b></div></div>
+      <div class="ca-callout ${o.closed ? 'late' : ''}">${o.closed ? 'Claims have closed.' : `Claims close <b>${esc(caWhen(o.closes_at))}</b> · ${esc(caLeft(o.closes_at))}.`} ${o.is_key ? '★ Key step. ' : ''}The step pays its locked ${esc(tierName)} rate; nobody bids on price.</div>`;
+    if (isG) {
+      body.innerHTML = `<div class="term-wf">${facts}
+        <div class="form-block"><div class="form-lbl">Claims (${claims.length})</div>
+        ${claims.length ? claims.map(c => `<div class="ca-claim">
+          <div class="ca-claim-h">${caAv({ name: c.name, avatar_url: c.avatar_url })}<span><b>${esc(c.name)}</b><small>${esc(c.handle || c.member_id || '')}</small></span>
+            <em class="ca-tier" style="background:${caTierColor(c.tier_rank)}">${CA_TIER[c.tier_rank]}</em></div>
+          <div class="ca-claim-s"><span>Standing <b>${c.reputation != null ? Number(c.reputation).toFixed(2) : '—'}</b></span><span>Now holding <b>${c.open_steps}</b> step${c.open_steps === 1 ? '' : 's'} · <b>${c.open_hours}</b> h</span><span>${c.available_from ? 'Can start <b>' + esc(fmtDate(c.available_from)) + '</b>' : 'No start date given'}</span>${c.has_wallet ? '' : '<span class="late">no wallet on file</span>'}</div>
+          ${c.note ? `<div class="ca-claim-n">“${esc(c.note)}”</div>` : ''}
+          <button class="pp-btn solid" onclick="caAward('${esc(leafId)}','${esc(c.operator_id)}','${esc(c.name)}')">Award to ${esc((c.name || '').split(' ')[0])}</button></div>`).join('')
+          : '<div class="pp-muted">No claims yet.</div>'}
+        </div>
+        <div class="form-block"><div class="form-lbl">Or decide another way</div>
+          <div class="ca-row"><select id="ca-assign" class="sch-in"><option value="">Grant directly to…</option>${(CA.team || []).filter(t => !t.is_genesis || true).map(t => `<option value="${esc(t.id)}">${esc(t.name)} · ${CA_TIER[t.tier_rank]}</option>`).join('')}</select>
+            <button class="pp-btn" onclick="caAssignDirect('${esc(leafId)}')">Grant</button></div>
+          <button class="pp-btn" style="margin-top:8px" onclick="caCloseClaims('${esc(leafId)}')">Close claims without awarding</button></div></div>`;
+    } else {
+      const mc = o.my_claim, tomorrow = new Date(Date.now() + 864e5), iso = schIso(tomorrow);
+      body.innerHTML = `<div class="term-wf">${facts}
+        ${!o.eligible ? `<div class="ca-callout late">${esc(o.why_not || 'You can’t claim this one.')}.</div>`
+        : o.closed ? '' : `<form class="pp-form flat" onsubmit="event.preventDefault(); caSubmitClaim('${esc(leafId)}')">
+          <label><span>Why you / anything we should know <em>optional</em></span><textarea id="ca-note" rows="3" maxlength="500" placeholder="I've done this before; I can start right away…">${esc(mc?.note || '')}</textarea></label>
+          <label><span>The day you could start</span><input id="ca-avail" type="date" min="${schIso(new Date())}" value="${esc(mc?.available_from || iso)}"></label>
+          <div class="pp-form-msg" id="ca-msg"></div>
+          <button class="pp-btn solid big" type="submit">${mc ? 'Update my claim' : 'Claim this step'}</button>
+          ${mc ? `<button class="pp-btn big" type="button" onclick="caWithdraw('${esc(leafId)}')">Withdraw my claim</button>` : ''}
+          <p class="pp-muted">${o.claims} claim${o.claims === 1 ? '' : 's'} so far. Genesis chooses; claiming doesn’t guarantee it. You can claim ahead of the steps it depends on, but can’t start until they’re verified.</p></form>`}
+      </div>`;
+    }
+  });
+}
+async function caSubmitClaim(leafId) {
+  const msg = document.getElementById('ca-msg');
+  const { error } = await sb.rpc('claim_step', { p_leaf: leafId, p_note: document.getElementById('ca-note').value, p_available: document.getElementById('ca-avail').value || null });
+  if (error) { msg.textContent = error.message; return; }
+  closeOverlay(); toast('Claim sent. You’ll be told if it’s awarded.'); renderCalendarPanel();
+}
+async function caWithdraw(leafId) {
+  const { error } = await sb.rpc('withdraw_claim', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  closeOverlay(); toast('Claim withdrawn.'); renderCalendarPanel();
+}
+async function caAward(leafId, memberId, name) {
+  if (!(await osConfirm(`Award this step to ${name}? The other claims are declined and the step is granted to them.`))) return;
+  const { error } = await sb.rpc('award_step', { p_leaf: leafId, p_member: memberId });
+  if (error) { toast(error.message); return; }
+  closeOverlay(); toast(`Awarded to ${name}.`); renderCalendarPanel();
+}
+async function caAssignDirect(leafId) {
+  const m = document.getElementById('ca-assign').value;
+  if (!m) { toast('Pick who to grant it to.'); return; }
+  const { error } = await sb.rpc('assign_leaf', { p_leaf: leafId, p_member: m });
+  if (error) { toast(error.message); return; }
+  closeOverlay(); toast('Granted.'); renderCalendarPanel();
+}
+async function caCloseClaims(leafId) {
+  if (!(await osConfirm('Close claims without awarding? Everyone who claimed is declined and the step goes back to un-granted.'))) return;
+  const { error } = await sb.rpc('close_step_claims', { p_leaf: leafId });
+  if (error) { toast(error.message); return; }
+  closeOverlay(); toast('Claims closed.'); renderCalendarPanel();
+}
+
+// Genesis: choose steps and a close time.
+async function caOpenClaimsDialog(preset) {
+  if (!CA.leaves?.length) await renderCalendarPanel();
+  const pool = CA.leaves.filter(l => l.status === 'to-do' && !l.assigned_to && !l.claim_open);
+  if (!pool.length) { toast('Every to-do step is already granted or open for claims.'); return; }
+  const byGoal = {}; pool.forEach(l => (byGoal[l.goal || 'Contract'] ||= []).push(l));
+  const def = new Date(Date.now() + 2 * 864e5); def.setHours(17, 0, 0, 0);
+  const local = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+  openOverlay('Open work for claims', body => {
+    body.innerHTML = `<div class="term-wf"><form class="pp-form flat" onsubmit="event.preventDefault(); caSubmitOpen()">
+      <p class="pp-muted">Pick the steps. Members whose tier reaches them are told, and they show on the calendar until claims close. You award one, or grant a step directly at any time.</p>
+      ${Object.entries(byGoal).map(([g, ls]) => `<div class="ca-grp"><h5>${esc(g)}</h5>${ls.sort((a, b) => byLeafCode(a.leaf_code, b.leaf_code)).map(l => `<label class="ca-pick"><input type="checkbox" value="${esc(l.id)}" ${preset?.includes(l.id) ? 'checked' : ''}>
+        <span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.tier)} · ${l.logs} h${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span></label>`).join('')}</div>`).join('')}
+      <label><span>Claims close</span><input id="ca-closes" type="datetime-local" class="sch-in" value="${local(def)}" min="${local(new Date())}"></label>
+      <div class="pp-form-msg" id="ca-omsg"></div>
+      <button class="pp-btn solid big" type="submit">Open for claims</button></form></div>`;
+  });
+}
+async function caSubmitOpen() {
+  const ids = [...document.querySelectorAll('.ca-pick input:checked')].map(i => i.value), msg = document.getElementById('ca-omsg');
+  if (!ids.length) { msg.textContent = 'Pick at least one step.'; return; }
+  const when = document.getElementById('ca-closes').value;
+  if (!when) { msg.textContent = 'Set when claims close.'; return; }
+  const { error } = await sb.rpc('open_steps_for_claim', { p_leaves: ids, p_closes: new Date(when).toISOString() });
+  if (error) { msg.textContent = error.message; return; }
+  closeOverlay(); toast(`${ids.length} step${ids.length === 1 ? '' : 's'} open for claims.`); CA.side = 'open'; renderCalendarPanel();
 }
 async function caOpenStep(mapId, leafId) {
   if (trackerState?.mapId !== mapId) await loadWorkMap(mapId);
@@ -12418,6 +12633,8 @@ function leafActionsHtml(l) {
   const script = scriptStatusOf(l.id);
   return [
     l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openAssignLeaf('${id}')">${grantee ? 'Change grant' : 'Grant…'}</button>` : '',
+    l.status === 'to-do' && !grantee && !l.claim_open && isG ? `<button class="term-card-btn" onclick="caOpenClaimsDialog(['${id}'])">Open for claims</button>` : '',
+    l.status === 'to-do' && !grantee && l.claim_open ? `<button class="term-card-btn ${isG ? '' : 'primary'}" onclick="caOpenWork('${id}')">${isG ? 'Review claims' : 'Claim'}</button>` : '',
     l.status === 'to-do' && isG ? `<button class="term-card-btn" onclick="openScriptEditor('${id}')">${script === 'approved' ? 'Script ✓' : script === 'draft' ? 'Script — draft' : 'Write script'}</button>` : '',
     l.status === 'to-do' && mine && !waiting.length
       ? (script === 'approved' ? `<button class="term-card-btn primary" onclick="openGuided('${id}')">Start</button>`

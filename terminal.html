@@ -13,12 +13,24 @@
 <meta name="apple-mobile-web-app-title" content="Bixxville">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script>
-// Applied synchronously, before the stylesheet paints anything, so the
-// theme never flashes. Light — the Land of Geb website's look — is the
-// default; dark is a stored choice (the `theme` command).
-try {
-  if (localStorage.getItem('bixx-theme2') !== 'dark') document.documentElement.classList.add('theme-light');
-} catch(e) { document.documentElement.classList.add('theme-light'); }
+// Applied synchronously, before the stylesheet paints anything, so the theme never
+// flashes. Same rule as landofgeb.net and bixxville.xyz: the visitor's saved choice
+// ("bx-theme") wins; with none, the phone or computer's own setting; with neither, light.
+// An older saved choice ("bixx-theme2") carries over once.
+(function () {
+  var root = document.documentElement, t = null;
+  try {
+    t = localStorage.getItem('bx-theme');
+    if (t !== 'light' && t !== 'dark') {
+      var old = localStorage.getItem('bixx-theme2');
+      t = old === 'light' || old === 'dark' ? old : null;
+      if (t) localStorage.setItem('bx-theme', t);
+    }
+  } catch (e) { t = null; }
+  var dark = t ? t === 'dark' : !!(window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches);
+  root.classList.toggle('theme-light', !dark);
+  if (t) root.setAttribute('data-theme', t);
+})();
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -2770,6 +2782,19 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 
 /* ── The dashboard and the agent are separate surfaces now ── */
 #term-main{position:relative}
+/* theme button: top right, the same as landofgeb.net and bixxville.xyz */
+#os-theme{position:absolute;top:calc(12px + env(safe-area-inset-top,0px));right:14px;z-index:62;appearance:none;-webkit-appearance:none;
+  display:grid;place-items:center;width:44px;height:44px;border-radius:999px;border:1px solid var(--term-line);background:var(--term-bg);color:var(--term-fg);cursor:pointer;transition:border-color .2s}
+#os-theme:hover{border-color:var(--term-fg)}
+#os-theme:focus-visible{outline:2px solid #FF2D95;outline-offset:2px}
+#os-theme svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+#os-theme .t-sun{display:block}
+#os-theme .t-moon{display:none}
+html.theme-light #os-theme .t-sun{display:none}
+html.theme-light #os-theme .t-moon{display:block}
+@media print{#os-theme{display:none}}
+/* keep panel headers' right-hand buttons clear of the theme button */
+#term-panel .pp-head,#term-panel .term-panel-head{padding-right:60px}
 #term-home{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 10px;-webkit-overflow-scrolling:touch}
 @media (min-width:768px){ #term-home{padding:28px 48px 14px} }
 @media (max-width:767px){ #term-home{padding-top:calc(62px + env(safe-area-inset-top,0px))} }
@@ -3829,6 +3854,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
   </nav>
   <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu">☰</button>
   <div id="term-main">
+    <button id="os-theme" class="t-theme" type="button" onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme"><svg class="t-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.4M12 19v2.4M4.6 12H2.2M21.8 12h-2.4M6.5 6.5 4.8 4.8M19.2 19.2l-1.7-1.7M17.5 6.5l1.7-1.7M4.8 19.2l1.7-1.7"/></svg><svg class="t-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.6 8.6 0 1 0 10.6 10.6z"/></svg></button>
     <div id="term-home"></div>
     <div id="term-panel" hidden></div>
     <section id="agent" aria-label="BIX AI">
@@ -9848,9 +9874,17 @@ function refreshNavIconColors() {
     if (icon) icon.setAttribute('stroke', btn.classList.contains('active') ? themeColor('--green') : themeColor('--grey'));
   });
 }
+// Applies a theme. `save` false = following the system (nothing stored).
+function applyTheme(theme) {
+  document.documentElement.classList.toggle('theme-light', theme === 'light');
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', theme === 'light' ? '#FFFFFF' : '#0A0A0A'));
+  refreshNavIconColors();
+  renderThemeToggleIcon();
+}
 function setTheme(theme) {
   document.documentElement.classList.toggle('theme-light', theme === 'light');
-  try { localStorage.setItem('bixx-theme2', theme); } catch(e) {}
+  document.documentElement.setAttribute('data-theme', theme);
+  try { localStorage.setItem('bx-theme', theme); } catch(e) {}
   document.querySelectorAll('meta[name="theme-color"]').forEach(m => m.setAttribute('content', theme === 'light' ? '#FFFFFF' : '#0A0A0A'));
   refreshNavIconColors();
   renderThemeToggleIcon();
@@ -9858,6 +9892,14 @@ function setTheme(theme) {
 function toggleTheme() {
   setTheme(currentTheme() === 'light' ? 'dark' : 'light');
 }
+// While nothing is saved, follow the phone or computer's own setting as it changes.
+(() => {
+  if (!window.matchMedia) return;
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+  const onChange = () => { let saved = null; try { saved = localStorage.getItem('bx-theme'); } catch (e) {} if (!saved) applyTheme(mq.matches ? 'dark' : 'light'); };
+  mq.addEventListener ? mq.addEventListener('change', onChange) : mq.addListener(onChange);
+})();
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => renderThemeToggleIcon()); else renderThemeToggleIcon();
 
 // ── RIGHT SHOULDER ── open/closed persists, same as the theme choice.
 function setShoulder(open) {
@@ -9883,6 +9925,11 @@ function restoreShoulder() {
 // Sun while light is active, moon while dark is — the icon shows the state
 // you're in, not the one you'd switch to.
 function renderThemeToggleIcon() {
+  const os = document.getElementById('os-theme');
+  if (os) {
+    const next = currentTheme() === 'light' ? 'dark' : 'light';
+    os.setAttribute('aria-label', `Switch to ${next} theme`); os.title = `Switch to ${next} theme`;
+  }
   const btn = document.getElementById('uni-theme-btn');
   if (!btn) return;
   const light = currentTheme() === 'light';

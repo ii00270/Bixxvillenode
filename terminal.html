@@ -867,6 +867,26 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .site-dot{width:12px;height:12px;border-radius:50%;background:#2F7CF6;border:2px solid #fff;box-shadow:0 0 0 2px rgba(47,124,246,.4)}
 
 
+
+/* Cycle start */
+.cy-h{margin:22px 0 8px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.cy-h span{font-weight:400;letter-spacing:0;text-transform:none;color:var(--term-dim);margin-left:6px}
+.cy-people{display:flex;flex-wrap:wrap;gap:8px}
+.cy-chip{appearance:none;background:none;border:1px solid var(--term-line);color:var(--term-fg);border-radius:999px;padding:8px 14px;font:13px var(--mono);cursor:pointer;min-height:40px}
+.cy-chip.on{border-color:#2E9D6B;color:#2E9D6B}
+.cy-row{border:1px solid var(--term-line);border-left:3px solid #2E9D6B;border-radius:10px;padding:10px 12px;margin-top:10px;display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between}
+.cy-who b{display:block}.cy-who small{font:11px var(--mono);color:var(--term-dim)}
+.cy-fields{display:grid;grid-template-columns:1fr 1fr auto;gap:8px;flex:1 1 360px}
+.cy-fields label,.cy-score,.cy-note{display:flex;flex-direction:column;gap:4px;font:11px var(--mono);color:var(--term-dim)}
+@media(max-width:560px){.cy-fields{grid-template-columns:1fr}}
+.cy-tax{font:12px var(--mono)}
+.cy-terms{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px}
+.cy-terms>div{border:1px solid var(--term-line);border-radius:10px;padding:10px 12px}
+.cy-terms small{font:600 10px var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.cy-terms b{display:block;font:600 18px var(--mono);margin:4px 0 2px}.cy-terms span{font:11px var(--mono);color:var(--term-dim)}
+.cy-scores{display:flex;gap:12px;flex-wrap:wrap}
+.cy-note{margin:14px 0 10px}
+.cy-started{font:12px var(--mono);color:var(--term-dim);margin:6px 0 14px}
 /* Wallet picker: MetaMask, HashPack, Robinhood Wallet */
 .wl-wrap{padding:6px 16px 22px}
 .wl-lead{margin:0 0 12px;color:var(--term-fg,inherit);font-size:13px;line-height:1.5}
@@ -893,11 +913,19 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .pf-wal-bal{font:11.5px var(--mono);color:var(--term-dim);margin-top:4px}
 .pf-wal-bal small{opacity:.8}
 .pf-wal-acts{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+.pf-wal.tax{border-left-color:#4C8DDB;background:color-mix(in srgb,#4C8DDB 6%,transparent)}
+.pf-wal.tax .pf-wal-k i{background:#4C8DDB}
+.pf-tax-row{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap;font:12px var(--mono);color:var(--term-dim)}
+.pf-tax-in{width:84px;background:transparent;border:1px solid var(--term-line);border-radius:8px;color:var(--term-fg);font:13px var(--mono);padding:7px 9px}
+.pf-tax-in.wide{width:100%}
+.tax-c{color:#4C8DDB}
 /* Ledger: Activity (green) and Payment (gold) */
 .lg-tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:999px;vertical-align:1px}
 .lg-tag.act{color:#2E9D6B;border:1px solid #2E9D6B}
 .lg-tag.pay{color:#0A0A0A;background:#C9A84C;border:1px solid #C9A84C}
-.lg-sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+.lg-tag.tax{color:#fff;background:#4C8DDB;border:1px solid #4C8DDB}
+.lg-card.tax{border-left-color:#4C8DDB}.lg-row.tax{border-left-color:#4C8DDB}.lg-f.tax.on{border-color:#4C8DDB;color:#4C8DDB}
+.lg-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
 @media(max-width:560px){.lg-sum{grid-template-columns:1fr}}
 .lg-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;border-left:4px solid #2E9D6B}
 .lg-card.pay{border-left-color:#C9A84C}
@@ -3906,6 +3934,12 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
       <button class="term-sb-item" data-view="analog" onclick="setTermView('analog')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 12.5a4 4 0 0 1 8 0"/><circle cx="12" cy="12.5" r="1.2"/><path d="M12 14v6"/></svg>
         <span>Analog</span>
+      </button>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="cycle" onclick="setTermView('cycle')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/><path d="M12 1.5v2M12 20.5v2"/></svg>
+        <span>Cycle</span>
       </button>
     </div>
     <div class="term-sb-group">
@@ -7571,15 +7605,28 @@ async function renderEscrowCreate(el, projectId, r, settings) {
   const missing = lines.filter(l => !l.payee_wallet);
   const { data: who } = await sb.rpc('escrow_client_for_project', { p_project: projectId });
   const clientWallet = who?.wallet || r.wallet_addr || '';
-  window._escrowDraft = { projectId, lines, settings, roles };
+  // Taxes (contract version 2): the started Cycle's terms, or the current settings before a Cycle is started.
+  const { data: cyc } = await sb.rpc('cycle_view');
+  const tax = {
+    networkWallet: (cyc ? cyc.tax_wallet : settings.tax_wallet) || null,
+    networkBps: Number(cyc ? cyc.network_tax_bps : settings.network_tax_bps) || 0,
+    fromCycle: cyc ? cyc.cycle_number : null,
+  };
+  tax.networkCents = Math.floor(price * tax.networkBps / 10000);
+  const lineTax = l => Math.floor(Number(l.labor_cents) * (Number(l.tax_bps) || 0) / 10000);
+  const taxBlock = (tax.networkBps > 0 && !tax.networkWallet) ? 'The network tax rate is set but there is no tax wallet. Add it in your profile (Wallets).' : '';
+  window._escrowDraft = { projectId, lines, settings, roles, tax };
   el.innerHTML = `
     <div class="form-lbl">Escrow · ${ESCROW_NET.name}</div>
     <div class="escrow-lines">${lines.map((l, i) => `
       <div class="escrow-line">
         <div><b>Line ${i + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || '—')} · ${Number(l.log_size)} LOG × ${escrowUsd(l.rate_cents)}</span></div>
-        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-muted" style="${l.payee_wallet ? '' : 'color:var(--red)'}">${l.payee_wallet ? shortAddr(l.payee_wallet) : 'no wallet on file'}</span></div>
+        <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-muted" style="${l.payee_wallet ? '' : 'color:var(--red)'}">${l.payee_wallet ? shortAddr(l.payee_wallet) : 'no wallet on file'}</span>
+          ${Number(l.tax_bps) > 0 ? `<br><span class="escrow-muted tax-c">${(l.tax_bps / 100).toFixed(2)}% set aside · ${escrowUsd(lineTax(l))} → ${shortAddr(l.tax_wallet)}</span>` : ''}</div>
       </div>`).join('')}</div>
     <div class="escrow-sum"><span>Labor ${escrowUsd(labor)} + Reserve ${escrowUsd(price - labor)}</span><b>Price ${escrowUsd(price)}</b></div>
+    <div class="escrow-muted tax-c" style="margin-top:6px">Taxes${tax.fromCycle ? ` (Cycle ${tax.fromCycle} terms)` : ''}: network ${(tax.networkBps / 100).toFixed(2)}% of the price${tax.networkBps ? ` = ${escrowUsd(tax.networkCents)}, out of the reserve → ${tax.networkWallet ? shortAddr(tax.networkWallet) : 'no tax wallet'}` : ''} · member set-asides ${escrowUsd(lines.reduce((n, l) => n + lineTax(l), 0))}</div>
+    ${taxBlock ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${esc(taxBlock)}</div>` : ''}
     <label class="form-lbl" for="esc-client">${esc(who?.name || 'Client')} wallet (pays and authorizes)</label>
     <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(clientWallet)}" spellcheck="false"/>
     ${clientWallet ? '' : `<div class="escrow-muted">No wallet on file for this client yet. Paste it here, or add it on the Clients page.</div>`}
@@ -7595,7 +7642,7 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     ${settings.treasury_wallet && lines.some(l => l.payee_wallet === settings.treasury_wallet) ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">The treasury wallet is also a worker's wallet on this job. A wallet can't pay itself: use a different treasury or a different worker wallet.</div>` : ''}
     ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
     <div class="gate-err" id="esc-err"></div>
-    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
+    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || taxBlock || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
     <div class="escrow-muted" style="padding:0 18px 12px">Your wallet (MetaMask, HashPack or Robinhood Wallet) deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
 }
 
@@ -7644,8 +7691,11 @@ async function createEscrow() {
     const art = await loadEscrowArtifact();
     btn.textContent = 'Confirm the deploy in your wallet…';
     const labors = d.lines.map(l => BigInt(l.labor_cents) * 10000n); // cents → USDC units (6 decimals)
+    const Z = ethers.ZeroAddress;
+    const taxPlan = [d.tax.networkWallet || Z, d.tax.networkBps,                       // the network's tax, out of the Reserve
+      d.lines.map(l => (Number(l.tax_bps) > 0 && l.tax_wallet) || Z), d.lines.map(l => (l.tax_wallet ? Number(l.tax_bps) || 0 : 0))]; // each member's set-aside
     const contract = await new ethers.ContractFactory(art.abi, art.bytecode, signer)
-      .deploy(tokenAddr, client, d.roles.wallet, treasury, treasury, payees, labors); // auditor, operator = treasury, treasury
+      .deploy(tokenAddr, client, d.roles.wallet, treasury, treasury, payees, labors, taxPlan); // auditor, operator = treasury, treasury
     btn.textContent = 'Deploying…';
     await contract.waitForDeployment();
     const address = (await contract.getAddress()).toLowerCase();
@@ -7660,7 +7710,9 @@ async function createEscrow() {
       p_project: d.projectId, p_network: ESCROW_NET.key, p_chain_id: ESCROW_NET.chainId, p_contract: address,
       p_token: tokenAddr, p_client: client, p_auditor: d.roles.wallet, p_operator: treasury, p_treasury: treasury,
       p_labor_cents: labor, p_deploy_tx: deployTx,
-      p_lines: d.lines.map((l, i) => ({ line_index: i, bid_id: l.bid_id, payee_operator_id: l.payee_operator_id, payee_wallet: l.payee_wallet, labor_cents: Number(l.labor_cents) })),
+      p_lines: d.lines.map((l, i) => ({ line_index: i, bid_id: l.bid_id, payee_operator_id: l.payee_operator_id, payee_wallet: l.payee_wallet, labor_cents: Number(l.labor_cents),
+        tax_wallet: l.tax_wallet || null, tax_bps: l.tax_wallet ? Number(l.tax_bps) || 0 : 0, tax_cents: l.tax_wallet ? Math.floor(Number(l.labor_cents) * (Number(l.tax_bps) || 0) / 10000) : 0 })),
+      p_tax: { version: 2, network_wallet: d.tax.networkWallet, network_bps: d.tax.networkBps, network_tax_cents: d.tax.networkCents },
     });
     if (error) throw new Error(`The contract is live at ${address}, but saving it failed: ${error.message}`);
     toast('Escrow created on Hedera.');
@@ -7732,6 +7784,7 @@ async function renderEscrowStatus(el, x) {
         <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-stage s${stage(i) ?? 0}">${stage(i) === 4 ? 'Paid' : stage(i) != null ? ESCROW_STAGES[stage(i)] : '—'}</span></div>
       </div>`).join('')}</div>
     <div class="escrow-muted">Client ${shortAddr(x.client_wallet)} · audits ${shortAddr(x.auditor_wallet)} · seals &amp; pays ${shortAddr(x.operator_wallet)} · treasury ${shortAddr(x.treasury_wallet)}</div>
+    ${x.version >= 2 && (x.network_tax_cents > 0 || (x.lines || []).some(l => l.tax_cents > 0)) ? `<div class="escrow-muted tax-c">Taxes: network ${escrowUsd(x.network_tax_cents)} → ${shortAddr(x.tax_wallet)} when the reserve is released${(x.lines || []).filter(l => l.tax_cents > 0).map(l => ` · line ${l.line_index + 1} sets aside ${escrowUsd(l.tax_cents)} → ${shortAddr(l.tax_wallet)}`).join('')}</div>` : ''}
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       ${status === 0 || x.client_wallet === me ? `<button class="act-btn-sm" onclick="navigator.clipboard.writeText(new URL('${escrowLink(x.contract_address)}', location.href).href).then(() => toast('Escrow link copied. Send it to the client to fund and approve.'))">Copy link for the client</button>` : ''}
       <a class="act-btn-sm" href="${escrowLink(x.contract_address)}" target="_blank" rel="noopener">Open escrow page →</a>
@@ -10614,6 +10667,7 @@ function routePrompt(text) {
     [/review|verify|proof/, () => { const a = (window._nextUp || []).find(x => x.kind === 'verify'); a ? a.run() : setTermView('notifications'); }],
     [/escrow|fund|pay|seal|audit/, () => { const a = (window._nextUp || []).find(x => x.kind === 'escrow'); a ? a.run() : toast('No escrow steps are waiting on you.'); }],
     [/ledger|payments?|activit/, () => setTermView('ledger')],
+    [/start (the )?cycle|cycle roster|open (the )?cycle/, () => setTermView('cycle')],
     [/profile|statement/, () => openProfilePanel()],
   ];
   for (const [re, run] of rules) if (re.test(q)) return run();
@@ -11984,6 +12038,18 @@ async function renderProfilePanel() {
           <p>The network’s money: pays each member when a line is sealed, and receives the reserve. Proven by signature.</p>
           <b>…</b>
         </div>` : ''}
+        <div class="pf-wal tax">
+          <div class="pf-wal-k"><i></i>Your tax set-aside</div>
+          <p>A share of your pay sent to a tax wallet you choose, the moment each line is paid. Fixed for a job when its escrow is created.</p>
+          <div class="pf-tax-row"><input id="pf-mytax-p" class="pf-tax-in" type="number" min="0" max="50" step="0.5" value="${((op.tax_bps || 0) / 100).toString()}" aria-label="Set-aside percent"><span>% of each payment</span></div>
+          <div class="pf-tax-row"><input id="pf-mytax-w" class="pf-tax-in wide" placeholder="0x… tax wallet" spellcheck="false" value="${esc(op.tax_wallet || '')}" aria-label="Tax wallet"></div>
+          <div class="pf-wal-acts"><button class="pf-btn" onclick="chooseMyTaxWallet()">${op.tax_wallet ? 'Change tax wallet' : 'Add tax wallet'}</button><button class="pf-btn solid" onclick="saveMyTax()">Save</button></div>
+        </div>
+        ${isExec() ? `<div class="pf-wal tax network" id="pf-wal-x">
+          <div class="pf-wal-k"><i></i>Network tax</div>
+          <p>The network’s own tax, out of the 25% reserve on every job, paid to the tax wallet when the reserve is released.</p>
+          <b>…</b>
+        </div>` : ''}
       </div>
     </div>
 
@@ -12024,6 +12090,8 @@ async function renderProfilePanel() {
           ${icon('<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>')}<span>Edit details</span><small class="desc">photo, bio, skills, contact, wallet</small></button>
         <button class="pf-row" onclick="openMemberRecord(operator.id)">
           ${icon('<path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h5"/>')}<span>Full record</span><small class="desc">ledger, execution log, cycle audit</small></button>
+        ${isInstalledApp() ? '' : `<button class="pf-row" onclick="installApp()">
+          ${icon('<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/>')}<span>Install the app</span><small class="desc">on this computer or phone; updates itself</small></button>`}
         <button class="pf-row danger" onclick="closeProfilePanel(); doLogout()">
           ${icon('<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>')}<span>Sign out</span></button>
       </div>
@@ -12053,6 +12121,18 @@ async function fillProfileWallets(op) {
     <div class="pf-wal-acts"><button class="pf-btn ${w ? '' : 'solid'}" onclick="setTreasuryWallet()">${w ? 'Change treasury wallet' : 'Add treasury wallet'}</button>
       ${w ? `<a class="pf-copy" href="${ESCROW_NET.explorer}/account/${esc(w)}" target="_blank" rel="noopener">HashScan</a>` : ''}</div>`;
   if (w) t.querySelectorAll('.pf-wal-bal')[0].innerHTML = await bal(w);
+  const x = document.getElementById('pf-wal-x');
+  if (!x) return;
+  const tw = st.tax_wallet, rate = (Number(st.network_tax_bps) || 0) / 100;
+  x.innerHTML = `<div class="pf-wal-k"><i></i>Network tax</div>
+    <p>The network’s own tax, out of the 25% reserve on every job, paid to the tax wallet when the reserve is released.</p>
+    <div class="pf-tax-row"><input id="pf-ntax" class="pf-tax-in" type="number" min="0" max="25" step="0.25" value="${rate}" aria-label="Network tax percent"><span>% of each job’s price</span><button class="pf-btn" onclick="saveNetworkTax()">Save rate</button></div>
+    <div class="pf-wal-k" style="margin-top:10px;font-size:10px">Tax wallet</div>
+    <b>${tw ? esc(tw.slice(0, 6) + '…' + tw.slice(-4)) : 'Not set'}</b>
+    <div class="pf-wal-bal">${tw ? '…' : rate > 0 ? 'Escrows can’t be created until it is set.' : 'Set it before the rate goes above zero.'}</div>
+    <div class="pf-wal-acts"><button class="pf-btn ${tw ? '' : 'solid'}" onclick="setTaxWallet()">${tw ? 'Change tax wallet' : 'Add tax wallet'}</button>
+      ${tw ? `<a class="pf-copy" href="${ESCROW_NET.explorer}/account/${esc(tw)}" target="_blank" rel="noopener">HashScan</a>` : ''}</div>`;
+  if (tw) x.querySelector('.pf-wal-bal').innerHTML = await bal(tw);
 }
 
 async function openWalletsInProfile() {
@@ -12125,6 +12205,7 @@ function setTermView(view) {
     else if (view === 'places') renderPlacesPanel();
     else if (view === 'analog') renderAnalogPanel();
     else if (view === 'ledger') renderLedgerPanel();
+    else if (view === 'cycle') renderCyclePanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
@@ -12168,6 +12249,122 @@ async function openPendingScan() {
 }
 document.addEventListener('DOMContentLoaded', () => setTimeout(showScanNotice, 400));
 
+// ── INSTALL: the OS as an app on the computer or phone. It opens in its own window and loads the
+// live version every time (sw.js is network-first), so everyone in the network stays on the same one.
+let INSTALL_PROMPT = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); INSTALL_PROMPT = e; });
+window.addEventListener('appinstalled', () => { INSTALL_PROMPT = null; toast('Bixxville is installed.'); });
+const isInstalledApp = () => matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+async function installApp() {
+  if (isInstalledApp()) { toast('You’re already using the installed app.'); return; }
+  if (INSTALL_PROMPT) {
+    INSTALL_PROMPT.prompt();
+    const r = await INSTALL_PROMPT.userChoice.catch(() => null);
+    INSTALL_PROMPT = null;
+    if (r?.outcome !== 'accepted') toast('Not installed. You can install it any time from here.');
+    return;
+  }
+  const ua = navigator.userAgent, ios = /iPhone|iPad|iPod/.test(ua) || (/Macintosh/.test(ua) && 'ontouchend' in document);
+  const safari = /Safari/.test(ua) && !/Chrome|Chromium|CriOS|Edg/.test(ua);
+  const how = ios ? 'In Safari, tap the Share button, then “Add to Home Screen”.'
+    : safari ? 'In Safari, open the File menu and choose “Add to Dock”.'
+    : 'In Chrome or Edge, click the install icon at the right end of the address bar, or open the ⋮ menu and choose “Install Bixxville…”.';
+  openOverlay('Install Bixxville', body => {
+    body.innerHTML = `<div class="term-wf wl-wrap"><p class="wl-lead">${how}</p>
+      <p class="wl-foot">The app opens in its own window, like any program on your computer or phone. It loads the live version every time you open it, so when the network is updated, everyone gets the update together. It also keeps an offline copy for when there’s no internet.</p></div>`;
+  }, null, null, true);
+}
+
+// ── CYCLE START: the Executive Operator chooses who takes part, their wallets and tax set-asides fill
+// in from their profiles (or are typed in), and Start fixes the Cycle's roster and tax terms for everyone
+// (migration 0027). Cycle dates stay computed from Genesis (LOG 3 §3a); what starts is the roster.
+const CY = { next: false, pick: {} };
+const pctOf = bps => ((Number(bps) || 0) / 100).toFixed(2).replace(/\.00$/, '');
+async function renderCyclePanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = '<div class="term-panel-empty">Reading the Cycle…</div>';
+  const now = getActiveCycle(), num = CY.next ? now.num + 1 : now.num;
+  const start = cycleStartDate(num), end = new Date(start); end.setDate(end.getDate() + CYCLE_DAYS - 1);
+  const fmt = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC' }); // Cycles run from midnight UTC (LOG 3 §3a)
+  const [{ data: view }, st] = await Promise.all([sb.rpc('cycle_view', { p_cycle: num }), treasuryStatus().catch(() => ({}))]);
+  const head = `<div class="pp-head"><div><h2>Cycle ${num}</h2><p>${fmt(start)} to ${fmt(end)}${CY.next ? '' : ` · day ${now.day} of 28`}. Who takes part, where each is paid, and the tax terms, fixed when the Cycle is started.</p></div></div>
+    ${isExec() ? `<div class="lg-filters"><button class="lg-f ${CY.next ? '' : 'on'}" onclick="CY.next=false;renderCyclePanel()">This Cycle (${now.num})</button><button class="lg-f ${CY.next ? 'on' : ''}" onclick="CY.next=true;renderCyclePanel()">Next Cycle (${now.num + 1})</button></div>` : ''}`;
+  if (view) {
+    const h = view.hardship;
+    panel.innerHTML = `<div class="cy-wrap">${head}
+      <div class="cy-started"><span class="lg-tag act">Started</span> by ${esc(view.started_by_name || '—')} · ${esc(new Date(view.started_at).toLocaleString())}${view.note ? ` · ${esc(view.note)}` : ''}</div>
+      <div class="cy-terms">
+        <div><small>Network tax</small><b>${pctOf(view.network_tax_bps)}%</b><span>of each price, out of the reserve${view.tax_wallet ? ` → ${esc(shortAddr(view.tax_wallet))}` : ''}</span></div>
+        <div><small>Treasury</small><b>${view.treasury_wallet ? esc(shortAddr(view.treasury_wallet)) : 'Not set'}</b><span>seals lines, receives the reserve</span></div>
+        <div><small>Hardship reading</small><b>${h ? h.reading : '—'}</b><span>${h ? `infrastructure ${h.infrastructure} · economic ${h.economic} · safety ${h.safety}` : 'not taken'}</span></div>
+      </div>
+      <h4 class="cy-h">Roster · ${view.roster.length}</h4>
+      ${view.roster.map(r => `<div class="cy-row on"><div class="cy-who"><b>${esc(r.name)}</b><small>paid to ${r.wallet ? esc(shortAddr(r.wallet)) : 'no wallet'}</small></div>
+        <div class="cy-tax tax-c">${r.tax_bps ? `${pctOf(r.tax_bps)}% set aside → ${esc(shortAddr(r.tax_wallet))}` : 'no set-aside'}</div></div>`).join('')}
+    </div>`;
+    return;
+  }
+  if (!isExec()) {
+    panel.innerHTML = `<div class="cy-wrap">${head}<div class="term-panel-empty">Cycle ${num} hasn’t been started yet. The Executive Operator starts it and chooses who takes part.</div></div>`;
+    return;
+  }
+  const members = st.members || [];
+  for (const m of members) if (!CY.pick[m.id]) CY.pick[m.id] = { on: false, wallet: m.wallet || '', tax_wallet: m.tax_wallet || '', tax: pctOf(m.tax_bps) };
+  const rate = Number(st.network_tax_bps) || 0, chosen = members.filter(m => CY.pick[m.id].on);
+  const warn = [!st.treasury_wallet && 'No treasury wallet yet (Profile → Wallets). Escrows can’t be created without it.',
+    rate > 0 && !st.tax_wallet && 'The network tax rate is above zero but there is no tax wallet. Add it first (Profile → Wallets).'].filter(Boolean);
+  const scoreSel = (k, label) => `<label class="cy-score"><span>${label}</span><select id="cy-h-${k}" class="pf-tax-in"><option value="">—</option>${Array.from({ length: 10 }, (_, i) => `<option>${i + 1}</option>`).join('')}</select></label>`;
+  panel.innerHTML = `<div class="cy-wrap">${head}
+    <h4 class="cy-h">1 · Who takes part <span>tap a name; their wallet and tax set-aside fill in from their profile</span></h4>
+    <div class="cy-people">${members.map(m => `<button class="cy-chip ${CY.pick[m.id].on ? 'on' : ''}" onclick="CY.pick['${m.id}'].on=!CY.pick['${m.id}'].on;renderCyclePanel()">${CY.pick[m.id].on ? '✓ ' : '+ '}${esc(m.name)}</button>`).join('') || '<span class="pp-muted">No active members.</span>'}</div>
+    ${chosen.map(m => { const p = CY.pick[m.id]; return `<div class="cy-row on">
+      <div class="cy-who"><b>${esc(m.name)}</b><small>${m.wallet ? 'from their profile' : 'no wallet on file: type one in'}</small></div>
+      <div class="cy-fields">
+        <label><span>Paid to</span><input class="pf-tax-in wide" value="${esc(p.wallet)}" placeholder="0x… wallet" spellcheck="false" oninput="CY.pick['${m.id}'].wallet=this.value.trim()"></label>
+        <label><span>Tax wallet</span><input class="pf-tax-in wide" value="${esc(p.tax_wallet)}" placeholder="0x… (optional)" spellcheck="false" oninput="CY.pick['${m.id}'].tax_wallet=this.value.trim()"></label>
+        <label><span>Set-aside %</span><input class="pf-tax-in" type="number" min="0" max="50" step="0.5" value="${esc(p.tax)}" oninput="CY.pick['${m.id}'].tax=this.value"></label>
+      </div></div>`; }).join('')}
+    <h4 class="cy-h">2 · Network terms <span>change these in Profile → Wallets before starting</span></h4>
+    <div class="cy-terms">
+      <div><small>Network tax</small><b>${pctOf(rate)}%</b><span>of each price, out of the reserve → ${st.tax_wallet ? esc(shortAddr(st.tax_wallet)) : 'no tax wallet'}</span></div>
+      <div><small>Treasury</small><b>${st.treasury_wallet ? esc(shortAddr(st.treasury_wallet)) : 'Not set'}</b><span>seals lines, receives the reserve</span></div>
+    </div>
+    ${warn.map(w => `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${esc(w)}</div>`).join('')}
+    <h4 class="cy-h">3 · Hardship reading <span>LOG 4 §13: taken once at Cycle open; the highest of the three governs</span></h4>
+    <div class="cy-scores">${scoreSel('infrastructure', 'Infrastructure')}${scoreSel('economic', 'Economic')}${scoreSel('safety', 'Safety')}</div>
+    <label class="cy-note"><span>Note (optional)</span><input id="cy-note" class="pf-tax-in wide" maxlength="140"></label>
+    <div class="gate-err" id="cy-err"></div>
+    <button class="act-btn" id="cy-go" onclick="startCycle(${num})" ${chosen.length && !(rate > 0 && !st.tax_wallet) ? '' : 'disabled'}>Start Cycle ${num}${chosen.length ? ` with ${chosen.length}` : ''}</button>
+    <p class="pp-muted" style="margin-top:8px">Once started, the roster and tax terms are fixed for the whole Cycle, so everyone knows their terms before they accept work. Everyone in the network is notified.</p>
+  </div>`;
+}
+
+async function startCycle(num) {
+  const err = document.getElementById('cy-err'), say = m => { err.textContent = m; err.classList.add('show'); };
+  err.classList.remove('show');
+  const st = await treasuryStatus().catch(() => ({}));
+  const chosen = (st.members || []).filter(m => CY.pick[m.id]?.on);
+  const isAddr = a => !a || /^0x[0-9a-fA-F]{40}$/.test(a);
+  for (const m of chosen) {
+    const p = CY.pick[m.id], pct = parseFloat(p.tax || '0');
+    if (!isAddr(p.wallet) || !isAddr(p.tax_wallet)) return say(`${m.name}: a wallet starts with 0x and has 40 more letters and numbers.`);
+    if (!(pct >= 0 && pct <= 50)) return say(`${m.name}: the set-aside is 0 to 50%.`);
+    if (pct > 0 && !p.tax_wallet) return say(`${m.name}: add a tax wallet for the set-aside, or set it to 0%.`);
+  }
+  const hs = ['infrastructure', 'economic', 'safety'].map(k => document.getElementById('cy-h-' + k).value);
+  if (hs.some(Boolean) && !hs.every(Boolean)) return say('Score all three hardship conditions, or leave all three blank.');
+  const hardship = hs.every(Boolean) ? { infrastructure: +hs[0], economic: +hs[1], safety: +hs[2] } : null;
+  if (!await osConfirm(`Start Cycle ${num} with ${chosen.map(m => m.name).join(', ')}? Network tax ${pctOf(st.network_tax_bps)}%${hardship ? `, hardship reading ${Math.max(...hs.map(Number))}` : ''}. This can’t be changed once started.`)) return;
+  const btn = document.getElementById('cy-go'); btn.disabled = true;
+  const { error } = await sb.rpc('cycle_start', { p_cycle: num,
+    p_members: chosen.map(m => { const p = CY.pick[m.id]; return { operator_id: m.id, wallet: p.wallet || null, tax_wallet: p.tax_wallet || null, tax_bps: Math.round(parseFloat(p.tax || '0') * 100) }; }),
+    p_hardship: hardship, p_note: document.getElementById('cy-note').value || null });
+  if (error) { say(error.message); btn.disabled = false; return; }
+  CY.pick = {};
+  toast(`Cycle ${num} started.`);
+  renderCyclePanel();
+}
+
 // ── LEDGER: everything you've done in the network (Activity) and every payment on the blockchain
 // (Payment), in one list, newest first. Activity comes from the hours ledger and network notices;
 // Payment comes from escrow contracts and the Hedera mirror node for your wallets.
@@ -12191,11 +12388,11 @@ async function lgChainRows(evm, whose) {
     const link = `${ESCROW_NET.explorer}/transaction/${t.consensus_timestamp}`;
     for (const tt of (t.token_transfers || []).filter(x => x.account === acc.account && x.amount)) {
       const tk = await lgToken(tt.token_id), amt = tt.amount / 10 ** tk.decimals;
-      rows.push({ kind: 'pay', when, title: `${amt > 0 ? 'Received' : 'Sent'} ${tk.symbol}`, detail: `${whose} · ${t.result === 'SUCCESS' ? 'confirmed' : t.result}`, amount: amt, unit: tk.symbol, link });
+      rows.push({ kind: 'pay', tax: /tax/i.test(whose), when, title: `${amt > 0 ? (/tax/i.test(whose) ? 'Tax set aside' : 'Received') : 'Sent'} ${tk.symbol}`, detail: `${whose} · ${t.result === 'SUCCESS' ? 'confirmed' : t.result}`, amount: amt, unit: tk.symbol, link });
     }
     const hbar = (t.transfers || []).filter(x => x.account === acc.account).reduce((n, x) => n + x.amount, 0) / 1e8;
     if (Math.abs(hbar) >= 0.1 && !(t.token_transfers || []).some(x => x.account === acc.account && x.amount))
-      rows.push({ kind: 'pay', when, title: `${hbar > 0 ? 'Received' : 'Sent'} HBAR`, detail: `${whose} · ${t.name === 'CRYPTOTRANSFER' ? 'transfer' : t.name.toLowerCase()}`, amount: hbar, unit: 'HBAR', link });
+      rows.push({ kind: 'pay', tax: /tax/i.test(whose), when, title: `${hbar > 0 ? 'Received' : 'Sent'} HBAR`, detail: `${whose} · ${t.name === 'CRYPTOTRANSFER' ? 'transfer' : t.name.toLowerCase()}`, amount: hbar, unit: 'HBAR', link });
   }
   return rows;
 }
@@ -12203,7 +12400,7 @@ async function lgChainRows(evm, whose) {
 async function renderLedgerPanel() {
   const panel = document.getElementById('term-panel');
   panel.innerHTML = `<div class="lg-wrap">
-    <div class="pp-head"><div><h2>Ledger</h2><p>Everything you’ve done in the network, and every payment on the blockchain. <span class="lg-tag act">Activity</span> is work, hours and records. <span class="lg-tag pay">Payment</span> is money that moved on chain.</p></div></div>
+    <div class="pp-head"><div><h2>Ledger</h2><p>Everything you’ve done in the network, and every payment on the blockchain. <span class="lg-tag act">Activity</span> is work, hours and records. <span class="lg-tag pay">Payment</span> is money that moved on chain. <span class="lg-tag tax">Tax</span> is money set aside into tax wallets.</p></div></div>
     <div class="lg-sum" id="lg-sum"></div>
     <div class="lg-filters" id="lg-filters"></div>
     <div id="lg-list"><div class="term-panel-empty">Reading the ledger and the blockchain…</div></div>
@@ -12222,7 +12419,13 @@ async function renderLedgerPanel() {
     detail: `${escrowUsd(x.price_cents)} price · ${x.lines?.length || 0} line(s) · ${ESCROW_NET.name}`, link: `${ESCROW_NET.explorer}/contract/${x.contract_address}` }));
   const wallets = [];
   if (operator.wallet_address) wallets.push([operator.wallet_address.toLowerCase(), 'Personal wallet']);
-  if (isExec()) { const t = (await treasuryStatus().catch(() => ({}))).treasury_wallet; if (t && t !== wallets[0]?.[0]) wallets.push([t, 'Treasury wallet']); }
+  if (operator.tax_wallet) wallets.push([operator.tax_wallet.toLowerCase(), 'Your tax wallet']);
+  if (isExec()) {
+    const st = await treasuryStatus().catch(() => ({}));
+    if (st.treasury_wallet) wallets.push([st.treasury_wallet, 'Treasury wallet']);
+    if (st.tax_wallet) wallets.push([st.tax_wallet, 'Network tax wallet']);
+  }
+  for (let i = wallets.length - 1; i > 0; i--) if (wallets.findIndex(w => w[0] === wallets[i][0]) < i) wallets.splice(i, 1);
   const chain = await Promise.all(wallets.map(([w, who]) => lgChainRows(w, who).catch(() => [])));
   chain.flat().forEach(r => rows.push(r));
   rows.sort((a, b) => b.when - a.when);
@@ -12231,20 +12434,21 @@ async function renderLedgerPanel() {
 }
 
 function drawLedger() {
-  const rows = LG.rows, act = rows.filter(r => r.kind === 'act'), pay = rows.filter(r => r.kind === 'pay');
+  const rows = LG.rows, act = rows.filter(r => r.kind === 'act'), pay = rows.filter(r => r.kind === 'pay' && !r.tax), tax = rows.filter(r => r.tax);
   const hours = act.reduce((n, r) => n + (r.hours || 0), 0);
   const sumBy = unit => pay.filter(r => r.unit === unit).reduce((n, r) => n + r.amount, 0);
   const fmt = (n, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
   document.getElementById('lg-sum').innerHTML = `
     <div class="lg-card act"><small><span class="lg-tag act">Activity</span></small><b>${act.length}</b><span>${fmt(hours)} hours logged · ${operator.total_logs || 0} total LOGs</span></div>
-    <div class="lg-card pay"><small><span class="lg-tag pay">Payment</span></small><b>${pay.length}</b><span>${['USDC', 'HBAR'].map(u => `${sumBy(u) >= 0 ? '+' : '−'}${fmt(Math.abs(sumBy(u)))} ${u}`).join(' · ')} net · ${esc(ESCROW_NET.name)}</span></div>`;
-  document.getElementById('lg-filters').innerHTML = [['all', 'All', rows.length], ['act', 'Activity', act.length], ['pay', 'Payments', pay.length]]
+    <div class="lg-card pay"><small><span class="lg-tag pay">Payment</span></small><b>${pay.length}</b><span>${['USDC', 'HBAR'].map(u => `${sumBy(u) >= 0 ? '+' : '−'}${fmt(Math.abs(sumBy(u)))} ${u}`).join(' · ')} net · ${esc(ESCROW_NET.name)}</span></div>
+    <div class="lg-card tax"><small><span class="lg-tag tax">Tax</span></small><b>${tax.length}</b><span>${fmt(tax.filter(r => r.unit === 'USDC' && r.amount > 0).reduce((n, r) => n + r.amount, 0))} USDC set aside · in your tax wallets</span></div>`;
+  document.getElementById('lg-filters').innerHTML = [['all', 'All', rows.length], ['act', 'Activity', act.length], ['pay', 'Payments', pay.length], ['tax', 'Tax', tax.length]]
     .map(([k, l, n]) => `<button class="lg-f ${LG.filter === k ? 'on' : ''} ${k}" onclick="LG.filter='${k}';drawLedger()">${l} <span>${n}</span></button>`).join('');
-  const shown = LG.filter === 'all' ? rows : rows.filter(r => r.kind === LG.filter);
+  const shown = LG.filter === 'all' ? rows : LG.filter === 'tax' ? tax : LG.filter === 'pay' ? pay : act;
   const day = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   document.getElementById('lg-list').innerHTML = shown.length ? shown.map(r => `
-    <div class="lg-row ${r.kind}">
-      <span class="lg-tag ${r.kind}">${r.kind === 'pay' ? 'Payment' : 'Activity'}</span>
+    <div class="lg-row ${r.tax ? 'tax' : r.kind}">
+      <span class="lg-tag ${r.tax ? 'tax' : r.kind}">${r.tax ? 'Tax' : r.kind === 'pay' ? 'Payment' : 'Activity'}</span>
       <div class="lg-main"><b>${esc(r.title)}</b><small>${esc(r.detail || '')} · ${day(r.when)}</small></div>
       <div class="lg-amt">${r.amount != null ? `<b class="${r.amount >= 0 ? 'in' : 'out'}">${r.amount >= 0 ? '+' : '−'}${fmt(Math.abs(r.amount), r.unit === 'HBAR' ? 2 : 2)} ${esc(r.unit)}</b>` : r.hours != null ? `<b>${fmt(r.hours)} h</b>` : ''}
         ${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">HashScan ↗</a>` : ''}</div>
@@ -15875,7 +16079,7 @@ async function termDispatch(raw) {
   }
 
   if (cmd === 'help') {
-    termPrint('Commands: help · clear · whoami · cycle · balance · ledger · status · treasury · theme · logout', 'system');
+    termPrint('Commands: help · clear · whoami · cycle · balance · ledger · status · treasury · install · theme · logout', 'system');
     termPrint('LOGG: mi wis di ka / di grobuki / di trap / di knoppunt', 'system');
     termPrint('Anything else is sent to BIX AI.', 'system');
     return;
@@ -15957,6 +16161,7 @@ async function termDispatch(raw) {
     } catch (e) { termPrint(`Could not read the treasury: ${e.message}`, 'err'); }
     return;
   }
+  if (cmd === 'install') { installApp(); return; }
   if (cmd === 'logout') {
     doLogout();
     return;
@@ -18045,21 +18250,34 @@ async function renderTreasuryPanel() {
   }
 }
 
-async function setTreasuryWallet() {
-  const err = document.getElementById('gc-tr-err');
-  const btn = document.getElementById('gc-tr-btn');
+// The two network wallets the Executive Operator proves by signature: the treasury (0024) and the
+// tax wallet (0027). Neither may be the personal wallet, and they may not be each other.
+const NETWORK_WALLETS = {
+  treasury: { title: 'Add the treasury wallet', rpc: 'treasury_challenge', name: 'treasury wallet',
+    lead: 'The treasury wallet runs the network’s money: it pays each member when a line is sealed and receives the reserve. Pick the wallet app that holds it. For real money, use a hardware wallet.' },
+  tax: { title: 'Add the tax wallet', rpc: 'tax_wallet_challenge', name: 'tax wallet',
+    lead: 'The tax wallet receives the network’s tax from every escrow, out of the reserve. Keep it separate from the treasury. For real money, use a hardware wallet.' },
+};
+function setTreasuryWallet() { return proveNetworkWallet('treasury'); }
+function setTaxWallet() { return proveNetworkWallet('tax'); }
+async function proveNetworkWallet(kind) {
+  const K = NETWORK_WALLETS[kind];
+  const err = kind === 'treasury' ? document.getElementById('gc-tr-err') : null;
+  const btn = kind === 'treasury' ? document.getElementById('gc-tr-btn') : null;
   const say = m => { if (err?.isConnected) { err.textContent = m; err.classList.add('show'); } else toast(m); };
   err?.classList.remove('show');
-  const w = await pickWallet({ title: 'Add the treasury wallet',
-    lead: 'The treasury wallet runs the network’s money: it pays each member when a line is sealed and receives the reserve. Pick the wallet app that holds it. For real money, use a hardware wallet.' });
+  const w = await pickWallet({ title: K.title, lead: K.lead });
   if (!w) return;
   const address = w.address;
-  if (address === (operator.wallet_address || '').toLowerCase()) return say('That is your personal wallet. Pick a different account for the treasury, so your own pay and the network’s money never mix.');
-  const ok = await osConfirm(`Make ${shortAddr(address)} (${w.name}) the treasury wallet? It will pay members and receive the reserve in every new escrow. ${w.name} will ask it to sign one message (free).`);
+  const st = await treasuryStatus().catch(() => ({}));
+  if (address === (operator.wallet_address || '').toLowerCase()) return say(`That is your personal wallet. Pick a different account for the ${K.name}, so your own pay and the network’s money never mix.`);
+  if (kind === 'tax' && address === st.treasury_wallet) return say('That is the treasury wallet. Pick a different account for the tax wallet, so tax money stays apart.');
+  if (kind === 'treasury' && address === st.tax_wallet) return say('That is the tax wallet. Pick a different account for the treasury, so tax money stays apart.');
+  const ok = await osConfirm(`Make ${shortAddr(address)} (${w.name}) the ${K.name}? ${kind === 'tax' ? 'It will receive the network’s tax from every new escrow.' : 'It will pay members and receive the reserve in every new escrow.'} ${w.name} will ask it to sign one message (free).`);
   if (!ok) return;
   if (btn) btn.disabled = true;
   try {
-    const { data: message, error } = await sb.rpc('treasury_challenge', { p_address: address });
+    const { data: message, error } = await sb.rpc(K.rpc, { p_address: address });
     if (error || !message) throw new Error(error?.message || 'Could not start.');
     const nonce = (message.match(/Nonce: ([0-9a-f]{32})/) || [])[1];
     if (btn) btn.textContent = `Sign in ${w.name}…`;
@@ -18069,18 +18287,49 @@ async function setTreasuryWallet() {
     const res = await fetch(`${SB_URL}/functions/v1/wallet-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
-      body: JSON.stringify({ address, nonce, signature, purpose: 'treasury' }),
+      body: JSON.stringify({ address, nonce, signature, purpose: kind }),
     });
     const body = await res.json().catch(() => ({}));
-    if (!res.ok || !body.wallet) throw new Error(body.error || 'The treasury could not be set.');
-    toast('Treasury wallet set and proven.');
+    if (!res.ok || !body.wallet) throw new Error(body.error || `The ${K.name} could not be set.`);
+    toast(`${K.name[0].toUpperCase() + K.name.slice(1)} set and proven.`);
     renderTreasuryPanel();
     refreshProfilePanel();
   } catch (e) {
-    say(e?.code === 4001 ? `Cancelled in ${w.name}.` : (e?.message || 'The treasury could not be set.'));
+    say(e?.code === 4001 ? `Cancelled in ${w.name}.` : (e?.message || `The ${K.name} could not be set.`));
   } finally {
     if (btn?.isConnected) { btn.disabled = false; btn.textContent = 'Connect and prove the treasury wallet'; }
   }
+}
+
+// The network's tax rate (0–25% of the price, out of the reserve). Applies to new escrows and new Cycles.
+async function saveNetworkTax() {
+  const v = parseFloat(document.getElementById('pf-ntax')?.value);
+  if (!(v >= 0 && v <= 25)) { toast('Enter a rate from 0 to 25 (percent of the price).'); return; }
+  const bps = Math.round(v * 100);
+  if (!await osConfirm(`Set the network tax to ${(bps / 100).toFixed(2)}% of each new job’s price, out of the reserve? Jobs already in escrow, and a Cycle already started, keep their rate.`)) return;
+  const { error } = await sb.rpc('set_network_tax', { p_bps: bps });
+  if (error) { toast(error.message); return; }
+  toast('Network tax rate saved.');
+  refreshProfilePanel();
+}
+
+// A member's own set-aside: a share of their pay sent to a tax wallet of their choice.
+async function chooseMyTaxWallet() {
+  const w = await pickWallet({ title: 'Your tax wallet', lead: 'Pick the wallet your set-aside goes to. Use an account other than your personal wallet.' });
+  if (!w) return;
+  if (w.address === (operator.wallet_address || '').toLowerCase()) { toast('That is your personal wallet. Pick a different account for your tax set-aside.'); return; }
+  const el = document.getElementById('pf-mytax-w');
+  if (el) { el.value = w.address; el.dispatchEvent(new Event('input')); }
+}
+async function saveMyTax() {
+  const wallet = (document.getElementById('pf-mytax-w')?.value || '').trim().toLowerCase();
+  const pct = parseFloat(document.getElementById('pf-mytax-p')?.value || '0');
+  if (!(pct >= 0 && pct <= 50)) { toast('Choose a set-aside from 0 to 50 percent.'); return; }
+  const { data, error } = await sb.rpc('set_my_tax', { p_wallet: wallet || null, p_bps: Math.round(pct * 100) });
+  if (error) { toast(error.message); return; }
+  operator.tax_wallet = data.tax_wallet; operator.tax_bps = data.tax_bps;
+  toast(data.tax_bps ? `Saved: ${(data.tax_bps / 100).toFixed(2)}% of your pay goes to your tax wallet on new jobs.` : 'Saved: no set-aside.');
+  refreshProfilePanel();
 }
 
 async function renderGenesisAudit() {

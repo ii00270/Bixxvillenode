@@ -2,6 +2,12 @@
 // drift apart. test.js checks these against the compiled contracts.
 export const ENGAGEMENT_ABI = [
   'function MAX_LINES() view returns (uint256)',
+  'function VERSION() view returns (uint256)',
+  'function MAX_NETWORK_BPS() view returns (uint16)',
+  'function MAX_MEMBER_BPS() view returns (uint16)',
+  'function taxWallet() view returns (address)',
+  'function networkTax() view returns (uint256)',
+  'function lineTax(uint256 i) view returns (address taxTo, uint256 tax)',
   'function token() view returns (address)',
   'function client() view returns (address)',
   'function auditor() view returns (address)',
@@ -30,6 +36,8 @@ export const ENGAGEMENT_ABI = [
   'event Stamped(uint256 indexed line, uint8 indexed stage, address indexed by, uint64 at)',
   'event LinePaid(uint256 indexed line, address indexed payee, uint256 amount)',
   'event ReserveReleased(address indexed treasury, uint256 amount)',
+  'event TaxSetAside(uint256 indexed line, address indexed taxWallet, uint256 amount)',
+  'event NetworkTaxSetAside(address indexed taxWallet, uint256 amount)',
   'event Cancelled(address indexed by, uint256 refunded)',
   'event TokenAssociated(address indexed token)',
   'error ZeroAddress()',
@@ -44,6 +52,7 @@ export const ENGAGEMENT_ABI = [
   'error NotAllSealed(uint256 sealedLines, uint256 totalLines)',
   'error TransferFailed()',
   'error AssociationFailed(int64 responseCode)',
+  'error BadTax()',
 ];
 
 export const TOKEN_ABI = [

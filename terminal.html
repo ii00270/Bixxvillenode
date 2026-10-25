@@ -866,6 +866,56 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .site-row{display:flex;justify-content:space-between;gap:8px;font-size:12px;padding:4px 0;border-bottom:1px solid var(--term-line)}.site-row:last-child{border:0}.site-row small{color:var(--term-dim)}
 .site-dot{width:12px;height:12px;border-radius:50%;background:#2F7CF6;border:2px solid #fff;box-shadow:0 0 0 2px rgba(47,124,246,.4)}
 
+
+/* Wallet picker: MetaMask, HashPack, Robinhood Wallet */
+.wl-wrap{padding:6px 16px 22px}
+.wl-lead{margin:0 0 12px;color:var(--term-fg,inherit);font-size:13px;line-height:1.5}
+.wl-list{display:flex;flex-direction:column;gap:10px}
+.wl-tile{border:1px solid var(--term-line,#333);border-radius:12px;padding:12px 14px;display:flex;flex-wrap:wrap;align-items:center;gap:10px;justify-content:space-between}
+.wl-tile.ok{border-color:color-mix(in srgb,#2E9D6B 55%,var(--term-line,#333))}
+.wl-name{display:flex;align-items:center;gap:10px;min-width:0}
+.wl-name img{width:28px;height:28px;border-radius:6px}
+.wl-name b{font-size:14px}.wl-name small{display:block;font:11px var(--mono);color:var(--term-dim,#888)}
+.wl-name>b+small{margin-left:0}
+.wl-dot{width:28px;height:28px;border-radius:6px;border:1px dashed var(--term-line,#444)}
+.wl-how{flex-basis:100%;margin:0;font-size:12px;line-height:1.5;color:var(--term-dim,#888)}
+.wl-foot{margin:14px 0 0;font-size:11.5px;line-height:1.5;color:var(--term-dim,#888)}
+/* Profile: personal wallet (green) and treasury wallet (gold), never confused */
+.pf-wals{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:560px){.pf-wals{grid-template-columns:1fr}}
+.pf-wal{border:1px solid var(--term-line);border-left:4px solid #2E9D6B;border-radius:12px;padding:14px 16px}
+.pf-wal.treasury{border-left-color:#C9A84C;background:color-mix(in srgb,#C9A84C 6%,transparent)}
+.pf-wal-k{display:flex;align-items:center;gap:8px;font:600 11px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.pf-wal-k i{width:8px;height:8px;border-radius:50%;background:#2E9D6B}
+.pf-wal.treasury .pf-wal-k i{background:#C9A84C}
+.pf-wal p{margin:6px 0 8px;font-size:12.5px;line-height:1.45;color:var(--term-dim)}
+.pf-wal>b{display:block;font:500 15px var(--mono)}
+.pf-wal-bal{font:11.5px var(--mono);color:var(--term-dim);margin-top:4px}
+.pf-wal-bal small{opacity:.8}
+.pf-wal-acts{display:flex;gap:8px;align-items:center;margin-top:10px;flex-wrap:wrap}
+/* Ledger: Activity (green) and Payment (gold) */
+.lg-tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:999px;vertical-align:1px}
+.lg-tag.act{color:#2E9D6B;border:1px solid #2E9D6B}
+.lg-tag.pay{color:#0A0A0A;background:#C9A84C;border:1px solid #C9A84C}
+.lg-sum{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:14px 0}
+@media(max-width:560px){.lg-sum{grid-template-columns:1fr}}
+.lg-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;border-left:4px solid #2E9D6B}
+.lg-card.pay{border-left-color:#C9A84C}
+.lg-card b{display:block;font:600 24px var(--mono);margin:6px 0 2px}.lg-card span{font:11.5px var(--mono);color:var(--term-dim)}
+.lg-filters{display:flex;gap:8px;margin:6px 0 12px;flex-wrap:wrap}
+.lg-f{appearance:none;background:none;border:1px solid var(--term-line);color:var(--term-fg);border-radius:999px;padding:6px 12px;font:12px var(--mono);cursor:pointer}
+.lg-f span{color:var(--term-dim)}.lg-f.on{border-color:var(--term-fg)}
+.lg-f.act.on{border-color:#2E9D6B;color:#2E9D6B}.lg-f.pay.on{border-color:#C9A84C;color:#C9A84C}
+.lg-row{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:11px 12px;border-bottom:1px solid var(--term-line);border-left:3px solid #2E9D6B}
+.lg-row.pay{border-left-color:#C9A84C}
+.lg-main{min-width:0}.lg-main b{display:block;font-size:13.5px;font-weight:500;overflow-wrap:anywhere}.lg-main small{font:11px var(--mono);color:var(--term-dim)}
+.lg-amt{text-align:right;font:12px var(--mono)}.lg-amt b{display:block;font-weight:600}.lg-amt b.in{color:#2E9D6B}.lg-amt b.out{color:#E8743A}
+.lg-amt a{color:var(--term-dim);font-size:11px}
+@media(max-width:560px){.lg-row{grid-template-columns:1fr auto}.lg-row>.lg-tag{grid-column:1/-1;justify-self:start}}
+/* The message box belongs to the terminal itself (and BIX AI), not to every screen */
+#terminal-shell[data-view]:not([data-view="terminal"]):not(.agent-on) #term-composer{display:none}
+/* The offline chip sits in the status row instead of floating over the composer */
+#term-footer #off-chip{position:static;margin-left:auto;padding:3px 10px;font-size:10px}
 #off-chip{position:fixed;right:12px;bottom:12px;z-index:9998;appearance:none;display:flex;gap:7px;align-items:center;background:var(--term-bg);color:var(--term-dim);border:1px solid var(--term-line);border-radius:999px;padding:6px 12px;font:11px var(--mono);cursor:pointer}
 #off-chip i{width:7px;height:7px;border-radius:50%;background:#2E9D6B}
 #off-chip.off{color:#0A0A0A;background:#E8B500;border-color:#E8B500}#off-chip.off i{background:#0A0A0A}
@@ -3750,7 +3800,7 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
     <!-- Operator mode — hidden until switched -->
     <div id="gate-op" style="display:none">
       <div id="gate-op-pin">
-        <button class="gate-btn" id="g-wallet-btn" onclick="doWalletLogin()">Sign in with MetaMask</button>
+        <button class="gate-btn" id="g-wallet-btn" onclick="doWalletLogin()">Sign in with a wallet</button>
         <div class="gate-err" id="g-wallet-err"></div>
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;margin:14px 0 10px">or use your PIN</div>
         <label class="gate-label" for="g-pin">PIN</label>
@@ -3856,6 +3906,12 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
       <button class="term-sb-item" data-view="analog" onclick="setTermView('analog')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 12.5a4 4 0 0 1 8 0"/><circle cx="12" cy="12.5" r="1.2"/><path d="M12 14v6"/></svg>
         <span>Analog</span>
+      </button>
+    </div>
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="ledger" onclick="setTermView('ledger')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg>
+        <span>Ledger</span>
       </button>
     </div>
     <button class="term-sb-me" id="term-sb-me" onclick="openProfilePanel()" aria-label="Open your profile">
@@ -4891,7 +4947,9 @@ const offAgo = t => { if (!t) return 'never'; const m = Math.round((Date.now() -
 function offStatus() {
   let chip = document.getElementById('off-chip');
   if (!operator) { chip?.remove(); return; }
-  if (!chip) { chip = document.createElement('button'); chip.id = 'off-chip'; chip.onclick = offDialog; document.body.appendChild(chip); }
+  if (!chip) { chip = document.createElement('button'); chip.id = 'off-chip'; chip.onclick = offDialog; }
+  const home = document.getElementById('term-footer') || document.body;   // in the status row when the terminal is up
+  if (chip.parentNode !== home) home.appendChild(chip);
   const off = OFF.online === false || navigator.onLine === false;
   chip.className = off ? 'off' : OFF.queued || OFF.failed ? 'wait' : '';
   chip.innerHTML = `<i></i>` + (OFF.syncing ? 'Updating offline copy…'
@@ -5173,21 +5231,18 @@ async function doWalletLogin() {
   const err = document.getElementById('g-wallet-err');
   const btn = document.getElementById('g-wallet-btn');
   err.classList.remove('show');
-  if (!window.ethereum) {
-    err.textContent = 'No wallet found. Open this in Chrome with MetaMask installed, or use your PIN.';
-    err.classList.add('show'); return;
-  }
+  const w = await pickWallet({ title: 'Sign in with a wallet', lead: 'Pick the wallet that is on file as your personal wallet.' });
+  if (!w) return;
   walletLogging = true;
   btn.disabled = true;
-  btn.textContent = 'Check MetaMask…';
+  btn.textContent = `Check ${w.name}…`;
   initSB();
   try {
-    const [address] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (!address) throw new Error('No account was shared from MetaMask.');
+    const address = w.address;
     const { data: message, error: chErr } = await sb.rpc('wallet_login_challenge', { p_address: address });
     if (chErr || !message) throw new Error(chErr?.message || 'Could not start wallet sign-in.');
     const nonce = (message.match(/Nonce: ([0-9a-f]{32})/) || [])[1];
-    const signature = await window.ethereum.request({ method: 'personal_sign', params: [message, address] });
+    const signature = await w.provider.request({ method: 'personal_sign', params: [message, address] });
     btn.textContent = 'Verifying…';
     const res = await fetch(`${SB_URL}/functions/v1/wallet-login`, {
       method: 'POST',
@@ -5207,12 +5262,12 @@ async function doWalletLogin() {
     enterShell();
   } catch (e) {
     // 4001 = the person pressed Cancel in MetaMask.
-    err.textContent = e?.code === 4001 ? 'Sign-in cancelled in MetaMask.' : (e?.message || 'Wallet sign-in failed.');
+    err.textContent = e?.code === 4001 ? 'Sign-in cancelled in your wallet.' : (e?.message || 'Wallet sign-in failed.');
     err.classList.add('show');
   } finally {
     walletLogging = false;
     btn.disabled = false;
-    btn.textContent = 'Sign in with MetaMask';
+    btn.textContent = 'Sign in with a wallet';
   }
 }
 
@@ -5311,6 +5366,7 @@ async function enterShell() {
 
   showSurface('members');
   loadAll();
+  if (isExec()) treasuryStatus().catch(() => {});
   setTimeout(openPendingScan, 600);
 }
 
@@ -7540,7 +7596,7 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
     <div class="gate-err" id="esc-err"></div>
     <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
-    <div class="escrow-muted" style="padding:0 18px 12px">Your MetaMask deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
+    <div class="escrow-muted" style="padding:0 18px 12px">Your wallet (MetaMask, HashPack or Robinhood Wallet) deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
 }
 
 // Genesis audits (the treasury wallet seals and pays); on a line where Genesis is the worker, another
@@ -7574,17 +7630,19 @@ async function createEscrow() {
   const useTest = ESCROW_NET.testToken && document.getElementById('esc-token')?.value === 'test';
   const tokenAddr = useTest ? ESCROW_NET.testToken : ESCROW_NET.usdc;
   const ok = await osConfirm(useTest
-    ? `Create the escrow on ${ESCROW_NET.name} with the free test token? MetaMask will ask you to confirm one transaction (deploy). Nothing real is involved.`
-    : `Create the escrow on ${ESCROW_NET.name}? MetaMask will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
+    ? `Create the escrow on ${ESCROW_NET.name} with the free test token? Your wallet will ask you to confirm one transaction (deploy). Nothing real is involved.`
+    : `Create the escrow on ${ESCROW_NET.name}? Your wallet will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
   if (!ok) return;
   btn.disabled = true;
   try {
-    btn.textContent = 'Connecting MetaMask…';
-    await window.ethereum.request({ method: 'eth_requestAccounts' });
+    btn.textContent = 'Connecting your wallet…';
+    const w = await ensureWallet('Wallet to create the escrow', 'This wallet deploys the contract and pays a little HBAR in fees.');
+    if (!w) throw Object.assign(new Error('Cancelled.'), { code: 4001 });
+    await w.provider.request({ method: 'eth_requestAccounts' });
     await ensureHederaNetwork();
-    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
+    const signer = await new ethers.BrowserProvider(w.provider).getSigner();
     const art = await loadEscrowArtifact();
-    btn.textContent = 'Confirm the deploy in MetaMask…';
+    btn.textContent = 'Confirm the deploy in your wallet…';
     const labors = d.lines.map(l => BigInt(l.labor_cents) * 10000n); // cents → USDC units (6 decimals)
     const contract = await new ethers.ContractFactory(art.abi, art.bytecode, signer)
       .deploy(tokenAddr, client, d.roles.wallet, treasury, treasury, payees, labors); // auditor, operator = treasury, treasury
@@ -7594,7 +7652,7 @@ async function createEscrow() {
     const deployTx = contract.deploymentTransaction().hash;
     if (!useTest) {
       // Circle USDC is a native Hedera token: the escrow has to be linked to it before it can hold any.
-      btn.textContent = 'Confirm the USDC link in MetaMask…';
+      btn.textContent = 'Confirm the USDC link in your wallet…';
       await (await contract.associateToken()).wait();
     }
     const labor = d.lines.reduce((n, l) => n + Number(l.labor_cents), 0);
@@ -7609,11 +7667,15 @@ async function createEscrow() {
     renderEscrowPanel(d.projectId, {});
   } catch (e) {
     console.error(e);
-    say(e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in MetaMask.' : (e?.shortMessage || e?.message || 'Could not create the escrow.'));
+    say(e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in your wallet.' : (e?.shortMessage || e?.message || 'Could not create the escrow.'));
     btn.disabled = false;
     btn.textContent = `Create escrow on ${ESCROW_NET.name}`;
   }
 }
+
+// The treasury wallet seals and releases; only the Executive Operator holds it.
+let TREASURY_ADDR = null; // read by treasuryStatus()
+const canOperate = (x, me) => x.operator_wallet === me || (isExec() && !!(x.treasury_wallet || TREASURY_ADDR) && x.operator_wallet === (x.treasury_wallet || TREASURY_ADDR));
 
 // Live status, read straight from the contract, with this member's next step.
 async function renderEscrowStatus(el, x) {
@@ -7645,11 +7707,11 @@ async function renderEscrowStatus(el, x) {
       }
       if (st === 1) { if (x.auditor_wallet === me) mine.push(['markAudited', i, `Audit ${line(i)} (approve the work)`]); else waiting.push(`the auditor on ${line(i)}`); }
       if (st === 2) { if (x.client_wallet === me) mine.push(['authorize', i, `Authorize ${line(i)}`]); else waiting.push(`the client to authorize ${line(i)}`); }
-      if (st === 3) { if (x.operator_wallet === me) mine.push(['seal', i, `Seal ${line(i)} and pay ${escrowUsd(l.labor_cents)}`]); else waiting.push(`the operator to seal ${line(i)}`); }
+      if (st === 3) { if (canOperate(x, me)) mine.push(['seal', i, `Seal ${line(i)} and pay ${escrowUsd(l.labor_cents)} (treasury wallet)`]); else waiting.push(`the treasury to seal ${line(i)}`); }
     });
     if (sum && Number(sum._sealedCount) === x.lines.length) {
-      if (x.operator_wallet === me) mine.push(['releaseReserve', null, `Release the ${escrowUsd(x.price_cents - x.labor_cents)} reserve to the treasury`]);
-      else waiting.push('the operator to release the reserve');
+      if (canOperate(x, me)) mine.push(['releaseReserve', null, `Release the ${escrowUsd(x.price_cents - x.labor_cents)} reserve to the treasury (treasury wallet)`]);
+      else waiting.push('the treasury to release the reserve');
     }
   }
   const done = status === 3 ? 'Complete — every line paid and the reserve released.' : status === 2 ? 'Cancelled — the client was refunded.' : '';
@@ -7677,7 +7739,7 @@ async function renderEscrowStatus(el, x) {
     </div>`;
 }
 
-// One stamp from this member's MetaMask, right here in the OS.
+// One stamp, signed by the wallet that holds that role, right here in the OS.
 async function escrowAct(btn, projectId, fn, lineIndex) {
   const x = window._escrowRows?.[projectId];
   const err = document.getElementById('esc-act-err-' + projectId);
@@ -7686,19 +7748,23 @@ async function escrowAct(btn, projectId, fn, lineIndex) {
   const label = btn.textContent;
   document.querySelectorAll('.escrow-go').forEach(b => { b.disabled = true; });
   try {
-    if (!window.ethereum) throw new Error('No wallet found. Use Chrome with MetaMask installed.');
-    btn.textContent = 'Open MetaMask…';
-    const [acct] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const want = (operator?.wallet_address || '').toLowerCase();
-    if ((acct || '').toLowerCase() !== want) {
-      throw new Error(`MetaMask is on ${shortAddr(acct)}. Switch to your account ${shortAddr(want)} in MetaMask and try again.`);
+    const role = fn === 'seal' || fn === 'releaseReserve' ? ['the treasury', x.operator_wallet]
+      : fn === 'markAudited' ? ['the auditor', x.auditor_wallet]
+      : fn === 'authorize' ? ['the client', x.client_wallet]
+      : ['your personal', (operator?.wallet_address || '').toLowerCase()];
+    const w = await ensureWallet('Wallet for this step', `This step is signed by ${role[0]} wallet (${shortAddr(role[1])}).`);
+    if (!w) throw Object.assign(new Error('Cancelled.'), { code: 4001 });
+    btn.textContent = `Open ${w.name}…`;
+    const [acct] = await w.provider.request({ method: 'eth_requestAccounts' });
+    if ((acct || '').toLowerCase() !== role[1]) {
+      throw new Error(`${w.name} is on ${shortAddr(acct)}. Switch to ${role[0]} wallet ${shortAddr(role[1])} in ${w.name} and try again.`);
     }
     await ensureHederaNetwork();
     const art = await loadEscrowArtifact();
-    const c = new ethers.Contract(x.contract_address, art.abi, await new ethers.BrowserProvider(window.ethereum).getSigner());
+    const c = new ethers.Contract(x.contract_address, art.abi, await new ethers.BrowserProvider(w.provider).getSigner());
     const args = lineIndex == null ? [] : [lineIndex];
     await c[fn].staticCall(...args); // a refusal shows its reason before anything is signed
-    btn.textContent = 'Confirm in MetaMask…';
+    btn.textContent = 'Confirm in your wallet…';
     const tx = await c[fn](...args);
     btn.textContent = 'Recording on Hedera…';
     await tx.wait();
@@ -7706,7 +7772,7 @@ async function escrowAct(btn, projectId, fn, lineIndex) {
     renderEscrowStatus(document.getElementById('proj-escrow-' + projectId), x);
   } catch (e) {
     console.error(e);
-    const reason = e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in MetaMask.'
+    const reason = e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in your wallet.'
       : e?.revert?.name === 'NotAllowed' ? 'Your wallet isn’t the one for this step.'
       : e?.revert?.name ? 'This step isn’t available right now — refresh the job.'
       : /insufficient|balance/i.test(e?.message || '') ? `Your wallet needs a little ${ESCROW_NET.currency.symbol} for the fee.`
@@ -9050,7 +9116,7 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
 // Testnet until the Executive Operator says mainnet.
 const ESCROW_NET = {
   key: 'hedera-testnet', name: 'Hedera Testnet', chainId: 296, chainHex: '0x128',
-  rpc: 'https://testnet.hashio.io/api', explorer: 'https://hashscan.io/testnet',
+  rpc: 'https://testnet.hashio.io/api', explorer: 'https://hashscan.io/testnet', mirror: 'https://testnet.mirrornode.hedera.com/api/v1',
   usdc: '0x0000000000000000000000000000000000068cda', usdcId: '0.0.429274',
   // Free test token for dry runs when Circle's faucet isn't delivering. Testnet only:
   // anyone can mint it and it is worth nothing. Deployed 2026-10-22 (dapp/deployments/hedera-testnet.json).
@@ -9071,17 +9137,18 @@ async function fetchUsdcBalance(address) {
   return parseInt(json.result, 16) / 1e6;
 }
 
-// Adds Hedera to MetaMask if needed and switches to it.
+// Adds Hedera to the wallet in use if needed and switches to it.
 async function ensureHederaNetwork() {
-  if (!window.ethereum) throw new Error('No wallet found. Open this in Chrome with MetaMask installed.');
-  const current = await window.ethereum.request({ method: 'eth_chainId' });
+  const eth = walletProvider();
+  if (!eth) throw new Error('No wallet found. Connect MetaMask, HashPack or Robinhood Wallet first.');
+  const current = await eth.request({ method: 'eth_chainId' });
   if (parseInt(current, 16) === ESCROW_NET.chainId) return;
-  await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [{
+  await eth.request({ method: 'wallet_addEthereumChain', params: [{
     chainId: ESCROW_NET.chainHex, chainName: ESCROW_NET.name, nativeCurrency: ESCROW_NET.currency,
     rpcUrls: [ESCROW_NET.rpc], blockExplorerUrls: [ESCROW_NET.explorer],
   }] });
-  if (parseInt(await window.ethereum.request({ method: 'eth_chainId' }), 16) !== ESCROW_NET.chainId) {
-    throw new Error(`Switch MetaMask to ${ESCROW_NET.name} and try again.`);
+  if (parseInt(await eth.request({ method: 'eth_chainId' }), 16) !== ESCROW_NET.chainId) {
+    throw new Error(`Switch your wallet to ${ESCROW_NET.name} and try again.`);
   }
 }
 
@@ -9091,7 +9158,7 @@ async function checkProfileWalletBalance() {
   if (!status) return;
 
   if (!addr) {
-    status.textContent = 'Or connect MetaMask to fill this in automatically.';
+    status.textContent = 'Or connect MetaMask, HashPack or Robinhood Wallet to fill this in.';
     status.style.color = 'var(--grey)';
     return;
   }
@@ -9120,12 +9187,12 @@ async function checkProfileWalletBalance() {
 }
 
 async function connectProfileWallet() {
-  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
   try {
-    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    const w = await pickWallet({ title: 'Connect your personal wallet' });
+    if (!w) return;
     const input = document.getElementById('prof-wallet');
-    if (input) input.value = accts[0];
-    toast('Wallet connected — remember to Save Profile.');
+    if (input) input.value = w.address;
+    toast(`${w.name} connected — remember to Save Profile.`);
     checkProfileWalletBalance();
   } catch(e) {
     console.error(e);
@@ -9271,7 +9338,7 @@ function renderProfileEdit() {
         <button class="prof-add-btn" style="white-space:nowrap" onclick="connectProfileWallet()">Connect</button>
       </div>
       <div id="prof-wallet-status" style="font-family:var(--mono);font-size:9px;color:var(--grey);margin-top:6px">
-        Or connect MetaMask to fill this in automatically.
+        Or connect MetaMask, HashPack or Robinhood Wallet to fill this in.
       </div>
     </div>
 
@@ -10191,6 +10258,7 @@ function toggleAgent(open) {
   if (!a) return;
   const on = open ?? !a.classList.contains('open');
   a.classList.toggle('open', on);
+  document.getElementById('terminal-shell')?.classList.toggle('agent-on', on);
   if (on) { const sc = document.getElementById('term-scroll'); if (sc) sc.scrollTop = sc.scrollHeight; }
 }
 
@@ -10517,9 +10585,9 @@ async function buildNextUp() {
           const stage = Number(lines[i].stage), t = short(l.title || `line ${l.line_index + 1}`);
           if (stage === 0 && l.payee_wallet === me) out.push({ kind: 'escrow', tag: 'Escrow', figure: fig, q: `“${t}” is funded. Mark it delivered when it’s done?`, btn: 'Open job', run: open });
           if (stage === 1 && x.auditor_wallet === me) out.push({ kind: 'escrow', tag: 'Audit', figure: fig, q: `“${t}” was delivered. Audit the work?`, btn: 'Open job', run: open });
-          if (stage === 3 && x.operator_wallet === me) out.push({ kind: 'escrow', tag: 'Pay', figure: fig, q: `“${t}” is approved. Seal it and pay ${escrowUsd(l.labor_cents)}?`, btn: 'Open job', run: open });
+          if (stage === 3 && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Pay', figure: fig, q: `“${t}” is approved. Seal it and pay ${escrowUsd(l.labor_cents)}?`, btn: 'Open job', run: open });
         });
-        if (Number(sum._sealedCount) === x.lines.length && x.operator_wallet === me) out.push({ kind: 'escrow', tag: 'Reserve', figure: fig, q: `${short(x.title)}: every line is paid. Release the reserve to the treasury?`, btn: 'Open job', run: open });
+        if (Number(sum._sealedCount) === x.lines.length && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Reserve', figure: fig, q: `${short(x.title)}: every line is paid. Release the reserve to the treasury?`, btn: 'Open job', run: open });
       }));
     }
   } catch (e) { console.error(e); }
@@ -10545,34 +10613,107 @@ function routePrompt(text) {
     [/member|client|people|add (a )?(member|client)|network/, () => setTermView('clients')],
     [/review|verify|proof/, () => { const a = (window._nextUp || []).find(x => x.kind === 'verify'); a ? a.run() : setTermView('notifications'); }],
     [/escrow|fund|pay|seal|audit/, () => { const a = (window._nextUp || []).find(x => x.kind === 'escrow'); a ? a.run() : toast('No escrow steps are waiting on you.'); }],
-    [/profile|statement|ledger/, () => openProfilePanel()],
+    [/ledger|payments?|activit/, () => setTermView('ledger')],
+    [/profile|statement/, () => openProfilePanel()],
   ];
   for (const [re, run] of rules) if (re.test(q)) return run();
   toggleAgent(true);
   agentSend(text);
 }
 
-// Put a wallet on file from MetaMask: add one, or change the one on file.
-// (HashPack can join this later; MetaMask is the only option for now.)
+// ── WALLETS: MetaMask, HashPack, Robinhood Wallet ──
+// Browser wallets announce themselves (EIP-6963), so several can sit side by side and each is
+// asked for by name. A wallet's address is the same on every EVM network (Ethereum, Base, Hedera…);
+// the OS pays through the Hedera escrow, but the wallet itself can be on any network when connected.
+const WALLET_FOUND = new Map();
+window.addEventListener('eip6963:announceProvider', e => { const d = e.detail; if (d?.info && d?.provider) WALLET_FOUND.set(d.info.uuid || d.info.rdns, d); });
+window.dispatchEvent(new Event('eip6963:requestProvider'));
+const WALLET_KINDS = [
+  { key: 'metamask', name: 'MetaMask', match: i => i.rdns === 'io.metamask' || /metamask/i.test(i.name), legacy: p => p?.isMetaMask && !p?.isHashPack && !p?.isRobinhood,
+    get: 'https://metamask.io/download/', how: 'Install the MetaMask extension (or open this page in the MetaMask app’s browser), then come back.' },
+  { key: 'hashpack', name: 'HashPack', match: i => /hashpack/i.test(i.name || '') || /hashpack/i.test(i.rdns || ''), legacy: p => p?.isHashPack,
+    get: 'https://www.hashpack.app/download', how: 'Install the HashPack extension, or open this page in the HashPack app’s browser. Use an EVM (ECDSA) account: those have an 0x address.' },
+  { key: 'robinhood', name: 'Robinhood Wallet', match: i => /robinhood/i.test(i.name || '') || /robinhood/i.test(i.rdns || ''), legacy: p => p?.isRobinhood,
+    get: null, how: 'Robinhood Wallet is a phone app. Open it, go to its browser, and open this page there. Then connect.' },
+];
+const CHAIN_NAMES = { 1: 'Ethereum', 10: 'Optimism', 56: 'BNB Chain', 137: 'Polygon', 8453: 'Base', 42161: 'Arbitrum', 43114: 'Avalanche', 295: 'Hedera', 296: 'Hedera Testnet', 11155111: 'Sepolia' };
+const chainName = id => CHAIN_NAMES[id] || (id ? `network ${id}` : '');
+
+// The wallet chosen last (any app). Escrow steps and network switches sign with it.
+let ACTIVE_WALLET = null;
+const walletProvider = () => ACTIVE_WALLET?.provider || window.ethereum || null;
+async function ensureWallet(title, lead) {
+  if (ACTIVE_WALLET) return ACTIVE_WALLET;
+  const w = await pickWallet({ title, lead });
+  return w;
+}
+
+function walletFor(kind) {
+  for (const d of WALLET_FOUND.values()) if (kind.match(d.info)) return { provider: d.provider, icon: d.info.icon };
+  if (!WALLET_FOUND.size && kind.legacy(window.ethereum)) return { provider: window.ethereum, icon: null };
+  return null;
+}
+
+// Asks which wallet app to use and connects it. Resolves { provider, address, name, chainId } or null.
+function pickWallet({ title = 'Connect a wallet', lead = '' } = {}) {
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  return new Promise(resolve => {
+    const known = new Set();
+    const tiles = WALLET_KINDS.map(k => { const w = walletFor(k); if (w) known.add(w.provider); return { ...k, w }; });
+    const others = [...WALLET_FOUND.values()].filter(d => !known.has(d.provider));
+    if (!WALLET_FOUND.size && window.ethereum && !known.has(window.ethereum)) others.push({ info: { name: 'Wallet in this browser' }, provider: window.ethereum });
+    const connect = async (provider, name) => {
+      try {
+        const [a] = await provider.request({ method: 'eth_requestAccounts' });
+        if (!a) throw new Error('No account was shared.');
+        const chainId = parseInt(await provider.request({ method: 'eth_chainId' }).catch(() => '0x0'), 16);
+        closeOverlay();
+        ACTIVE_WALLET = { provider, name };
+        resolve({ provider, address: a.toLowerCase(), name, chainId });
+      } catch (e) { toast(e?.code === 4001 ? `Cancelled in ${name}.` : (e?.message || `Couldn’t connect ${name}.`)); }
+    };
+    openOverlay(title, body => {
+      body.innerHTML = `<div class="term-wf wl-wrap">
+        ${lead ? `<p class="wl-lead">${esc(lead)}</p>` : ''}
+        <div class="wl-list">
+          ${tiles.map((t, i) => `<div class="wl-tile ${t.w ? 'ok' : ''}">
+            <div class="wl-name">${t.w?.icon ? `<img src="${esc(t.w.icon)}" alt="">` : `<span class="wl-dot"></span>`}<b>${esc(t.name)}</b><small>${t.w ? 'Found in this browser' : 'Not found here'}</small></div>
+            ${t.w ? `<button class="pp-btn solid" data-k="${i}">Connect</button>`
+                  : `<p class="wl-how">${esc(t.how)}</p>${t.get ? `<a class="pp-btn" href="${t.get}" target="_blank" rel="noopener">Get ${esc(t.name)}</a>` : `<button class="pp-btn" data-copy="1">Copy this page’s link</button>`}`}
+          </div>`).join('')}
+          ${others.map((d, i) => `<div class="wl-tile ok"><div class="wl-name">${d.info.icon ? `<img src="${esc(d.info.icon)}" alt="">` : '<span class="wl-dot"></span>'}<b>${esc(d.info.name)}</b><small>Also found in this browser</small></div><button class="pp-btn" data-o="${i}">Connect</button></div>`).join('')}
+        </div>
+        <p class="wl-foot">Connecting only shares the wallet’s public address. It moves no money, and your keys never leave the wallet. The address works on every EVM network; the OS pays members through the Hedera escrow.</p>
+      </div>`;
+      body.querySelectorAll('[data-k]').forEach(b => { b.onclick = () => { const t = tiles[+b.dataset.k]; connect(t.w.provider, t.name); }; });
+      body.querySelectorAll('[data-o]').forEach(b => { b.onclick = () => { const d = others[+b.dataset.o]; connect(d.provider, d.info.name); }; });
+      body.querySelectorAll('[data-copy]').forEach(b => { b.onclick = () => { navigator.clipboard?.writeText(location.origin + location.pathname); toast('Link copied. Open it in Robinhood Wallet’s browser.'); }; });
+    }, null, null, true);
+  });
+}
+
+// Your personal wallet: signs you in and receives your pay. Kept apart from the treasury wallet.
 async function openAddWallet() {
-  if (!window.ethereum) { toast('No wallet found. Use Chrome with MetaMask installed.'); return; }
-  try {
-    const [a] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (!a) return;
-    const have = (operator.wallet_address || '').toLowerCase();
-    if (have === a.toLowerCase()) { toast('That MetaMask account is already your wallet.'); return; }
-    const ok = await osConfirm(have
-      ? `Change your wallet to ${a.slice(0, 6)}…${a.slice(-4)}? You’ll sign in and be paid with this one instead of ${have.slice(0, 6)}…${have.slice(-4)}.`
-      : `Put ${a.slice(0, 6)}…${a.slice(-4)} on file as your wallet? You’ll sign in with it and be paid to it through escrow.`);
-    if (!ok) return;
-    const { data, error } = await sb.rpc('set_member_wallet', { p_operator_id: operator.id, p_wallet: a });
-    if (error) { toast(error.message); return; }
-    operator.wallet_address = data;
-    termBalanceCache = null;
-    toast('Wallet saved.');
-    renderDashboard();
-    if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) { await loadPeople(true); renderClientsPanel(); }
-  } catch (e) { toast(e?.code === 4001 ? 'Cancelled in MetaMask.' : 'Couldn’t connect the wallet.'); }
+  const have = (operator.wallet_address || '').toLowerCase();
+  const w = await pickWallet({ title: have ? 'Change your personal wallet' : 'Add your personal wallet',
+    lead: 'Your personal wallet signs you in and receives your pay. Pick the wallet app you use.' });
+  if (!w) return;
+  const a = w.address, s = x => `${x.slice(0, 6)}…${x.slice(-4)}`;
+  if (have === a) { toast(`That ${w.name} account is already your personal wallet.`); return; }
+  const tre = isExec() ? (await treasuryStatus().catch(() => ({}))).treasury_wallet : null;
+  if (tre && tre === a) { toast('That is the treasury wallet. Pick a different account, so your own pay and the network’s money never mix.'); return; }
+  const ok = await osConfirm(have
+    ? `Change your personal wallet to ${s(a)} (${w.name}${w.chainId ? ', on ' + chainName(w.chainId) : ''})? You’ll sign in and be paid with this one instead of ${s(have)}.`
+    : `Add ${s(a)} (${w.name}${w.chainId ? ', on ' + chainName(w.chainId) : ''}) as your personal wallet? You’ll sign in with it and be paid to it through escrow.`);
+  if (!ok) return;
+  const { data, error } = await sb.rpc('set_member_wallet', { p_operator_id: operator.id, p_wallet: a });
+  if (error) { toast(error.message); return; }
+  operator.wallet_address = data;
+  termBalanceCache = null;
+  toast(`Personal wallet saved: ${w.name}.`);
+  renderDashboard();
+  refreshProfilePanel();
+  if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) { await loadPeople(true); renderClientsPanel(); }
 }
 
 async function renderDashBalance() {
@@ -10584,12 +10725,13 @@ async function renderDashBalance() {
     <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">USDC · ${ESCROW_NET.name}</span></div>
     <div class="dash-big" id="dash-bal-v">${addr ? '…' : '—'}</div>
     <div class="dash-bar"><i style="width:100%"></i></div>
-    <div class="dash-sub">${addr ? `Wallet ${esc(short)}` : 'No wallet on file yet.'}</div>
+    <div class="dash-sub">${addr ? `Personal wallet ${esc(short)}` : 'No personal wallet yet.'}</div>
     <div class="dash-acts">
-      <button class="dash-btn" onclick="openMemberRecord(operator.id)">Ledger</button>
+      <button class="dash-btn" onclick="setTermView('ledger')">Ledger</button>
       ${addr ? `<button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(addr)}');toast('Wallet address copied.')">Copy address</button>
       <button class="dash-btn" onclick="openAddWallet()">Change wallet</button>`
-             : `<button class="dash-btn solid" onclick="openAddWallet()">Add wallet · MetaMask</button>`}
+             : `<button class="dash-btn solid" onclick="openAddWallet()">Add wallet</button>`}
+      <button class="dash-btn" onclick="openWalletsInProfile()">${isExec() ? 'Wallets · treasury' : 'Wallets'}</button>
     </div>`;
   if (addr) {
     const b = termBalanceCache ?? await fetchUsdcBalance(addr).catch(() => null);
@@ -11016,13 +11158,13 @@ function openWalletDrawer(kind, id) {
   d.setAttribute('aria-label', 'Wallet on file');
   d.innerHTML = `
     <div class="pp-dr-top"><b>${person.wallet_address ? 'Change' : 'Add'} wallet</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>
-    <p class="pp-dr-lead">${self ? 'Your wallet is where escrow pays you, and how you sign in with MetaMask.'
+    <p class="pp-dr-lead">${self ? 'Your personal wallet is where escrow pays you, and how you sign in with a wallet.'
       : kind === 'member' ? `${esc(name)} is paid here when a line of their work is sealed, and can sign in with it.`
       : `${esc(name)} funds and approves their jobs from this wallet.`}</p>
     <form class="pp-form" onsubmit="event.preventDefault(); saveWallet('${kind}','${esc(id)}')">
       <label><span>Wallet address</span><input id="wd-addr" autocomplete="off" spellcheck="false" placeholder="0x…" value="${esc(person.wallet_address || '')}"></label>
-      ${self ? `<button type="button" class="pp-btn" onclick="walletFromMetaMask()">${ico(ICON.wallet)}Use my connected MetaMask</button>`
-             : `<p class="pp-muted">In MetaMask, they tap their account name at the top to copy it. It starts with 0x.</p>`}
+      ${self ? `<button type="button" class="pp-btn" onclick="walletFromMetaMask()">${ico(ICON.wallet)}Connect a wallet (MetaMask, HashPack, Robinhood)</button>`
+             : `<p class="pp-muted">In their wallet app (MetaMask, HashPack or Robinhood Wallet) they copy their address. It starts with 0x.</p>`}
       <div class="pp-form-msg" id="wd-msg"></div>
       <button class="pp-btn solid big" id="wd-go" type="submit">Save wallet</button>
       ${person.wallet_address ? `<button type="button" class="pp-btn big" onclick="document.getElementById('wd-addr').value='';saveWallet('${kind}','${esc(id)}')">Remove wallet</button>` : ''}
@@ -11030,11 +11172,8 @@ function openWalletDrawer(kind, id) {
   requestAnimationFrame(() => { d.classList.add('on'); document.getElementById('pp-scrim').classList.add('on'); document.getElementById('wd-addr').focus(); });
 }
 async function walletFromMetaMask() {
-  if (!window.ethereum) { toast('No wallet found. Use Chrome with MetaMask installed.'); return; }
-  try {
-    const [a] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (a) document.getElementById('wd-addr').value = a.toLowerCase();
-  } catch (e) { toast('MetaMask didn’t share an account.'); }
+  const w = await pickWallet({ title: 'Use a connected wallet' });
+  if (w) document.getElementById('wd-addr').value = w.address;
 }
 async function saveWallet(kind, id) {
   const msg = document.getElementById('wd-msg'), go = document.getElementById('wd-go');
@@ -11096,7 +11235,7 @@ function renderAddPerson(kind, done) {
       ${isM ? `<div class="pp-field"><span>Starting tier</span><div class="pp-tierpick">
         ${tiers.map(([t, rate, logs], i) => `<label class="pp-tieropt ${TIER_COLOR[t]}"><input type="radio" name="ap-tier" value="${t}" ${i === 0 ? 'checked' : ''}><b>${t}</b><small>$${rate} per LOG · starts at ${logs.toLocaleString()} LOGs</small></label>`).join('')}
       </div></div>
-      <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" spellcheck="false" placeholder="0x… (their MetaMask address)"></label>` : `
+      <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" spellcheck="false" placeholder="0x… (their wallet address)"></label>` : `
       <label><span>Phone <em>optional</em></span><input id="ap-phone" autocomplete="off" placeholder="+1 340 …"></label>
       <label><span>Wallet <em>optional</em></span><input id="ap-wallet" autocomplete="off" placeholder="0x…"></label>`}
       <div class="pp-form-msg" id="ap-msg"></div>
@@ -11117,7 +11256,7 @@ async function submitAddPerson(kind) {
       if (val('ap-wallet')) {
         const { error: wErr } = await sb.rpc('set_member_wallet', { p_operator_id: data.id, p_wallet: val('ap-wallet') });
         walletNote = wErr ? `<p class="pp-muted" style="color:var(--red)">Added, but the wallet wasn’t saved: ${esc(wErr.message)} Add it from their row.</p>`
-                          : `<p class="pp-muted">Wallet on file — they can sign in with MetaMask and be paid through escrow.</p>`;
+                          : `<p class="pp-muted">Wallet on file — they can sign in with their wallet and be paid through escrow.</p>`;
       }
       const welcome = `Welcome to Bixxville, ${data.name}.\nYour member ID: ${data.member_id}\nYour PIN: ${data.pin}\nSign in at ${location.origin}${location.pathname.replace(/[^/]*$/, '')}terminal.html`;
       window._apWelcome = welcome;
@@ -11827,6 +11966,27 @@ async function renderProfilePanel() {
       </div>
     </div>
 
+    <div class="pf-sec" id="pf-wallets">
+      <h4>Wallets <span>${isExec() ? 'yours, and the network’s' : 'where you are paid'}</span></h4>
+      <div class="pf-wals">
+        <div class="pf-wal personal">
+          <div class="pf-wal-k"><i></i>Personal wallet</div>
+          <p>Signs you in and receives your pay.</p>
+          <b>${op.wallet_address ? esc(op.wallet_address.slice(0, 6) + '…' + op.wallet_address.slice(-4)) : 'None yet'}</b>
+          <div class="pf-wal-bal" id="pf-wal-p">${op.wallet_address ? '…' : ''}</div>
+          <div class="pf-wal-acts">
+            <button class="pf-btn ${op.wallet_address ? '' : 'solid'}" onclick="openAddWallet()">${op.wallet_address ? 'Change wallet' : 'Add wallet'}</button>
+            ${op.wallet_address ? copyBtn(op.wallet_address, 'Wallet address') : ''}
+          </div>
+        </div>
+        ${isExec() ? `<div class="pf-wal treasury" id="pf-wal-t">
+          <div class="pf-wal-k"><i></i>Treasury wallet</div>
+          <p>The network’s money: pays each member when a line is sealed, and receives the reserve. Proven by signature.</p>
+          <b>…</b>
+        </div>` : ''}
+      </div>
+    </div>
+
     <div class="pf-sec">
       <h4>Tier <span>$${TIER_STEPS[k][2]} per LOG</span></h4>
       <div class="pf-ladder"><i style="width:${pct(logs)}%"></i>
@@ -11872,6 +12032,32 @@ async function renderProfilePanel() {
     <div class="pf-sec" style="border-bottom:none">
       <div class="pf-stamp"><b>${esc(stamp[0])}</b><br>${stamp.slice(1).map(esc).join('<br>')}</div>
     </div>`;
+  fillProfileWallets(op);
+}
+
+// Balances on the two wallet cards, and the treasury card's state (Executive Operator only).
+async function fillProfileWallets(op) {
+  const money = (u, h) => `${u != null ? '$' + u.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'} USDC · ${h != null ? h.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'} HBAR <small>${esc(ESCROW_NET.name)}</small>`;
+  const bal = async a => money(await fetchUsdcBalance(a).catch(() => null), await fetchHbarBalance(a).catch(() => null));
+  if (op.wallet_address) { const el = document.getElementById('pf-wal-p'); if (el) el.innerHTML = await bal(op.wallet_address); }
+  const t = document.getElementById('pf-wal-t');
+  if (!t) return;
+  let st = {};
+  try { st = await treasuryStatus(); } catch (e) { t.querySelector('b').textContent = 'Could not read'; return; }
+  const w = st.treasury_wallet;
+  t.innerHTML = `<div class="pf-wal-k"><i></i>Treasury wallet</div>
+    <p>The network’s money: pays each member when a line is sealed, and receives the reserve. Proven by signature.</p>
+    <b>${w ? esc(w.slice(0, 6) + '…' + w.slice(-4)) : 'Not set'}</b>
+    <div class="pf-wal-bal">${w ? '…' : 'No escrow can be created until it is set.'}</div>
+    ${w && st.treasury_proven_at ? `<div class="pf-wal-bal">Proven ${esc(new Date(st.treasury_proven_at).toLocaleDateString())}</div>` : ''}
+    <div class="pf-wal-acts"><button class="pf-btn ${w ? '' : 'solid'}" onclick="setTreasuryWallet()">${w ? 'Change treasury wallet' : 'Add treasury wallet'}</button>
+      ${w ? `<a class="pf-copy" href="${ESCROW_NET.explorer}/account/${esc(w)}" target="_blank" rel="noopener">HashScan</a>` : ''}</div>`;
+  if (w) t.querySelectorAll('.pf-wal-bal')[0].innerHTML = await bal(w);
+}
+
+async function openWalletsInProfile() {
+  await openProfilePanel();
+  document.getElementById('pf-wallets')?.scrollIntoView({ block: 'start', behavior: 'smooth' });
 }
 
 async function openStepFromProfile(mapId) {
@@ -11921,6 +12107,7 @@ function setTermView(view) {
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
   if (view !== 'chat') clearInterval(CH.timer);
+  document.getElementById('terminal-shell')?.setAttribute('data-view', view);
   const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
   if (view === 'browser') view = 'decomposed'; // Browser was folded into Map
@@ -11937,6 +12124,7 @@ function setTermView(view) {
     else if (view === 'decomposed') renderDecomposedPanel();
     else if (view === 'places') renderPlacesPanel();
     else if (view === 'analog') renderAnalogPanel();
+    else if (view === 'ledger') renderLedgerPanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
@@ -11979,6 +12167,90 @@ async function openPendingScan() {
   } catch (e) { toast(`The scanned code could not be opened: ${e.message}`); }
 }
 document.addEventListener('DOMContentLoaded', () => setTimeout(showScanNotice, 400));
+
+// ── LEDGER: everything you've done in the network (Activity) and every payment on the blockchain
+// (Payment), in one list, newest first. Activity comes from the hours ledger and network notices;
+// Payment comes from escrow contracts and the Hedera mirror node for your wallets.
+const LG = { filter: 'all', rows: [] };
+const LG_TOKENS = {}; // token id → { symbol, decimals }
+async function lgToken(id) {
+  if (!LG_TOKENS[id]) {
+    const t = await fetch(`${ESCROW_NET.mirror}/tokens/${id}`).then(r => r.ok ? r.json() : null).catch(() => null);
+    LG_TOKENS[id] = { symbol: t?.symbol || id, decimals: Number(t?.decimals ?? 0) };
+  }
+  return LG_TOKENS[id];
+}
+// Money that moved to or from one wallet on Hedera. Network fees alone are left out.
+async function lgChainRows(evm, whose) {
+  const acc = await fetch(`${ESCROW_NET.mirror}/accounts/${evm}`).then(r => r.ok ? r.json() : null).catch(() => null);
+  if (!acc?.account) return [];
+  const tx = await fetch(`${ESCROW_NET.mirror}/transactions?account.id=${acc.account}&limit=60&order=desc`).then(r => r.json()).catch(() => ({}));
+  const rows = [];
+  for (const t of tx.transactions || []) {
+    const when = new Date(Number(t.consensus_timestamp) * 1000);
+    const link = `${ESCROW_NET.explorer}/transaction/${t.consensus_timestamp}`;
+    for (const tt of (t.token_transfers || []).filter(x => x.account === acc.account && x.amount)) {
+      const tk = await lgToken(tt.token_id), amt = tt.amount / 10 ** tk.decimals;
+      rows.push({ kind: 'pay', when, title: `${amt > 0 ? 'Received' : 'Sent'} ${tk.symbol}`, detail: `${whose} · ${t.result === 'SUCCESS' ? 'confirmed' : t.result}`, amount: amt, unit: tk.symbol, link });
+    }
+    const hbar = (t.transfers || []).filter(x => x.account === acc.account).reduce((n, x) => n + x.amount, 0) / 1e8;
+    if (Math.abs(hbar) >= 0.1 && !(t.token_transfers || []).some(x => x.account === acc.account && x.amount))
+      rows.push({ kind: 'pay', when, title: `${hbar > 0 ? 'Received' : 'Sent'} HBAR`, detail: `${whose} · ${t.name === 'CRYPTOTRANSFER' ? 'transfer' : t.name.toLowerCase()}`, amount: hbar, unit: 'HBAR', link });
+  }
+  return rows;
+}
+
+async function renderLedgerPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.innerHTML = `<div class="lg-wrap">
+    <div class="pp-head"><div><h2>Ledger</h2><p>Everything you’ve done in the network, and every payment on the blockchain. <span class="lg-tag act">Activity</span> is work, hours and records. <span class="lg-tag pay">Payment</span> is money that moved on chain.</p></div></div>
+    <div class="lg-sum" id="lg-sum"></div>
+    <div class="lg-filters" id="lg-filters"></div>
+    <div id="lg-list"><div class="term-panel-empty">Reading the ledger and the blockchain…</div></div>
+  </div>`;
+  const rows = [];
+  const [led, ev, escs] = await Promise.all([
+    sb.from('log_ledger').select('log_date,hours,description,lane,verified,created_at').eq('peer', operator.peer_name).order('log_date', { ascending: false }),
+    sb.rpc('get_events'),
+    sb.rpc('escrow_list'),
+  ]);
+  (led.data || []).forEach(r => rows.push({ kind: 'act', when: new Date(r.log_date + 'T12:00:00'), title: r.description || 'Work logged',
+    detail: `${Number(r.hours).toLocaleString(undefined, { maximumFractionDigits: 2 })} h logged · ${r.lane || 'work'}${r.verified ? ' · verified' : ''}`, hours: Number(r.hours) }));
+  (ev.data || []).filter(e => e.type !== 'MESSAGE' && !/ signed (in|out)$/.test(e.title || ''))
+    .forEach(e => rows.push({ kind: 'act', when: new Date(e.created_at), title: e.title, detail: [e.type, e.payload].filter(Boolean).join(' · ').slice(0, 140) }));
+  (escs.data || []).forEach(x => rows.push({ kind: 'pay', when: new Date(x.created_at), title: `Escrow contract · ${x.title || 'job'}`,
+    detail: `${escrowUsd(x.price_cents)} price · ${x.lines?.length || 0} line(s) · ${ESCROW_NET.name}`, link: `${ESCROW_NET.explorer}/contract/${x.contract_address}` }));
+  const wallets = [];
+  if (operator.wallet_address) wallets.push([operator.wallet_address.toLowerCase(), 'Personal wallet']);
+  if (isExec()) { const t = (await treasuryStatus().catch(() => ({}))).treasury_wallet; if (t && t !== wallets[0]?.[0]) wallets.push([t, 'Treasury wallet']); }
+  const chain = await Promise.all(wallets.map(([w, who]) => lgChainRows(w, who).catch(() => [])));
+  chain.flat().forEach(r => rows.push(r));
+  rows.sort((a, b) => b.when - a.when);
+  LG.rows = rows; LG.wallets = wallets;
+  drawLedger();
+}
+
+function drawLedger() {
+  const rows = LG.rows, act = rows.filter(r => r.kind === 'act'), pay = rows.filter(r => r.kind === 'pay');
+  const hours = act.reduce((n, r) => n + (r.hours || 0), 0);
+  const sumBy = unit => pay.filter(r => r.unit === unit).reduce((n, r) => n + r.amount, 0);
+  const fmt = (n, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
+  document.getElementById('lg-sum').innerHTML = `
+    <div class="lg-card act"><small><span class="lg-tag act">Activity</span></small><b>${act.length}</b><span>${fmt(hours)} hours logged · ${operator.total_logs || 0} total LOGs</span></div>
+    <div class="lg-card pay"><small><span class="lg-tag pay">Payment</span></small><b>${pay.length}</b><span>${['USDC', 'HBAR'].map(u => `${sumBy(u) >= 0 ? '+' : '−'}${fmt(Math.abs(sumBy(u)))} ${u}`).join(' · ')} net · ${esc(ESCROW_NET.name)}</span></div>`;
+  document.getElementById('lg-filters').innerHTML = [['all', 'All', rows.length], ['act', 'Activity', act.length], ['pay', 'Payments', pay.length]]
+    .map(([k, l, n]) => `<button class="lg-f ${LG.filter === k ? 'on' : ''} ${k}" onclick="LG.filter='${k}';drawLedger()">${l} <span>${n}</span></button>`).join('');
+  const shown = LG.filter === 'all' ? rows : rows.filter(r => r.kind === LG.filter);
+  const day = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
+  document.getElementById('lg-list').innerHTML = shown.length ? shown.map(r => `
+    <div class="lg-row ${r.kind}">
+      <span class="lg-tag ${r.kind}">${r.kind === 'pay' ? 'Payment' : 'Activity'}</span>
+      <div class="lg-main"><b>${esc(r.title)}</b><small>${esc(r.detail || '')} · ${day(r.when)}</small></div>
+      <div class="lg-amt">${r.amount != null ? `<b class="${r.amount >= 0 ? 'in' : 'out'}">${r.amount >= 0 ? '+' : '−'}${fmt(Math.abs(r.amount), r.unit === 'HBAR' ? 2 : 2)} ${esc(r.unit)}</b>` : r.hours != null ? `<b>${fmt(r.hours)} h</b>` : ''}
+        ${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">HashScan ↗</a>` : ''}</div>
+    </div>`).join('')
+    : `<div class="term-panel-empty">${LG.filter === 'pay' ? (LG.wallets?.length ? 'No payments on chain yet for your wallets.' : 'Add a wallet to see your payments here.') : 'Nothing here yet.'}</div>`;
+}
 
 async function renderAnalogPanel() {
   const panel = document.getElementById('term-panel');
@@ -15659,6 +15931,8 @@ async function termDispatch(raw) {
     const since = new Date(Date.now() - 28 * 864e5).toISOString().slice(0, 10);
     const recent = rows.filter(r => r.log_date >= since);
     termPrint(`Ledger · ${rows.length} entries · ${sum(rows).toLocaleString(undefined,{maximumFractionDigits:2})} hours logged · last 28 days ${sum(recent).toLocaleString(undefined,{maximumFractionDigits:2})} h on ${recent.length} days · ${operator.total_logs || 0} total LOGs`, 'system');
+    termPrint('Opening the Ledger: every activity and every payment.', 'system');
+    setTermView('ledger');
     return;
   }
   // The network at a glance.
@@ -17744,6 +18018,7 @@ async function fetchHbarBalance(address) {
 async function treasuryStatus() {
   const { data, error } = await sb.rpc('escrow_settings');
   if (error) throw error;
+  TREASURY_ADDR = data?.treasury_wallet || null;
   return data || {};
 }
 
@@ -17763,7 +18038,7 @@ async function renderTreasuryPanel() {
     : `<div class="escrow-muted" style="color:var(--orange);margin-bottom:12px">No treasury wallet yet. Escrows can't be created until one is set.</div>`}
     <div class="gate-err" id="gc-tr-err"></div>
     <button class="act-btn" id="gc-tr-btn" onclick="setTreasuryWallet()">${w ? 'Change the treasury wallet' : 'Connect and prove the treasury wallet'}</button>
-    <div class="escrow-muted" style="margin-top:8px">In MetaMask, pick the account you want as the treasury first. It signs one message: free, no transaction.</div>`;
+    <div class="escrow-muted" style="margin-top:8px">Works with MetaMask, HashPack or Robinhood Wallet. Pick the account you want as the treasury in that wallet first. It signs one message: free, no transaction.</div>`;
   if (w) {
     fetchHbarBalance(w).then(b => { const x = document.getElementById('gc-tr-hbar'); if (x) x.textContent = b == null ? '—' : b.toLocaleString(undefined, { maximumFractionDigits: 2 }); }).catch(() => {});
     fetchUsdcBalance(w).then(b => { const x = document.getElementById('gc-tr-usdc'); if (x) x.textContent = b == null ? '0' : b.toLocaleString(undefined, { maximumFractionDigits: 2 }); }).catch(() => {});
@@ -17773,22 +18048,24 @@ async function renderTreasuryPanel() {
 async function setTreasuryWallet() {
   const err = document.getElementById('gc-tr-err');
   const btn = document.getElementById('gc-tr-btn');
-  const say = m => { err.textContent = m; err.classList.add('show'); };
-  err.classList.remove('show');
-  if (!window.ethereum) return say('No wallet found. Open the OS in Chrome with MetaMask installed.');
-  btn.disabled = true;
+  const say = m => { if (err?.isConnected) { err.textContent = m; err.classList.add('show'); } else toast(m); };
+  err?.classList.remove('show');
+  const w = await pickWallet({ title: 'Add the treasury wallet',
+    lead: 'The treasury wallet runs the network’s money: it pays each member when a line is sealed and receives the reserve. Pick the wallet app that holds it. For real money, use a hardware wallet.' });
+  if (!w) return;
+  const address = w.address;
+  if (address === (operator.wallet_address || '').toLowerCase()) return say('That is your personal wallet. Pick a different account for the treasury, so your own pay and the network’s money never mix.');
+  const ok = await osConfirm(`Make ${shortAddr(address)} (${w.name}) the treasury wallet? It will pay members and receive the reserve in every new escrow. ${w.name} will ask it to sign one message (free).`);
+  if (!ok) return;
+  if (btn) btn.disabled = true;
   try {
-    btn.textContent = 'Check MetaMask…';
-    const [address] = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    if (!address) throw new Error('No account was shared from MetaMask.');
-    const ok = await osConfirm(`Make ${shortAddr(address.toLowerCase())} the treasury wallet? It will pay members and receive the reserve in every new escrow. MetaMask will ask it to sign one message (free).`);
-    if (!ok) return;
     const { data: message, error } = await sb.rpc('treasury_challenge', { p_address: address });
     if (error || !message) throw new Error(error?.message || 'Could not start.');
     const nonce = (message.match(/Nonce: ([0-9a-f]{32})/) || [])[1];
-    btn.textContent = 'Sign in MetaMask…';
-    const signature = await window.ethereum.request({ method: 'personal_sign', params: [message, address] });
-    btn.textContent = 'Verifying…';
+    if (btn) btn.textContent = `Sign in ${w.name}…`;
+    else toast(`Sign the message in ${w.name}.`);
+    const signature = await w.provider.request({ method: 'personal_sign', params: [message, address] });
+    if (btn) btn.textContent = 'Verifying…';
     const res = await fetch(`${SB_URL}/functions/v1/wallet-login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
@@ -17798,10 +18075,11 @@ async function setTreasuryWallet() {
     if (!res.ok || !body.wallet) throw new Error(body.error || 'The treasury could not be set.');
     toast('Treasury wallet set and proven.');
     renderTreasuryPanel();
+    refreshProfilePanel();
   } catch (e) {
-    say(e?.code === 4001 ? 'Cancelled in MetaMask.' : (e?.message || 'The treasury could not be set.'));
+    say(e?.code === 4001 ? `Cancelled in ${w.name}.` : (e?.message || 'The treasury could not be set.'));
   } finally {
-    if (btn.isConnected) { btn.disabled = false; btn.textContent = 'Connect and prove the treasury wallet'; }
+    if (btn?.isConnected) { btn.disabled = false; btn.textContent = 'Connect and prove the treasury wallet'; }
   }
 }
 
@@ -17831,10 +18109,10 @@ async function renderGenesisAudit() {
 
 
 async function connectSkWallet() {
-  if (!window.ethereum) { toast('No wallet found. Open this in your wallet\'s browser, or install MetaMask.'); return; }
   try {
-    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    const addr = accts[0];
+    const w = await pickWallet({ title: 'Connect your personal wallet' });
+    if (!w) return;
+    const addr = w.address;
     const { error } = await sb.rpc('update_wallet_address', { p_operator_id: operator.id, p_wallet_address: addr });
     if (error) throw error;
     operator.wallet_address = addr;
@@ -18205,11 +18483,11 @@ function renderRelWalletBox() {
 }
 
 async function connectRelWallet() {
-  if (!window.ethereum) { toast('No wallet found. Open this page in your wallet\'s browser, or install MetaMask.'); return; }
   try {
-    const accts = await window.ethereum.request({ method: 'eth_requestAccounts' });
-    relWallet.addr = accts[0];
-    // Put MetaMask on Hedera so the balance reads on the right network.
+    const w = await pickWallet({ title: 'Connect your wallet' });
+    if (!w) return;
+    relWallet.addr = w.address;
+    // Put the wallet on Hedera so the balance reads on the right network.
     await ensureHederaNetwork();
     relWallet.usdc = (await fetchUsdcBalance(relWallet.addr)) ?? 0;
     relWallet.confirmed = true;

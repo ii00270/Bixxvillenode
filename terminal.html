@@ -7520,16 +7520,17 @@ async function renderEscrowCreate(el, projectId, r, settings) {
       <option value="test">Free test token (mUSDC) — for dry runs</option>
     </select>
     <div class="escrow-muted">The test token is free to mint and worth nothing. It lets you run the whole flow without the faucet.</div>` : ''}
-    <label class="form-lbl" for="esc-treasury" style="margin-top:10px">Treasury wallet (receives the 25% reserve)</label>
-    <input class="form-input" id="esc-treasury" placeholder="0x…" value="${esc(settings.treasury_wallet || '')}" spellcheck="false"/>
-    <div class="escrow-muted" style="margin-top:8px">Audits and seals: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
+    <div class="form-lbl" style="margin-top:10px">Treasury wallet (pays each member when their line is sealed, and receives the 25% reserve)</div>
+    <div class="escrow-muted">${settings.treasury_wallet ? `${shortAddr(settings.treasury_wallet)} · proven ${settings.treasury_proven_at ? esc(new Date(settings.treasury_proven_at).toLocaleDateString()) : ''}` : `<span style="color:var(--red)">No treasury wallet yet. Set it in Network tools, then reopen this job.</span>`}</div>
+    <div class="escrow-muted" style="margin-top:8px">Audits: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
+    ${settings.treasury_wallet && lines.some(l => l.payee_wallet === settings.treasury_wallet) ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">The treasury wallet is also a worker's wallet on this job. A wallet can't pay itself: use a different treasury or a different worker wallet.</div>` : ''}
     ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
     <div class="gate-err" id="esc-err"></div>
-    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
+    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
     <div class="escrow-muted" style="padding:0 18px 12px">Your MetaMask deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
 }
 
-// Genesis audits and seals; on a line where Genesis is the worker, another
+// Genesis audits (the treasury wallet seals and pays); on a line where Genesis is the worker, another
 // member with a wallet does (a worker can never audit or seal their own line).
 function escrowRoles(lines, settings) {
   const payees = new Set(lines.map(l => l.payee_wallet).filter(Boolean));
@@ -7547,13 +7548,15 @@ async function createEscrow() {
   const say = m => { err.textContent = m; err.classList.add('show'); };
   err.classList.remove('show');
   const client = (document.getElementById('esc-client').value || '').trim().toLowerCase();
-  const treasury = (document.getElementById('esc-treasury').value || '').trim().toLowerCase();
+  const treasury = (d.settings.treasury_wallet || '').toLowerCase(); // proven in Network tools (0024)
   const isAddr = a => /^0x[0-9a-f]{40}$/.test(a);
   if (!isAddr(client)) return say('Enter the client’s wallet address.');
-  if (!isAddr(treasury)) return say('Enter the treasury wallet address.');
+  if (!isAddr(treasury)) return say('Set the treasury wallet in Network tools first.');
   const payees = d.lines.map(l => l.payee_wallet);
   if (payees.includes(client)) return say('The client can’t also be a worker on this job.');
   if (client === d.roles.wallet) return say('The client can’t also audit this job.');
+  if (client === treasury) return say('The client can’t also be the treasury.');
+  if (payees.includes(treasury)) return say('The treasury wallet can’t also be a worker on this job.');
   if (d.lines.length > 32) return say('An escrow holds at most 32 lines.');
   const useTest = ESCROW_NET.testToken && document.getElementById('esc-token')?.value === 'test';
   const tokenAddr = useTest ? ESCROW_NET.testToken : ESCROW_NET.usdc;
@@ -7567,12 +7570,11 @@ async function createEscrow() {
     await window.ethereum.request({ method: 'eth_requestAccounts' });
     await ensureHederaNetwork();
     const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
-    if (treasury !== d.settings.treasury_wallet) await sb.rpc('escrow_set_treasury', { p_wallet: treasury });
     const art = await loadEscrowArtifact();
     btn.textContent = 'Confirm the deploy in MetaMask…';
     const labors = d.lines.map(l => BigInt(l.labor_cents) * 10000n); // cents → USDC units (6 decimals)
     const contract = await new ethers.ContractFactory(art.abi, art.bytecode, signer)
-      .deploy(tokenAddr, client, d.roles.wallet, d.roles.wallet, treasury, payees, labors);
+      .deploy(tokenAddr, client, d.roles.wallet, treasury, treasury, payees, labors); // auditor, operator = treasury, treasury
     btn.textContent = 'Deploying…';
     await contract.waitForDeployment();
     const address = (await contract.getAddress()).toLowerCase();
@@ -7585,7 +7587,7 @@ async function createEscrow() {
     const labor = d.lines.reduce((n, l) => n + Number(l.labor_cents), 0);
     const { error } = await sb.rpc('escrow_record', {
       p_project: d.projectId, p_network: ESCROW_NET.key, p_chain_id: ESCROW_NET.chainId, p_contract: address,
-      p_token: tokenAddr, p_client: client, p_auditor: d.roles.wallet, p_operator: d.roles.wallet, p_treasury: treasury,
+      p_token: tokenAddr, p_client: client, p_auditor: d.roles.wallet, p_operator: treasury, p_treasury: treasury,
       p_labor_cents: labor, p_deploy_tx: deployTx,
       p_lines: d.lines.map((l, i) => ({ line_index: i, bid_id: l.bid_id, payee_operator_id: l.payee_operator_id, payee_wallet: l.payee_wallet, labor_cents: Number(l.labor_cents) })),
     });
@@ -7654,7 +7656,7 @@ async function renderEscrowStatus(el, x) {
         <div><b>Line ${l.line_index + 1}</b> · ${esc(l.title || 'Scope')}<br><span class="escrow-muted">${esc(l.assignee || shortAddr(l.payee_wallet))}${l.payee_wallet === me ? ' · you' : ''}${onchain[i]?.startedAt > 0n && stage(i) === 0 ? ' · started' : ''}</span></div>
         <div style="text-align:right">${escrowUsd(l.labor_cents)}<br><span class="escrow-stage s${stage(i) ?? 0}">${stage(i) === 4 ? 'Paid' : stage(i) != null ? ESCROW_STAGES[stage(i)] : '—'}</span></div>
       </div>`).join('')}</div>
-    <div class="escrow-muted">Client ${shortAddr(x.client_wallet)} · audits &amp; seals ${shortAddr(x.operator_wallet)} · treasury ${shortAddr(x.treasury_wallet)}</div>
+    <div class="escrow-muted">Client ${shortAddr(x.client_wallet)} · audits ${shortAddr(x.auditor_wallet)} · seals &amp; pays ${shortAddr(x.operator_wallet)} · treasury ${shortAddr(x.treasury_wallet)}</div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px">
       ${status === 0 || x.client_wallet === me ? `<button class="act-btn-sm" onclick="navigator.clipboard.writeText(new URL('${escrowLink(x.contract_address)}', location.href).href).then(() => toast('Escrow link copied. Send it to the client to fund and approve.'))">Copy link for the client</button>` : ''}
       <a class="act-btn-sm" href="${escrowLink(x.contract_address)}" target="_blank" rel="noopener">Open escrow page →</a>
@@ -15555,7 +15557,7 @@ async function termDispatch(raw) {
   }
 
   if (cmd === 'help') {
-    termPrint('Commands: help · clear · whoami · cycle · balance · theme · logout', 'system');
+    termPrint('Commands: help · clear · whoami · cycle · balance · ledger · status · treasury · theme · logout', 'system');
     termPrint('LOGG: mi wis di ka / di grobuki / di trap / di knoppunt', 'system');
     termPrint('Anything else is sent to BIX AI.', 'system');
     return;
@@ -15596,8 +15598,43 @@ async function termDispatch(raw) {
     termPrint('Checking…', 'system');
     try {
       const bal = await fetchUsdcBalance(operator.wallet_address);
-      termPrint(bal != null ? `$${bal.toLocaleString(undefined,{maximumFractionDigits:2})} USDC on Base` : 'Could not verify balance right now.', 'system');
+      const hbar = await fetchHbarBalance(operator.wallet_address).catch(() => null);
+      termPrint(bal != null ? `${shortAddr(operator.wallet_address)}: $${bal.toLocaleString(undefined,{maximumFractionDigits:2})} USDC · ${hbar != null ? hbar.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'} HBAR on ${ESCROW_NET.name}` : 'Could not verify balance right now.', 'system');
     } catch(e) { termPrint('Could not verify balance right now.', 'system'); }
+    return;
+  }
+  // Hours on the ledger: this cycle, the last 28 days and everything.
+  if (cmd === 'ledger') {
+    if (!operator) { termPrint('Sign in to see your hours.', 'system'); return; }
+    const { data, error } = await sb.from('log_ledger').select('log_date,hours').eq('peer', operator.peer_name);
+    if (error) { termPrint(`Could not read the ledger: ${error.message}`, 'err'); return; }
+    const rows = data || [];
+    const sum = r => r.reduce((n, x) => n + Number(x.hours || 0), 0);
+    const since = new Date(Date.now() - 28 * 864e5).toISOString().slice(0, 10);
+    const recent = rows.filter(r => r.log_date >= since);
+    termPrint(`Ledger · ${rows.length} entries · ${sum(rows).toLocaleString(undefined,{maximumFractionDigits:2})} hours logged · last 28 days ${sum(recent).toLocaleString(undefined,{maximumFractionDigits:2})} h on ${recent.length} days · ${operator.total_logs || 0} total LOGs`, 'system');
+    return;
+  }
+  // The network at a glance.
+  if (cmd === 'status') {
+    if (!operator) { termPrint('Sign in to see the network.', 'system'); return; }
+    try {
+      const st = await treasuryStatus();
+      const { count: jobs } = await sb.from('relation_submissions').select('id', { count: 'exact', head: true });
+      const c = getActiveCycle();
+      termPrint(`${ESCROW_NET.name} · Cycle ${c.num}, day ${c.day} of 28 · ${(st.members || []).length} member(s) · ${jobs ?? 0} job(s) · treasury ${st.treasury_wallet ? shortAddr(st.treasury_wallet) + ' (proven)' : 'not set'}`, 'system');
+    } catch (e) { termPrint(`Could not read the network: ${e.message}`, 'err'); }
+    return;
+  }
+  // Which wallet runs the money, and what it holds.
+  if (cmd === 'treasury') {
+    if (!operator) { termPrint('Sign in to see the treasury.', 'system'); return; }
+    try {
+      const st = await treasuryStatus();
+      if (!st.treasury_wallet) { termPrint(`No treasury wallet yet.${isExec() ? ' Set it in Network tools → Treasury wallet.' : ''}`, 'system'); return; }
+      const [usdc, hbar] = await Promise.all([fetchUsdcBalance(st.treasury_wallet).catch(() => null), fetchHbarBalance(st.treasury_wallet).catch(() => null)]);
+      termPrint(`Treasury ${st.treasury_wallet} · ${hbar != null ? hbar.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'} HBAR · ${usdc != null ? '$' + usdc.toLocaleString(undefined,{maximumFractionDigits:2}) : '$0'} USDC · ${ESCROW_NET.name} · proven ${st.treasury_proven_at ? new Date(st.treasury_proven_at).toLocaleDateString() : '—'}`, 'system');
+    } catch (e) { termPrint(`Could not read the treasury: ${e.message}`, 'err'); }
     return;
   }
   if (cmd === 'logout') {
@@ -17533,21 +17570,14 @@ function openGenesisConsole() {
       <div class="section-lbl" style="position:relative;top:0">PIN Recovery Requests</div>
       <div id="gc-recovery-list" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
 
-      <div class="section-lbl" style="position:relative;top:0">Central Wallet</div>
-      <div class="prof-field">
-        <div class="prof-field-lbl">Wallet address</div>
-        <div style="display:flex;gap:8px">
-          <input class="prof-field-input" id="gc-central-wallet" style="flex:1" value="${esc(operator.central_wallet_address || '')}" placeholder="0x…"/>
-          <button class="prof-add-btn" onclick="genesisSaveCentralWallet()">Save</button>
-        </div>
-      </div>
-      <div id="gc-central-balance" style="padding:0 18px 18px"></div>
+      <div class="section-lbl" style="position:relative;top:0">Treasury wallet</div>
+      <div id="gc-treasury" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
 
       <div class="section-lbl" style="position:relative;top:0">Payment Audit</div>
       <div id="gc-audit-list" style="padding:0 18px 24px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>`;
 
     renderGenesisRecoveryQueue();
-    if (operator.central_wallet_address) renderGenesisCentralBalance();
+    renderTreasuryPanel();
     renderGenesisAudit();
   }, null, null, true);
 }
@@ -17650,27 +17680,82 @@ async function genesisPromptResetPin(requestId) {
   }
 }
 
-async function genesisSaveCentralWallet() {
-  const addr = document.getElementById('gc-central-wallet')?.value.trim();
-  try {
-    const { error } = await sb.rpc('update_central_wallet', { p_address: addr || null });
-    if (error) throw error;
-    operator.central_wallet_address = addr;
-    toast('Central wallet saved.');
-    if (addr) renderGenesisCentralBalance();
-  } catch(e) { console.error(e); toast('Could not save the wallet address.'); }
+// ── TREASURY WALLET (migration 0024) ──
+// One wallet runs the money: in every escrow it is the operator (it seals each
+// line, which pays that member, and releases the reserve) and the treasury
+// (it receives the reserve). The wallet proves itself with a free signature;
+// the system keeps only its public address and that proof, never a key.
+async function fetchHbarBalance(address) {
+  const res = await fetch(ESCROW_NET.rpc, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_getBalance', params: [address, 'latest'] }),
+  });
+  const json = await res.json();
+  if (json.error || !json.result) return null;
+  return Number(BigInt(json.result) / 10n ** 14n) / 1e4; // weibar (18 decimals) → HBAR
 }
 
-async function renderGenesisCentralBalance() {
-  const el = document.getElementById('gc-central-balance');
-  if (!el || !operator.central_wallet_address) return;
-  el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--grey)">Checking balance…</div>';
+async function treasuryStatus() {
+  const { data, error } = await sb.rpc('escrow_settings');
+  if (error) throw error;
+  return data || {};
+}
+
+async function renderTreasuryPanel() {
+  const el = document.getElementById('gc-treasury');
+  if (!el) return;
+  let s;
+  try { s = await treasuryStatus(); }
+  catch (e) { el.innerHTML = `<div class="escrow-muted" style="color:var(--red)">${esc(e.message || 'Could not read the treasury.')}</div>`; return; }
+  const w = s.treasury_wallet;
+  el.innerHTML = `
+    <div class="escrow-muted" style="margin-bottom:10px">This wallet runs the money on ${esc(ESCROW_NET.name)}. In every escrow it pays each member when their line is sealed, and it receives the 25% reserve. Every payment is signed in the wallet itself: the system only keeps its public address.</div>
+    ${w ? `
+      <div class="escrow-line"><div><b>${esc(shortAddr(w))}</b><br><span class="escrow-muted">Proven ${s.treasury_proven_at ? esc(new Date(s.treasury_proven_at).toLocaleString()) : '—'}${s.treasury_set_by ? ' · set by ' + esc(s.treasury_set_by) : ''}</span></div>
+        <div style="text-align:right"><span id="gc-tr-hbar">…</span> HBAR<br><span class="escrow-muted"><span id="gc-tr-usdc">…</span> USDC</span></div></div>
+      <div class="escrow-muted" style="margin:6px 0 12px"><a href="${ESCROW_NET.explorer}/account/${esc(w)}" target="_blank" rel="noopener">View on HashScan ↗</a></div>`
+    : `<div class="escrow-muted" style="color:var(--orange);margin-bottom:12px">No treasury wallet yet. Escrows can't be created until one is set.</div>`}
+    <div class="gate-err" id="gc-tr-err"></div>
+    <button class="act-btn" id="gc-tr-btn" onclick="setTreasuryWallet()">${w ? 'Change the treasury wallet' : 'Connect and prove the treasury wallet'}</button>
+    <div class="escrow-muted" style="margin-top:8px">In MetaMask, pick the account you want as the treasury first. It signs one message: free, no transaction.</div>`;
+  if (w) {
+    fetchHbarBalance(w).then(b => { const x = document.getElementById('gc-tr-hbar'); if (x) x.textContent = b == null ? '—' : b.toLocaleString(undefined, { maximumFractionDigits: 2 }); }).catch(() => {});
+    fetchUsdcBalance(w).then(b => { const x = document.getElementById('gc-tr-usdc'); if (x) x.textContent = b == null ? '0' : b.toLocaleString(undefined, { maximumFractionDigits: 2 }); }).catch(() => {});
+  }
+}
+
+async function setTreasuryWallet() {
+  const err = document.getElementById('gc-tr-err');
+  const btn = document.getElementById('gc-tr-btn');
+  const say = m => { err.textContent = m; err.classList.add('show'); };
+  err.classList.remove('show');
+  if (!window.ethereum) return say('No wallet found. Open the OS in Chrome with MetaMask installed.');
+  btn.disabled = true;
   try {
-    const bal = await fetchUsdcBalance(operator.central_wallet_address);
-    el.innerHTML = `<div style="font-family:var(--display);font-size:22px;font-weight:800;color:var(--green)">${bal != null ? '$' + bal.toLocaleString(undefined,{maximumFractionDigits:2}) : '—'}</div>`;
-  } catch(e) {
-    console.error(e);
-    el.innerHTML = '<div style="font-family:var(--mono);font-size:10px;color:var(--orange)">Could not check balance.</div>';
+    btn.textContent = 'Check MetaMask…';
+    const [address] = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    if (!address) throw new Error('No account was shared from MetaMask.');
+    const ok = await osConfirm(`Make ${shortAddr(address.toLowerCase())} the treasury wallet? It will pay members and receive the reserve in every new escrow. MetaMask will ask it to sign one message (free).`);
+    if (!ok) return;
+    const { data: message, error } = await sb.rpc('treasury_challenge', { p_address: address });
+    if (error || !message) throw new Error(error?.message || 'Could not start.');
+    const nonce = (message.match(/Nonce: ([0-9a-f]{32})/) || [])[1];
+    btn.textContent = 'Sign in MetaMask…';
+    const signature = await window.ethereum.request({ method: 'personal_sign', params: [message, address] });
+    btn.textContent = 'Verifying…';
+    const res = await fetch(`${SB_URL}/functions/v1/wallet-login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}` },
+      body: JSON.stringify({ address, nonce, signature, purpose: 'treasury' }),
+    });
+    const body = await res.json().catch(() => ({}));
+    if (!res.ok || !body.wallet) throw new Error(body.error || 'The treasury could not be set.');
+    toast('Treasury wallet set and proven.');
+    renderTreasuryPanel();
+  } catch (e) {
+    say(e?.code === 4001 ? 'Cancelled in MetaMask.' : (e?.message || 'The treasury could not be set.'));
+  } finally {
+    if (btn.isConnected) { btn.disabled = false; btn.textContent = 'Connect and prove the treasury wallet'; }
   }
 }
 

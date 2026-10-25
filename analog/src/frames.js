@@ -4,6 +4,10 @@
 //
 //   BXF1.<session>.<i>.<n>.<crc32>.<chunk>      (chunk is base64url)
 //
+// With `link`, each frame is written as <link>#bx=<frame>, so an ordinary phone camera opens the OS
+// (which explains the code and hands it to Analog) instead of showing raw data. The part after # is
+// never sent to any server. Readers accept a frame on its own or inside such a link.
+//
 // There is no back-channel: the sender loops the frames and the receiver keeps what it has, so the
 // receiver just keeps pointing the camera until every frame has been seen. Frames already seen are kept
 // per session, so a scan that was interrupted carries on where it stopped.
@@ -14,7 +18,7 @@ export const FRAME_PREFIX = 'BXF1';
 export const MAX_FRAMES = 2000;
 export const DEFAULT_CHUNK = 400;   // bytes per frame; keeps each QR scannable on a phone
 
-export async function encodeFrames(bytes, { chunk = DEFAULT_CHUNK, compress = true, sid } = {}) {
+export async function encodeFrames(bytes, { chunk = DEFAULT_CHUNK, compress = true, sid, link } = {}) {
   let flag = 0, data = bytes;
   if (compress) { const z = await gzip(bytes); if (z && z.length < bytes.length) { flag = 1; data = z; } }
   const body = concat(Uint8Array.of(flag), data);
@@ -24,12 +28,16 @@ export async function encodeFrames(bytes, { chunk = DEFAULT_CHUNK, compress = tr
   sid = sid || hex(crypto.getRandomValues(new Uint8Array(3)));
   return Array.from({ length: n }, (_, i) => {
     const part = payload.subarray(i * chunk, (i + 1) * chunk);
-    return `${FRAME_PREFIX}.${sid}.${i}.${n}.${crc32(part).toString(16).padStart(8, '0')}.${b64u(part)}`;
+    const frame = `${FRAME_PREFIX}.${sid}.${i}.${n}.${crc32(part).toString(16).padStart(8, '0')}.${b64u(part)}`;
+    return link ? `${link}#bx=${frame}` : frame;
   });
 }
 
 export function parseFrame(text) {
-  const p = String(text).trim().split('.');
+  let t = String(text).trim();
+  const at = t.indexOf('#bx=');
+  if (at >= 0) t = t.slice(at + 4);
+  const p = t.split('.');
   if (p.length !== 6 || p[0] !== FRAME_PREFIX) throw new Error('not a Bixxville frame');
   const [, sid, i, n, crc, data] = p;
   if (!/^[0-9a-f]{6}$/.test(sid) || !/^\d{1,4}$/.test(i) || !/^\d{1,4}$/.test(n) || !/^[0-9a-f]{8}$/.test(crc)) throw new Error('bad frame header');

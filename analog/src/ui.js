@@ -1,5 +1,6 @@
 // The Analog panel. It is handed the host app's small helpers, so the same panel can sit in any of the apps.
-//   host = { openOverlay(title, bodyFn, actionLabel, actionFn, push), closeOverlay(), toast(msg), esc(text), operator() }
+//   host = { openOverlay(title, bodyFn, actionLabel, actionFn, push), closeOverlay(), toast(msg), esc(text), operator(), link? }
+//   link: the app's own address; QR codes carry it so a phone's ordinary camera opens the app.
 
 import { IdbStore, MemoryStore } from './store.js';
 import { Keyring, createIdentity, restoreIdentity, keyCard, readKeyCard, BACKUP_WARNING } from './keys.js';
@@ -144,10 +145,28 @@ async function onKeyCardBytes(bytes) {
   return false;
 }
 
+// A code that came in through the app's link (a phone's ordinary camera opened <link>#bx=<frame>).
+// One-frame codes are read at once; a frame of an animated code opens the scanner with it already counted.
+const readScanned = async (bytes) => {
+  const t = dec.decode(bytes);
+  return t.includes('"bixx-key-card"') ? onKeyCardBytes(bytes) : doImport(t);
+};
+export async function openScanned(host, text) {
+  await ensure(host);
+  const asm = new FrameAssembler(), r = asm.add(text);
+  if (!r.ok) { host.toast(`That code could not be read: ${r.reason}.`); return; }
+  if (r.done) {
+    try { await readScanned(await asm.result()); } catch (e) { host.toast(e.message); }
+    return;
+  }
+  const d = scanDialog({ title: 'Finish the scan', hint: `This is frame ${r.have} of ${r.total} of an animated code. Point this phone at the other screen until every frame is in.`, onBytes: readScanned });
+  await d.handle(text);
+}
+
 // ───────────────────────── QR dialogs ─────────────────────────
 async function showFrames(title, bytes, hint = '', tag = '') {
   let frames;
-  try { frames = await encodeFrames(bytes); } catch (e) { A.host.toast(e.message); return; }
+  try { frames = await encodeFrames(bytes, { link: A.host.link }); } catch (e) { A.host.toast(e.message); return; }
   A.host.openOverlay(title, (body) => {
     body.innerHTML = `<div class="term-wf" style="text-align:center"><div id="an-qr" class="an-qr"></div>
       <div class="pp-muted" id="an-qrn">${frames.length === 1 ? 'One code' : `${frames.length} frames`}${tag ? ' · ' + esc(tag) : ''}</div>

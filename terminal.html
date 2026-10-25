@@ -13,6 +13,18 @@
 <meta name="apple-mobile-web-app-title" content="Bixxville">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script>
+// A Bixxville QR code opened by a phone's ordinary camera arrives as terminal.html#bx=<frame>.
+// Keep the frame for Analog and clear it from the address bar (the part after # never reaches a server).
+(function () {
+  try {
+    if (location.hash.indexOf('#bx=') === 0) {
+      sessionStorage.setItem('bx-scan', location.hash.slice(4));
+      history.replaceState(null, '', location.pathname + location.search);
+    }
+  } catch (e) {}
+})();
+</script>
+<script>
 // Applied synchronously, before the stylesheet paints anything, so the theme never
 // flashes. Same rule as landofgeb.net and bixxville.xyz: the visitor's saved choice
 // ("bx-theme") wins; with none, the phone or computer's own setting; with neither, light.
@@ -5299,6 +5311,7 @@ async function enterShell() {
 
   showSurface('members');
   loadAll();
+  setTimeout(openPendingScan, 600);
 }
 
 // ── NAVIGATION ──
@@ -11934,12 +11947,45 @@ function setTermView(view) {
 
 
 // ── ANALOG: signed records that move with no internet (see analog/ANALOG.md) ──
+// link: this app's own address, so Analog's QR codes open the app from a phone's ordinary camera.
+const analogHost = () => ({ openOverlay, closeOverlay, toast, esc, operator: () => operator, link: location.origin + location.pathname });
+
+// A code scanned with an ordinary camera (see the #bx= catcher in <head>): explain it while signed out,
+// and hand it to Analog once signed in.
+function pendingScan() { try { return sessionStorage.getItem('bx-scan'); } catch (e) { return null; } }
+function describeScan(text) {
+  const p = String(text).split('.');
+  return p.length === 6 && p[0] === 'BXF1' && +p[3] > 1 ? `part ${+p[2] + 1} of ${p[3]} of an animated Bixxville code` : 'a Bixxville code';
+}
+function showScanNotice() {
+  const text = pendingScan();
+  if (!text || operator || document.getElementById('bx-scan-note')) return;
+  const n = document.createElement('div');
+  n.id = 'bx-scan-note';
+  n.setAttribute('role', 'status');
+  n.style.cssText = 'position:fixed;left:12px;right:12px;bottom:12px;z-index:99999;max-width:520px;margin:0 auto;padding:14px 16px;background:var(--bg,#0A0B0C);color:var(--text,#CDCFD3);border:1px solid var(--orange,#F45E26);font:13px/1.5 var(--mono,monospace)';
+  n.innerHTML = `<b style="color:var(--white,#fff)">You scanned ${esc(describeScan(text))}.</b><br>It is a key card or signed records for Analog. Sign in, and it opens there for you to check before anything is saved. <button type="button" style="margin-left:6px;background:none;border:0;color:inherit;font:inherit;text-decoration:underline;cursor:pointer" onclick="try{sessionStorage.removeItem('bx-scan')}catch(e){};this.parentNode.remove()">Dismiss</button>`;
+  document.body.appendChild(n);
+}
+async function openPendingScan() {
+  const text = pendingScan();
+  if (!text) return;
+  try { sessionStorage.removeItem('bx-scan'); } catch (e) {}
+  document.getElementById('bx-scan-note')?.remove();
+  try {
+    setTermView('analog');
+    const m = await import('./analog/src/ui.js');
+    await m.openScanned(analogHost(), text);
+  } catch (e) { toast(`The scanned code could not be opened: ${e.message}`); }
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(showScanNotice, 400));
+
 async function renderAnalogPanel() {
   const panel = document.getElementById('term-panel');
   panel.innerHTML = '<div class="term-panel-empty">Loading Analog…</div>';
   try {
     const m = await import('./analog/src/ui.js');
-    await m.renderAnalog(panel, { openOverlay, closeOverlay, toast, esc, operator: () => operator });
+    await m.renderAnalog(panel, analogHost());
   } catch (e) { panel.innerHTML = `<div class="term-panel-empty">Analog could not load: ${esc(e.message)}</div>`; }
 }
 

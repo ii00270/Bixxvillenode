@@ -2827,6 +2827,7 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 .dash-lbl > span:first-child{display:flex;align-items:center;gap:7px;color:var(--term-fg);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dash-chip{border:1px solid var(--term-line);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--term-dim)}
 .dash-big{font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.dash-big small{font-size:.42em;font-weight:400;letter-spacing:.04em;color:var(--term-dim);margin-left:2px}
 .dash-mid-v{font-size:20px;font-weight:500;line-height:1.2;margin:2px 0 4px}
 .dash-sub{font-size:11.5px;color:var(--term-dim);margin-top:8px}
 .dash-note{font-size:10.5px;color:var(--term-dim)}
@@ -10857,9 +10858,9 @@ async function connectKnownWallet(provider, name) {
 }
 
 // Your personal wallet: signs you in and receives your pay. Kept apart from the treasury wallet.
-async function openAddWallet() {
+async function openAddWallet(pre) {
   const have = (operator.wallet_address || '').toLowerCase();
-  const w = await pickWallet({ title: have ? 'Change your personal wallet' : 'Add your personal wallet',
+  const w = pre?.address ? pre : await pickWallet({ title: have ? 'Change your personal wallet' : 'Add your personal wallet',
     lead: 'Your personal wallet signs you in and receives your pay. Pick the wallet app you use.' });
   if (!w) return;
   const a = w.address, s = x => `${x.slice(0, 6)}…${x.slice(-4)}`;
@@ -10880,32 +10881,129 @@ async function openAddWallet() {
   if (document.getElementById('term-panel')?.querySelector('.cl-wrap')) { await loadPeople(true); renderClientsPanel(); }
 }
 
+// ── THE WALLET CONNECTED IN THIS BROWSER ──
+// Asked silently (eth_accounts opens no pop-up and only answers if the wallet already allows this site), so the
+// home card shows the real wallet, account and network, whatever they are, instead of only the address on file.
+const USDC_BY_CHAIN = {
+  1: '0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48', 8453: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',
+  42161: '0xaf88d065e77c8cC2239327C5EDb3A432268e5831', 10: '0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85',
+  137: '0x3c499c542cEF5E3811e1192ce70d8cC03d5c3359', 295: '0x000000000000000000000000000000000006f89a', 296: ESCROW_NET.usdc,
+};
+const NATIVE_SYMBOL = { 137: 'POL', 56: 'BNB', 295: 'HBAR', 296: 'HBAR' };
+const providerName = p => p?.isRobinhood ? 'Robinhood Wallet' : p?.isHashPack ? 'HashPack' : p?.isMetaMask ? 'MetaMask' : 'Wallet in this browser';
+const WALLET_WATCHED = new WeakSet();
+let walletRefreshTimer = null;
+function scheduleWalletRefresh() { clearTimeout(walletRefreshTimer); walletRefreshTimer = setTimeout(refreshWalletViews, 400); }
+function refreshWalletViews() {
+  if (!operator) return;
+  if (document.getElementById('dash-bal')) renderDashBalance();
+  if (typeof profileOpen === 'function' && profileOpen()) fillProfileWallets(operator);
+}
+window.addEventListener('eip6963:announceProvider', scheduleWalletRefresh);   // a wallet that announces itself late
+
+async function detectWallet() {
+  window.dispatchEvent(new Event('eip6963:requestProvider'));
+  await new Promise(r => setTimeout(r, 150));
+  const have = (operator?.wallet_address || '').toLowerCase(), seen = new Set(), cands = [];
+  for (const d of WALLET_FOUND.values()) if (!seen.has(d.provider)) { seen.add(d.provider); cands.push({ provider: d.provider, name: d.info.name }); }
+  if (window.ethereum && !seen.has(window.ethereum)) cands.push({ provider: window.ethereum, name: providerName(window.ethereum) });
+  let best = null;
+  for (const c of cands) {
+    try {
+      const accts = await c.provider.request({ method: 'eth_accounts' });
+      if (!accts?.length) continue;
+      if (!WALLET_WATCHED.has(c.provider)) {
+        WALLET_WATCHED.add(c.provider);
+        c.provider.on?.('accountsChanged', scheduleWalletRefresh);
+        c.provider.on?.('chainChanged', scheduleWalletRefresh);
+      }
+      const hit = { ...c, address: accts[0].toLowerCase() };
+      if (!best || hit.address === have || (ACTIVE_WALLET?.provider === c.provider && best.address !== have)) best = hit;
+    } catch (e) { /* a wallet that won't answer is treated as not connected */ }
+  }
+  if (best) ACTIVE_WALLET = { provider: best.provider, name: best.name };
+  return best;
+}
+
+// What the connected wallet holds, on whichever network it is on right now.
+async function walletSnapshot() {
+  const hit = await detectWallet();
+  const have = (operator?.wallet_address || '').toLowerCase();
+  if (!hit) return { connected: false, address: have || null };
+  const rpc = m => hit.provider.request(m);
+  const chainId = parseInt(await rpc({ method: 'eth_chainId' }), 16);
+  const snap = { connected: true, name: hit.name, address: hit.address, chainId, chain: chainName(chainId) || `network ${chainId}`,
+    onFile: hit.address === have, hedera: chainId === ESCROW_NET.chainId, symbol: NATIVE_SYMBOL[chainId] || 'ETH', native: null, usdc: null, token: !!USDC_BY_CHAIN[chainId] };
+  try { snap.native = Number(BigInt(await rpc({ method: 'eth_getBalance', params: [hit.address, 'latest'] })) / 10n ** 14n) / 1e4; } catch (e) {}
+  const tok = USDC_BY_CHAIN[chainId];
+  if (tok) {
+    try {
+      const r = await rpc({ method: 'eth_call', params: [{ to: tok, data: '0x70a08231' + '0'.repeat(24) + hit.address.slice(2) }, 'latest'] });
+      snap.usdc = r && r !== '0x' ? Number(BigInt(r)) / 1e6 : 0;
+    } catch (e) {}
+  }
+  return snap;
+}
+
+async function switchToHedera() {
+  try { await ensureHederaNetwork(); toast(`Switched to ${ESCROW_NET.name}.`); scheduleWalletRefresh(); }
+  catch (e) { toast(e?.code === 4001 ? 'Cancelled in your wallet.' : (e?.message || 'Could not switch networks.')); }
+}
+async function useConnectedWallet() {
+  const snap = await walletSnapshot();
+  if (!snap.connected) { openAddWallet(); return; }
+  openAddWallet({ provider: ACTIVE_WALLET.provider, address: snap.address, name: snap.name, chainId: snap.chainId });
+}
+
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
   if (!el) return;
-  const addr = operator?.wallet_address;
-  const short = addr ? addr.slice(0, 6) + '…' + addr.slice(-4) : null;
-  el.innerHTML = `
-    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">USDC · ${ESCROW_NET.name}</span></div>
-    <div class="dash-big" id="dash-bal-v">${addr ? '…' : '—'}</div>
-    <div class="dash-bar"><i style="width:100%"></i></div>
-    <div class="dash-sub">${addr ? `Personal wallet ${esc(short)}` : 'No personal wallet yet.'}</div>
+  const have = operator?.wallet_address || '';
+  const sh = a => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
+  const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = (n, d = 4) => n.toLocaleString('en-US', { maximumFractionDigits: d });
+  const acts = (snap) => `
     <div class="dash-acts">
+      ${!snap.connected ? `<button class="dash-btn solid" onclick="connectWalletHere()">Connect a wallet</button>` : ''}
+      ${snap.connected && !snap.onFile ? `<button class="dash-btn solid" onclick="useConnectedWallet()">Use this wallet</button>` : ''}
+      ${snap.connected && !snap.hedera ? `<button class="dash-btn" onclick="switchToHedera()">Switch to Hedera</button>` : ''}
       <button class="dash-btn" onclick="setTermView('ledger')">Ledger</button>
-      ${addr ? `<button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(addr)}');toast('Wallet address copied.')">Copy address</button>
-      <button class="dash-btn" onclick="openAddWallet()">Change wallet</button>`
-             : `<button class="dash-btn solid" onclick="openAddWallet()">Add wallet</button>`}
+      ${snap.address ? `<button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(snap.address)}');toast('Wallet address copied.')">Copy address</button>` : ''}
+      <button class="dash-btn" onclick="openAddWallet()">${have ? 'Change wallet' : 'Add wallet'}</button>
       <button class="dash-btn" onclick="openWalletsInProfile()">${isExec() ? 'Wallets · treasury' : 'Wallets'}</button>
     </div>`;
-  if (addr) {
-    const b = termBalanceCache ?? await fetchUsdcBalance(addr).catch(() => null);
-    const v = document.getElementById('dash-bal-v');
-    if (v) v.textContent = b != null ? '$' + b.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00';
-    if (b == null) {
-      const sub = el.querySelector('.dash-sub');
-      if (sub) sub.textContent = `Wallet ${short} isn’t on ${ESCROW_NET.name} yet — sending it a little HBAR creates it.`;
-    }
+  // First paint straight away, from what we already know; then ask the wallet.
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">Checking your wallet…</span></div>
+    <div class="dash-big">…</div><div class="dash-bar"><i style="width:100%"></i></div>
+    <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}` : 'No personal wallet yet.'}</div>${acts({ connected: false, address: have })}`;
+  let snap;
+  try { snap = await walletSnapshot(); } catch (e) { snap = { connected: false, address: have }; }
+  if (!document.getElementById('dash-bal')) return;
+  if (snap.connected) {
+    const big = snap.token && snap.usdc != null ? money(snap.usdc) + '<small> USDC</small>' : snap.native != null ? `${num(snap.native)}<small> ${esc(snap.symbol)}</small>` : '—';
+    el.innerHTML = `
+      <div class="dash-lbl"><span>${esc(snap.name)}</span><span class="dash-chip">${esc(snap.chain)}</span></div>
+      <div class="dash-big">${big}</div>
+      <div class="dash-bar"><i style="width:100%"></i></div>
+      <div class="dash-sub">${esc(sh(snap.address))} · ${snap.onFile ? 'your personal wallet' : `not your personal wallet on file${have ? ` (${esc(sh(have))})` : ''}`}${snap.token && snap.native != null ? ` · ${num(snap.native)} ${esc(snap.symbol)} for fees` : ''}${snap.token ? '' : ' · USDC isn’t shown on this network'}</div>
+      ${acts(snap)}`;
+    return;
   }
+  // No wallet connected here: show the address on file, read from Hedera, and say so.
+  const b = termBalanceCache ?? (have ? await fetchUsdcBalance(have).catch(() => null) : null);
+  el.innerHTML = `
+    <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">${have ? `On file · ${esc(ESCROW_NET.name)}` : 'No wallet'}</span></div>
+    <div class="dash-big">${have ? (b != null ? money(b) : '$0.00') + '<small> USDC</small>' : '—'}</div>
+    <div class="dash-bar"><i style="width:100%"></i></div>
+    <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}, read from ${esc(ESCROW_NET.name)}. No wallet is connected in this browser: connect one to see its own network and balance.` : 'No personal wallet yet.'}</div>
+    ${acts({ connected: false, address: have })}`;
+}
+
+// Connect from the home card: the picker, then the card redraws with that wallet.
+async function connectWalletHere() {
+  const w = await pickWallet({ title: 'Connect a wallet', lead: 'Pick the wallet app you use. The card then shows that wallet and the network it is on.' });
+  if (w) scheduleWalletRefresh();
 }
 
 function renderDashMarkets(m) {
@@ -12167,6 +12265,7 @@ async function renderProfilePanel() {
           <p>Signs you in and receives your pay.</p>
           <b>${op.wallet_address ? esc(op.wallet_address.slice(0, 6) + '…' + op.wallet_address.slice(-4)) : 'None yet'}</b>
           <div class="pf-wal-bal" id="pf-wal-p">${op.wallet_address ? '…' : ''}</div>
+          <div class="pf-wal-bal" id="pf-wal-conn">Checking the connected wallet…</div>
           <div class="pf-wal-acts">
             <button class="pf-btn ${op.wallet_address ? '' : 'solid'}" onclick="openAddWallet()">${op.wallet_address ? 'Change wallet' : 'Add wallet'}</button>
             ${op.wallet_address ? copyBtn(op.wallet_address, 'Wallet address') : ''}
@@ -12249,6 +12348,12 @@ async function renderProfilePanel() {
 
 // Balances on the two wallet cards, and the treasury card's state (Executive Operator only).
 async function fillProfileWallets(op) {
+  walletSnapshot().then(sn => {
+    const c = document.getElementById('pf-wal-conn'); if (!c) return;
+    c.textContent = sn.connected
+      ? `Connected now: ${sn.name} on ${sn.chain}${sn.onFile ? '' : ' · a different account from the one on file'}`
+      : 'No wallet is connected in this browser.';
+  }).catch(() => {});
   const money = (u, h) => `${u != null ? '$' + u.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'} USDC · ${h != null ? h.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'} HBAR <small>${esc(ESCROW_NET.name)}</small>`;
   const bal = async a => money(await fetchUsdcBalance(a).catch(() => null), await fetchHbarBalance(a).catch(() => null));
   if (op.wallet_address) { const el = document.getElementById('pf-wal-p'); if (el) el.innerHTML = await bal(op.wallet_address); }

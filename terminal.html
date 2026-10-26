@@ -10899,11 +10899,15 @@ function refreshWalletViews() {
   if (document.getElementById('dash-bal')) renderDashBalance();
   if (typeof profileOpen === 'function' && profileOpen()) fillProfileWallets(operator);
 }
-window.addEventListener('eip6963:announceProvider', scheduleWalletRefresh);   // a wallet that announces itself late
+const WALLET_ANNOUNCED = new Set();
+window.addEventListener('eip6963:announceProvider', e => {                       // a wallet that announces itself late
+  const id = e.detail?.info?.uuid || e.detail?.info?.rdns;
+  if (!id || WALLET_ANNOUNCED.has(id)) return;                                   // wallets repeat themselves; only a new one counts
+  WALLET_ANNOUNCED.add(id);
+  scheduleWalletRefresh();
+});
 
 async function detectWallet() {
-  window.dispatchEvent(new Event('eip6963:requestProvider'));
-  await new Promise(r => setTimeout(r, 150));
   const have = (operator?.wallet_address || '').toLowerCase(), seen = new Set(), cands = [];
   for (const d of WALLET_FOUND.values()) if (!seen.has(d.provider)) { seen.add(d.provider); cands.push({ provider: d.provider, name: d.info.name }); }
   if (window.ethereum && !seen.has(window.ethereum)) cands.push({ provider: window.ethereum, name: providerName(window.ethereum) });
@@ -10955,9 +10959,14 @@ async function useConnectedWallet() {
   openAddWallet({ provider: ACTIVE_WALLET.provider, address: snap.address, name: snap.name, chainId: snap.chainId });
 }
 
+let dashBalBusy = false;
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
-  if (!el) return;
+  if (!el || dashBalBusy) return;
+  dashBalBusy = true;
+  try { await drawDashBalance(el); } finally { dashBalBusy = false; }
+}
+async function drawDashBalance(el) {
   const have = operator?.wallet_address || '';
   const sh = a => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
   const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -10972,14 +10981,16 @@ async function renderDashBalance() {
       <button class="dash-btn" onclick="openAddWallet()">${have ? 'Change wallet' : 'Add wallet'}</button>
       <button class="dash-btn" onclick="openWalletsInProfile()">${isExec() ? 'Wallets · treasury' : 'Wallets'}</button>
     </div>`;
-  // First paint straight away, from what we already know; then ask the wallet.
-  el.innerHTML = `
+  // First paint straight away, from what we already know; then ask the wallet. A card that is already showing
+  // something keeps showing it while it updates, so a refresh never flashes.
+  if (!el.dataset.painted) el.innerHTML = `
     <div class="dash-lbl"><span>Wallet balance</span><span class="dash-chip">Checking your wallet…</span></div>
     <div class="dash-big">…</div><div class="dash-bar"><i style="width:100%"></i></div>
     <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}` : 'No personal wallet yet.'}</div>${acts({ connected: false, address: have })}`;
   let snap;
   try { snap = await walletSnapshot(); } catch (e) { snap = { connected: false, address: have }; }
   if (!document.getElementById('dash-bal')) return;
+  el.dataset.painted = '1';
   if (snap.connected) {
     const big = snap.token && snap.usdc != null ? money(snap.usdc) + '<small> USDC</small>' : snap.native != null ? `${num(snap.native)}<small> ${esc(snap.symbol)}</small>` : '—';
     el.innerHTML = `

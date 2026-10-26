@@ -10786,7 +10786,7 @@ const WALLET_KINDS = [
   { key: 'robinhood', name: 'Robinhood Wallet', match: i => /robinhood/i.test(i.name || '') || /robinhood/i.test(i.rdns || ''), legacy: p => p?.isRobinhood,
     get: null, how: 'Robinhood Wallet is a phone app. Open it, go to its browser, and open this page there. Then connect.' },
 ];
-const CHAIN_NAMES = { 1: 'Ethereum', 10: 'Optimism', 56: 'BNB Chain', 137: 'Polygon', 8453: 'Base', 42161: 'Arbitrum', 43114: 'Avalanche', 295: 'Hedera', 296: 'Hedera Testnet', 11155111: 'Sepolia' };
+const CHAIN_NAMES = { 1: 'Ethereum', 10: 'Optimism', 56: 'BNB Chain', 137: 'Polygon', 8453: 'Base', 42161: 'Arbitrum', 43114: 'Avalanche', 295: 'Hedera', 296: 'Hedera Testnet', 4663: 'Robinhood Chain', 46630: 'Robinhood Chain Testnet', 11155111: 'Sepolia' };   // Robinhood ids: docs.robinhood.com/chain/add-network-to-wallet
 const chainName = id => CHAIN_NAMES[id] || (id ? `network ${id}` : '');
 
 // The wallet chosen last (any app). Escrow steps and network switches sign with it.

@@ -5507,6 +5507,7 @@ async function enterShell() {
   loadAll();
   if (isExec()) treasuryStatus().catch(() => {});
   startPresence();
+  startWalletPoll();
   if (isExec()) watchPresence();
   setTimeout(openPendingScan, 600);
 }
@@ -9301,15 +9302,23 @@ async function fetchUsdcBalance(address) {
 async function ensureHederaNetwork() {
   const eth = walletProvider();
   if (!eth) throw new Error('No wallet found. Connect MetaMask, HashPack or Robinhood Wallet first.');
-  const current = await eth.request({ method: 'eth_chainId' });
-  if (parseInt(current, 16) === ESCROW_NET.chainId) return;
-  await eth.request({ method: 'wallet_addEthereumChain', params: [{
-    chainId: ESCROW_NET.chainHex, chainName: ESCROW_NET.name, nativeCurrency: ESCROW_NET.currency,
-    rpcUrls: [ESCROW_NET.rpc], blockExplorerUrls: [ESCROW_NET.explorer],
-  }] });
-  if (parseInt(await eth.request({ method: 'eth_chainId' }), 16) !== ESCROW_NET.chainId) {
-    throw new Error(`Switch your wallet to ${ESCROW_NET.name} and try again.`);
+  const at = async () => parseInt(await eth.request({ method: 'eth_chainId' }), 16);
+  if (await at() === ESCROW_NET.chainId) return;
+  try {
+    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ESCROW_NET.chainHex }] });     // already in the wallet
+  } catch (e) {
+    if (e?.code === 4001) throw e;                                                                              // the person said no
+    await eth.request({ method: 'wallet_addEthereumChain', params: [{                                           // not in the wallet yet (4902): add it
+      chainId: ESCROW_NET.chainHex, chainName: ESCROW_NET.name, nativeCurrency: ESCROW_NET.currency,
+      rpcUrls: [ESCROW_NET.rpc], blockExplorerUrls: [ESCROW_NET.explorer],
+    }] });
   }
+  // Wallets answer first and switch a moment later (a phone asks to confirm the switch). Wait for it to happen.
+  for (let i = 0; i < 40; i++) {
+    if (await at() === ESCROW_NET.chainId) return;
+    await new Promise(r => setTimeout(r, 500));
+  }
+  throw new Error(`Confirm the switch to ${ESCROW_NET.name} in your wallet, then try again.`);
 }
 
 async function checkProfileWalletBalance() {
@@ -10913,6 +10922,20 @@ window.addEventListener('eip6963:announceProvider', e => {                      
   scheduleWalletRefresh();
 });
 
+// Wallets in in-app browsers don't always announce a change, so look again every few seconds while the card is on screen.
+let WALLET_KEY = null, walletPoll = null;
+function startWalletPoll() {
+  clearInterval(walletPoll);
+  walletPoll = setInterval(async () => {
+    if (!operator || document.hidden || !document.getElementById('dash-bal') || dashBalBusy) return;
+    try {
+      const hit = await detectWallet();
+      const key = hit ? hit.address + '|' + await hit.provider.request({ method: 'eth_chainId' }) : 'none';
+      if (WALLET_KEY !== null && key !== WALLET_KEY) scheduleWalletRefresh();
+      WALLET_KEY = key;
+    } catch (e) {}
+  }, 4000);
+}
 async function detectWallet() {
   const have = (operator?.wallet_address || '').toLowerCase(), seen = new Set(), cands = [];
   for (const d of WALLET_FOUND.values()) if (!seen.has(d.provider)) { seen.add(d.provider); cands.push({ provider: d.provider, name: d.info.name }); }
@@ -10956,8 +10979,10 @@ async function walletSnapshot() {
 }
 
 async function switchToHedera() {
-  try { await ensureHederaNetwork(); toast(`Switched to ${ESCROW_NET.name}.`); scheduleWalletRefresh(); }
+  toast(`Open your wallet and approve the switch to ${ESCROW_NET.name}…`);
+  try { await ensureHederaNetwork(); toast(`Switched to ${ESCROW_NET.name}.`); }
   catch (e) { toast(e?.code === 4001 ? 'Cancelled in your wallet.' : (e?.message || 'Could not switch networks.')); }
+  scheduleWalletRefresh();                                   // show whatever the wallet is on now, success or not
 }
 async function useConnectedWallet() {
   const snap = await walletSnapshot();
@@ -11042,12 +11067,14 @@ async function fillAllNetworks(address) {
     <small class="nt-note">Ethereum, Base, Arbitrum, Optimism, Polygon, Robinhood Chain and Hedera Testnet · coin and USDC only${hasOtherCoin ? ' · other coins not valued' : ''}${failed.length ? ' · couldn’t read: ' + esc(failed.join(', ')) : ''}.</small>`;
 }
 
-let dashBalBusy = false;
+let dashBalBusy = false, dashBalAgain = false;
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
-  if (!el || dashBalBusy) return;
+  if (!el) return;
+  if (dashBalBusy) { dashBalAgain = true; return; }          // a change arrived mid-update: run once more when this one ends
   dashBalBusy = true;
   try { await drawDashBalance(el); } finally { dashBalBusy = false; }
+  if (dashBalAgain) { dashBalAgain = false; renderDashBalance(); }
 }
 async function drawDashBalance(el) {
   const have = operator?.wallet_address || '';

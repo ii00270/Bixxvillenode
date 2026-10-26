@@ -3784,6 +3784,15 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
 }
 .term-timeline-dl:hover{background:var(--green);color:var(--on-accent);}
 .term-timeline-dl:disabled{opacity:.5;cursor:default;background:transparent;color:var(--term-dim);border-color:var(--term-line);}
+
+/* Phones: tapping a field or a button must not zoom the page. iOS zooms into any text field under 16px, and on a
+   quick double tap. Pinch zoom stays available (accessibility). */
+html{touch-action:manipulation;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+button,a,summary,label,[onclick]{touch-action:manipulation}
+@media (pointer:coarse),(max-width:820px){
+  input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select,textarea,
+  #term-input,#term-composer #term-input,.pp-form input,.pp-form textarea,.gw-input{font-size:16px !important}
+}
 </style>
 </head>
 <body>
@@ -10230,12 +10239,7 @@ async function doRelationLogin() {
     }
 
     // Look up existing project for this relation
-    const { data: projects } = await sb
-      .from('relation_submissions')
-      .select('id, status')
-      .eq('relation_code', code)
-      .order('created_at', { ascending: false })
-      .limit(1);
+    const { data: projects } = await sb.rpc('client_projects', { p_code: code });   // newest first; checks the code (0030)
 
     relation = {
       code,
@@ -19144,11 +19148,7 @@ async function renderRelProfile(body) {
 
 async function renderRelMyWorkList() {
   try {
-    const { data } = await sb
-      .from('relation_submissions')
-      .select('*, bids(*)')
-      .eq('relation_code', relation.code)
-      .order('created_at', { ascending: false });
+    const { data } = await sb.rpc('client_projects', { p_code: relation.code });   // (0030)
 
     const subs = data || [];
     const workEl = document.getElementById('rel-work-body');
@@ -19185,11 +19185,7 @@ async function openRelSubmissionDetail(id) {
   if (!body) return;
   body.innerHTML = '<div class="empty"><div class="empty-msg">Loading…</div></div>';
 
-  const { data: project } = await sb
-    .from('relation_submissions')
-    .select('*, bids(*)')
-    .eq('id', id)
-    .single();
+  const { data: project } = await sb.rpc('client_project', { p_code: relation.code, p_id: id });   // (0030)
 
   if (!project) { body.innerHTML = '<div class="empty"><div class="empty-msg">Project not found.</div></div>'; return; }
 

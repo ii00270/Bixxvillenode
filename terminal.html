@@ -2827,6 +2827,12 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 .dash-lbl > span:first-child{display:flex;align-items:center;gap:7px;color:var(--term-fg);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dash-chip{border:1px solid var(--term-line);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--term-dim)}
 .dash-big{font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.dash-nets{margin:10px 0 2px;border-top:1px solid var(--term-line);padding-top:10px;font:12px var(--mono);color:var(--term-dim)}
+.nt-head{display:flex;justify-content:space-between;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--term-fg);margin-bottom:6px}
+.nt-head b{font-size:15px;letter-spacing:0}
+.nt-row{display:flex;justify-content:space-between;gap:10px;padding:3px 0}.nt-row b{color:var(--term-fg);font-weight:500;text-align:right}
+.nt-row.test{opacity:.75}
+.nt-note{display:block;margin-top:6px;font-size:10.5px;line-height:1.4;opacity:.8}
 .dash-big small{font-size:.42em;font-weight:400;letter-spacing:.04em;color:var(--term-dim);margin-left:2px}
 .dash-mid-v{font-size:20px;font-weight:500;line-height:1.2;margin:2px 0 4px}
 .dash-sub{font-size:11.5px;color:var(--term-dim);margin-top:8px}
@@ -10959,6 +10965,83 @@ async function useConnectedWallet() {
   openAddWallet({ provider: ACTIVE_WALLET.provider, address: snap.address, name: snap.name, chainId: snap.chainId });
 }
 
+// What an address holds on every network we know, from public nodes (the same view MetaMask's total gives).
+// Native coin and USDC only; other tokens are not shown. The address is public, and is sent to these nodes only.
+const SCAN_NETWORKS = [
+  { id: 1,     name: 'Ethereum',        sym: 'ETH', rpc: ['https://ethereum-rpc.publicnode.com', 'https://eth.llamarpc.com'] },
+  { id: 8453,  name: 'Base',            sym: 'ETH', rpc: ['https://base-rpc.publicnode.com', 'https://mainnet.base.org'] },
+  { id: 42161, name: 'Arbitrum',        sym: 'ETH', rpc: ['https://arbitrum-one-rpc.publicnode.com', 'https://arb1.arbitrum.io/rpc'] },
+  { id: 10,    name: 'Optimism',        sym: 'ETH', rpc: ['https://optimism-rpc.publicnode.com', 'https://mainnet.optimism.io'] },
+  { id: 137,   name: 'Polygon',         sym: 'POL', rpc: ['https://polygon-bor-rpc.publicnode.com'] },
+  { id: 4663,  name: 'Robinhood Chain', sym: 'ETH', rpc: ['https://rpc.mainnet.chain.robinhood.com/'] },
+  { id: 296,   name: 'Hedera Testnet',  sym: 'HBAR', rpc: [ESCROW_NET.rpc], test: true },
+];
+let SCAN_CACHE = {};
+async function rpcCall(urls, method, params) {
+  let last;
+  for (const u of urls) {
+    try {
+      const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), 7000);
+      const r = await fetch(u, { method: 'POST', headers: { 'Content-Type': 'application/json' }, signal: ctl.signal, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) });
+      clearTimeout(t);
+      const j = await r.json();
+      if (j.error) throw new Error(j.error.message);
+      return j.result;
+    } catch (e) { last = e; }
+  }
+  throw last || new Error('no node answered');
+}
+async function scanNetworks(address, force) {
+  const hit = SCAN_CACHE[address];
+  if (!force && hit && Date.now() - hit.at < 60000) return hit.rows;
+  const rows = await Promise.all(SCAN_NETWORKS.map(async n => {
+    const row = { id: n.id, name: n.name, sym: n.sym, test: !!n.test, native: null, usdc: null, ok: true };
+    try { row.native = Number(BigInt(await rpcCall(n.rpc, 'eth_getBalance', [address, 'latest'])) / 10n ** 14n) / 1e4; } catch (e) { row.ok = false; }
+    const tok = USDC_BY_CHAIN[n.id];
+    if (tok) {
+      try {
+        const r = await rpcCall(n.rpc, 'eth_call', [{ to: tok, data: '0x70a08231' + '0'.repeat(24) + address.slice(2) }, 'latest']);
+        row.usdc = r && r !== '0x' ? Number(BigInt(r)) / 1e6 : 0;
+      } catch (e) { row.ok = false; }
+    }
+    return row;
+  }));
+  SCAN_CACHE[address] = { at: Date.now(), rows };
+  return rows;
+}
+let ETH_USD = null;
+async function ethUsd() {
+  if (ETH_USD && Date.now() - ETH_USD.at < 300000) return ETH_USD.v;
+  try { const j = await (await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot')).json(); ETH_USD = { at: Date.now(), v: Number(j.data.amount) }; return ETH_USD.v; }
+  catch (e) { return ETH_USD?.v ?? null; }
+}
+// The block under the card: every network that holds something, and the total on real networks.
+async function fillAllNetworks(address) {
+  const box = document.getElementById('dash-nets'); if (!box) return;
+  const rows = await scanNetworks(address).catch(() => null);
+  if (!document.getElementById('dash-nets')) return;
+  if (!rows) { box.textContent = 'Couldn’t read the other networks right now.'; return; }
+  const price = await ethUsd();
+  const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const num = n => n.toLocaleString('en-US', { maximumFractionDigits: 4 });
+  const holds = rows.filter(r => (r.usdc || 0) > 0 || (r.native || 0) > 0);
+  const real = holds.filter(r => !r.test);
+  const totalUsd = real.reduce((n, r) => n + (r.usdc || 0) + (r.sym === 'ETH' && price ? (r.native || 0) * price : 0), 0);
+  const hasOtherCoin = real.some(r => r.sym !== 'ETH' && (r.native || 0) > 0);
+  const failed = rows.filter(r => !r.ok).map(r => r.name);
+  const line = r => `<div class="nt-row ${r.test ? 'test' : ''}"><span>${esc(r.name)}${r.test ? ' · test' : ''}</span><b>${[(r.usdc || 0) > 0 ? money(r.usdc) + ' USDC' : '', (r.native || 0) > 0 ? num(r.native) + ' ' + esc(r.sym) : ''].filter(Boolean).join(' · ')}</b></div>`;
+  // The headline becomes the total across networks, the way MetaMask shows it; the connected network moves to the line below.
+  const bigEl = document.getElementById('dash-big-v'), subEl = document.getElementById('dash-sub-c');
+  if (bigEl && real.length) {
+    bigEl.innerHTML = '≈ ' + money(totalUsd) + '<small> all networks</small>';
+    if (subEl && !subEl.dataset.merged) { subEl.dataset.merged = '1'; subEl.textContent = subEl.dataset.here + ' · ' + subEl.textContent; }
+  }
+  box.innerHTML = `
+    <div class="nt-head"><span>All networks</span><b>${real.length ? '≈ ' + money(totalUsd) : '$0.00'}</b></div>
+    ${holds.length ? holds.map(line).join('') : '<div class="nt-row"><span>Nothing found on the networks checked</span></div>'}
+    <small class="nt-note">Ethereum, Base, Arbitrum, Optimism, Polygon, Robinhood Chain and Hedera Testnet · coin and USDC only${hasOtherCoin ? ' · other coins not valued' : ''}${failed.length ? ' · couldn’t read: ' + esc(failed.join(', ')) : ''}.</small>`;
+}
+
 let dashBalBusy = false;
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
@@ -10995,10 +11078,12 @@ async function drawDashBalance(el) {
     const big = snap.token && snap.usdc != null ? money(snap.usdc) + '<small> USDC</small>' : snap.native != null ? `${num(snap.native)}<small> ${esc(snap.symbol)}</small>` : '—';
     el.innerHTML = `
       <div class="dash-lbl"><span>${esc(snap.name)}</span><span class="dash-chip">${esc(snap.chain)}</span></div>
-      <div class="dash-big">${big}</div>
+      <div class="dash-big" id="dash-big-v">${big}</div>
       <div class="dash-bar"><i style="width:100%"></i></div>
-      <div class="dash-sub">${esc(sh(snap.address))} · ${snap.onFile ? 'your personal wallet' : `not your personal wallet on file${have ? ` (${esc(sh(have))})` : ''}`}${snap.token && snap.native != null ? ` · ${num(snap.native)} ${esc(snap.symbol)} for fees` : ''}${snap.token ? '' : ' · USDC isn’t shown on this network'}</div>
+      <div class="dash-sub" id="dash-sub-c" data-here="${esc(`${snap.name} is on ${snap.chain}`)}">${esc(sh(snap.address))} · ${snap.onFile ? 'your personal wallet' : `not your personal wallet on file${have ? ` (${esc(sh(have))})` : ''}`}${snap.token && snap.native != null ? ` · ${num(snap.native)} ${esc(snap.symbol)} for fees` : ''}${snap.token ? '' : ' · USDC isn’t shown on this network'}</div>
+      <div class="dash-nets" id="dash-nets">Checking all networks…</div>
       ${acts(snap)}`;
+    fillAllNetworks(snap.address);
     return;
   }
   // No wallet connected here: show the address on file, read from Hedera, and say so.
@@ -11008,7 +11093,9 @@ async function drawDashBalance(el) {
     <div class="dash-big">${have ? (b != null ? money(b) : '$0.00') + '<small> USDC</small>' : '—'}</div>
     <div class="dash-bar"><i style="width:100%"></i></div>
     <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}, read from ${esc(ESCROW_NET.name)}. No wallet is connected in this browser: connect one to see its own network and balance.` : 'No personal wallet yet.'}</div>
+    ${have ? '<div class="dash-nets" id="dash-nets">Checking all networks…</div>' : ''}
     ${acts({ connected: false, address: have })}`;
+  if (have) fillAllNetworks(have.toLowerCase());
 }
 
 // Connect from the home card: the picker, then the card redraws with that wallet.

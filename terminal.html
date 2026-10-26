@@ -21,6 +21,11 @@
       sessionStorage.setItem('bx-scan', location.hash.slice(4));
       history.replaceState(null, '', location.pathname + location.search);
     }
+    // An invite link (terminal.html#invite=<token>), kept the same way and opened by the welcome screen.
+    if (location.hash.indexOf('#invite=') === 0) {
+      sessionStorage.setItem('bx-invite', location.hash.slice(8));
+      history.replaceState(null, '', location.pathname + location.search);
+    }
   } catch (e) {}
 })();
 </script>
@@ -887,6 +892,23 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .cy-scores{display:flex;gap:12px;flex-wrap:wrap}
 .cy-note{margin:14px 0 10px}
 .cy-started{font:12px var(--mono);color:var(--term-dim);margin:6px 0 14px}
+
+/* Sign in with … */
+.sg-label{font:9px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;margin:0 0 10px}
+.sg-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sg-btn{appearance:none;display:flex;align-items:center;justify-content:center;gap:8px;min-height:44px;background:transparent;color:var(--white,#fff);border:1px solid var(--line,#333);border-radius:10px;font:12px var(--mono);cursor:pointer;padding:8px}
+.sg-btn:hover{border-color:var(--white,#fff)}
+.sg-btn svg{width:18px;height:18px;flex:none}
+.sg-btn:disabled{opacity:.5}
+.si-list{display:flex;flex-direction:column;gap:8px}
+.si-row{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--term-line);border-radius:10px}
+.si-row i{width:8px;height:8px;border-radius:50%;background:var(--term-line);margin-top:6px;flex:none}
+.si-row.on i{background:#2E9D6B}
+.si-row b{font-size:13px}.si-row small{display:block;font:11.5px/1.45 var(--mono);color:var(--term-dim);overflow-wrap:anywhere}
+.si-steps{margin-top:12px;font-size:12.5px;line-height:1.5}
+.si-steps summary{cursor:pointer;font:600 12px var(--mono);color:var(--term-fg)}
+.si-steps ol{padding-left:18px}.si-steps li{margin:8px 0}
+.si-steps code{font:11px var(--mono);overflow-wrap:anywhere;background:color-mix(in srgb,var(--term-fg) 8%,transparent);padding:1px 4px;border-radius:4px}
 /* Wallet picker: MetaMask, HashPack, Robinhood Wallet */
 .wl-wrap{padding:6px 16px 22px}
 .wl-lead{margin:0 0 12px;color:var(--term-fg,inherit);font-size:13px;line-height:1.5}
@@ -919,6 +941,12 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .pf-tax-in{width:84px;background:transparent;border:1px solid var(--term-line);border-radius:8px;color:var(--term-fg);font:13px var(--mono);padding:7px 9px}
 .pf-tax-in.wide{width:100%}
 .tax-c{color:#4C8DDB}
+.pp-seen{display:block;font:10.5px var(--mono);color:var(--term-dim)}
+.pp-seen.on{color:#2E9D6B}.pp-seen.on::before{content:'';display:inline-block;width:7px;height:7px;border-radius:50%;background:#2E9D6B;margin-right:5px;vertical-align:1px}
+.iv-qr svg{width:100%;max-width:260px;height:auto;background:#fff;padding:10px;border-radius:12px}
+.iv-link{font:11px var(--mono);word-break:break-all;color:var(--term-dim);margin:10px 0;padding:8px;border:1px dashed var(--term-line);border-radius:8px;text-align:left}
+.iv-h{font:600 20px var(--mono);margin:4px 0 8px}
+.fs-check{display:flex;align-items:center;gap:8px;margin:8px 0 14px;font:12px var(--mono);color:var(--term-dim)}
 /* Ledger: Activity (green) and Payment (gold) */
 .lg-tag{display:inline-block;font:600 10px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;padding:4px 7px;border-radius:999px;vertical-align:1px}
 .lg-tag.act{color:#2E9D6B;border:1px solid #2E9D6B}
@@ -3828,8 +3856,21 @@ textarea.gw-input{resize:vertical;line-height:1.5;}
     <!-- Operator mode — hidden until switched -->
     <div id="gate-op" style="display:none">
       <div id="gate-op-pin">
-        <button class="gate-btn" id="g-wallet-btn" onclick="doWalletLogin()">Sign in with a wallet</button>
+        <div class="sg-label">Sign in with</div>
+        <div class="sg-grid">
+          <button class="sg-btn" id="sg-google" style="display:none" onclick="doGoogleLogin()"><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="#4285F4" d="M21.6 12.2c0-.7-.1-1.3-.2-1.9H12v3.6h5.4a4.6 4.6 0 0 1-2 3v2.5h3.2c1.9-1.7 3-4.3 3-7.2z"/><path fill="#34A853" d="M12 22c2.7 0 5-.9 6.6-2.4l-3.2-2.5c-.9.6-2 1-3.4 1-2.6 0-4.8-1.8-5.600-4.100H3.100v2.600A10 10 0 0 0 12 22z"/><path fill="#FBBC05" d="M6.400 13.900a6 6 0 0 1 0-3.800V7.500H3.100a10 10 0 0 0 0 9z"/><path fill="#EA4335" d="M12 5.900c1.500 0 2.800.5 3.800 1.500l2.900-2.900A10 10 0 0 0 3.100 7.500l3.300 2.600C7.200 7.700 9.400 5.900 12 5.900z"/></svg>Google</button>
+          <button class="sg-btn" id="sg-email" onclick="gateShowEmailLink()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3.500 7 8.500 6.500L20.500 7"/></svg>Proton · email</button>
+          <button class="sg-btn" id="g-wallet-btn" onclick="doWalletLogin('metamask')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="m3 4 7 5-1.300-3zM21 4l-7 5 1.300-3zM6 16l-1 4 4-1.200zM18 16l1 4-4-1.200zM9 13l3 2 3-2-1.500-4h-3z"/></svg>MetaMask</button>
+          <button class="sg-btn" id="sg-hashpack" onclick="doWalletLogin('hashpack')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M7 4v16M17 4v16M7 9h10M7 15h10"/></svg>HashPack</button>
+        </div>
+        <span class="gate-back" style="font-size:9px;display:block;text-align:center;margin:10px 0 14px" onclick="doWalletLogin()">Robinhood Wallet or another wallet</span>
         <div class="gate-err" id="g-wallet-err"></div>
+        <div id="sg-email-box" style="display:none;margin-bottom:6px">
+          <label class="gate-label" for="sg-email-in">Your email: Proton Mail, Gmail, any</label>
+          <input class="gate-input" id="sg-email-in" type="email" inputmode="email" autocomplete="email" placeholder="you@proton.me" onkeydown="if(event.key==='Enter')doEmailLink()"/>
+          <button class="gate-btn" id="sg-email-go" onclick="doEmailLink()">Send me a sign-in link</button>
+          <div class="gate-err" id="sg-email-err"></div>
+        </div>
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;margin:14px 0 10px">or use your PIN</div>
         <label class="gate-label" for="g-pin">PIN</label>
         <input class="gate-input" id="g-pin" type="password" inputmode="numeric" maxlength="7"
@@ -5259,15 +5300,63 @@ async function doPinLogin() {
 // ── WALLET LOGIN — sign a one-time message in MetaMask (no gas, no money).
 // The wallet-login edge function checks the signature and opens the same kind
 // of session a PIN does (migration 0014). The PIN stays as a backup.
+// ── SIGN IN WITH GOOGLE OR AN EMAILED LINK (Proton Mail, Gmail, any) — migration 0029 ──
+// Both prove the person controls an email address. That address has to be the member's email on file
+// (the Executive Operator sets it when inviting); an uninvited address gets no session.
+const AUTH_ORIGIN = () => location.origin + location.pathname;
+let AUTH_PROVIDERS = null;
+async function loadAuthProviders() {
+  if (AUTH_PROVIDERS) return AUTH_PROVIDERS;
+  try { AUTH_PROVIDERS = (await (await fetch(`${SB_URL}/auth/v1/settings`, { headers: { apikey: SB_KEY } })).json()).external || {}; }
+  catch (e) { AUTH_PROVIDERS = {}; }
+  return AUTH_PROVIDERS;
+}
+async function showAuthButtons() {
+  const p = await loadAuthProviders();
+  const g = document.getElementById('sg-google');
+  if (g) g.style.display = p.google ? '' : 'none';           // only offered once Google is switched on
+  const em = document.getElementById('sg-email');
+  if (em) em.style.gridColumn = p.google ? '' : '1 / -1';      // with no Google button, email takes the full row
+}
+function gateShowEmailLink() {
+  const b = document.getElementById('sg-email-box');
+  b.style.display = b.style.display === 'none' ? '' : 'none';
+  if (b.style.display !== 'none') document.getElementById('sg-email-in').focus();
+}
+async function doEmailLink() {
+  const input = document.getElementById('sg-email-in'), err = document.getElementById('sg-email-err'), btn = document.getElementById('sg-email-go');
+  const email = (input.value || '').trim().toLowerCase();
+  err.classList.remove('show');
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { err.textContent = 'Enter your email address.'; err.classList.add('show'); return; }
+  initSB();
+  btn.disabled = true; btn.textContent = 'Sending…';
+  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: AUTH_ORIGIN(), shouldCreateUser: true } });
+  btn.disabled = false; btn.textContent = 'Send me a sign-in link';
+  if (error) { err.textContent = /rate|seconds|too many/i.test(error.message) ? 'Too many tries. Wait a minute, then try again.' : error.message; err.classList.add('show'); return; }
+  err.style.color = 'var(--green)';
+  err.textContent = `Check ${email}. Open the link on this device. It works once.`;
+  err.classList.add('show');
+}
+async function doGoogleLogin() {
+  initSB();
+  const { error } = await sb.auth.signInWithOAuth({ provider: 'google', options: { redirectTo: AUTH_ORIGIN() } });
+  if (error) { const er = document.getElementById('g-wallet-err'); er.textContent = error.message; er.classList.add('show'); }
+}
+window.addEventListener('DOMContentLoaded', () => setTimeout(showAuthButtons, 300));
+
 let walletLogging = false;
-async function doWalletLogin() {
+async function doWalletLogin(kindKey) {
   if (walletLogging) return;
   const err = document.getElementById('g-wallet-err');
-  const btn = document.getElementById('g-wallet-btn');
+  const btn = document.getElementById(kindKey === 'hashpack' ? 'sg-hashpack' : 'g-wallet-btn');
   err.classList.remove('show');
-  const w = await pickWallet({ title: 'Sign in with a wallet', lead: 'Pick the wallet that is on file as your personal wallet.' });
+  // A named wallet goes straight to it; if it isn't in this browser, or no name was given, the picker explains.
+  const kind = WALLET_KINDS.find(k => k.key === kindKey), found = kind && walletFor(kind);
+  const w = found ? await connectKnownWallet(found.provider, kind.name)
+                  : await pickWallet({ title: 'Sign in with a wallet', lead: 'Pick the wallet that is on file as your personal wallet.' });
   if (!w) return;
   walletLogging = true;
+  const label = btn.innerHTML;
   btn.disabled = true;
   btn.textContent = `Check ${w.name}…`;
   initSB();
@@ -5301,7 +5390,7 @@ async function doWalletLogin() {
   } finally {
     walletLogging = false;
     btn.disabled = false;
-    btn.textContent = 'Sign in with a wallet';
+    btn.innerHTML = label;
   }
 }
 
@@ -5401,6 +5490,8 @@ async function enterShell() {
   showSurface('members');
   loadAll();
   if (isExec()) treasuryStatus().catch(() => {});
+  startPresence();
+  if (isExec()) watchPresence();
   setTimeout(openPendingScan, 600);
 }
 
@@ -10686,7 +10777,7 @@ const WALLET_KINDS = [
   { key: 'metamask', name: 'MetaMask', match: i => i.rdns === 'io.metamask' || /metamask/i.test(i.name), legacy: p => p?.isMetaMask && !p?.isHashPack && !p?.isRobinhood,
     get: 'https://metamask.io/download/', how: 'Install the MetaMask extension (or open this page in the MetaMask app’s browser), then come back.' },
   { key: 'hashpack', name: 'HashPack', match: i => /hashpack/i.test(i.name || '') || /hashpack/i.test(i.rdns || ''), legacy: p => p?.isHashPack,
-    get: 'https://www.hashpack.app/download', how: 'Install the HashPack extension, or open this page in the HashPack app’s browser. Use an EVM (ECDSA) account: those have an 0x address.' },
+    get: 'https://www.hashpack.app/download', how: 'Install the HashPack extension, or open this page in the HashPack app’s browser, and use an EVM (ECDSA) account: those have an 0x address. HashPack from a computer connects through WalletConnect, which this app doesn’t have yet.' },
   { key: 'robinhood', name: 'Robinhood Wallet', match: i => /robinhood/i.test(i.name || '') || /robinhood/i.test(i.rdns || ''), legacy: p => p?.isRobinhood,
     get: null, how: 'Robinhood Wallet is a phone app. Open it, go to its browser, and open this page there. Then connect.' },
 ];
@@ -10744,6 +10835,21 @@ function pickWallet({ title = 'Connect a wallet', lead = '' } = {}) {
       body.querySelectorAll('[data-copy]').forEach(b => { b.onclick = () => { navigator.clipboard?.writeText(location.origin + location.pathname); toast('Link copied. Open it in Robinhood Wallet’s browser.'); }; });
     }, null, null, true);
   });
+}
+
+// Connects a wallet we have already found (no picker). Same shape as pickWallet's answer, or null.
+async function connectKnownWallet(provider, name) {
+  try {
+    const [a] = await provider.request({ method: 'eth_requestAccounts' });
+    if (!a) throw new Error('No account was shared.');
+    const chainId = parseInt(await provider.request({ method: 'eth_chainId' }).catch(() => '0x0'), 16);
+    ACTIVE_WALLET = { provider, name };
+    return { provider, address: a.toLowerCase(), name, chainId };
+  } catch (e) {
+    const er = document.getElementById('g-wallet-err');
+    if (er) { er.textContent = e?.code === 4001 ? `Cancelled in ${name}.` : (e?.message || `Couldn’t connect ${name}.`); er.classList.add('show'); }
+    return null;
+  }
 }
 
 // Your personal wallet: signs you in and receives your pay. Kept apart from the treasury wallet.
@@ -11149,7 +11255,8 @@ function clMemberRow(m) {
   return `<tr>
     <td><div class="pp-person">
       <span class="pp-av">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(m.peer_name))}<i class="pp-dot ${status}"></i></span>
-      <div><b>${esc(m.peer_name)}</b>${m.is_genesis ? '<span class="pp-exec">Executive Operator</span>' : ''}<small>${esc(m.region || m.handle || 'Member')}</small></div></div></td>
+      <div><b>${esc(m.peer_name)}</b>${m.is_genesis ? '<span class="pp-exec">Executive Operator</span>' : ''}<small>${esc(m.region || m.handle || 'Member')}</small>
+        <small class="pp-seen ${seenText(m.last_seen_at) === 'Online now' ? 'on' : ''}" data-seen="${esc(m.id)}">${esc(seenText(m.last_seen_at) || 'Not signed in yet')}</small></div></div></td>
     <td>${clContactHtml(m.email, m.phone)}</td>
     <td class="hide-md"><div class="pp-ids"><span>${esc(m.member_id || '—')}</span><small>${esc(m.bix_id || 'no BIX ID')}</small></div></td>
     <td>${clFundsHtml(m.wallet_address, (isExec() || m.id === operator.id) ? `openWalletDrawer('member','${esc(m.id)}')` : '')}</td>
@@ -11166,6 +11273,7 @@ function clMemberMenu(btn, id) {
   if (m.member_id) items.push({ label: 'Copy member ID', run: () => copyText(m.member_id, 'Member ID') });
   if (m.email) items.push({ label: 'Copy email', run: () => copyText(m.email, 'Email') });
   if (isExec() || id === operator.id) items.push({ label: m.wallet_address ? 'Change wallet' : 'Add wallet', run: () => openWalletDrawer('member', id) });
+  if (isExec() && !m.is_genesis) items.unshift({ label: 'Send invite link + QR', run: () => openInviteLink(id) });
   openRowMenu(btn, items);
 }
 
@@ -11322,7 +11430,8 @@ async function submitAddPerson(kind) {
           <div class="pp-secret pin"><small>PIN — shown once</small><b>${esc(data.pin)}</b><button class="pp-copy" onclick="copyText('${esc(data.pin)}','PIN')">${ico(ICON.copy)}Copy</button></div>
           <p class="pp-muted">Copy the PIN now — it isn’t stored anywhere it can be read back. If it’s lost, they can request a reset from the sign-in screen.</p>
           ${walletNote}
-          <button class="pp-btn solid big" onclick="copyText(window._apWelcome,'Welcome message')">${ico(ICON.copy)}Copy a welcome message</button>
+          <button class="pp-btn solid big" onclick="closeAddPerson(); loadPeople(true).then(() => openInviteLink('${esc(data.id)}'))">Send invite link + QR</button>
+          <button class="pp-btn big" onclick="copyText(window._apWelcome,'Welcome message')">${ico(ICON.copy)}Copy a welcome message</button>
           <button class="pp-btn big" onclick="closeAddPerson()">Done</button>
         </div>`);
     } else {
@@ -12020,6 +12129,32 @@ async function renderProfilePanel() {
       </div>
     </div>
 
+    <div class="pf-sec" id="pf-signin">
+      <h4>Ways to sign in <span>${isExec() ? 'what is on, and what is not' : 'any of these'}</span></h4>
+      <div class="si-list">
+        <div class="si-row on"><i></i><div><b>PIN</b><small>7 digits. Always works.</small></div></div>
+        <div class="si-row on"><i></i><div><b>Wallet</b><small>MetaMask, Robinhood Wallet, and HashPack where it connects. The wallet has to be your personal wallet on file.</small></div></div>
+        <div class="si-row on"><i></i><div><b>Emailed link · Proton Mail, Gmail, any</b><small>A one-time link to <b>${esc(op.contact_email || (op.email && !/@bixxville\.invite$/.test(op.email) ? op.email : '') || 'the email on file')}</b>${op.contact_email || (op.email && !/@bixxville\.invite$/.test(op.email)) ? '' : ' (ask the Executive Operator to add yours)'}.</small></div></div>
+        <div class="si-row" id="si-google"><i></i><div><b>Google</b><small>Checking…</small></div></div>
+      </div>
+      ${isExec() ? `<details class="si-steps"><summary>Switch Google on, and set up email links</summary>
+        <ol>
+          <li><b>Google keys.</b> console.cloud.google.com → APIs &amp; Services → Credentials → Create credentials → OAuth client ID → Web application. Under “Authorized redirect URIs” add <code>${esc(SB_URL)}/auth/v1/callback</code>. Copy the Client ID and Client secret.</li>
+          <li><b>Turn it on.</b> Supabase dashboard → Authentication → Sign In / Providers → Google → paste both, switch it on, save. The Google button then appears on the sign-in screen by itself.</li>
+          <li><b>Allow the app’s address.</b> Authentication → URL Configuration: set the Site URL to <code>${esc(AUTH_ORIGIN())}</code> and add the same address under Redirect URLs. Do this again for the app’s own domain when you have it. Email links and Google both need it.</li>
+          <li><b>Real email delivery.</b> Supabase’s built-in sender is for testing and allows only a few emails an hour. Before launch: Authentication → Emails → SMTP Settings, and add a sending service (Proton’s SMTP, Resend, or similar).</li>
+        </ol>
+        <p>Proton doesn’t offer a “Sign in with Proton” button to other apps, so Proton members sign in with the emailed link to their Proton address. Same security: only the owner of the mailbox gets the link.</p>
+      </details>` : ''}
+    </div>
+
+    <div class="pf-sec" id="pf-details">
+      <h4>Your number <span>${op.phone_visible ? 'members can see it' : 'only the Executive Operator sees it'}</span></h4>
+      <div class="pf-tax-row"><input id="pf-phone" class="pf-tax-in wide" type="tel" autocomplete="tel" placeholder="+1 340 555 0123" value="${esc(op.phone || '')}" aria-label="Phone number"></div>
+      <label class="fs-check"><input id="pf-phone-vis" type="checkbox" ${op.phone_visible ? 'checked' : ''}> Let other members see my number</label>
+      <div class="pf-wal-acts"><button class="pf-btn solid" onclick="saveMyPhone()">Save number</button><button class="pf-btn" onclick="changeMyPin()">Change my PIN</button></div>
+    </div>
+
     <div class="pf-sec" id="pf-wallets">
       <h4>Wallets <span>${isExec() ? 'yours, and the network’s' : 'where you are paid'}</span></h4>
       <div class="pf-wals">
@@ -12101,6 +12236,11 @@ async function renderProfilePanel() {
       <div class="pf-stamp"><b>${esc(stamp[0])}</b><br>${stamp.slice(1).map(esc).join('<br>')}</div>
     </div>`;
   fillProfileWallets(op);
+  loadAuthProviders().then(pr => {
+    const g = document.getElementById('si-google'); if (!g) return;
+    g.classList.toggle('on', !!pr.google);
+    g.querySelector('small').textContent = pr.google ? 'On. Uses the same email as your emailed link.' : (isExec() ? 'Off. Needs the Google keys: see the steps below.' : 'Not available yet.');
+  });
 }
 
 // Balances on the two wallet cards, and the treasury card's state (Executive Operator only).
@@ -12248,6 +12388,153 @@ async function openPendingScan() {
   } catch (e) { toast(`The scanned code could not be opened: ${e.message}`); }
 }
 document.addEventListener('DOMContentLoaded', () => setTimeout(showScanNotice, 400));
+
+// ── INVITES, PHONES, ONLINE NOW (migration 0028) ──
+// The Executive Operator sends a member a one-time link (and QR). Opening it shows a welcome, signs
+// them in once, then they choose their PIN, add their phone, and can install the app. While the app
+// is open and in front it pings, so the Executive Operator sees them as "Online now".
+const pendingInvite = () => { try { return sessionStorage.getItem('bx-invite'); } catch (e) { return null; } };
+const dropInvite = () => { try { sessionStorage.removeItem('bx-invite'); } catch (e) {} };
+const inviteLink = token => `${location.origin}${location.pathname}#invite=${token}`;
+
+async function openInviteLink(memberId) {
+  const m = (CL.members || []).find(x => x.id === memberId);
+  const { data, error } = await sb.rpc('create_member_invite', { p_operator: memberId });
+  if (error) { toast(error.message); return; }
+  const link = inviteLink(data.token);
+  let svg = '';
+  try { const Q = await import('./analog/src/qr.js'); await Q.loadQr(); svg = await Q.qrSvg(link); } catch (e) { console.warn(e); }
+  const phone = m?.phone ? m.phone.replace(/[^+0-9]/g, '') : '';
+  const msg = `${data.name}, you're invited to Bixxville. Open this on your phone or computer to join: ${link}`;
+  openOverlay(`Invite ${data.name}`, body => {
+    body.innerHTML = `<div class="term-wf wl-wrap" style="text-align:center">
+      <div class="iv-qr">${svg || ''}</div>
+      <p class="wl-lead">They scan this, or open the link. It signs them in once, then they choose their own PIN and can install the app. You’ll see them as <b>Online now</b> the moment they’re in.</p>
+      <div class="iv-link" id="iv-link">${esc(link)}</div>
+      <div class="pf-wal-acts" style="justify-content:center">
+        <button class="pp-btn solid" onclick="copyText(${esc(JSON.stringify(link))},'Invite link')">Copy link</button>
+        ${navigator.share ? `<button class="pp-btn" onclick="navigator.share({ title: 'Bixxville invite', text: ${esc(JSON.stringify(msg))} }).catch(() => {})">Share…</button>` : ''}
+        <a class="pp-btn" href="sms:${esc(phone)}?&body=${encodeURIComponent(msg)}">Text it</a>
+      </div>
+      <p class="wl-foot">Works once and expires in 7 days. Anyone holding the link can use it, so send it only to ${esc(data.name)}. Making a new link cancels this one.</p>
+    </div>`;
+  }, null, null, true);
+}
+
+// The welcome screen for someone who opened an invite link.
+async function showInviteWelcome() {
+  const token = pendingInvite();
+  if (!token || operator) return;
+  initSB();
+  const { data: pv } = await sb.rpc('invite_preview', { p_token: token });
+  openOverlay('Welcome to Bixxville', body => {
+    body.innerHTML = pv?.ok ? `<div class="term-wf wl-wrap">
+        <h3 class="iv-h">Welcome, ${esc(pv.name)}.</h3>
+        <p class="wl-lead">${esc(pv.from || 'The Executive Operator')} invited you to the Bixxville network. Accept to sign in. Next you’ll choose your own PIN, add your phone number, and you can install the app.</p>
+        <div class="gate-err" id="iv-err"></div>
+        <button class="pp-btn solid big" id="iv-go">Accept and sign in</button>
+      </div>`
+      : `<div class="term-wf wl-wrap"><p class="wl-lead">${esc(pv?.reason || 'This invite link isn’t valid.')}</p><button class="pp-btn big" id="iv-close">Go to sign in</button></div>`;
+    body.querySelector('#iv-close')?.addEventListener('click', () => { dropInvite(); closeOverlay(); });
+    body.querySelector('#iv-go')?.addEventListener('click', async e => {
+      e.target.disabled = true;
+      const { data, error } = await sb.rpc('redeem_invite', { p_token: token });
+      dropInvite();
+      if (error || !data?.token) { const er = body.querySelector('#iv-err'); er.textContent = error?.message || 'Could not sign in.'; er.classList.add('show'); return; }
+      operator = data.operator;
+      opSessionToken = data.token;
+      startSessionHeartbeat();
+      closeOverlay();
+      await enterShell();
+      setTimeout(showFirstSteps, 500);
+    });
+  }, null, null, true);
+}
+document.addEventListener('DOMContentLoaded', () => setTimeout(showInviteWelcome, 1200));
+
+// First steps after an invite: PIN (needed to sign in again), phone, install, wallet.
+function showFirstSteps() {
+  openOverlay('Set up your account', body => {
+    body.innerHTML = `<div class="term-wf wl-wrap">
+      <h4 class="cy-h">1 · Choose your PIN <span>7 digits; you sign in with it next time</span></h4>
+      <input id="fs-pin" class="pf-tax-in wide" type="password" inputmode="numeric" maxlength="7" autocomplete="new-password" placeholder="7 digits">
+      <input id="fs-pin2" class="pf-tax-in wide" style="margin-top:8px" type="password" inputmode="numeric" maxlength="7" autocomplete="new-password" placeholder="Type it again">
+      <h4 class="cy-h">2 · Your phone number <span>optional</span></h4>
+      <input id="fs-phone" class="pf-tax-in wide" type="tel" autocomplete="tel" placeholder="+1 340 555 0123" value="${esc(operator.phone || '')}">
+      <label class="fs-check"><input id="fs-vis" type="checkbox"> Let other members see my number</label>
+      <div class="gate-err" id="fs-err"></div>
+      <button class="pp-btn solid big" id="fs-go">Save</button>
+      <h4 class="cy-h">3 · Put Bixxville on this device</h4>
+      <div class="pf-wal-acts"><button class="pp-btn" onclick="installApp()">Install the app</button><button class="pp-btn" onclick="openAddWallet()">Add your wallet</button></div>
+    </div>`;
+    body.querySelector('#fs-go').onclick = async () => {
+      const er = body.querySelector('#fs-err'), say = m => { er.textContent = m; er.classList.add('show'); };
+      er.classList.remove('show');
+      const pin = body.querySelector('#fs-pin').value, pin2 = body.querySelector('#fs-pin2').value;
+      if (!/^\d{7}$/.test(pin)) return say('Your PIN is exactly 7 digits.');
+      if (pin !== pin2) return say('The two PINs don’t match.');
+      const { error } = await sb.rpc('set_my_pin', { p_pin: pin });
+      if (error) return say(error.message);
+      const ph = body.querySelector('#fs-phone').value.trim();
+      if (ph) {
+        const { data, error: e2 } = await sb.rpc('set_my_phone', { p_phone: ph, p_visible: body.querySelector('#fs-vis').checked });
+        if (e2) return say(e2.message);
+        operator.phone = data.phone; operator.phone_visible = data.phone_visible;
+      }
+      toast('Saved. Next time, sign in with your PIN.');
+      body.querySelector('#fs-go').textContent = 'Saved';
+      body.querySelector('#fs-go').disabled = true;
+    };
+  }, null, null, true);
+}
+
+// Phone number in the profile.
+async function saveMyPhone() {
+  const ph = (document.getElementById('pf-phone')?.value || '').trim();
+  const vis = !!document.getElementById('pf-phone-vis')?.checked;
+  const { data, error } = await sb.rpc('set_my_phone', { p_phone: ph || null, p_visible: vis });
+  if (error) { toast(error.message); return; }
+  operator.phone = data.phone; operator.phone_visible = data.phone_visible;
+  toast(data.phone ? `Phone saved${data.phone_visible ? ' (members can see it)' : ' (only the Executive Operator sees it)'}.` : 'Phone removed.');
+}
+async function changeMyPin() {
+  const a = prompt('New 7-digit PIN:'); if (a == null) return;
+  const b = prompt('Type it again:'); if (b == null) return;
+  if (a !== b) { toast('The two PINs don’t match.'); return; }
+  const { error } = await sb.rpc('set_my_pin', { p_pin: a });
+  toast(error ? error.message : 'PIN changed.');
+}
+
+// Online now: a ping every minute while the app is open and in front.
+let PRESENCE_TIMER = null;
+function startPresence() {
+  clearInterval(PRESENCE_TIMER);
+  const ping = () => { if (operator && opSessionToken && document.visibilityState === 'visible') sb.rpc('presence_ping').then(() => {}, () => {}); };
+  ping();
+  PRESENCE_TIMER = setInterval(ping, 60000);
+  document.addEventListener('visibilitychange', ping);
+}
+const seenText = t => {
+  if (!t) return '';
+  const m = Math.round((Date.now() - new Date(t)) / 60000);
+  return m <= 2 ? 'Online now' : m < 60 ? `Seen ${m} min ago` : m < 1440 ? `Seen ${Math.round(m / 60)} h ago` : `Seen ${Math.round(m / 1440)} d ago`;
+};
+// While the Executive Operator has the members list open, the online dots refresh on their own.
+let SEEN_TIMER = null;
+function watchPresence() {
+  clearInterval(SEEN_TIMER);
+  SEEN_TIMER = setInterval(async () => {
+    if (!document.querySelector('[data-seen]') || document.visibilityState !== 'visible') return;
+    const { data } = await sb.rpc('network_members');
+    for (const m of data || []) {
+      const el = document.querySelector(`[data-seen="${m.id}"]`);
+      if (!el) continue;
+      const was = el.classList.contains('on'), t = seenText(m.last_seen_at), on = t === 'Online now';
+      el.textContent = t; el.classList.toggle('on', on);
+      if (on && !was && m.id !== operator.id) toast(`${m.peer_name} is online now.`);
+    }
+  }, 30000);
+}
 
 // ── INSTALL: the OS as an app on the computer or phone. It opens in its own window and loads the
 // live version every time (sw.js is network-first), so everyone in the network stays on the same one.
@@ -19032,9 +19319,13 @@ window.addEventListener('load', async () => {
     if (op) {
       operator = { ...op, email: session.user.email };
       await startOperatorSessionFromAuth();
-      enterShell();
-      return;
+      if (opSessionToken) { enterShell(); return; }
     }
+    // A confirmed email, but nobody invited it: no session. Say so and sign out of that login.
+    await sb.auth.signOut();
+    const er = document.getElementById('g-wallet-err'), msg = `${session.user.email} isn’t a member yet. Ask the Executive Operator to invite that email, or sign in another way.`;
+    if (er) { er.textContent = msg; er.classList.add('show'); }
+    gateShowForm?.('operator');      // straight to the sign-in methods, with the reason showing
   }
   // No session — gate stays up, starting at the splash screen
 });

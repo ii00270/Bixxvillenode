@@ -3956,13 +3956,13 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
         <span>Terminal</span>
       </button>
     </div>
-    <div class="term-sb-group" data-group="tracker">
+    <div class="term-sb-group folded" data-group="tracker">
       <div class="term-sb-row">
       <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>
         <span>Tracker</span>
       </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('tracker')" aria-label="Collapse Tracker">−</button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('tracker')" aria-label="Expand Tracker">+</button>
       </div>
       <div class="term-sb-sub" id="term-sb-tracker-sub">
         <button class="term-sb-subitem" onclick="setTrackerFilter('to-do'); setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
@@ -3973,13 +3973,13 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
         <button class="term-sb-subitem" data-sub="places" onclick="setTermView('places')">Places</button>
       </div>
     </div>
-    <div class="term-sb-group" data-group="clients">
+    <div class="term-sb-group folded" data-group="clients">
       <div class="term-sb-row">
       <button class="term-sb-item" data-view="clients" onclick="setTermView('clients')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg>
         <span>Clients</span>
       </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('clients')" aria-label="Collapse Clients">−</button>
+      <button class="term-sb-fold" onclick="toggleSbGroup('clients')" aria-label="Expand Clients">+</button>
       </div>
       <div class="term-sb-sub" id="term-sb-clients-sub">
         <button class="term-sb-subitem" data-sub="notifications" onclick="setTermView('notifications')">Notifications <span class="term-sb-count" id="sb-notif-count"></span></button>
@@ -12521,15 +12521,15 @@ async function openStepFromProfile(mapId) {
 }
 
 // ── Sidebar: nested nav, mobile drawer ──────────────────────────────────
-// +/− beside Tracker, Statements and Browser fold their sub-lists away.
-// Remembered per device.
-function sbFolded() {
-  try { return JSON.parse(localStorage.getItem('bixx-sb-folded') || '[]'); } catch (e) { return []; }
+// +/− beside Tracker and Clients open their sub-lists. Closed until opened;
+// the ones you open are remembered per device.
+function sbOpened() {
+  try { return JSON.parse(localStorage.getItem('bixx-sb-open') || '[]'); } catch (e) { return []; }
 }
 function applySbFolds() {
-  const folded = sbFolded();
+  const opened = sbOpened();
   document.querySelectorAll('.term-sb-group[data-group]').forEach(g => {
-    const on = folded.includes(g.dataset.group);
+    const on = !opened.includes(g.dataset.group);
     g.classList.toggle('folded', on);
     const b = g.querySelector('.term-sb-fold');
     if (b) {
@@ -12540,10 +12540,10 @@ function applySbFolds() {
   });
 }
 function toggleSbGroup(key) {
-  const folded = sbFolded();
-  const i = folded.indexOf(key);
-  if (i >= 0) folded.splice(i, 1); else folded.push(key);
-  try { localStorage.setItem('bixx-sb-folded', JSON.stringify(folded)); } catch (e) {}
+  const opened = sbOpened();
+  const i = opened.indexOf(key);
+  if (i >= 0) opened.splice(i, 1); else opened.push(key);
+  try { localStorage.setItem('bixx-sb-open', JSON.stringify(opened)); } catch (e) {}
   applySbFolds();
 }
 

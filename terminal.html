@@ -10855,7 +10855,9 @@ function walletFor(kind) {
 }
 
 // Asks which wallet app to use and connects it. Resolves { provider, address, name, chainId } or null.
-function pickWallet({ title = 'Connect a wallet', lead = '' } = {}) {
+// choose: ask the wallet to show its own account chooser, so a second account can be picked even though
+// this site is already connected to the first (MetaMask otherwise just hands back the connected one).
+function pickWallet({ title = 'Connect a wallet', lead = '', choose = false } = {}) {
   window.dispatchEvent(new Event('eip6963:requestProvider'));
   return new Promise(resolve => {
     const known = new Set();
@@ -10864,6 +10866,7 @@ function pickWallet({ title = 'Connect a wallet', lead = '' } = {}) {
     if (!WALLET_FOUND.size && window.ethereum && !known.has(window.ethereum)) others.push({ info: { name: 'Wallet in this browser' }, provider: window.ethereum });
     const connect = async (provider, name) => {
       try {
+        if (choose) { try { await provider.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] }); } catch (e) { if (e?.code === 4001) throw e; /* a wallet without the chooser: fall through to the plain connect */ } }
         const [a] = await provider.request({ method: 'eth_requestAccounts' });
         if (!a) throw new Error('No account was shared.');
         const chainId = parseInt(await provider.request({ method: 'eth_chainId' }).catch(() => '0x0'), 16);
@@ -10911,7 +10914,7 @@ async function connectKnownWallet(provider, name) {
 async function openAddWallet(pre) {
   const have = (operator.wallet_address || '').toLowerCase();
   const w = pre?.address ? pre : await pickWallet({ title: have ? 'Change your personal wallet' : 'Add your personal wallet',
-    lead: 'Your personal wallet signs you in and receives your pay. Pick the wallet app you use.' });
+    lead: 'Your personal wallet signs you in and receives your pay. Pick the wallet app you use.', choose: !!have });
   if (!w) return;
   const a = w.address, s = x => `${x.slice(0, 6)}…${x.slice(-4)}`;
   if (have === a) { toast(`That ${w.name} account is already your personal wallet.`); return; }
@@ -18825,7 +18828,7 @@ async function proveNetworkWallet(kind) {
   const btn = kind === 'treasury' ? document.getElementById('gc-tr-btn') : null;
   const say = m => { if (err?.isConnected) { err.textContent = m; err.classList.add('show'); } else toast(m); };
   err?.classList.remove('show');
-  const w = await pickWallet({ title: K.title, lead: K.lead });
+  const w = await pickWallet({ title: K.title, lead: K.lead, choose: true });
   if (!w) return;
   const address = w.address;
   const st = await treasuryStatus().catch(() => ({}));

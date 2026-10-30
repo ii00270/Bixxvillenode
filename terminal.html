@@ -1020,13 +1020,20 @@ button.ca-chip{appearance:none;text-align:left;cursor:pointer;font:inherit;width
 .lm-card dd small{display:block;color:var(--term-dim);font-size:10.5px}
 .lm-card dd.stale{color:#E8743A}
 #pf-mapme .pf-tax-row .pf-tax-in{flex:1 1 0;min-width:0;width:auto}
-.net-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.net-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px;font-family:var(--mono);color:var(--term-fg)}
+.net-card *{font-family:var(--mono)}
+.net-now b{color:var(--term-fg);font-size:15px;font-weight:600}
+.net-card a{color:#FF2D95}
+.net-switch summary{list-style:none;display:inline-flex;align-items:center;gap:8px;width:max-content;max-width:100%;border:1px solid #FF2D95;border-radius:8px;padding:8px 12px;color:var(--term-fg) !important;font-size:12.5px !important;font-weight:600}
+.net-switch summary::-webkit-details-marker{display:none}
+.net-switch summary::before{content:'→';color:#FF2D95}
+.net-switch[open] summary::before{content:'↓'}
 .net-card.live{border-color:#FF2D95;box-shadow:inset 3px 0 0 #FF2D95}
 .net-now{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .net-now small{color:var(--term-dim);font-size:11.5px}
 .net-dot{width:9px;height:9px;border-radius:50%;background:#3B82F6}
 .net-card.live .net-dot{background:#FF2D95;box-shadow:0 0 0 3px rgba(255,45,149,.2)}
-.net-switch summary{cursor:pointer;font-size:12px;color:var(--term-dim)}
+.net-switch summary{cursor:pointer}
 .net-switch[open]{display:flex;flex-direction:column;gap:8px}
 .net-hist{border-top:1px solid var(--term-line);padding-top:8px;font-size:11px;color:var(--term-dim);display:flex;flex-direction:column;gap:6px}
 .net-hist span{color:var(--term-fg)}

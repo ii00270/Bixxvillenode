@@ -3100,6 +3100,7 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 .dw-k.treasury i{background:#C9A24A}
 .dw-row b{font-weight:500}
 .dw-v{color:var(--term-dim);text-align:right;white-space:nowrap}
+.dw-net{font:11px var(--mono);color:var(--term-dim);padding-top:4px}
 .dash-nets{margin:10px 0 2px;border-top:1px solid var(--term-line);padding-top:10px;font:12px var(--mono);color:var(--term-dim)}
 .nt-head{display:flex;justify-content:space-between;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--term-fg);margin-bottom:6px}
 .nt-head b{font-size:15px;letter-spacing:0}
@@ -11473,13 +11474,14 @@ async function fillDashWallets() {
   const rows = [];
   if (operator.wallet_address) rows.push(['Personal', operator.wallet_address]);
   if (isExec()) {
-    let t = TREASURY_ADDR;
-    if (!t) { try { t = (await treasuryStatus()).treasury_wallet || null; } catch (e) {} }
+    let t = TREASURY_ADDR;                                   // what we knew; replaced by what the server says now
+    try { t = (await treasuryStatus()).treasury_wallet || null; } catch (e) {}
     rows.push(['Treasury', t]);
   }
   if (!document.getElementById('dash-wals')) return;
   if (!rows.length) { box.remove(); return; }
-  box.innerHTML = rows.map(([k, a], i) => `<button class="dw-row" onclick="openWalletsInProfile()"><span class="dw-k ${k.toLowerCase()}"><i></i>${k} wallet</span><b>${a ? esc(sh(a)) : 'Not set'}</b><span class="dw-v" id="dw-v${i}">${a ? '…' : ''}</span></button>`).join('');
+  box.innerHTML = rows.map(([k, a], i) => `<button class="dw-row" onclick="openWalletsInProfile()"><span class="dw-k ${k.toLowerCase()}"><i></i>${k} wallet</span><b>${a ? esc(sh(a)) : 'Not set'}</b><span class="dw-v" id="dw-v${i}">${a ? '…' : ''}</span></button>`).join('')
+    + `<div class="dw-net">Escrow network: <b>${esc(ESCROW_NET.name)}</b>${ESCROW_NET.live ? ' · real money' : ' · test money'}</div>`;
   rows.forEach(async ([, a], i) => {
     if (!a) return;
     const u = await fetchUsdcBalance(a).catch(() => null);

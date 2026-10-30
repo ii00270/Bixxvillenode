@@ -5354,13 +5354,21 @@ async function doEmailLink() {
   btn.disabled = true; btn.textContent = 'Sending…';
   const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: AUTH_ORIGIN(), shouldCreateUser: true } });
   btn.disabled = false; btn.textContent = 'Send me a sign-in link';
-  if (error) { err.textContent = /rate|seconds|too many/i.test(error.message) ? 'Too many tries. Wait a minute, then try again.' : error.message; err.classList.add('show'); return; }
-  err.style.color = 'var(--green)';
-  err.textContent = `Check ${email}. Open the link on this device, or type the code from the email below. Either works once.`;
+  if (error) {
+    if (!/rate|seconds|too many/i.test(error.message)) { err.textContent = error.message; err.classList.add('show'); return; }
+    // One email per address per minute. One was sent a moment ago, so its code can still be typed.
+    err.style.color = '';
+    err.textContent = 'An email was sent a moment ago. Type its code below, or wait a minute and ask again.';
+  } else {
+    err.style.color = 'var(--green)';
+    err.textContent = `Check ${email}. Open the link on this device, or type the code from the email below. Either works once.`;
+  }
   err.classList.add('show');
   emailCodeFor = email;
-  document.getElementById('sg-code-box').style.display = '';
-  document.getElementById('sg-code-in').focus();
+  const box = document.getElementById('sg-code-box');
+  box.style.display = '';
+  box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  document.getElementById('sg-code-in').focus({ preventScroll: true });
 }
 // The same email also carries a code. It works from any device or app, which a link cannot
 // (a phone's mail app opens links in its own browser, not in the installed app).

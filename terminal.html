@@ -1020,6 +1020,18 @@ button.ca-chip{appearance:none;text-align:left;cursor:pointer;font:inherit;width
 .lm-card dd small{display:block;color:var(--term-dim);font-size:10.5px}
 .lm-card dd.stale{color:#E8743A}
 #pf-mapme .pf-tax-row .pf-tax-in{flex:1 1 0;min-width:0;width:auto}
+.net-card{border:1px solid var(--term-line);border-radius:12px;padding:12px 14px;display:flex;flex-direction:column;gap:8px}
+.net-card.live{border-color:#FF2D95;box-shadow:inset 3px 0 0 #FF2D95}
+.net-now{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.net-now small{color:var(--term-dim);font-size:11.5px}
+.net-dot{width:9px;height:9px;border-radius:50%;background:#3B82F6}
+.net-card.live .net-dot{background:#FF2D95;box-shadow:0 0 0 3px rgba(255,45,149,.2)}
+.net-switch summary{cursor:pointer;font-size:12px;color:var(--term-dim)}
+.net-switch[open]{display:flex;flex-direction:column;gap:8px}
+.net-hist{border-top:1px solid var(--term-line);padding-top:8px;font-size:11px;color:var(--term-dim);display:flex;flex-direction:column;gap:6px}
+.net-hist span{color:var(--term-fg)}
+.hr-line{font:11px var(--mono);color:var(--term-dim);margin-top:4px;line-height:1.5}
+.hr-line .ok{color:#2E9D6B}.hr-line .warn,.hr-line.warn{color:#E8743A}
 .pf-map-prec{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12px}
 .pf-map-prec label{display:flex;align-items:center;gap:6px;cursor:pointer}
 .lm-grad{display:inline-block;width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#FFEA00,#FF7A1A 50%,#FF2D95);box-shadow:0 0 0 2px var(--term-bg),0 0 0 3px color-mix(in srgb,var(--term-fg) 30%,transparent);flex-shrink:0}
@@ -5789,7 +5801,7 @@ async function enterShell() {
 
   showSurface('members');
   loadAll();
-  if (isExec()) treasuryStatus().catch(() => {});
+  treasuryStatus().catch(() => {});   // also picks up which Hedera network escrow uses
   startPresence();
   startWalletPoll();
   if (isExec()) watchPresence();
@@ -8070,7 +8082,7 @@ async function createEscrow() {
   const tokenAddr = useTest ? ESCROW_NET.testToken : ESCROW_NET.usdc;
   const ok = await osConfirm(useTest
     ? `Create the escrow on ${ESCROW_NET.name} with the free test token? Your wallet will ask you to confirm one transaction (deploy). Nothing real is involved.`
-    : `Create the escrow on ${ESCROW_NET.name}? Your wallet will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
+    : `Create the escrow on ${ESCROW_NET.name}?${ESCROW_NET.live ? ' This is the live network: real USDC and real HBAR fees.' : ''} Your wallet will ask you to confirm two transactions (deploy, then link it to USDC). No USDC moves until the client funds it.`);
   if (!ok) return;
   btn.disabled = true;
   try {
@@ -9559,7 +9571,10 @@ function renderProfileView(body, op, breakdown, memberId, currentWork, walletBal
 // ── PAYMENT LEDGER ──
 // Money moves only through the Hedera escrow (wallet-first, decided 2026-10-22).
 // Testnet until the Executive Operator says mainnet.
-const ESCROW_NET = {
+// Both Hedera networks. Which one escrow uses is the Executive Operator's written decision
+// (set_escrow_network, migration 0033); everyone's OS follows escrow_settings().network.
+const ESCROW_NETS = {
+  'hedera-testnet': {
   key: 'hedera-testnet', name: 'Hedera Testnet', chainId: 296, chainHex: '0x128',
   rpc: 'https://testnet.hashio.io/api', explorer: 'https://hashscan.io/testnet', mirror: 'https://testnet.mirrornode.hedera.com/api/v1',
   usdc: '0x0000000000000000000000000000000000068cda', usdcId: '0.0.429274',
@@ -9567,7 +9582,24 @@ const ESCROW_NET = {
   // anyone can mint it and it is worth nothing. Deployed 2026-10-22 (dapp/deployments/hedera-testnet.json).
   testToken: '0xc14D81Add3876206818732F7B5e25c614B0f4aD0',
   currency: { name: 'HBAR', symbol: 'HBAR', decimals: 18 },
+},
+  'hedera-mainnet': {
+    key: 'hedera-mainnet', name: 'Hedera', live: true, chainId: 295, chainHex: '0x127',
+    // Hashio is Hedera's free public relay; Hedera's docs say production should move to a commercial relay.
+    rpc: 'https://mainnet.hashio.io/api', explorer: 'https://hashscan.io/mainnet', mirror: 'https://mainnet.mirrornode.hedera.com/api/v1',
+    usdc: '0x000000000000000000000000000000000006f89a', usdcId: '0.0.456858',   // Circle USDC (developers.circle.com)
+    testToken: null,
+    currency: { name: 'HBAR', symbol: 'HBAR', decimals: 18 },
+  },
 };
+let ESCROW_NET = ESCROW_NETS['hedera-testnet'];
+function useEscrowNetwork(key) {
+  const n = ESCROW_NETS[key];
+  if (!n || n === ESCROW_NET) return;
+  ESCROW_NET = n;
+  termBalanceCache = null;
+  if (typeof scheduleWalletRefresh === 'function') scheduleWalletRefresh();
+}
 
 // USDC balance on Hedera (6 decimals), read through the public RPC.
 async function fetchUsdcBalance(address) {
@@ -11292,7 +11324,8 @@ const SCAN_NETWORKS = [
   { id: 10,    name: 'Optimism',        sym: 'ETH', rpc: ['https://optimism-rpc.publicnode.com', 'https://mainnet.optimism.io'] },
   { id: 137,   name: 'Polygon',         sym: 'POL', rpc: ['https://polygon-bor-rpc.publicnode.com'] },
   { id: 4663,  name: 'Robinhood Chain', sym: 'ETH', rpc: ['https://rpc.mainnet.chain.robinhood.com/'] },
-  { id: 296,   name: 'Hedera Testnet',  sym: 'HBAR', rpc: [ESCROW_NET.rpc], test: true },
+  { id: 295,   name: 'Hedera',          sym: 'HBAR', rpc: ['https://mainnet.hashio.io/api'] },
+  { id: 296,   name: 'Hedera Testnet',  sym: 'HBAR', rpc: ['https://testnet.hashio.io/api'], test: true },
 ];
 let SCAN_CACHE = {};
 async function rpcCall(urls, method, params) {
@@ -12818,7 +12851,10 @@ async function fillProfileWallets(op) {
   }).catch(() => {});
   const money = (u, h) => `${u != null ? '$' + u.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : '$0.00'} USDC · ${h != null ? h.toLocaleString(undefined, { maximumFractionDigits: 2 }) : '0'} HBAR <small>${esc(ESCROW_NET.name)}</small>`;
   const bal = async a => money(await fetchUsdcBalance(a).catch(() => null), await fetchHbarBalance(a).catch(() => null));
-  if (op.wallet_address) { const el = document.getElementById('pf-wal-p'); if (el) el.innerHTML = await bal(op.wallet_address); }
+  if (op.wallet_address) {
+    const el = document.getElementById('pf-wal-p'); if (el) el.innerHTML = await bal(op.wallet_address);
+    hederaReadiness(op.wallet_address).then(r => { const x = document.getElementById('pf-wal-p'); if (x) x.insertAdjacentHTML('afterend', readinessHtml(r)); });
+  }
   const t = document.getElementById('pf-wal-t');
   if (!t) return;
   let st = {};
@@ -12831,7 +12867,10 @@ async function fillProfileWallets(op) {
     ${w && st.treasury_proven_at ? `<div class="pf-wal-bal">Proven ${esc(new Date(st.treasury_proven_at).toLocaleDateString())}</div>` : ''}
     <div class="pf-wal-acts"><button class="pf-btn ${w ? '' : 'solid'}" onclick="setTreasuryWallet()">${w ? 'Change treasury wallet' : 'Add treasury wallet'}</button>
       ${w ? `<a class="pf-copy" href="${ESCROW_NET.explorer}/account/${esc(w)}" target="_blank" rel="noopener">HashScan</a>` : ''}</div>`;
-  if (w) t.querySelectorAll('.pf-wal-bal')[0].innerHTML = await bal(w);
+  if (w) {
+    t.querySelectorAll('.pf-wal-bal')[0].innerHTML = await bal(w);
+    hederaReadiness(w).then(r => t.querySelectorAll('.pf-wal-bal')[0]?.insertAdjacentHTML('afterend', readinessHtml(r)));
+  }
   const x = document.getElementById('pf-wal-x');
   if (!x) return;
   const tw = st.tax_wallet, rate = (Number(st.network_tax_bps) || 0) / 100;
@@ -19733,6 +19772,9 @@ function openGenesisConsole() {
       <div class="section-lbl" style="position:relative;top:0">PIN Recovery Requests</div>
       <div id="gc-recovery-list" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
 
+      <div class="section-lbl" style="position:relative;top:0">Escrow network</div>
+      <div id="gc-network" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
+
       <div class="section-lbl" style="position:relative;top:0">Treasury wallet</div>
       <div id="gc-treasury" style="padding:0 18px 18px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>
 
@@ -19740,6 +19782,7 @@ function openGenesisConsole() {
       <div id="gc-audit-list" style="padding:0 18px 24px"><div class="empty" style="padding:8px 0"><div class="empty-msg">Loading…</div></div></div>`;
 
     renderGenesisRecoveryQueue();
+    renderNetworkPanel();
     renderTreasuryPanel();
     renderGenesisAudit();
   }, null, null, true);
@@ -19861,8 +19904,69 @@ async function fetchHbarBalance(address) {
 async function treasuryStatus() {
   const { data, error } = await sb.rpc('escrow_settings');
   if (error) throw error;
+  useEscrowNetwork(data?.network);
   TREASURY_ADDR = data?.treasury_wallet || null;
   return data || {};
+}
+
+// Escrow network (migration 0033). Moving to the live network is a written decision, kept on record.
+async function renderNetworkPanel() {
+  const el = document.getElementById('gc-network');
+  if (!el) return;
+  let hist = [];
+  try { await treasuryStatus(); hist = (await sb.rpc('escrow_network_history')).data || []; } catch (e) {}
+  const live = !!ESCROW_NET.live, other = live ? ESCROW_NETS['hedera-testnet'] : ESCROW_NETS['hedera-mainnet'];
+  el.innerHTML = `<div class="net-card ${live ? 'live' : ''}">
+      <div class="net-now"><span class="net-dot"></span><b>${esc(ESCROW_NET.name)}</b><small>${live ? 'Live network. Real USDC; payments cannot be reversed.' : 'Test network. Nothing here is worth anything.'}</small></div>
+      <div class="escrow-muted">Chain ${ESCROW_NET.chainId} · USDC ${esc(ESCROW_NET.usdcId)} · <a href="${ESCROW_NET.explorer}" target="_blank" rel="noopener">HashScan</a></div>
+      <details class="net-switch"><summary>Switch to ${esc(other.name)}${other.live ? ' (real money)' : ''}</summary>
+        <p class="escrow-muted">${other.live
+          ? 'Amendment VIII §4: this is a written decision. Write it in your own words; it is kept on record with your name and the time. The treasury and tax wallets are cleared and must be proven again on the live network (Amendment VIII §3: a hardware wallet for real value).'
+          : 'Going back to the test network also clears the treasury and tax wallets; they must be proven again there.'}</p>
+        <textarea id="net-stmt" class="form-input" style="min-height:70px" placeholder="${other.live ? 'e.g. I, Benjo, Executive Operator, move Bixxville escrow to Hedera mainnet with Circle USDC as of today.' : 'Why we are going back to the test network.'}"></textarea>
+        ${other.live ? '<label class="fs-check"><input id="net-ack" type="checkbox"> I understand payments on the live network are real and cannot be pulled back.</label>' : ''}
+        <div class="gate-err" id="net-err"></div>
+        <button class="act-btn" onclick="switchEscrowNetwork('${other.key}')">Switch to ${esc(other.name)}</button>
+      </details>
+      ${hist.length ? `<div class="net-hist">${hist.slice(0, 5).map(h => `<div><b>${esc(fmtWhen(h.at))}</b> · ${esc(h.by || '')} · ${esc(h.from)} → ${esc(h.to)}<br><span>“${esc(h.statement)}”</span></div>`).join('')}</div>` : ''}
+    </div>`;
+}
+async function switchEscrowNetwork(key) {
+  const err = document.getElementById('net-err');
+  const say = m => { err.textContent = m; err.classList.add('show'); };
+  const stmt = (document.getElementById('net-stmt')?.value || '').trim();
+  const to = ESCROW_NETS[key];
+  if (stmt.length < 20) return say('Write the decision in a sentence or two. It is kept on record.');
+  if (to.live && !document.getElementById('net-ack')?.checked) return say('Tick the box to confirm you understand the money is real.');
+  if (!await osConfirm(`Switch escrow to ${to.name}${to.live ? ' (real USDC)' : ''}? The treasury and tax wallets are cleared and must be proven again there.`)) return;
+  const { error } = await sb.rpc('set_escrow_network', { p_network: key, p_statement: stmt });
+  if (error) return say(error.message);
+  await treasuryStatus().catch(() => {});
+  toast(`Escrow now uses ${ESCROW_NET.name}. Prove the treasury wallet again next.`);
+  renderNetworkPanel(); renderTreasuryPanel(); refreshProfilePanel();
+  if (document.getElementById('dash-bal')) renderDashboard();
+}
+
+// Whether an address can take part on the Hedera network in use: does the account exist yet, will it
+// accept USDC, and does it hold HBAR for fees. Read from the public mirror node.
+async function hederaReadiness(addr) {
+  const out = { exists: false, usdc: null, acceptsUsdc: false, hbar: 0 };
+  try {
+    const r = await fetch(`${ESCROW_NET.mirror}/accounts/${addr.toLowerCase()}`, { signal: AbortSignal.timeout(8000) });
+    if (r.status === 404) return out;
+    const a = await r.json();
+    out.exists = !!a.account; out.id = a.account;
+    out.hbar = Number(a.balance?.balance || 0) / 1e8;
+    const t = (a.balance?.tokens || []).find(x => x.token_id === ESCROW_NET.usdcId);
+    out.usdc = t ? Number(t.balance) / 1e6 : null;
+    out.acceptsUsdc = !!t || a.max_automatic_token_associations === -1 || a.max_automatic_token_associations > 0;
+  } catch (e) { out.error = true; }
+  return out;
+}
+function readinessHtml(r) {
+  if (r.error) return '<div class="hr-line">Could not check Hedera right now.</div>';
+  if (!r.exists) return `<div class="hr-line warn">Not on ${esc(ESCROW_NET.name)} yet. It appears once it receives a little HBAR (from an exchange or another wallet).</div>`;
+  return `<div class="hr-line"><span class="${r.exists ? 'ok' : ''}">Account ${esc(r.id)}</span> · <span class="${r.acceptsUsdc ? 'ok' : 'warn'}">${r.acceptsUsdc ? 'accepts USDC' : 'not set to accept USDC'}</span> · <span class="${r.hbar >= 1 ? 'ok' : 'warn'}">${r.hbar.toLocaleString(undefined, { maximumFractionDigits: 3 })} HBAR for fees</span></div>`;
 }
 
 async function renderTreasuryPanel() {

@@ -3886,6 +3886,12 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
           <input class="gate-input" id="sg-email-in" type="email" inputmode="email" autocomplete="email" placeholder="you@proton.me" onkeydown="if(event.key==='Enter')doEmailLink()"/>
           <button class="gate-btn" id="sg-email-go" onclick="doEmailLink()">Send me a sign-in link</button>
           <div class="gate-err" id="sg-email-err"></div>
+          <div id="sg-code-box" style="display:none;margin-top:12px">
+            <label class="gate-label" for="sg-code-in">Or type the code from the email</label>
+            <input class="gate-input" id="sg-code-in" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="6-digit code" onkeydown="if(event.key==='Enter')doEmailCode()"/>
+            <button class="gate-btn" id="sg-code-go" onclick="doEmailCode()">Sign in with the code</button>
+            <div class="gate-err" id="sg-code-err"></div>
+          </div>
         </div>
         <div style="font-family:var(--mono);font-size:9px;letter-spacing:.14em;text-transform:uppercase;color:var(--grey);text-align:center;margin:14px 0 10px">or use your PIN</div>
         <label class="gate-label" for="g-pin">PIN</label>
@@ -5350,8 +5356,28 @@ async function doEmailLink() {
   btn.disabled = false; btn.textContent = 'Send me a sign-in link';
   if (error) { err.textContent = /rate|seconds|too many/i.test(error.message) ? 'Too many tries. Wait a minute, then try again.' : error.message; err.classList.add('show'); return; }
   err.style.color = 'var(--green)';
-  err.textContent = `Check ${email}. Open the link on this device. It works once.`;
+  err.textContent = `Check ${email}. Open the link on this device, or type the code from the email below. Either works once.`;
   err.classList.add('show');
+  emailCodeFor = email;
+  document.getElementById('sg-code-box').style.display = '';
+  document.getElementById('sg-code-in').focus();
+}
+// The same email also carries a code. It works from any device or app, which a link cannot
+// (a phone's mail app opens links in its own browser, not in the installed app).
+let emailCodeFor = null;
+async function doEmailCode() {
+  const input = document.getElementById('sg-code-in'), err = document.getElementById('sg-code-err'), btn = document.getElementById('sg-code-go');
+  const code = (input.value || '').replace(/\D/g, '');
+  err.classList.remove('show');
+  if (!emailCodeFor) { err.textContent = 'Ask for a link first, then type the code.'; err.classList.add('show'); return; }
+  if (code.length < 6) { err.textContent = 'Enter the code from the email.'; err.classList.add('show'); return; }
+  initSB();
+  btn.disabled = true; btn.textContent = 'Checking…';
+  const { data, error } = await sb.auth.verifyOtp({ email: emailCodeFor, token: code, type: 'email' });
+  btn.disabled = false; btn.textContent = 'Sign in with the code';
+  if (error || !data?.session) { err.textContent = /expired|invalid/i.test(error?.message || '') ? 'That code is wrong or has expired. Ask for a new one.' : (error?.message || 'Could not sign in with that code.'); err.classList.add('show'); return; }
+  input.value = '';
+  await enterFromAuthSession(data.session);
 }
 async function doGoogleLogin() {
   initSB();
@@ -19536,23 +19562,26 @@ document.addEventListener('keydown', e => {
 })();
 
 // ── ENTRY POINT ──
+// A confirmed email login (the emailed link on load, or the typed code) becomes an OS session only
+// if that email belongs to an invited member.
+async function enterFromAuthSession(session) {
+  const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: session.user.email });
+  const op = Array.isArray(opRows) ? opRows[0] : opRows;
+  if (op) {
+    operator = { ...op, email: session.user.email };
+    await startOperatorSessionFromAuth();
+    if (opSessionToken) { enterShell(); return; }
+  }
+  // A confirmed email, but nobody invited it: no session. Say so and sign out of that login.
+  await sb.auth.signOut();
+  const er = document.getElementById('g-wallet-err'), msg = `${session.user.email} isn’t a member yet. Ask the Executive Operator to invite that email, or sign in another way.`;
+  if (er) { er.textContent = msg; er.classList.add('show'); }
+  gateShowForm?.('operator');      // straight to the sign-in methods, with the reason showing
+}
 window.addEventListener('load', async () => {
   initSB();
   const { data: { session } } = await sb.auth.getSession();
-  if (session?.user) {
-    const { data: opRows } = await sb.rpc('get_operator_by_email', { p_email: session.user.email });
-    const op = Array.isArray(opRows) ? opRows[0] : opRows;
-    if (op) {
-      operator = { ...op, email: session.user.email };
-      await startOperatorSessionFromAuth();
-      if (opSessionToken) { enterShell(); return; }
-    }
-    // A confirmed email, but nobody invited it: no session. Say so and sign out of that login.
-    await sb.auth.signOut();
-    const er = document.getElementById('g-wallet-err'), msg = `${session.user.email} isn’t a member yet. Ask the Executive Operator to invite that email, or sign in another way.`;
-    if (er) { er.textContent = msg; er.classList.add('show'); }
-    gateShowForm?.('operator');      // straight to the sign-in methods, with the reason showing
-  }
+  if (session?.user) await enterFromAuthSession(session);
   // No session — gate stays up, starting at the splash screen
 });
 // TRACKER — P-03 The Map and P-04 Leaf Cards, on screen.

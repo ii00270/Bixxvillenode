@@ -672,7 +672,6 @@ button.ca-chip{appearance:none;text-align:left;cursor:pointer;font:inherit;width
 #pl-map{height:560px;width:100%;background:#e9e7e2}
 @media (max-width:900px){#pl-map{height:380px}}
 #pl-map.picking{cursor:crosshair}
-html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.92) contrast(.9)}
 .pl-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:500;background:#0B0B0C;color:#fff;font-family:var(--mono);font-size:11px;padding:7px 14px;border-radius:999px;border:1px solid #FF2D95;pointer-events:none}
 .pl-pin span{display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:50%;background:var(--pc);color:#fff;font-family:var(--mono);font-size:12px;font-weight:700;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,.45)}
 .pl-pin span.on{transform:scale(1.25);box-shadow:0 0 0 4px rgba(255,45,149,.5)}
@@ -970,6 +969,99 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 @media(max-width:560px){.lg-row{grid-template-columns:1fr auto}.lg-row>.lg-tag{grid-column:1/-1;justify-self:start}}
 /* The message box belongs to BIX AI. On the Dashboard the ask box at the top does the asking */
 #terminal-shell:not(.agent-on) #term-composer{display:none}
+/* ── LIVE MAP (Places tab) ── */
+.lm{display:grid;grid-template-columns:320px minmax(0,1fr);gap:12px;height:calc(100dvh - 210px);min-height:520px;font-family:var(--mono);color:var(--term-fg)}
+.lm-side{display:flex;flex-direction:column;min-height:0;border:1px solid var(--term-line);border-radius:14px;background:var(--term-bg);overflow:hidden}
+.lm-head{padding:14px 14px 8px}
+.lm-head h2{font:400 26px/1 Anton,Impact,sans-serif;letter-spacing:.02em;text-transform:uppercase;margin:0;background:linear-gradient(90deg,#FFEA00,#FF7A1A 50%,#FF2D95);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lm-head p{margin:6px 0 0;font-size:11.5px;color:var(--term-dim)}
+.lm-tabs{display:flex;gap:4px;padding:0 10px 10px;border-bottom:1px solid var(--term-line)}
+.lm-tabs button{appearance:none;flex:1;border:1px solid var(--term-line);background:none;color:var(--term-dim);font:500 11.5px var(--mono);padding:7px 6px;border-radius:8px;cursor:pointer}
+.lm-tabs button span{opacity:.7;margin-left:3px}
+.lm-tabs button.on{color:var(--term-fg);border-color:color-mix(in srgb,var(--term-fg) 40%,var(--term-line));background:color-mix(in srgb,var(--term-fg) 6%,transparent)}
+.lm-sidebody{flex:1;min-height:0;overflow-y:auto;padding:10px}
+.lm-tools{display:flex;gap:6px;margin-bottom:8px}
+.lm-search{flex:1;min-width:0}
+.lm-search input{width:100%;box-sizing:border-box;height:32px;border:1px solid var(--term-line);border-radius:8px;background:transparent;color:var(--term-fg);font:12.5px var(--mono);padding:0 10px;outline:0}
+.lm-search input:focus{border-color:#FF2D95}
+.lm-btn{appearance:none;height:32px;padding:0 11px;border:1px solid var(--term-line);border-radius:8px;background:var(--term-bg);color:var(--term-fg);font:500 11.5px var(--mono);cursor:pointer;white-space:nowrap}
+.lm-btn:hover,.lm-btn.on{border-color:color-mix(in srgb,var(--term-fg) 45%,var(--term-line))}
+.lm-btn.solid{background:linear-gradient(90deg,#FFEA00,#FF7A1A 50%,#FF2D95);color:#0A0A0A;border:0;font-weight:600}
+.lm-btn:focus-visible,.lm-tabs button:focus-visible,.lm-row:focus-visible,.lm-chips button:focus-visible{outline:2px solid #FF2D95;outline-offset:2px}
+.lm-add{width:100%;margin-bottom:10px}
+.lm-filter{border:1px solid var(--term-line);border-radius:10px;padding:10px;margin-bottom:10px;background:color-mix(in srgb,var(--term-fg) 3%,transparent)}
+.lm-fk{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--term-dim);margin:2px 0 6px}
+.lm-chips{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:10px}
+.lm-chips button{appearance:none;display:flex;align-items:center;gap:6px;border:1px solid var(--term-line);background:none;color:var(--term-dim);font:11px var(--mono);padding:5px 8px;border-radius:999px;cursor:pointer}
+.lm-chips button.on{color:var(--term-fg);border-color:#FF2D95}
+.lm-chips i,.lm-row > i,.lm-key i{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+.lm-facts{display:flex;justify-content:flex-end;gap:6px}
+.lm-list{display:flex;flex-direction:column;gap:2px}
+.lm-row{appearance:none;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;width:100%;text-align:left;border:1px solid transparent;border-radius:9px;background:none;color:var(--term-fg);font:12px var(--mono);padding:8px;cursor:pointer}
+.lm-row:hover{background:color-mix(in srgb,var(--term-fg) 5%,transparent)}
+.lm-row.on{border-color:#FF2D95;background:color-mix(in srgb,#FF2D95 8%,transparent)}
+.lm-row.stale{opacity:.55}
+.lm-row b{display:block;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lm-row small{display:block;color:var(--term-dim);font-size:10.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lm-row em{font-style:normal;text-align:right;font-size:11.5px;white-space:nowrap}
+.lm-note{padding:10px;font-size:12px;color:var(--term-dim);line-height:1.5}
+.lm-note b{color:var(--term-fg)}.lm-note p{margin:6px 0 0}
+.lm-mapbox{display:flex;flex-direction:column;min-height:0;border:1px solid var(--term-line);border-radius:14px;overflow:hidden;background:var(--term-bg)}
+.lm-mapwrap{position:relative;flex:1;min-height:0}
+.lm #pl-map{position:absolute;inset:0;height:auto;width:100%;background:var(--term-bg)}
+.lm-nogl{position:absolute;inset:0;display:grid;place-content:center;gap:10px;text-align:center;padding:24px;color:var(--term-dim);font-size:13px}
+.lm-nogl b{color:var(--term-fg);font-size:15px}.lm-nogl p{margin:0;max-width:380px}
+.lm .pl-hint{position:absolute;top:12px;left:50%;transform:translateX(-50%);z-index:3}
+.lm-card{position:absolute;top:12px;left:12px;z-index:4;width:min(300px,calc(100% - 24px));background:var(--term-bg);border:1px solid var(--term-line);border-radius:12px;padding:14px;box-shadow:0 14px 34px rgba(0,0,0,.35);font-size:12px}
+.lm-card-k{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:#FF2D95}
+.lm-card h3{font:400 20px/1.1 Anton,Impact,sans-serif;letter-spacing:.02em;margin:4px 30px 10px 0;text-transform:uppercase}
+.lm-card dl{display:grid;grid-template-columns:auto 1fr;gap:5px 12px;margin:0}
+.lm-card dt{color:var(--term-dim)}.lm-card dd{margin:0;text-align:right}
+.lm-card dd small{display:block;color:var(--term-dim);font-size:10.5px}
+.lm-card dd.stale{color:#E8743A}
+.lm-warn{margin:10px 0 0;padding-top:8px;border-top:1px solid var(--term-line);color:var(--term-dim);font-size:10.5px}
+.lm-x{appearance:none;position:absolute;top:8px;right:8px;width:28px;height:28px;border:0;border-radius:7px;background:none;color:var(--term-dim);font-size:18px;cursor:pointer}
+.lm-x:hover{color:var(--term-fg)}
+.lm-legend{position:absolute;right:12px;bottom:28px;z-index:3;max-width:250px;background:color-mix(in srgb,var(--term-bg) 92%,transparent);border:1px solid var(--term-line);border-radius:10px;padding:8px 10px;font-size:11px}
+.lm-legend summary{cursor:pointer;color:var(--term-dim);letter-spacing:.06em}
+.lm-key{display:flex;align-items:center;gap:7px;margin-top:6px}
+.lm-tgs{display:flex;flex-direction:column;gap:4px;margin-top:8px;padding-top:8px;border-top:1px solid var(--term-line)}
+.lm-tgs label{display:flex;gap:7px;align-items:center;cursor:pointer}
+.lm-tgs label.off{color:var(--term-dim);cursor:default}
+.lm-foot{display:flex;flex-wrap:wrap;align-items:center;gap:6px 14px;padding:8px 12px;background:var(--term-bg);border-top:1px solid var(--term-line);font-size:11px;color:var(--term-dim)}
+.lm-foot .lm-btn{height:26px;font-size:10.5px}
+.lm-live{display:flex;align-items:center;gap:6px;color:var(--term-fg)}
+.lm-live i{width:7px;height:7px;border-radius:50%;background:#2E9D6B;box-shadow:0 0 0 3px rgba(46,157,107,.2)}
+.lm-live.bad i{background:#E8743A}
+.lm-disc{flex:1 1 260px;color:var(--term-dim)}
+.lm-table p{font-size:12px;color:var(--term-dim)}
+.lm-tw{overflow-x:auto}
+.lm-table table{width:100%;border-collapse:collapse;font:12px var(--mono);min-width:640px}
+.lm-table th{text-align:left;color:var(--term-dim);font-weight:500;padding:7px 8px;border-bottom:1px solid var(--term-line)}
+.lm-table td{padding:7px 8px;border-bottom:1px solid var(--term-line);vertical-align:top}
+.lm-table tr.stale td{opacity:.6}
+.lm .maplibregl-ctrl-group{background:var(--term-bg);border:1px solid var(--term-line)}
+html:not(.theme-light) .lm .maplibregl-ctrl-group button .maplibregl-ctrl-icon{filter:invert(1)}
+.lm .maplibregl-ctrl-attrib{font:10px var(--mono)}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+@media (max-width:900px){
+  .lm{grid-template-columns:minmax(0,1fr);height:auto;min-height:0}
+  .lm-mapbox{order:-1}
+  .lm-mapwrap{flex:none;height:58vh;min-height:360px}
+  .lm-side{max-height:none}
+  .lm-sidebody{overflow:visible}
+  .lm-legend{bottom:auto;top:12px;right:56px;max-width:200px}
+  .lm-card{top:auto;bottom:12px}
+}
+@media print{
+  body.lm-printing #term-sidebar,body.lm-printing .dc-head,body.lm-printing .lm-side,body.lm-printing #term-footer,body.lm-printing #os-theme,body.lm-printing .maplibregl-ctrl-top-right,body.lm-printing .lm-foot .lm-btn{display:none !important}
+  body.lm-printing,body.lm-printing #terminal-shell,body.lm-printing #term-panel{background:#fff !important;color:#000 !important}
+  body.lm-printing .lm{display:block;height:auto}
+  body.lm-printing .lm-mapbox{border-color:#ccc;background:#fff}
+  body.lm-printing .lm-mapwrap{height:170mm}
+  body.lm-printing .lm-foot,body.lm-printing .lm-legend,body.lm-printing .lm-card{background:#fff;color:#000;border-color:#ccc}
+}
+
 /* ── DECOMPOSITION — project dashboard (Overview), with Steps, Maps and Places under the same header ── */
 #term-panel.dc-on > .term-panel-head{display:none}
 .dc{--dc-card:#111215;--dc-card2:#16171B;--dc-line:#24262B;--dc-line2:#34363D;--dc-fg:#EDEDEF;--dc-dim:#8D9098;--dc-faint:#5F626A;--dc-grid:rgba(255,255,255,.045);
@@ -14137,21 +14229,6 @@ function gmDetail(g, m, color) {
 // A place is a point and a radius (a real outline from a building schematic
 // can replace the radius later; nothing pinned to it changes). Steps and
 // gates are pinned to places; the map shows each place with the work there.
-let leafletLoading = null;
-function loadLeaflet() {
-  if (window.L) return Promise.resolve(window.L);
-  if (leafletLoading) return leafletLoading;
-  leafletLoading = new Promise((resolve, reject) => {
-    const css = document.createElement('link');
-    css.rel = 'stylesheet'; css.href = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css';
-    document.head.appendChild(css);
-    const sc = document.createElement('script');
-    sc.src = 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js';
-    sc.onload = () => resolve(window.L); sc.onerror = () => { leafletLoading = null; reject(new Error('The map could not load. Check your connection.')); };
-    document.head.appendChild(sc);
-  });
-  return leafletLoading;
-}
 
 const PL = { map: null, data: null, layers: [], sel: null, pick: null, draft: null };
 const AYEAYE = [17.7275, -64.747];   // the network's home region (St. Croix)
@@ -14175,20 +14252,370 @@ function placeSummary(pl) {
 const PL_COLOR = { empty: '#8A8A88', waiting: '#3B82F6', active: '#FF7A1A', late: '#FF5A4F', done: '#10B981' };
 const PL_LABEL = { empty: 'Nothing pinned', waiting: 'Waiting to start', active: 'Work under way', late: 'Overdue', done: 'All delivered' };
 
+
+// ── LIVE MAP (the Places tab): tankers from AIS, job sites, and who is on site ──
+// MapLibre 6.14.0 with OpenFreeMap tiles (commercial use allowed, no key; see MAP.md) and deck.gl
+// 9.4.0 on top. Tankers come from the map_tankers view, which the ais-collect function fills once a
+// minute; the browser never talks to AISStream. Every ship shows how old its position is, and the
+// map says plainly that coverage has gaps. Sites keep their side panel and tools (plRenderSide,
+// plForm, plSave…); only the drawing below changed from Leaflet to this map.
+const LM_LIBS = {
+  css: 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.14.0/dist/maplibre-gl.css',
+  ml: 'https://cdn.jsdelivr.net/npm/maplibre-gl@6.14.0/dist/maplibre-gl.mjs',
+  deck: 'https://cdn.jsdelivr.net/npm/deck.gl@9.4.0/dist.min.js',
+};
+const LM_STYLE = { dark: 'https://tiles.openfreemap.org/styles/dark', light: 'https://tiles.openfreemap.org/styles/positron' };
+// The boxes the collector watches (supabase/functions/ais-collect/collect.ts): [[lat, lon], [lat, lon]].
+const LM_REGIONS = {
+  caribbean: ['Caribbean', [[9, -89], [23, -59]]],
+  gulf_of_mexico: ['Gulf of Mexico', [[18, -98], [31, -80]]],
+  persian_gulf: ['Persian Gulf', [[23, 47], [31, 58]]],
+};
+const LM_BAND = { underway: [255, 45, 149], slow: [245, 158, 11], moored: [59, 130, 246], stale: [125, 128, 135] };
+const LM_BAND_LABEL = { underway: 'Underway, 5 kn or more', slow: 'Slow, under 5 kn', moored: 'Moored or at anchor', stale: 'Not heard for 10 min' };
+const LM_STALE_S = 600;
+var LM = { tab: 'tankers', ships: [], lastRun: null, fetchedAt: null, err: null, q: '', region: 'all', viewBox: null,
+  bands: new Set(['underway', 'slow', 'moored', 'stale']), sel: null, overlay: null, ml: null, timer: null, filterOpen: false,
+  show: { tankers: true, trails: true, sites: true, regions: true }, base: Date.now() - 2 * 3600e3 };
+
+// Arrow (moving) and dot (no course, or moored), white so deck can tint them.
+const LM_ICONS = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="128" height="64"><path d="M32 6 50 56 32 45 14 56z" fill="#fff"/><circle cx="96" cy="32" r="14" fill="#fff"/></svg>');
+const LM_ICON_MAP = { arrow: { x: 0, y: 0, width: 64, height: 64, mask: true }, dot: { x: 64, y: 0, width: 64, height: 64, mask: true } };
+
+const lmAge = s => Math.max(0, (Date.now() - new Date(s.seen_at)) / 1000);
+function lmBand(s) {
+  if (lmAge(s) > LM_STALE_S) return 'stale';
+  if (s.nav_status === 1 || s.nav_status === 5 || (s.sog ?? 0) < 0.5) return 'moored';   // 1 at anchor, 5 moored
+  return (s.sog ?? 0) < 5 ? 'slow' : 'underway';
+}
+const lmType = t => t === 80 ? 'Tanker'
+  : t >= 81 && t <= 84 ? `Tanker, dangerous cargo (IMO category ${'ABCD'[t - 81]})`
+  : t === 89 ? 'Tanker, no more detail' : `Tanker (type ${t})`;
+function lmAgo(sec) {
+  sec = Math.max(0, Math.round(sec));
+  return sec < 60 ? `${sec} s ago` : sec < 3600 ? `${Math.round(sec / 60)} min ago` : `${Math.round(sec / 3600)} h ago`;
+}
+// ISO 8601 at the AyeAye offset, −04:00.
+const lmIso = d => new Date(new Date(d).getTime() - 4 * 3600e3).toISOString().slice(0, 19) + '-04:00';
+
+let lmLibsLoading = null;
+function loadMapLibs() {
+  if (lmLibsLoading) return lmLibsLoading;
+  lmLibsLoading = (async () => {
+    if (!document.querySelector('link[data-lm]')) {
+      const css = document.createElement('link');
+      css.rel = 'stylesheet'; css.href = LM_LIBS.css; css.dataset.lm = '1';
+      document.head.appendChild(css);
+    }
+    const mod = await import(LM_LIBS.ml);
+    const ml = mod.default?.Map ? mod.default : mod;
+    if (!window.deck?.MapboxOverlay) await new Promise((ok, no) => {
+      const s = document.createElement('script');
+      s.src = LM_LIBS.deck; s.onload = ok; s.onerror = () => no(new Error('The map could not load. Check your connection.'));
+      document.head.appendChild(s);
+    });
+    LM.ml = ml;
+    return ml;
+  })().catch(e => { lmLibsLoading = null; throw e; });
+  return lmLibsLoading;
+}
+function lmWebgl() {
+  try { const c = document.createElement('canvas'); return !!(c.getContext('webgl2') || c.getContext('webgl')); } catch (e) { return false; }
+}
+
+// Tankers in pages (the API returns at most 1,000 rows a request) plus the collector's last run.
+async function lmFetch() {
+  try {
+    const rows = [];
+    for (let from = 0; from < 20000; from += 1000) {
+      const { data, error } = await sb.from('map_tankers')
+        .select('mmsi,name,ship_type,lat,lon,sog,cog,heading,nav_status,destination,seen_at,trail').range(from, from + 999);
+      if (error) throw error;
+      rows.push(...(data || []));
+      if (!data || data.length < 1000) break;
+    }
+    const { data: run } = await sb.rpc('map_last_run');
+    LM.ships = rows; LM.lastRun = run || null; LM.fetchedAt = Date.now(); LM.err = null;
+  } catch (e) { LM.err = 'Ship positions could not be loaded right now.'; }
+}
+
+function lmVisible() {
+  const q = LM.q.trim().toLowerCase();
+  const box = LM.region === 'view' ? LM.viewBox : LM.region !== 'all' ? LM_REGIONS[LM.region]?.[1] : null;
+  return LM.ships.filter(s => {
+    if (!LM.bands.has(lmBand(s))) return false;
+    if (q && !`${s.name || ''} ${s.mmsi}`.toLowerCase().includes(q)) return false;
+    if (box && !(s.lat >= box[0][0] && s.lat <= box[1][0] && s.lon >= box[0][1] && s.lon <= box[1][1])) return false;
+    return true;
+  });
+}
+
 async function renderPlacesPanel() {
   const panel = document.getElementById('term-panel');
   panel.innerHTML = '<div class="term-panel-empty">Loading the map…</div>';
-  try { await Promise.all([loadLeaflet(), loadPlaces(), window._opNameCache ? 0 : sb.rpc('list_operators').then(({ data }) => { window._opNameCache = {}; (data || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); }); })]); }
-  catch (e) { panel.innerHTML = `<div class="term-panel-empty">${esc(e.message || 'Could not load places.')}</div>`; return; }
-  const places = PL.data.places;
-  panel.innerHTML = `<div class="pl-wrap">
-    <div class="pp-head"><div><h2>Places</h2><p>Where the work is. Each place is a point and a radius; steps and gates are pinned to them.</p></div>
-      <div class="pp-head-acts">${isExec() ? `<button class="pp-btn solid" onclick="plStartAdd()">${ico(ICON.plus)}Add place</button>` : ''}</div></div>
-    <div class="pl-split"><div class="pl-mapbox"><div id="pl-map"></div><div class="pl-hint" id="pl-hint" hidden></div></div>
-      <div class="pl-side" id="pl-side"></div></div></div>`;
-  plInitMap();
-  plRenderSide();
+  try {
+    await Promise.all([loadPlaces(), lmFetch(), window._opNameCache ? 0 : sb.rpc('list_operators').then(({ data }) => {
+      window._opNameCache = {};
+      (data || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
+    })]);
+  } catch (e) { panel.innerHTML = `<div class="term-panel-empty">${esc(e.message || 'Could not load places.')}</div>`; return; }
+  let noMap = lmWebgl() ? null : 'This device cannot draw the map (WebGL is switched off or not supported). The tankers are listed instead.';
+  if (!noMap) { try { await loadMapLibs(); } catch (e) { noMap = e.message; } }
+  if (!['places'].includes(document.getElementById('terminal-shell')?.dataset.view)) return;   // moved on while loading
+  panel.innerHTML = `<div class="lm">
+    <aside class="lm-side">
+      <div class="lm-head"><h2>Live map</h2><p>Tankers, job sites, and who is on site.</p></div>
+      <div class="lm-tabs" role="tablist">
+        <button role="tab" data-t="tankers" onclick="lmTab('tankers')">Tankers <span id="lm-n-t"></span></button>
+        <button role="tab" data-t="sites" onclick="lmTab('sites')">Sites <span>${PL.data.places.length}</span></button>
+        <button role="tab" data-t="aircraft" onclick="lmTab('aircraft')">Aircraft</button>
+      </div>
+      <div class="lm-sidebody" id="lm-sidebody"></div>
+    </aside>
+    <div class="lm-mapbox">
+      <div class="lm-mapwrap">
+        ${noMap ? `<div class="lm-nogl"><b>No map on this device.</b><p>${esc(noMap)}</p><button class="lm-btn" onclick="lmTable()">Show the tanker table</button></div>` : '<div id="pl-map"></div>'}
+        <div class="pl-hint" id="pl-hint" hidden></div>
+        <div class="lm-card" id="lm-card" hidden></div>
+        <div class="lm-legend" id="lm-legend"></div>
+      </div>
+      <div class="lm-foot" id="lm-foot" role="status"></div>
+    </div>
+  </div>`;
+  if (!noMap) plInitMap();
+  lmTab(LM.tab);
+  lmLegend(); lmFoot();
   sitePresenceLoad();
+  lmPoll();
+}
+
+function lmTab(t) {
+  LM.tab = t;
+  document.querySelectorAll('.lm-tabs button').forEach(b => { const on = b.dataset.t === t; b.classList.toggle('on', on); b.setAttribute('aria-selected', on); });
+  const body = document.getElementById('lm-sidebody');
+  if (!body) return;
+  if (t === 'sites') {
+    body.innerHTML = `${isExec() ? `<button class="lm-btn solid lm-add" onclick="plStartAdd()">+ Add place</button>` : ''}<div class="pl-side" id="pl-side"></div>`;
+    plRenderSide();
+    plDrawPins(!PL.sel);
+    return;
+  }
+  if (t === 'aircraft') {
+    body.innerHTML = `<div class="lm-note"><b>Aircraft are not on the map yet.</b><p>OpenSky does not allow use by a business without a written license, and the other sources need a license or written terms. This layer switches on once one is in place (MAP.md).</p></div>`;
+    return;
+  }
+  const regs = [['all', 'All watched regions'], ...Object.entries(LM_REGIONS).map(([k, [n]]) => [k, n]), ['view', 'This map view']];
+  body.innerHTML = `<div class="lm-tools">
+      <label class="lm-search"><span class="sr-only">Search tankers</span><input id="lm-q" placeholder="Name or MMSI" value="${esc(LM.q)}" autocomplete="off" oninput="LM.q=this.value; lmSideList(); lmDraw()" onkeydown="if(event.key==='Enter'){const s=lmVisible()[0]; if(s) lmSelect(s.mmsi)}"></label>
+      <button class="lm-btn ${LM.filterOpen ? 'on' : ''}" onclick="LM.filterOpen=!LM.filterOpen; lmTab('tankers')" aria-expanded="${LM.filterOpen}">Filters</button>
+    </div>
+    ${LM.filterOpen ? `<div class="lm-filter">
+      <div class="lm-fk">Region</div>
+      <div class="lm-chips">${regs.map(([k, n]) => `<button class="${LM.region === k ? 'on' : ''}" onclick="lmRegion('${k}')">${esc(n)}</button>`).join('')}</div>
+      <div class="lm-fk">Status</div>
+      <div class="lm-chips">${Object.keys(LM_BAND).map(k => `<button class="${LM.bands.has(k) ? 'on' : ''}" onclick="lmBandToggle('${k}')"><i style="background:rgb(${LM_BAND[k]})"></i>${esc(LM_BAND_LABEL[k])}</button>`).join('')}</div>
+      <div class="lm-facts"><button class="lm-btn" onclick="lmReset()">Reset</button><button class="lm-btn solid" onclick="LM.filterOpen=false; lmTab('tankers')">Done</button></div>
+    </div>` : ''}
+    <div class="lm-list" id="lm-list"></div>`;
+  lmSideList();
+}
+function lmRegion(k) {
+  LM.region = k;
+  if (k === 'view' && PL.map) { const b = PL.map.getBounds(); LM.viewBox = [[b.getSouth(), b.getWest()], [b.getNorth(), b.getEast()]]; }
+  else if (k !== 'all' && PL.map) { const [[a, b], [c, d]] = LM_REGIONS[k][1]; PL.map.fitBounds([[b, a], [d, c]], { padding: 30, duration: 700 }); }
+  lmTab('tankers'); lmDraw();
+}
+function lmBandToggle(k) { LM.bands.has(k) ? LM.bands.delete(k) : LM.bands.add(k); lmTab('tankers'); lmDraw(); }
+function lmReset() { LM.region = 'all'; LM.viewBox = null; LM.q = ''; LM.bands = new Set(Object.keys(LM_BAND)); lmTab('tankers'); lmDraw(); }
+
+function lmSideList() {
+  const n = document.getElementById('lm-n-t');
+  if (n) n.textContent = LM.ships.length;
+  lmFoot();
+  const box = document.getElementById('lm-list');
+  if (!box) return;
+  if (LM.err) { box.innerHTML = `<div class="lm-note">${esc(LM.err)}</div>`; return; }
+  const ships = lmVisible().sort((a, b) => new Date(b.seen_at) - new Date(a.seen_at));
+  if (!ships.length) {
+    box.innerHTML = `<div class="lm-note">${LM.ships.length ? 'No tanker matches these filters.' : '<b>No tankers heard yet.</b><p>The collector listens once a minute. A ship shows once its type has been received, which it broadcasts about every 6 minutes.</p>'}</div>`;
+    return;
+  }
+  const shown = ships.slice(0, 300);
+  box.innerHTML = shown.map(s => {
+    const b = lmBand(s);
+    return `<button class="lm-row ${s.mmsi === LM.sel ? 'on' : ''} ${b === 'stale' ? 'stale' : ''}" onclick="lmSelect(${s.mmsi})">
+      <i style="background:rgb(${LM_BAND[b]})"></i>
+      <span><b>${esc(s.name || 'Name not received')}</b><small>${s.mmsi}${s.destination ? ' · to ' + esc(s.destination) : ''}</small></span>
+      <em>${s.sog != null ? s.sog.toFixed(1) + ' kn' : '—'}<small>${esc(lmAgo(lmAge(s)))}</small></em></button>`;
+  }).join('') + (ships.length > shown.length ? `<div class="lm-note">Showing 300 of ${ships.length}. Search or pick a region to narrow it.</div>` : '');
+}
+
+function lmSelect(mmsi) {
+  LM.sel = mmsi;
+  const s = LM.ships.find(x => x.mmsi === mmsi);
+  lmCard(s); lmDraw(); lmSideList();
+  if (s && PL.map) PL.map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(PL.map.getZoom(), 7), duration: 600 });
+}
+function lmCard(s) {
+  const el = document.getElementById('lm-card');
+  if (!el) return;
+  if (!s) { el.hidden = true; return; }
+  const age = lmAge(s);
+  el.hidden = false;
+  el.innerHTML = `<button class="lm-x" onclick="LM.sel=null; lmCard(null); lmDraw(); lmSideList()" aria-label="Close">×</button>
+    <div class="lm-card-k">Tanker</div>
+    <h3>${esc(s.name || 'Name not received yet')}</h3>
+    <dl>
+      <dt>MMSI</dt><dd>${s.mmsi}</dd>
+      <dt>Type</dt><dd>${esc(lmType(s.ship_type))}</dd>
+      <dt>Speed</dt><dd>${s.sog != null ? s.sog.toFixed(1) + ' kn' : 'Not reported'}</dd>
+      <dt>Course</dt><dd>${s.cog != null ? Math.round(s.cog) + '°' : 'Not reported'}</dd>
+      <dt>Destination</dt><dd>${esc(s.destination || 'Not reported')}</dd>
+      <dt>Position</dt><dd class="${age > LM_STALE_S ? 'stale' : ''}">Updated ${esc(lmAgo(age))}<small>${esc(lmIso(s.seen_at))}</small></dd>
+    </dl>
+    <p class="lm-warn">Public AIS broadcast. Not for navigation or safety decisions.</p>`;
+}
+
+function lmLegend() {
+  const el = document.getElementById('lm-legend');
+  if (!el) return;
+  const tg = (k, label) => `<label><input type="checkbox" ${LM.show[k] ? 'checked' : ''} onchange="LM.show['${k}']=this.checked; lmDraw()"> ${label}</label>`;
+  el.innerHTML = `<details ${window.innerWidth > 900 ? 'open' : ''}><summary>Legend and layers</summary>
+    ${Object.keys(LM_BAND).map(k => `<div class="lm-key"><i style="background:rgb(${LM_BAND[k]})"></i>${esc(LM_BAND_LABEL[k])}</div>`).join('')}
+    <div class="lm-tgs">${tg('tankers', 'Tankers')}${tg('trails', 'Trails, last 30 min')}${tg('sites', 'Job sites')}${tg('regions', 'Watched regions')}
+      <label class="off"><input type="checkbox" disabled> Aircraft (not licensed yet)</label></div></details>`;
+}
+function lmFoot() {
+  const el = document.getElementById('lm-foot');
+  if (!el) return;
+  const run = LM.lastRun?.at ? `Collected ${lmAgo((Date.now() - new Date(LM.lastRun.at)) / 1000)}` : 'Not collected yet';
+  el.innerHTML = `<span class="lm-live ${LM.lastRun?.ok === false ? 'bad' : ''}"><i></i>${esc(run)}</span>
+    <span>Refreshed ${LM.fetchedAt ? esc(lmAgo((Date.now() - LM.fetchedAt) / 1000)) : '—'}</span>
+    <span>${lmVisible().length} of ${LM.ships.length} tankers shown</span>
+    <span class="lm-disc">Coverage has gaps (shore receivers only). Not for navigation or safety decisions.</span>
+    <button class="lm-btn" onclick="lmTable()">Table</button><button class="lm-btn" onclick="lmPrint()">Print view</button>`;
+}
+
+// What is on screen, as a table (also the fallback when the map cannot be drawn).
+function lmTable() {
+  let ships = lmVisible();
+  if (PL.map) { const b = PL.map.getBounds(); ships = ships.filter(s => b.contains([s.lon, s.lat])); }
+  openOverlay('Tankers on screen', body => {
+    body.innerHTML = `<div class="lm-table"><p>${ships.length} tanker${ships.length === 1 ? '' : 's'}. Public AIS broadcasts; coverage has gaps. Not for navigation or safety decisions.</p>
+      <div class="lm-tw"><table><thead><tr><th scope="col">Name</th><th scope="col">MMSI</th><th scope="col">Type</th><th scope="col">Speed</th><th scope="col">Course</th><th scope="col">Destination</th><th scope="col">Updated</th></tr></thead>
+      <tbody>${ships.map(s => `<tr class="${lmAge(s) > LM_STALE_S ? 'stale' : ''}"><td>${esc(s.name || '—')}</td><td>${s.mmsi}</td><td>${esc(lmType(s.ship_type))}</td><td>${s.sog != null ? s.sog.toFixed(1) + ' kn' : '—'}</td><td>${s.cog != null ? Math.round(s.cog) + '°' : '—'}</td><td>${esc(s.destination || '—')}</td><td>${esc(lmAgo(lmAge(s)))}<br><small>${esc(lmIso(s.seen_at))}</small></td></tr>`).join('') || '<tr><td colspan="7">Nothing on screen.</td></tr>'}</tbody></table></div></div>`;
+  }, null, null, true);
+}
+
+// Print on white: switch to the light map, print, switch back.
+function lmPrint() {
+  if (!PL.map) { window.print(); return; }
+  const dark = !document.documentElement.classList.contains('theme-light');
+  document.body.classList.add('lm-printing');
+  const go = () => { window.print(); document.body.classList.remove('lm-printing'); if (dark) PL.map.setStyle(LM_STYLE.dark); };
+  if (dark) { PL.map.setStyle(LM_STYLE.light); PL.map.once('idle', go); } else go();
+}
+
+function lmPoll() {
+  clearInterval(LM.timer);
+  let tick = 0;
+  LM.timer = setInterval(async () => {
+    if (!document.getElementById('lm-foot')) { clearInterval(LM.timer); return; }
+    if (document.hidden) return;
+    if (++tick % 6 === 0) { await lmFetch(); if (LM.tab === 'tankers') lmSideList(); }
+    lmDraw(); lmFoot();
+    if (LM.sel) lmCard(LM.ships.find(x => x.mmsi === LM.sel));
+  }, 5000);
+}
+
+const lmStyleUrl = () => document.documentElement.classList.contains('theme-light') ? LM_STYLE.light : LM_STYLE.dark;
+function lmWatchTheme() {
+  LM.themeObs?.disconnect();
+  LM.themeObs = new MutationObserver(() => {
+    const want = lmStyleUrl();
+    if (PL.map && LM.styleUrl !== want && !document.body.classList.contains('lm-printing')) { LM.styleUrl = want; PL.map.setStyle(want); }
+  });
+  LM.themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+}
+
+function plInitMap() {
+  const ml = LM.ml, el = document.getElementById('pl-map');
+  if (PL.map) { try { PL.map.remove(); } catch (e) {} PL.map = null; LM.overlay = null; }
+  if (!ml || !el) return;
+  LM.styleUrl = lmStyleUrl();
+  PL.map = new ml.Map({ container: el, style: LM.styleUrl, center: [AYEAYE[1], AYEAYE[0]], zoom: 4, attributionControl: { compact: true },
+    canvasContextAttributes: { preserveDrawingBuffer: true } });
+  PL.map.addControl(new ml.NavigationControl({ visualizePitch: false }), 'top-right');
+  LM.overlay = new deck.MapboxOverlay({ interleaved: false, layers: [],
+    getCursor: ({ isHovering }) => PL.pick ? 'crosshair' : isHovering ? 'pointer' : 'grab' });
+  PL.map.addControl(LM.overlay);
+  PL.map.on('click', e => { if (PL.pick) PL.pick({ lat: e.lngLat.lat, lng: e.lngLat.lng }); });
+  PL.map.on('load', () => { lmDraw(); lmFitShips(); });
+  lmWatchTheme();
+}
+
+// Every layer, rebuilt from state: regions, sites, people on site, the draft place, trails, tankers.
+function lmDraw() {
+  if (!LM.overlay || !window.deck) return;
+  const D = window.deck, now = Date.now(), ships = LM.show.tankers ? lmVisible() : [], layers = [];
+  if (LM.show.regions) layers.push(new D.PolygonLayer({ id: 'lm-regions', data: Object.values(LM_REGIONS),
+    getPolygon: ([, [[a, b], [c, d]]]) => [[b, a], [d, a], [d, c], [b, c]], filled: false, stroked: true,
+    getLineColor: [255, 45, 149, 110], lineWidthMinPixels: 1 }));
+  if (LM.show.sites) {
+    const places = PL.data?.places || [];
+    const col = pl => { const h = PL_COLOR[placeSummary(pl).state]; return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; };
+    layers.push(new D.ScatterplotLayer({ id: 'lm-site-area', data: places, getPosition: p => [p.lon, p.lat], getRadius: p => p.radius_m,
+      radiusUnits: 'meters', getFillColor: p => [...col(p), 40], getLineColor: p => [...col(p), 220], stroked: true, lineWidthMinPixels: 2,
+      pickable: true, onClick: i => { if (!PL.pick && i.object) { PL.sel = i.object.id; lmTab('sites'); plSelect(i.object.id); } }, updateTriggers: { getFillColor: PL.sel } }));
+    layers.push(new D.ScatterplotLayer({ id: 'lm-site-pin', data: places, getPosition: p => [p.lon, p.lat], getRadius: p => p.id === PL.sel ? 8 : 6,
+      radiusUnits: 'pixels', getFillColor: p => col(p), getLineColor: [255, 255, 255], stroked: true, lineWidthMinPixels: 2,
+      pickable: true, onClick: i => { if (!PL.pick && i.object) { PL.sel = i.object.id; lmTab('sites'); plSelect(i.object.id); } }, updateTriggers: { getRadius: PL.sel } }));
+    const live = PL.presence?.live || [];
+    if (live.length) layers.push(new D.ScatterplotLayer({ id: 'lm-onsite', data: live, getPosition: p => [p.lon, p.lat],
+      getRadius: p => Math.max(5, p.accuracy_m || 10), radiusUnits: 'meters', radiusMinPixels: 5, getFillColor: [47, 124, 246, 200],
+      getLineColor: [255, 255, 255], stroked: true, lineWidthMinPixels: 1 }));
+  }
+  const d = PL.draft;
+  if (d && d.lat != null) layers.push(new D.ScatterplotLayer({ id: 'lm-draft', data: [d], getPosition: x => [x.lon, x.lat], getRadius: x => x.radius_m,
+    radiusUnits: 'meters', radiusMinPixels: 6, getFillColor: [255, 45, 149, 40], getLineColor: [255, 45, 149], stroked: true, lineWidthMinPixels: 2,
+    updateTriggers: { getRadius: d.radius_m, getPosition: [d.lat, d.lon] } }));
+  if (LM.show.trails && ships.length) layers.push(new D.TripsLayer({ id: 'lm-trails', data: ships.filter(s => (s.trail || []).length),
+    getPath: s => [...s.trail.map(p => [p[0], p[1]]), [s.lon, s.lat]],
+    getTimestamps: s => [...s.trail.map(p => (p[2] - LM.base) / 1000), (new Date(s.seen_at) - LM.base) / 1000],
+    getColor: s => LM_BAND[lmBand(s)], currentTime: (now - LM.base) / 1000, trailLength: 1800, fadeTrail: true,
+    widthMinPixels: 2, capRounded: true, jointRounded: true, opacity: 0.8 }));
+  if (ships.length) layers.push(new D.IconLayer({ id: 'lm-ships', data: ships, iconAtlas: LM_ICONS, iconMapping: LM_ICON_MAP,
+    getIcon: s => s.cog == null || lmBand(s) === 'moored' ? 'dot' : 'arrow', getPosition: s => [s.lon, s.lat],
+    getSize: s => s.mmsi === LM.sel ? 30 : 20, sizeUnits: 'pixels', getAngle: s => -(s.cog ?? 0),
+    getColor: s => [...LM_BAND[lmBand(s)], lmBand(s) === 'stale' ? 150 : 255],
+    pickable: true, onClick: i => { if (!PL.pick && i.object) lmSelect(i.object.mmsi); },
+    updateTriggers: { getSize: LM.sel, getColor: Math.floor(now / 5000), getIcon: Math.floor(now / 5000) } }));
+  LM.overlay.setProps({ layers });
+}
+
+// First view: wherever the tankers are (or the home region if none yet).
+function lmFitShips() {
+  const s = LM.ships;
+  if (!PL.map || !LM.ml || !s.length || LM.tab === 'sites') return;
+  const b = new LM.ml.LngLatBounds();
+  s.forEach(x => b.extend([x.lon, x.lat]));
+  PL.map.fitBounds(b, { padding: 80, maxZoom: 7, duration: 0 });
+}
+function plDrawLive() { lmDraw(); }
+function plDrawPins(fit) {
+  lmDraw();
+  const pts = PL.data?.places || [];
+  if (fit && pts.length && PL.map && LM.ml) {
+    const b = new LM.ml.LngLatBounds();
+    pts.forEach(p => b.extend([p.lon, p.lat]));
+    PL.map.fitBounds(b, { padding: 70, maxZoom: 16, duration: 600 });
+  }
+}
+function plSelect(id) {
+  PL.sel = id; lmDraw(); plRenderSide();
+  const pl = PL.data.places.find(x => x.id === id);
+  if (pl && PL.map) PL.map.flyTo({ center: [pl.lon, pl.lat], zoom: Math.max(PL.map.getZoom(), 15), duration: 600 });
 }
 
 async function sitePresenceLoad() {
@@ -14199,16 +14626,6 @@ async function sitePresenceLoad() {
   clearTimeout(PL.presTimer);
   PL.presTimer = setTimeout(() => { if (document.getElementById('pl-map')) sitePresenceLoad(); }, 30000);
 }
-function plDrawLive() {
-  const L = window.L; if (!L || !PL.map) return;
-  (PL.liveLayers || []).forEach(l => l.remove()); PL.liveLayers = [];
-  (PL.presence?.live || []).forEach(p => {
-    const mk = L.marker([p.lat, p.lon], { icon: L.divIcon({ className: '', html: '<div class="site-dot"></div>', iconSize: [16, 16], iconAnchor: [8, 8] }), title: p.who }).addTo(PL.map);
-    mk.bindTooltip(`${p.who} · ${p.leaf_code}`);
-    const acc = L.circle([p.lat, p.lon], { radius: Math.max(5, p.accuracy_m || 10), color: '#2F7CF6', weight: 1, fillOpacity: 0.1 }).addTo(PL.map);
-    PL.liveLayers.push(mk, acc);
-  });
-}
 function sitePresenceHtml() {
   const d = PL.presence; if (!d) return '';
   const live = d.live || [], ci = (d.checkins || []).slice(0, 8);
@@ -14217,36 +14634,8 @@ function sitePresenceHtml() {
     ${ci.length ? `<div class="site-card"><h4>Check-ins, last 24 hours</h4>${ci.map(c => `<div class="site-row"><span><b>${esc(c.who)}</b> ${c.kind === 'arrive' ? 'arrived' : 'left'}${c.leaf_code ? ' · ' + esc(c.leaf_code) : ''}</span><small>${c.inside === true ? 'at the place' : c.inside === false ? `${Math.round(c.distance_m)} m away` : ''} · ${esc(siteAgo(c.at))}</small></div>`).join('')}</div>` : ''}`;
 }
 
-function plInitMap() {
-  const L = window.L;
-  if (PL.map) { PL.map.remove(); PL.map = null; }
-  PL.map = L.map('pl-map', { zoomControl: true, attributionControl: true }).setView(AYEAYE, 12);
-  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a> contributors' }).addTo(PL.map);
-  PL.map.on('click', e => { if (PL.pick) PL.pick(e.latlng); });
-  plDrawPins(true);
-}
 
-function plDrawPins(fit) {
-  const L = window.L;
-  PL.layers.forEach(l => l.remove()); PL.layers = [];
-  const pts = [];
-  for (const pl of PL.data.places) {
-    const sm = placeSummary(pl), col = PL_COLOR[sm.state];
-    const circle = L.circle([pl.lat, pl.lon], { radius: pl.radius_m, color: col, weight: 2, fillColor: col, fillOpacity: 0.15 }).addTo(PL.map);
-    const icon = L.divIcon({ className: 'pl-pin', html: `<span style="--pc:${col}" class="${PL.sel === pl.id ? 'on' : ''}">${sm.steps.length + sm.gates.length || ''}</span>`, iconSize: [30, 30], iconAnchor: [15, 15] });
-    const mk = L.marker([pl.lat, pl.lon], { icon, title: pl.name }).addTo(PL.map);
-    mk.on('click', () => plSelect(pl.id));
-    circle.on('click', () => plSelect(pl.id));
-    PL.layers.push(circle, mk); pts.push([pl.lat, pl.lon]);
-  }
-  if (fit && pts.length) PL.map.fitBounds(pts.length === 1 ? L.latLng(pts[0]).toBounds(Math.max(400, PL.data.places[0].radius_m * 6)) : pts, { padding: [40, 40], maxZoom: 17 });
-}
 
-function plSelect(id) {
-  PL.sel = id; plDrawPins(false); plRenderSide();
-  const pl = PL.data.places.find(x => x.id === id);
-  if (pl && PL.map) PL.map.flyTo([pl.lat, pl.lon], Math.max(PL.map.getZoom(), 16), { duration: 0.6 });
-}
 
 function plRenderSide() {
   const side = document.getElementById('pl-side');
@@ -14307,17 +14696,11 @@ function plBeginPick() {
 }
 function plEndPick() {
   PL.pick = null; PL.draft = null;
-  if (PL.draftLayers) { PL.draftLayers.forEach(l => l.remove()); PL.draftLayers = null; }
+  lmDraw();
   const hint = document.getElementById('pl-hint'); if (hint) hint.hidden = true;
   document.getElementById('pl-map')?.classList.remove('picking');
 }
-function plDraftLayer() {
-  const L = window.L, d = PL.draft;
-  if (PL.draftLayers) PL.draftLayers.forEach(l => l.remove());
-  if (d.lat == null) { PL.draftLayers = null; return; }
-  PL.draftLayers = [L.circle([d.lat, d.lon], { radius: d.radius_m, color: '#FF2D95', weight: 2, dashArray: '6 6', fillColor: '#FF2D95', fillOpacity: 0.12 }).addTo(PL.map),
-    L.circleMarker([d.lat, d.lon], { radius: 6, color: '#fff', weight: 2, fillColor: '#FF2D95', fillOpacity: 1 }).addTo(PL.map)];
-}
+function plDraftLayer() { lmDraw(); }
 function plCoords() { const e = document.getElementById('pl-coords'), d = PL.draft; if (e && d.lat != null) { e.classList.remove('unset'); e.textContent = `Point: ${d.lat.toFixed(5)}, ${d.lon.toFixed(5)} — click the map to move it.`; } }
 function plRadius(v) { PL.draft.radius_m = +v; document.getElementById('pl-rv').textContent = v; plDraftLayer(); }
 async function plFind() {
@@ -14336,7 +14719,7 @@ function plPickResult(i) {
   d.lat = +x.lat; d.lon = +x.lon; d.address = x.display_name;
   document.getElementById('pl-addr').value = x.display_name;
   document.getElementById('pl-results').innerHTML = '';
-  plDraftLayer(); plCoords(); PL.map.flyTo([d.lat, d.lon], 17, { duration: 0.6 });
+  plDraftLayer(); plCoords(); PL.map?.flyTo({ center: [d.lon, d.lat], zoom: 16, duration: 600 });
 }
 function plCancel() { plEndPick(); plRenderSide(); }
 async function plSave() {

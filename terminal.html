@@ -1019,6 +1019,21 @@ button.ca-chip{appearance:none;text-align:left;cursor:pointer;font:inherit;width
 .lm-card dt{color:var(--term-dim)}.lm-card dd{margin:0;text-align:right}
 .lm-card dd small{display:block;color:var(--term-dim);font-size:10.5px}
 .lm-card dd.stale{color:#E8743A}
+#pf-mapme .pf-tax-row .pf-tax-in{flex:1 1 0;min-width:0;width:auto}
+.pf-map-prec{display:flex;flex-wrap:wrap;gap:6px 14px;margin:8px 0;font-size:12px}
+.pf-map-prec label{display:flex;align-items:center;gap:6px;cursor:pointer}
+.lm-grad{display:inline-block;width:11px;height:11px;border-radius:50%;background:linear-gradient(135deg,#FFEA00,#FF7A1A 50%,#FF2D95);box-shadow:0 0 0 2px var(--term-bg),0 0 0 3px color-mix(in srgb,var(--term-fg) 30%,transparent);flex-shrink:0}
+.lm-ids{font-size:10.5px;color:var(--term-dim);margin:-6px 0 10px}
+.lm-skills{display:flex;flex-wrap:wrap;gap:5px;margin-top:10px}
+.lm-skills span{border:1px solid var(--term-line);border-radius:999px;padding:3px 8px;font-size:10.5px}
+.lm-wal{margin-top:12px;padding-top:10px;border-top:1px solid var(--term-line)}
+.lm-wal-k{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--term-dim);margin-bottom:6px}
+.lm-wal code{display:block;font:11px var(--mono);word-break:break-all;margin-bottom:8px}
+.lm-wal-acts,.lm-send{display:flex;gap:6px;flex-wrap:wrap}
+.lm-send{margin-top:8px}
+.lm-send input{flex:1;min-width:0;height:32px;border:1px solid var(--term-line);border-radius:8px;background:transparent;color:var(--term-fg);font:12.5px var(--mono);padding:0 10px}
+.lm-qr{margin-top:8px;background:#fff;border-radius:8px;padding:6px;width:max-content}
+.lm-card{max-height:calc(100% - 24px);overflow-y:auto;scrollbar-width:thin;scrollbar-color:var(--term-line) transparent}
 .lm-warn{margin:10px 0 0;padding-top:8px;border-top:1px solid var(--term-line);color:var(--term-dim);font-size:10.5px}
 .lm-x{appearance:none;position:absolute;top:8px;right:8px;width:28px;height:28px;border:0;border-radius:7px;background:none;color:var(--term-dim);font-size:18px;cursor:pointer}
 .lm-x:hover{color:var(--term-fg)}
@@ -12688,6 +12703,21 @@ async function renderProfilePanel() {
       <div class="pf-wal-acts"><button class="pf-btn solid" onclick="saveMyPhone()">Save number</button><button class="pf-btn" onclick="changeMyPin()">Change my PIN</button></div>
     </div>
 
+    <div class="pf-sec" id="pf-mapme">
+      <h4>On the live map <span id="pf-map-state">checking…</span></h4>
+      <p class="pp-muted">Off until you turn it on. Only signed-in members see it. Your point is rounded to the precision you pick before it is saved.</p>
+      <label class="fs-check"><input id="pf-map-on" type="checkbox"> Show me on the members’ map</label>
+      <div class="pf-tax-row"><input id="pf-map-lat" class="pf-tax-in" type="number" step="any" min="-90" max="90" inputmode="decimal" placeholder="Latitude" aria-label="Latitude">
+        <input id="pf-map-lon" class="pf-tax-in" type="number" step="any" min="-180" max="180" inputmode="decimal" placeholder="Longitude" aria-label="Longitude"></div>
+      <div class="pf-tax-row"><input id="pf-map-label" class="pf-tax-in wide" maxlength="60" placeholder="Place shown, e.g. Christiansted, St. Croix" aria-label="Place name shown on the map"></div>
+      <div class="pf-map-prec" role="radiogroup" aria-label="How exact">
+        <label><input type="radio" name="pf-map-prec" value="town" checked> Town (about 10 km)</label>
+        <label><input type="radio" name="pf-map-prec" value="area"> About 1 km</label>
+        <label><input type="radio" name="pf-map-prec" value="exact"> Exact</label>
+      </div>
+      <div class="pf-wal-acts"><button class="pf-btn" onclick="pfMapHere()">Use my current location</button><button class="pf-btn solid" onclick="saveMyMapLocation()">Save</button></div>
+    </div>
+
     <div class="pf-sec" id="pf-wallets">
       <h4>Wallets <span>${isExec() ? 'yours, and the network’s' : 'where you are paid'}</span></h4>
       <div class="pf-wals">
@@ -12770,6 +12800,7 @@ async function renderProfilePanel() {
       <div class="pf-stamp"><b>${esc(stamp[0])}</b><br>${stamp.slice(1).map(esc).join('<br>')}</div>
     </div>`;
   fillProfileWallets(op);
+  pfMapFill();
   loadAuthProviders().then(pr => {
     const g = document.getElementById('si-google'); if (!g) return;
     g.classList.toggle('on', !!pr.google);
@@ -13383,6 +13414,40 @@ function showFirstSteps() {
 }
 
 // Phone number in the profile.
+// Profile → On the live map (migration 0032).
+async function pfMapFill() {
+  const { data, error } = await sb.rpc('my_map_location');
+  const st = document.getElementById('pf-map-state');
+  if (!st) return;
+  if (error || !data) { st.textContent = 'could not read'; return; }
+  st.textContent = data.share ? 'you are on the map' : 'off';
+  document.getElementById('pf-map-on').checked = !!data.share;
+  if (data.lat != null) { document.getElementById('pf-map-lat').value = data.lat; document.getElementById('pf-map-lon').value = data.lon; }
+  document.getElementById('pf-map-label').value = data.label || operator?.region || '';
+  const r = document.querySelector(`input[name="pf-map-prec"][value="${data.precision || 'town'}"]`); if (r) r.checked = true;
+}
+async function pfMapHere() {
+  toast('Finding your location…');
+  const h = await ckHere();
+  if (!h) { toast('Location is off or not allowed on this device. Type the numbers instead.'); return; }
+  document.getElementById('pf-map-lat').value = h.lat.toFixed(5);
+  document.getElementById('pf-map-lon').value = h.lon.toFixed(5);
+  document.getElementById('pf-map-on').checked = true;
+  toast('Filled in. Pick how exact, then Save.');
+}
+async function saveMyMapLocation() {
+  const on = document.getElementById('pf-map-on').checked;
+  const lat = parseFloat(document.getElementById('pf-map-lat').value), lon = parseFloat(document.getElementById('pf-map-lon').value);
+  const prec = document.querySelector('input[name="pf-map-prec"]:checked')?.value || 'town';
+  const label = document.getElementById('pf-map-label').value.trim();
+  if (on && !(Math.abs(lat) <= 90 && Math.abs(lon) <= 180)) { toast('Enter a latitude from -90 to 90 and a longitude from -180 to 180.'); return; }
+  const { data, error } = await sb.rpc('set_my_map_location', { p_share: on, p_lat: on ? lat : null, p_lon: on ? lon : null, p_precision: on ? prec : null, p_label: on ? label : null });
+  if (error) { toast(error.message); return; }
+  toast(on ? `You are on the map at ${data.lat}, ${data.lon} (${LM_PRECISION[data.precision]}).` : 'You are off the map.');
+  pfMapFill();
+  if (document.getElementById('lm-foot')) { await lmFetch(); lmDraw(); if (LM.tab === 'members') lmTab('members'); }
+}
+
 async function saveMyPhone() {
   const ph = (document.getElementById('pf-phone')?.value || '').trim();
   const vis = !!document.getElementById('pf-phone-vis')?.checked;
@@ -14276,7 +14341,14 @@ const LM_BAND_LABEL = { underway: 'Underway, 5 kn or more', slow: 'Slow, under 5
 const LM_STALE_S = 600;
 var LM = { tab: 'tankers', ships: [], lastRun: null, fetchedAt: null, err: null, q: '', region: 'all', viewBox: null,
   bands: new Set(['underway', 'slow', 'moored', 'stale']), sel: null, overlay: null, ml: null, timer: null, filterOpen: false,
-  show: { tankers: true, trails: true, sites: true, regions: true }, base: Date.now() - 2 * 3600e3 };
+  show: { tankers: true, trails: true, sites: true, regions: true, members: true }, base: Date.now() - 2 * 3600e3,
+  members: [], selMember: null };
+// Members who chose to be on the map (migration 0032): a dot in the yellow-to-pink gradient, named.
+const LM_MEMBER_ICON = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
+  '<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1">'
+  + '<stop offset="0" stop-color="#FFEA00"/><stop offset=".5" stop-color="#FF7A1A"/><stop offset="1" stop-color="#FF2D95"/></linearGradient></defs>'
+  + '<circle cx="32" cy="32" r="22" fill="url(#g)" stroke="#fff" stroke-width="5"/></svg>');
+const LM_PRECISION = { exact: 'exact point', area: 'within about 1 km', town: 'town level, about 10 km' };
 
 // Arrow (moving) and dot (no course, or moored), white so deck can tint them.
 const LM_ICONS = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(
@@ -14335,8 +14407,9 @@ async function lmFetch() {
       rows.push(...(data || []));
       if (!data || data.length < 1000) break;
     }
-    const { data: run } = await sb.rpc('map_last_run');
+    const [{ data: run }, mem] = await Promise.all([sb.rpc('map_last_run'), sb.rpc('member_map')]);
     LM.ships = rows; LM.lastRun = run || null; LM.fetchedAt = Date.now(); LM.err = null;
+    if (!mem.error) LM.members = mem.data || [];
   } catch (e) { LM.err = 'Ship positions could not be loaded right now.'; }
 }
 
@@ -14368,6 +14441,7 @@ async function renderPlacesPanel() {
       <div class="lm-head"><h2>Live map</h2><p>Tankers, job sites, and who is on site.</p></div>
       <div class="lm-tabs" role="tablist">
         <button role="tab" data-t="tankers" onclick="lmTab('tankers')">Tankers <span id="lm-n-t"></span></button>
+        <button role="tab" data-t="members" onclick="lmTab('members')">Members <span id="lm-n-m">${LM.members.length}</span></button>
         <button role="tab" data-t="sites" onclick="lmTab('sites')">Sites <span>${PL.data.places.length}</span></button>
         <button role="tab" data-t="aircraft" onclick="lmTab('aircraft')">Aircraft</button>
       </div>
@@ -14399,6 +14473,15 @@ function lmTab(t) {
     body.innerHTML = `${isExec() ? `<button class="lm-btn solid lm-add" onclick="plStartAdd()">+ Add place</button>` : ''}<div class="pl-side" id="pl-side"></div>`;
     plRenderSide();
     plDrawPins(!PL.sel);
+    return;
+  }
+  if (t === 'members') {
+    const me = LM.members.find(m => m.me);
+    body.innerHTML = `${me ? '' : `<div class="lm-note"><b>You are not on the map.</b><p>Turn it on in your profile: Profile → On the live map.</p><button class="lm-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-mapme')?.scrollIntoView({ behavior: 'smooth' }), 500)">Open my profile</button></div>`}
+      <div class="lm-list">${LM.members.map(m => `<button class="lm-row ${m.id === LM.selMember ? 'on' : ''}" onclick="lmSelectMember('${esc(m.id)}')">
+        <i class="lm-grad"></i><span><b>${esc(m.name)}${m.me ? ' (you)' : ''}</b><small>${esc(m.label || 'No place name')}</small></span>
+        <em>${Number(m.logs || 0).toLocaleString()} LOG<small>${esc(m.member_id || '')}</small></em></button>`).join('')
+        || '<div class="lm-note">No member has turned this on yet.</div>'}</div>`;
     return;
   }
   if (t === 'aircraft') {
@@ -14452,7 +14535,7 @@ function lmSideList() {
 }
 
 function lmSelect(mmsi) {
-  LM.sel = mmsi;
+  LM.sel = mmsi; LM.selMember = null;
   const s = LM.ships.find(x => x.mmsi === mmsi);
   lmCard(s); lmDraw(); lmSideList();
   if (s && PL.map) PL.map.easeTo({ center: [s.lon, s.lat], zoom: Math.max(PL.map.getZoom(), 7), duration: 600 });
@@ -14477,13 +14560,81 @@ function lmCard(s) {
     <p class="lm-warn">Public AIS broadcast. Not for navigation or safety decisions.</p>`;
 }
 
+function lmSelectMember(id) {
+  LM.selMember = id; LM.sel = null;
+  const m = LM.members.find(x => x.id === id);
+  lmMemberCard(m); lmDraw();
+  if (LM.tab === 'members') lmTab('members');
+  if (m && PL.map) PL.map.easeTo({ center: [m.lon, m.lat], zoom: Math.max(PL.map.getZoom(), m.precision === 'town' ? 9 : 12), duration: 600 });
+}
+function lmMemberCard(m) {
+  const el = document.getElementById('lm-card');
+  if (!el) return;
+  if (!m) { el.hidden = true; return; }
+  const skills = Array.isArray(m.skills) ? m.skills : [];
+  const standing = m.standing ? m.standing[0].toUpperCase() + m.standing.slice(1) : null;
+  const dp = m.precision === 'exact' ? 5 : m.precision === 'area' ? 2 : 1;
+  el.hidden = false;
+  el.innerHTML = `<button class="lm-x" onclick="LM.selMember=null; lmMemberCard(null); lmDraw()" aria-label="Close">×</button>
+    <div class="lm-card-k">Member${m.me ? ' · you' : ''}</div>
+    <h3>${esc(m.name)}</h3>
+    <div class="lm-ids">${esc([m.member_id, m.bix_id, m.handle].filter(Boolean).join(' · '))}</div>
+    <dl>
+      <dt>Location</dt><dd>${esc(m.label || 'Not named')}<small>${Number(m.lat).toFixed(dp)}, ${Number(m.lon).toFixed(dp)} · ${esc(LM_PRECISION[m.precision] || '')}</small></dd>
+      <dt>Score</dt><dd>${m.score != null ? Number(m.score).toFixed(3) : '—'}${standing ? `<small>${esc(standing)}</small>` : ''}</dd>
+      <dt>LOGs</dt><dd>${Number(m.logs || 0).toLocaleString()}</dd>
+    </dl>
+    ${skills.length ? `<div class="lm-skills">${skills.map(x => `<span>${esc(x)}</span>`).join('')}</div>` : ''}
+    <div class="lm-wal">
+      <div class="lm-wal-k">Wallet · USDC on ${esc(ESCROW_NET.name)}</div>
+      ${m.wallet ? `<code>${esc(m.wallet)}</code>
+        <div class="lm-wal-acts">
+          <button class="lm-btn" onclick="navigator.clipboard?.writeText('${esc(m.wallet)}'); toast('Wallet address copied.')">Copy</button>
+          <button class="lm-btn" onclick="lmWalletQr('${esc(m.wallet)}')">QR code</button>
+        </div>
+        <div id="lm-qr"></div>
+        ${m.me ? '' : `<div class="lm-send"><label class="sr-only" for="lm-amt">Amount in USDC</label><input id="lm-amt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Amount in USDC">
+          <button class="lm-btn solid" onclick="lmSendUsdc('${esc(m.wallet)}', '${esc(m.name).replace(/'/g, '')}')">Send USDC</button></div>
+          <p class="lm-warn">Your wallet asks you to confirm. A payment on the chain cannot be pulled back. Their wallet must already accept USDC on Hedera.</p>`}`
+      : '<div class="pp-muted">No wallet on file.</div>'}
+    </div>`;
+}
+async function lmWalletQr(addr) {
+  const box = document.getElementById('lm-qr');
+  if (!box) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  try { await ckLoadQR(); box.innerHTML = `<div class="lm-qr">${ckQrSvg(addr, 150)}</div>`; } catch (e) { toast(e.message); }
+}
+// USDC transfer prepared for the person's own wallet to confirm; the OS never sends on its own.
+async function lmSendUsdc(to, name) {
+  const amt = parseFloat(document.getElementById('lm-amt')?.value);
+  if (!(amt > 0) || amt > 1e6) { toast('Enter an amount in USDC.'); return; }
+  if (!/^0x[0-9a-fA-F]{40}$/.test(to)) { toast('That wallet address is not valid.'); return; }
+  if (!await osConfirm(`Send ${amt.toFixed(2)} USDC on ${ESCROW_NET.name} to ${name} (${shortAddr(to)})? Your wallet will ask you to confirm. It cannot be pulled back.`)) return;
+  try {
+    if (!walletProvider()) { const w = await pickWallet({ title: 'Pay with a wallet', lead: 'Pick the wallet that holds your USDC.' }); if (!w) return; }
+    await ensureHederaNetwork();
+    const eth = walletProvider();
+    const [from] = await eth.request({ method: 'eth_requestAccounts' });
+    const units = BigInt(Math.round(amt * 1e6));
+    const data = '0xa9059cbb' + to.slice(2).toLowerCase().padStart(64, '0') + units.toString(16).padStart(64, '0');
+    toast('Confirm the payment in your wallet…');
+    const tx = await eth.request({ method: 'eth_sendTransaction', params: [{ from, to: ESCROW_NET.usdc, data }] });
+    toast(`Sent. Transaction ${String(tx).slice(0, 10)}…`);
+    window.open(`${ESCROW_NET.explorer}/transaction/${tx}`, '_blank', 'noopener');
+  } catch (e) {
+    toast(e?.code === 4001 ? 'Cancelled in your wallet.' : (e?.message || 'The payment did not go through.'));
+  }
+}
+
 function lmLegend() {
   const el = document.getElementById('lm-legend');
   if (!el) return;
   const tg = (k, label) => `<label><input type="checkbox" ${LM.show[k] ? 'checked' : ''} onchange="LM.show['${k}']=this.checked; lmDraw()"> ${label}</label>`;
   el.innerHTML = `<details ${window.innerWidth > 900 ? 'open' : ''}><summary>Legend and layers</summary>
     ${Object.keys(LM_BAND).map(k => `<div class="lm-key"><i style="background:rgb(${LM_BAND[k]})"></i>${esc(LM_BAND_LABEL[k])}</div>`).join('')}
-    <div class="lm-tgs">${tg('tankers', 'Tankers')}${tg('trails', 'Trails, last 30 min')}${tg('sites', 'Job sites')}${tg('regions', 'Watched regions')}
+    <div class="lm-key"><i class="lm-grad"></i>Member</div>
+    <div class="lm-tgs">${tg('tankers', 'Tankers')}${tg('trails', 'Trails, last 30 min')}${tg('members', 'Members')}${tg('sites', 'Job sites')}${tg('regions', 'Watched regions')}
       <label class="off"><input type="checkbox" disabled> Aircraft (not licensed yet)</label></div></details>`;
 }
 function lmFoot() {
@@ -14526,6 +14677,7 @@ function lmPoll() {
     if (++tick % 6 === 0) { await lmFetch(); if (LM.tab === 'tankers') lmSideList(); }
     lmDraw(); lmFoot();
     if (LM.sel) lmCard(LM.ships.find(x => x.mmsi === LM.sel));
+    const nm = document.getElementById('lm-n-m'); if (nm) nm.textContent = LM.members.length;
   }, 5000);
 }
 
@@ -14591,12 +14743,24 @@ function lmDraw() {
     getColor: s => [...LM_BAND[lmBand(s)], lmBand(s) === 'stale' ? 150 : 255],
     pickable: true, onClick: i => { if (!PL.pick && i.object) lmSelect(i.object.mmsi); },
     updateTriggers: { getSize: LM.sel, getColor: Math.floor(now / 5000), getIcon: Math.floor(now / 5000) } }));
+  if (LM.show.members && LM.members.length) {
+    const light = document.documentElement.classList.contains('theme-light');
+    layers.push(new D.IconLayer({ id: 'lm-members', data: LM.members, iconAtlas: LM_MEMBER_ICON,
+      iconMapping: { m: { x: 0, y: 0, width: 64, height: 64 } }, getIcon: () => 'm', getPosition: m => [m.lon, m.lat],
+      getSize: m => m.id === LM.selMember ? 34 : 24, sizeUnits: 'pixels', pickable: true,
+      onClick: i => { if (!PL.pick && i.object) lmSelectMember(i.object.id); }, updateTriggers: { getSize: LM.selMember } }));
+    layers.push(new D.TextLayer({ id: 'lm-member-names', data: LM.members, getPosition: m => [m.lon, m.lat], getText: m => m.name || '',
+      getPixelOffset: [0, -22], getSize: 13, sizeUnits: 'pixels', fontFamily: 'IBM Plex Mono, ui-monospace, monospace', fontWeight: 600,
+      characterSet: 'auto', getColor: light ? [10, 10, 10] : [245, 245, 245], fontSettings: { sdf: true }, outlineWidth: 3,
+      outlineColor: light ? [255, 255, 255, 230] : [10, 10, 10, 230], getTextAnchor: 'middle', getAlignmentBaseline: 'bottom',
+      updateTriggers: { getColor: light, outlineColor: light } }));
+  }
   LM.overlay.setProps({ layers });
 }
 
 // First view: wherever the tankers are (or the home region if none yet).
 function lmFitShips() {
-  const s = LM.ships;
+  const s = [...LM.ships, ...LM.members];
   if (!PL.map || !LM.ml || !s.length || LM.tab === 'sites') return;
   const b = new LM.ml.LngLatBounds();
   s.forEach(x => b.extend([x.lon, x.lat]));

@@ -9325,6 +9325,7 @@ async function fetchUsdcBalance(address) {
   const res = await fetch(ESCROW_NET.rpc, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
+    signal: AbortSignal.timeout(8000),
     body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'eth_call', params: [{ to: ESCROW_NET.usdc, data }, 'latest'] }),
   });
   const json = await res.json();
@@ -10964,12 +10965,15 @@ function startWalletPoll() {
     if (!operator || document.hidden || !document.getElementById('dash-bal') || dashBalBusy) return;
     try {
       const hit = await detectWallet();
-      const key = hit ? hit.address + '|' + await hit.provider.request({ method: 'eth_chainId' }) : 'none';
+      const key = hit ? hit.address + '|' + await withTimeout(hit.provider.request({ method: 'eth_chainId' }), 4000, 'The wallet') : 'none';
       if (WALLET_KEY !== null && key !== WALLET_KEY) scheduleWalletRefresh();
       WALLET_KEY = key;
     } catch (e) {}
   }, 4000);
 }
+// A wallet that never answers (a site it has not been connected to, or a security screen waiting on a tap)
+// must not freeze the card on "Checking…": give up after a few seconds and treat it as not connected.
+const withTimeout = (p, ms, what) => Promise.race([p, new Promise((_, no) => setTimeout(() => no(new Error(`${what} did not answer`)), ms))]);
 async function detectWallet() {
   const have = (operator?.wallet_address || '').toLowerCase(), seen = new Set(), cands = [];
   for (const d of WALLET_FOUND.values()) if (!seen.has(d.provider)) { seen.add(d.provider); cands.push({ provider: d.provider, name: d.info.name }); }
@@ -10977,7 +10981,7 @@ async function detectWallet() {
   let best = null;
   for (const c of cands) {
     try {
-      const accts = await c.provider.request({ method: 'eth_accounts' });
+      const accts = await withTimeout(c.provider.request({ method: 'eth_accounts' }), 4000, 'The wallet');
       if (!accts?.length) continue;
       if (!WALLET_WATCHED.has(c.provider)) {
         WALLET_WATCHED.add(c.provider);
@@ -10997,7 +11001,7 @@ async function walletSnapshot() {
   const hit = await detectWallet();
   const have = (operator?.wallet_address || '').toLowerCase();
   if (!hit) return { connected: false, address: have || null };
-  const rpc = m => hit.provider.request(m);
+  const rpc = m => withTimeout(hit.provider.request(m), 8000, 'The wallet');
   const chainId = parseInt(await rpc({ method: 'eth_chainId' }), 16);
   const snap = { connected: true, name: hit.name, address: hit.address, chainId, chain: chainName(chainId) || `network ${chainId}`,
     onFile: hit.address === have, hedera: chainId === ESCROW_NET.chainId, symbol: NATIVE_SYMBOL[chainId] || 'ETH', native: null, usdc: null, token: !!USDC_BY_CHAIN[chainId] };
@@ -11132,7 +11136,7 @@ async function drawDashBalance(el) {
     <div class="dash-big">…</div><div class="dash-bar"><i style="width:100%"></i></div>
     <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}` : 'No personal wallet yet.'}</div>${acts({ connected: false, address: have })}`;
   let snap;
-  try { snap = await walletSnapshot(); } catch (e) { snap = { connected: false, address: have }; }
+  try { snap = await withTimeout(walletSnapshot(), 15000, 'The wallet'); } catch (e) { snap = { connected: false, address: have }; }
   if (!document.getElementById('dash-bal')) return;
   el.dataset.painted = '1';
   if (snap.connected) {

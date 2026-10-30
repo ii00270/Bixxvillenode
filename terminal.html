@@ -9616,26 +9616,26 @@ async function fetchUsdcBalance(address) {
 }
 
 // Adds Hedera to the wallet in use if needed and switches to it.
-async function ensureHederaNetwork() {
+async function ensureHederaNetwork(net = ESCROW_NET) {
   const eth = walletProvider();
   if (!eth) throw new Error('No wallet found. Connect MetaMask, HashPack or Robinhood Wallet first.');
   const at = async () => parseInt(await eth.request({ method: 'eth_chainId' }), 16);
-  if (await at() === ESCROW_NET.chainId) return;
+  if (await at() === net.chainId) return;
   try {
-    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: ESCROW_NET.chainHex }] });     // already in the wallet
+    await eth.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: net.chainHex }] });     // already in the wallet
   } catch (e) {
     if (e?.code === 4001) throw e;                                                                              // the person said no
     await eth.request({ method: 'wallet_addEthereumChain', params: [{                                           // not in the wallet yet (4902): add it
-      chainId: ESCROW_NET.chainHex, chainName: ESCROW_NET.name, nativeCurrency: ESCROW_NET.currency,
-      rpcUrls: [ESCROW_NET.rpc], blockExplorerUrls: [ESCROW_NET.explorer],
+      chainId: net.chainHex, chainName: net.name, nativeCurrency: net.currency,
+      rpcUrls: [net.rpc], blockExplorerUrls: [net.explorer],
     }] });
   }
   // Wallets answer first and switch a moment later (a phone asks to confirm the switch). Wait for it to happen.
   for (let i = 0; i < 40; i++) {
-    if (await at() === ESCROW_NET.chainId) return;
+    if (await at() === net.chainId) return;
     await new Promise(r => setTimeout(r, 500));
   }
-  throw new Error(`Confirm the switch to ${ESCROW_NET.name} in your wallet, then try again.`);
+  throw new Error(`Confirm the switch to ${net.name} in your wallet, then try again.`);
 }
 
 async function checkProfileWalletBalance() {
@@ -11309,6 +11309,14 @@ async function switchToHedera() {
   catch (e) { toast(e?.code === 4001 ? 'Cancelled in your wallet.' : (e?.message || 'Could not switch networks.')); }
   scheduleWalletRefresh();                                   // show whatever the wallet is on now, success or not
 }
+// Adds Hedera's live network to the wallet (or switches to it), so HBAR and Hedera USDC show up there.
+async function addHederaLive() {
+  const net = ESCROW_NETS['hedera-mainnet'];
+  toast('Open your wallet and approve adding Hedera…');
+  try { await ensureHederaNetwork(net); toast('Hedera is in your wallet. Your HBAR shows as the balance on that network.'); }
+  catch (e) { toast(e?.code === 4001 ? 'Cancelled in your wallet.' : (e?.message || 'Could not add Hedera.')); }
+  scheduleWalletRefresh();
+}
 async function useConnectedWallet() {
   const snap = await walletSnapshot();
   if (!snap.connected) { openAddWallet(); return; }
@@ -11411,7 +11419,8 @@ async function drawDashBalance(el) {
     <div class="dash-acts">
       ${!snap.connected ? `<button class="dash-btn solid" onclick="connectWalletHere()">Connect a wallet</button>` : ''}
       ${snap.connected && !snap.onFile ? `<button class="dash-btn solid" onclick="useConnectedWallet()">Use this wallet</button>` : ''}
-      ${snap.connected && !snap.hedera ? `<button class="dash-btn" onclick="switchToHedera()">Switch to Hedera</button>` : ''}
+      ${snap.connected && !snap.hedera ? `<button class="dash-btn" onclick="switchToHedera()">Switch to ${esc(ESCROW_NET.name)}</button>` : ''}
+      ${snap.connected && snap.chainId !== 295 ? `<button class="dash-btn" onclick="addHederaLive()">Add Hedera to my wallet</button>` : ''}
       <button class="dash-btn" onclick="setTermView('ledger')">Ledger</button>
       ${snap.address ? `<button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(snap.address)}');toast('Wallet address copied.')">Copy address</button>` : ''}
       <button class="dash-btn" onclick="openAddWallet()">${have ? 'Change wallet' : 'Add wallet'}</button>

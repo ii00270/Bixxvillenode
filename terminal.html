@@ -968,8 +968,154 @@ html:not(.theme-light) #pl-map .leaflet-tile-pane{filter:invert(1) hue-rotate(18
 .lg-amt{text-align:right;font:12px var(--mono)}.lg-amt b{display:block;font-weight:600}.lg-amt b.in{color:#2E9D6B}.lg-amt b.out{color:#E8743A}
 .lg-amt a{color:var(--term-dim);font-size:11px}
 @media(max-width:560px){.lg-row{grid-template-columns:1fr auto}.lg-row>.lg-tag{grid-column:1/-1;justify-self:start}}
-/* The message box belongs to the terminal itself (and BIX AI), not to every screen */
-#terminal-shell[data-view]:not([data-view="terminal"]):not(.agent-on) #term-composer{display:none}
+/* The message box belongs to BIX AI. On the Dashboard the ask box at the top does the asking */
+#terminal-shell:not(.agent-on) #term-composer{display:none}
+/* ── DECOMPOSITION — project dashboard (Overview), with Steps, Maps and Places under the same header ── */
+#term-panel.dc-on > .term-panel-head{display:none}
+.dc{--dc-card:#111215;--dc-card2:#16171B;--dc-line:#24262B;--dc-line2:#34363D;--dc-fg:#EDEDEF;--dc-dim:#8D9098;--dc-faint:#5F626A;--dc-grid:rgba(255,255,255,.045);
+  font-family:Inter,system-ui,-apple-system,sans-serif;color:var(--dc-fg);font-size:13px;letter-spacing:0}
+html.theme-light .dc{--dc-card:#FFFFFF;--dc-card2:#F6F6F8;--dc-line:#E5E6EA;--dc-line2:#CFD1D7;--dc-fg:#111215;--dc-dim:#666973;--dc-faint:#9A9CA4;--dc-grid:rgba(0,0,0,.05)}
+.dc svg{flex-shrink:0}
+.dc button{font-family:inherit}
+/* top bar */
+.dc-head{margin-bottom:14px}
+.dc-bar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:0 44px 12px 0;border-bottom:1px solid var(--dc-line)}
+.dc-crumb{display:flex;align-items:center;gap:8px;min-width:0;flex:1 1 280px}
+.dc-logo{width:26px;height:26px;border-radius:7px;background:var(--dc-fg);color:var(--term-bg);display:grid;place-items:center}
+.dc-logo svg{width:15px;height:15px}
+.dc-crumb-root{appearance:none;border:0;background:none;color:var(--dc-dim);font-size:13px;cursor:pointer;padding:0}
+.dc-crumb-root:hover{color:var(--dc-fg)}
+.dc-crumb-sep{color:var(--dc-faint)}
+.dc-pick{appearance:none;-webkit-appearance:none;border:0;background:transparent;color:var(--dc-fg);font:600 13px Inter,system-ui,sans-serif;min-width:0;max-width:100%;text-overflow:ellipsis;cursor:pointer;padding:4px 18px 4px 0;
+  background-image:linear-gradient(45deg,transparent 50%,var(--dc-dim) 50%),linear-gradient(135deg,var(--dc-dim) 50%,transparent 50%);background-position:calc(100% - 7px) 55%,calc(100% - 3px) 55%;background-size:4px 4px;background-repeat:no-repeat;flex:1 1 auto}
+.dc-pick option{background:var(--dc-card);color:var(--dc-fg)}
+.dc-bar-r{display:flex;align-items:center;gap:8px;flex:0 1 auto}
+.dc-search{position:relative;display:flex;align-items:center;gap:7px;height:32px;padding:0 10px;border:1px solid var(--dc-line);border-radius:8px;background:var(--dc-card);color:var(--dc-dim);width:min(240px,48vw)}
+.dc-search svg{width:14px;height:14px}
+.dc-search input{border:0;outline:0;background:transparent;color:var(--dc-fg);font:13px Inter,system-ui,sans-serif;width:100%;min-width:0}
+.dc-results{position:absolute;top:36px;left:0;right:0;z-index:30;background:var(--dc-card);border:1px solid var(--dc-line2);border-radius:10px;padding:4px;box-shadow:0 12px 30px rgba(0,0,0,.35);min-width:260px}
+.dc-results button{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:none;color:var(--dc-fg);padding:7px 8px;border-radius:7px;cursor:pointer;font-size:12.5px}
+.dc-results button:hover{background:var(--dc-card2)}
+.dc-results b{font:600 11.5px var(--mono)}.dc-results span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.dc-results em{font-style:normal;color:var(--dc-dim);font-size:11px}
+.dc-res-none{padding:9px;color:var(--dc-dim);font-size:12.5px}
+.dc-icbtn{appearance:none;width:32px;height:32px;border-radius:8px;border:1px solid var(--dc-line);background:var(--dc-card);color:var(--dc-dim);display:grid;place-items:center;cursor:pointer}
+.dc-icbtn svg{width:15px;height:15px}.dc-icbtn:hover{color:var(--dc-fg)}
+.dc-new{appearance:none;height:32px;padding:0 13px;border-radius:8px;border:0;background:var(--dc-fg);color:var(--term-bg);font:600 12.5px Inter,system-ui,sans-serif;cursor:pointer;white-space:nowrap}
+.dc-new:hover{opacity:.88}
+/* tabs */
+.dc-tabs{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:12px}
+.dc-tabset{display:flex;gap:4px;padding:3px;border:1px solid var(--dc-line);border-radius:9px;background:var(--dc-card);overflow-x:auto;max-width:100%;scrollbar-width:none}
+.dc-tabset::-webkit-scrollbar{display:none}
+.dc-tabset button{appearance:none;display:flex;align-items:center;gap:6px;border:0;background:none;color:var(--dc-dim);font-size:12.5px;padding:5px 10px;border-radius:6px;cursor:pointer;white-space:nowrap}
+.dc-tabset button svg{width:13px;height:13px}
+.dc-tabset button.on{background:var(--dc-card2);color:var(--dc-fg);box-shadow:inset 0 0 0 1px var(--dc-line)}
+.dc-range{font-size:12px;color:var(--dc-dim);border:1px solid var(--dc-line);border-radius:8px;padding:6px 10px;background:var(--dc-card)}
+/* cards */
+.dc-body{display:flex;flex-direction:column;gap:12px}
+.dc-loading{padding:40px 0;color:var(--dc-dim);text-align:center}
+.dc-card{background:var(--dc-card);border:1px solid var(--dc-line);border-radius:12px;min-width:0}
+.dc-card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 14px;border-bottom:1px solid var(--dc-line)}
+.dc-card-h > span{display:flex;align-items:center;gap:8px;font-weight:600;font-size:13px}
+.dc-card-h > span svg{width:15px;height:15px;color:var(--dc-dim)}
+.dc-btn{appearance:none;display:flex;align-items:center;gap:6px;height:28px;padding:0 10px;border:1px solid var(--dc-line);border-radius:7px;background:var(--dc-card2);color:var(--dc-fg);font-size:12px;cursor:pointer;white-space:nowrap}
+.dc-btn svg{width:13px;height:13px}.dc-btn:hover{border-color:var(--dc-line2)}
+.dc-more{color:var(--dc-faint);letter-spacing:.1em;font-size:12px}
+/* KPI row */
+.dc-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.dc-kpi{padding:13px 14px;display:flex;flex-direction:column;gap:12px}
+.dc-kpi-h{display:flex;justify-content:space-between;align-items:center;font-size:12.5px;color:var(--dc-dim)}
+.dc-kpi-h > span:first-child{display:flex;align-items:center;gap:7px}
+.dc-kpi-h svg{width:14px;height:14px}
+.dc-kpi-m{display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.dc-kpi-v{font-size:clamp(22px,2.3vw,30px);font-weight:600;letter-spacing:-.02em;line-height:1;white-space:nowrap}
+.dc-kpi-v small{font-size:13px;font-weight:500;color:var(--dc-dim);margin-left:3px;letter-spacing:0}
+.dc-bars{height:30px;width:auto;max-width:110px}
+.dc-bars rect{fill:currentColor}
+.dc-kpi-f{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:11.5px;color:var(--dc-dim);border-top:1px solid var(--dc-line);padding-top:10px;flex-wrap:wrap}
+.dc-delta{font-weight:600;white-space:nowrap}
+.dc-delta.up{color:#22C55E}.dc-delta.down{color:#EF4444}.dc-delta.flat{color:var(--dc-dim)}
+/* grid */
+.dc-grid{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:12px;align-items:start}
+.dc-col{display:flex;flex-direction:column;gap:12px;min-width:0}
+/* map canvas */
+.dc-canvas{position:relative;padding:44px 16px 20px;background-image:radial-gradient(var(--dc-grid) 1px,transparent 1px);background-size:16px 16px;border-radius:0 0 12px 12px;min-height:260px}
+.dc-stamp{position:absolute;top:12px;left:14px;font-size:11px;color:var(--dc-dim);border:1px solid var(--dc-line);border-radius:6px;padding:3px 8px;background:var(--dc-card)}
+.dc-links{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}
+.dc-links path{fill:none;stroke:var(--dc-line2);stroke-width:1.2}
+.dc-links circle{fill:var(--dc-dim)}
+.dc-tree{position:relative;display:flex;flex-direction:column;gap:34px;align-items:center}
+.dc-lvl{display:flex;justify-content:center;gap:12px;width:100%}
+.dc-node{background:var(--dc-card2);border:1px solid var(--dc-line2);border-radius:10px;padding:10px 12px;flex:1 1 0;min-width:0;max-width:210px;box-shadow:0 6px 18px rgba(0,0,0,.18);position:relative;z-index:1}
+.dc-node.top,.dc-node.end{flex:0 1 260px}
+.dc-node.more,.dc-node.ghost{display:grid;place-items:center;color:var(--dc-dim);font-size:12px;border-style:dashed;cursor:pointer;min-height:72px;appearance:none}
+.dc-node.ghost{cursor:default}
+.dc-node-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.dc-node-h b{display:flex;align-items:flex-start;gap:6px;font-size:12.5px;font-weight:600;min-width:0;line-height:1.3}
+.dc-node-h b svg{margin-top:1px}
+.dc-node-h b span{overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.dc-node-h b svg{width:13px;height:13px;color:var(--dc-dim)}
+.dc-node-r{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;color:var(--dc-dim);padding:2px 0}
+.dc-node-r span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.dc-node-r b{color:var(--dc-fg);font:500 11.5px var(--mono);white-space:nowrap}
+/* pills */
+.dc-pill{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;padding:2px 7px;border-radius:999px;border:1px solid;white-space:nowrap}
+.dc-pill i{width:6px;height:6px;border-radius:50%;background:currentColor}
+.dc-pill.ok{color:#22C55E;border-color:rgba(34,197,94,.35);background:rgba(34,197,94,.08)}
+.dc-pill.run{color:#3B82F6;border-color:rgba(59,130,246,.35);background:rgba(59,130,246,.08)}
+.dc-pill.rev{color:#A78BFA;border-color:rgba(167,139,250,.35);background:rgba(167,139,250,.08)}
+.dc-pill.wait{color:#F59E0B;border-color:rgba(245,158,11,.35);background:rgba(245,158,11,.08)}
+.dc-pill.bad{color:#EF4444;border-color:rgba(239,68,68,.35);background:rgba(239,68,68,.08)}
+.dc-pill.idle{color:var(--dc-dim);border-color:var(--dc-line2);background:transparent}
+/* table */
+.dc-tw{overflow-x:auto}
+.dc-table table{width:100%;border-collapse:collapse;min-width:560px}
+.dc-table th{text-align:left;font-weight:500;font-size:11.5px;color:var(--dc-dim);padding:9px 14px;border-bottom:1px solid var(--dc-line)}
+.dc-table td{padding:10px 14px;border-bottom:1px solid var(--dc-line);font-size:12.5px;white-space:nowrap;vertical-align:middle}
+.dc-table tr:last-child td{border-bottom:0}
+.dc-table td.mono{font:12px var(--mono)}
+.dc-table td.snip{color:var(--dc-dim);white-space:normal;min-width:180px;font-size:12px}
+.dc-none{padding:16px 14px;color:var(--dc-dim);font-size:12.5px;white-space:normal}
+/* plan */
+.dc-plan{position:sticky;top:0}
+.dc-sec{padding:14px;border-bottom:1px solid var(--dc-line)}
+.dc-sec:last-child{border-bottom:0}
+.dc-sec-t{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--dc-dim);margin-bottom:10px}
+.dc-box{border:1px solid var(--dc-line);border-radius:10px;background:var(--dc-card2);padding:4px 12px}
+.dc-kv{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:12.5px;border-bottom:1px solid var(--dc-line)}
+.dc-kv:last-child{border-bottom:0}
+.dc-kv span{color:var(--dc-dim);flex-shrink:0}
+.dc-kv b{margin-left:auto;font-weight:500;text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:var(--mono);font-size:12px}
+.dc-kv em{font-style:normal;font:600 10.5px var(--mono);border:1px solid var(--dc-line2);border-radius:5px;padding:2px 6px;color:var(--dc-fg);white-space:nowrap}
+.dc-minis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.dc-mini{border:1px solid var(--dc-line);border-radius:10px;background:var(--dc-card2);padding:10px}
+.dc-mini-t{display:flex;align-items:center;gap:6px;font-weight:600;font-size:12px;margin-bottom:8px}
+.dc-mini-t svg{width:13px;height:13px;color:var(--dc-dim)}
+.dc-mini-r{display:flex;justify-content:space-between;gap:6px;font-size:11.5px;color:var(--dc-dim);padding:2px 0}
+.dc-mini-r b{color:var(--dc-fg);font:500 11.5px var(--mono);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dc-rule{border:1px solid var(--dc-line);border-radius:10px;background:var(--dc-card2);padding:10px 12px;margin-bottom:8px}
+.dc-rule:last-child{margin-bottom:0}
+.dc-rule-h{display:flex;justify-content:space-between;align-items:center}
+.dc-rule-h > span{display:flex;align-items:center;gap:8px;font-size:12.5px}
+.dc-num{font:600 11px var(--mono);border:1px solid var(--dc-line2);border-radius:5px;padding:1px 6px}
+.dc-rule-t{font-size:12.5px;font-weight:600;margin:8px 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dc-if{display:flex;align-items:center;gap:7px;flex-wrap:wrap;font:11.5px var(--mono);border:1px solid var(--dc-line);border-radius:8px;padding:6px 9px;margin-bottom:4px;background:var(--dc-card)}
+.dc-if em{font-style:normal;font-weight:600;color:var(--dc-dim)}.dc-if i{font-style:normal;color:var(--dc-faint)}
+.dc-if span{border:1px solid var(--dc-line2);border-radius:5px;padding:1px 6px}
+.dc-canvas-empty{display:grid;place-items:center}
+.dc-empty{max-width:380px;text-align:center;display:flex;flex-direction:column;gap:10px;align-items:center;position:relative;z-index:1}
+.dc-empty b{font-size:15px}.dc-empty p{margin:0;color:var(--dc-dim);font-size:13px;line-height:1.5}
+.term-card.dc-flash{outline:2px solid #FF2D95;outline-offset:3px;transition:outline-color 1.2s}
+/* phones and narrow windows */
+@media (max-width:1100px){.dc-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.dc-grid{grid-template-columns:minmax(0,1fr)}.dc-plan{position:static}}
+@media (max-width:560px){
+  .dc-bars{max-width:90px}.dc-bar{padding-right:0}
+  .dc-lvl{flex-wrap:wrap}.dc-node,.dc-node.top,.dc-node.end{flex:1 1 100%;max-width:none}
+  .dc-kpis{gap:8px}.dc-kpi{padding:11px}
+  .dc-search{width:auto;flex:1}.dc-bar-r{width:100%}
+  .dc-minis{grid-template-columns:minmax(0,1fr)}
+  .dc-canvas{padding:40px 10px 16px}
+}
+
 /* The offline chip sits in the status row instead of floating over the composer */
 #term-footer #off-chip{position:static;margin-left:auto;padding:3px 10px;font-size:10px}
 #off-chip{position:fixed;right:12px;bottom:12px;z-index:9998;appearance:none;display:flex;gap:7px;align-items:center;background:var(--term-bg);color:var(--term-dim);border:1px solid var(--term-line);border-radius:999px;padding:6px 12px;font:11px var(--mono);cursor:pointer}
@@ -2827,6 +2973,14 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 .dash-lbl > span:first-child{display:flex;align-items:center;gap:7px;color:var(--term-fg);font-weight:500;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dash-chip{border:1px solid var(--term-line);border-radius:999px;padding:1px 8px;font-size:10.5px;color:var(--term-dim)}
 .dash-big{font-size:30px;font-weight:500;letter-spacing:-.01em;line-height:1.1}
+.dash-wals{margin:10px 0 2px;border-top:1px solid var(--term-line);padding-top:8px;display:flex;flex-direction:column;gap:2px}
+.dw-row{appearance:none;display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;width:100%;border:0;background:none;color:var(--term-fg);font:12px var(--mono);padding:5px 0;cursor:pointer;text-align:left}
+.dw-row:hover b{text-decoration:underline}
+.dw-k{display:flex;align-items:center;gap:7px;color:var(--term-dim)}
+.dw-k i{width:7px;height:7px;border-radius:50%;background:#2E9D6B}
+.dw-k.treasury i{background:#C9A24A}
+.dw-row b{font-weight:500}
+.dw-v{color:var(--term-dim);text-align:right;white-space:nowrap}
 .dash-nets{margin:10px 0 2px;border-top:1px solid var(--term-line);padding-top:10px;font:12px var(--mono);color:var(--term-dim)}
 .nt-head{display:flex;justify-content:space-between;font:600 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--term-fg);margin-bottom:6px}
 .nt-head b{font-size:15px;letter-spacing:0}
@@ -3954,30 +4108,19 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
 <div id="terminal-shell">
   <div id="term-sidebar-backdrop" onclick="toggleTermSidebar(false)"></div>
   <nav id="term-sidebar">
-    <div class="term-sb-head" onclick="setTermView('terminal')" title="Terminal">BIXXVILLE</div>
+    <div class="term-sb-head" onclick="setTermView('terminal')" title="Dashboard">BIXXVILLE</div>
     <button class="term-sb-collapse" onclick="toggleSbCollapse()" title="Collapse the sidebar" aria-label="Collapse the sidebar"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M9 4v16M15 10l-2 2 2 2"/></svg></button>
     <div class="term-sb-group">
       <button class="term-sb-item active" data-view="terminal" onclick="setTermView('terminal')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
-        <span>Terminal</span>
+        <span>Dashboard</span>
       </button>
     </div>
-    <div class="term-sb-group folded" data-group="tracker">
-      <div class="term-sb-row">
-      <button class="term-sb-item" data-view="tracker" onclick="setTermView('tracker')">
+    <div class="term-sb-group">
+      <button class="term-sb-item" data-view="tracker" onclick="dcGo('overview')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>
-        <span>Tracker</span>
+        <span>Decomposition</span>
       </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('tracker')" aria-label="Expand Tracker">+</button>
-      </div>
-      <div class="term-sb-sub" id="term-sb-tracker-sub">
-        <button class="term-sb-subitem" onclick="setTrackerFilter('to-do'); setTermView('tracker')">To-do <span class="term-sb-count" data-count="to-do">—</span></button>
-        <button class="term-sb-subitem" onclick="setTrackerFilter('in progress'); setTermView('tracker')">In progress <span class="term-sb-count" data-count="in progress">—</span></button>
-        <button class="term-sb-subitem" onclick="setTrackerFilter('delivered'); setTermView('tracker')">Delivered <span class="term-sb-count" data-count="delivered">—</span></button>
-        <button class="term-sb-subitem" onclick="setTrackerFilter('all'); setTermView('tracker')">All <span class="term-sb-count" data-count="all">—</span></button>
-        <button class="term-sb-subitem" onclick="setTermView('decomposed')">Map <span class="term-sb-count" id="term-sb-decomposed-count">—</span></button>
-        <button class="term-sb-subitem" data-sub="places" onclick="setTermView('places')">Places</button>
-      </div>
     </div>
     <div class="term-sb-group folded" data-group="clients">
       <div class="term-sb-row">
@@ -4086,7 +4229,7 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
 
     <nav id="uni-tabs">
       <button class="uni-tab active" id="unav-home" onclick="showUniTab('home')">Home</button>
-      <button class="uni-tab" id="unav-tracker" onclick="showUniTab('tracker')">Tracker</button>
+      <button class="uni-tab" id="unav-tracker" onclick="showUniTab('tracker')">Decomposition</button>
       <button class="uni-tab" id="unav-messages" onclick="showUniTab('messages')">Messages</button>
       <button class="uni-tab" id="unav-sidekick" onclick="showUniTab('sidekick')">Profile</button>
       <button class="uni-tab" id="unav-downloads" onclick="showUniTab('downloads')">Downloads</button>
@@ -10798,14 +10941,14 @@ async function buildNextUp() {
 function routePrompt(text) {
   const q = (text || '').trim().toLowerCase();
   if (!q) return;
-  const go = f => { window._trackerFilter = f; setTermView('tracker'); };
+  const go = f => { window._trackerFilter = f; DC.tab = 'steps'; setTermView('tracker'); };
   const rules = [
     [/\b(next|start|ready|my work|to.?do|todo)\b/, () => { const a = (window._nextUp || []).find(x => x.kind === 'start' || x.kind === 'continue'); a ? a.run() : go('to-do'); }],
     [/progress|working|ongoing|countdown|meter/, () => go('in progress')],
     [/deliver|finished|done|completed/, () => go('delivered')],
     [/wallet|metamask|hashpack|connect/, () => openAddWallet()],
     [/upload|contract|worksheet|pdf/, () => document.getElementById('term-upload-file').click()],
-    [/\bmap\b|decompos/, () => setTermView('decomposed')],
+    [/\bmap\b|decompos/, () => dcGo('overview')],
     [/message|chat|dm|talk/, () => setTermView('chat')],
     [/calendar|schedule|meeting|event/, () => setTermView('calendar')],
     [/notif|alert|attention/, () => setTermView('notifications')],
@@ -10818,7 +10961,9 @@ function routePrompt(text) {
   ];
   for (const [re, run] of rules) if (re.test(q)) return run();
   toggleAgent(true);
-  agentSend(text);
+  agentFollowups(false);
+  termEcho(text.trim());
+  termDispatch(text.trim());
 }
 
 // ── WALLETS: MetaMask, HashPack, Robinhood Wallet ──
@@ -11150,8 +11295,10 @@ async function drawDashBalance(el) {
       <div class="dash-bar"><i style="width:100%"></i></div>
       <div class="dash-sub" id="dash-sub-c" data-here="${esc(`${snap.name} is on ${snap.chain}`)}">${esc(sh(snap.address))} · ${snap.onFile ? 'your personal wallet' : `not your personal wallet on file${have ? ` (${esc(sh(have))})` : ''}`}${snap.token && snap.native != null ? ` · ${num(snap.native)} ${esc(snap.symbol)} for fees` : ''}${snap.token ? '' : ' · USDC isn’t shown on this network'}</div>
       <div class="dash-nets" id="dash-nets">Checking all networks…</div>
+      <div class="dash-wals" id="dash-wals"></div>
       ${acts(snap)}`;
     fillAllNetworks(snap.address);
+    fillDashWallets();
     return;
   }
   // No wallet connected here: show the address on file, read from Hedera, and say so.
@@ -11162,8 +11309,34 @@ async function drawDashBalance(el) {
     <div class="dash-bar"><i style="width:100%"></i></div>
     <div class="dash-sub">${have ? `Personal wallet ${esc(sh(have))}, read from ${esc(ESCROW_NET.name)}. No wallet is connected in this browser: connect one to see its own network and balance.` : 'No personal wallet yet.'}</div>
     ${have ? '<div class="dash-nets" id="dash-nets">Checking all networks…</div>' : ''}
+    <div class="dash-wals" id="dash-wals"></div>
     ${acts({ connected: false, address: have })}`;
   if (have) fillAllNetworks(have.toLowerCase());
+  fillDashWallets();
+}
+
+// Both wallets on the Dashboard: the personal one and, for the Executive Operator, the treasury.
+// Each shows its USDC on Hedera; tapping a row opens the wallets in the profile.
+async function fillDashWallets() {
+  const box = document.getElementById('dash-wals');
+  if (!box || !operator) return;
+  const sh = a => a.slice(0, 6) + '…' + a.slice(-4);
+  const rows = [];
+  if (operator.wallet_address) rows.push(['Personal', operator.wallet_address]);
+  if (isExec()) {
+    let t = TREASURY_ADDR;
+    if (!t) { try { t = (await treasuryStatus()).treasury_wallet || null; } catch (e) {} }
+    rows.push(['Treasury', t]);
+  }
+  if (!document.getElementById('dash-wals')) return;
+  if (!rows.length) { box.remove(); return; }
+  box.innerHTML = rows.map(([k, a], i) => `<button class="dw-row" onclick="openWalletsInProfile()"><span class="dw-k ${k.toLowerCase()}"><i></i>${k} wallet</span><b>${a ? esc(sh(a)) : 'Not set'}</b><span class="dw-v" id="dw-v${i}">${a ? '…' : ''}</span></button>`).join('');
+  rows.forEach(async ([, a], i) => {
+    if (!a) return;
+    const u = await fetchUsdcBalance(a).catch(() => null);
+    const el = document.getElementById('dw-v' + i);
+    if (el) el.textContent = u == null ? 'No balance yet' : '$' + u.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) + ' USDC';   // null: Hedera has no account for it until it first receives something
+  });
 }
 
 // Connect from the home card: the picker, then the card redraws with that wallet.
@@ -11270,7 +11443,7 @@ function renderDashMe() {
       <button class="dash-btn" onclick="toggleAgent(true); document.getElementById('term-input').focus()">Ask BIX AI</button>
       <button class="dash-btn" onclick="document.getElementById('term-upload-file').click()">Upload contract</button>
       <button class="dash-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-statements')?.scrollIntoView({ behavior: 'smooth' }), 500)">Statements</button>
-      <button class="dash-btn" onclick="setTermView('tracker')">Tracker board</button>
+      <button class="dash-btn" onclick="dcGo('overview')">Decomposition</button>
     </div>`;
 }
 
@@ -11317,7 +11490,7 @@ async function renderDashTracker() {
           <td class="hide-sm">${esc(l.tier)} · ${l.logs}</td>
           <td class="hide-sm">${esc(l.assigned_to ? (window._opNameCache[l.assigned_to] || '—') : 'Not granted')}</td>
           <td>${pill(l)}</td></tr>`).join('')}
-      </table>${rows.length > 8 ? `<div class="dash-more"><button class="dash-btn sm" onclick="setTermView('tracker')">See all ${rows.length} on the board →</button></div>` : ''}`
+      </table>${rows.length > 8 ? `<div class="dash-more"><button class="dash-btn sm" onclick="DC.tab='steps'; setTermView('tracker')">See all ${rows.length} on the board →</button></div>` : ''}`
       : '<div class="dash-empty">Nothing here.</div>'}`;
 }
 
@@ -12614,7 +12787,8 @@ function setTermView(view) {
   } else {
     home.style.display = 'none';
     panel.style.display = 'block';
-    if (view === 'tracker') renderTrackerBoard();
+    panel.classList.toggle('dc-on', ['tracker', 'decomposed', 'places'].includes(view));
+    if (view === 'tracker') renderDecomposition();
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'decomposed') renderDecomposedPanel();
     else if (view === 'places') renderPlacesPanel();
@@ -12629,6 +12803,359 @@ function setTermView(view) {
   toggleTermSidebar(false);
 }
 
+
+// ── DECOMPOSITION — one screen per job: its numbers, its map, its plan and its proof queue ──
+// Overview is drawn here. Steps, Maps and Places are the existing screens, shown under the same
+// header and tabs (see the wrappers below), so everything they do still works from one place.
+var DC = { tab: 'overview', mapId: null, maps: null, filter: 'All' };
+const DC_TABS = [['overview', 'Overview'], ['steps', 'Steps'], ['map', 'Maps'], ['places', 'Places']];
+const DC_ICO = {
+  logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>',
+  overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
+  steps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg>',
+  map: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="5" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/><path d="M12 7.4v4.1M12 11.5 5.8 16.8M12 11.5l6.2 5.3"/></svg>',
+  places: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 21s-6.5-5.6-6.5-11a6.5 6.5 0 0 1 13 0c0 5.4-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m20 20-4.2-4.2"/></svg>',
+  bell: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg>',
+  done: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.2 2.4 2.4 4.6-5"/></svg>',
+  clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg>',
+  coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="M14.6 9.3c-.5-.9-1.5-1.3-2.6-1.3-1.5 0-2.6.8-2.6 2s1.1 1.6 2.6 2 2.7.9 2.7 2.1-1.2 2-2.7 2c-1.2 0-2.2-.5-2.7-1.4M12 6.5v1.5M12 16v1.5"/></svg>',
+  block: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="12" cy="12" r="8.5"/><path d="m6 6 12 12"/></svg>',
+  graph: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 18h3l3-9 4 8 3-5h3"/></svg>',
+  plan: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3.5" width="16" height="17" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>',
+  shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 3 5 6v5.5c0 4.3 3 7.7 7 9.5 4-1.8 7-5.2 7-9.5V6z"/><path d="m9 12 2 2 4-4" stroke-linecap="round"/></svg>',
+  filter: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 6h16M7 12h10M10 18h4"/></svg>',
+  edit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h4L19 9l-4-4L4 16z"/></svg>',
+  node: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="3"/><path d="M9 12h6M12 9v6" stroke-linecap="round"/></svg>',
+};
+
+const dcMoney = c => '$' + ((c || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dcDate = d => d ? new Date(d.length === 10 ? d + 'T12:00:00' : d).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : '—';
+const dcWhen = d => {
+  const t = new Date(d);
+  return t.toDateString() === new Date().toDateString()
+    ? t.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })
+    : t.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+};
+const dcPill = ([k, label]) => `<span class="dc-pill ${k}"><i></i>${esc(label)}</span>`;
+
+async function dcLoadMaps(force) {
+  if (DC.maps && !force) return DC.maps;
+  try {
+    const { data } = await sb.from('work_maps').select('id,goal,prepared_for,created_at').order('created_at', { ascending: false });
+    DC.maps = data || [];
+  } catch (e) { DC.maps = DC.maps || []; }
+  return DC.maps;
+}
+async function dcNames() {
+  if (window._opNameCache) return;
+  const { data: ops } = await sb.rpc('list_operators');
+  window._opNameCache = {};
+  (ops || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
+}
+
+function dcHeadHtml(tab) {
+  const maps = DC.maps || [];
+  const cur = trackerState?.mapId || DC.mapId;
+  const label = m => `${m.goal || 'Untitled job'}${m.prepared_for ? ' · ' + m.prepared_for : ''}`;
+  const opts = maps.length
+    ? maps.map(m => `<option value="${esc(m.id)}" ${m.id === cur ? 'selected' : ''}>${esc(label(m))}</option>`).join('')
+    : `<option>${DC.maps ? 'No jobs mapped yet' : 'Loading jobs…'}</option>`;
+  const days = Math.floor((Date.now() - GENESIS_DATE) / 864e5);
+  const left = CYCLE_DAYS - (days % CYCLE_DAYS);
+  return `<div class="dc dc-head">
+    <div class="dc-bar">
+      <div class="dc-crumb">
+        <span class="dc-logo">${DC_ICO.logo}</span>
+        <button class="dc-crumb-root" onclick="dcGo('overview')">Decomposition</button>
+        <span class="dc-crumb-sep">›</span>
+        <select class="dc-pick" aria-label="Choose a job" onchange="dcPickMap(this.value)" ${maps.length ? '' : 'disabled'}>${opts}</select>
+      </div>
+      <div class="dc-bar-r">
+        <label class="dc-search">${DC_ICO.search}<input id="dc-q" placeholder="Search steps…" autocomplete="off" oninput="dcSearch(this.value)" onfocus="dcSearch(this.value)" onblur="setTimeout(() => { const r = document.getElementById('dc-results'); if (r) r.hidden = true; }, 200)"><div class="dc-results" id="dc-results" hidden></div></label>
+        <button class="dc-icbtn" onclick="setTermView('notifications')" title="Notifications" aria-label="Notifications">${DC_ICO.bell}</button>
+        <button class="dc-new" onclick="document.getElementById('term-upload-file').click()">+ New map</button>
+      </div>
+    </div>
+    <div class="dc-tabs">
+      <div class="dc-tabset">${DC_TABS.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" onclick="dcGo('${k}')">${DC_ICO[k]}${l}</button>`).join('')}</div>
+      <span class="dc-range">Cycle ${cycleNumberForDate(new Date())} · ${left} day${left === 1 ? '' : 's'} left</span>
+    </div>
+  </div>`;
+}
+
+// Puts the header on top of the Steps, Maps and Places screens.
+function dcDecorate(tab) {
+  const panel = document.getElementById('term-panel');
+  if (!panel || !['tracker', 'decomposed', 'places'].includes(document.getElementById('terminal-shell')?.dataset.view)) return;
+  panel.classList.add('dc-on');
+  panel.querySelector(':scope > .dc-head')?.remove();
+  panel.insertAdjacentHTML('afterbegin', dcHeadHtml(tab));
+  if (!DC.maps) dcLoadMaps().then(() => { if (DC.tab === tab) dcDecorate(tab); });
+}
+for (const [name, tab] of [['renderTrackerBoard', 'steps'], ['renderDecomposedPanel', 'map'], ['renderPlacesPanel', 'places']]) {
+  const orig = window[name];
+  window[name] = async function (...a) { DC.tab = tab; const r = await orig.apply(this, a); if (DC.tab === tab) dcDecorate(tab); return r; };
+}
+
+function dcGo(tab) {
+  DC.tab = tab;
+  if (tab === 'map') return setTermView('decomposed');
+  if (tab === 'places') return setTermView('places');
+  setTermView('tracker');
+}
+function renderDecomposition() {
+  if (DC.tab === 'steps') return renderTrackerBoard();
+  if (DC.tab === 'map') return renderDecomposedPanel();
+  if (DC.tab === 'places') return renderPlacesPanel();
+  return renderDcOverview();
+}
+async function dcPickMap(id) {
+  DC.mapId = id;
+  await loadWorkMap(id);
+  renderDecomposition();
+}
+
+function dcSearch(q) {
+  const box = document.getElementById('dc-results');
+  if (!box) return;
+  q = (q || '').trim().toLowerCase();
+  if (!q) { box.hidden = true; return; }
+  const hits = (trackerState?.leaves || []).filter(l => `${l.leaf_code} ${l.task || ''}`.toLowerCase().includes(q)).slice(0, 8);
+  box.hidden = false;
+  box.innerHTML = hits.length
+    ? hits.map(l => `<button onmousedown="dcOpenStep('${esc(l.id)}')"><b>${esc(l.leaf_code)}</b><span>${esc(l.task || '')}</span><em>${esc(l.status)}</em></button>`).join('')
+    : `<div class="dc-res-none">No step in this job matches “${esc(q)}”.</div>`;
+}
+async function dcOpenStep(leafId) {
+  DC.tab = 'steps';
+  window._trackerFilter = 'all';
+  setTermView('tracker');
+  for (let i = 0; i < 40; i++) {
+    await new Promise(r => setTimeout(r, 100));
+    const c = document.querySelector(`#term-panel .term-card[data-leaf="${CSS.escape(leafId)}"]`);
+    if (c) { c.scrollIntoView({ block: 'center', behavior: 'smooth' }); c.classList.add('dc-flash'); setTimeout(() => c.classList.remove('dc-flash'), 1800); return; }
+  }
+}
+function dcCycleFilter() {
+  const order = ['All', 'Waiting', 'Verified', 'Returned', 'Started'];
+  DC.filter = order[(order.indexOf(DC.filter) + 1) % order.length];
+  renderDcOverview();
+}
+
+async function renderDcOverview() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('overview') + '<div class="dc dc-body"><div class="dc-loading">Loading the decomposition…</div></div>';
+  await dcLoadMaps();
+  if (DC.maps.length) {
+    const want = DC.maps.some(m => m.id === (DC.mapId || trackerState?.mapId)) ? (DC.mapId || trackerState.mapId) : DC.maps[0].id;
+    DC.mapId = want;
+    if (trackerState?.mapId !== want || trackerState.source !== 'live') await loadWorkMap(want);
+  }
+  await dcNames().catch(() => {});
+  const d = DC.maps.length && trackerState?.source === 'live' ? await dcGather() : null;
+  if (document.getElementById('terminal-shell')?.dataset.view !== 'tracker' || DC.tab !== 'overview') return;   // moved on while loading
+  panel.innerHTML = dcHeadHtml('overview') + `<div class="dc dc-body">${dcOverviewHtml(d)}</div>`;
+  requestAnimationFrame(dcDrawLinks);
+}
+
+async function dcGather() {
+  const map = trackerState.map || {}, L = trackerState.leaves || [];
+  const B = [...(trackerState.branches || [])].sort((a, b) => byLeafCode(a.code || '', b.code || ''));
+  let subs = [], escrow = null, treasury = TREASURY_ADDR;
+  const ids = L.map(l => l.id);
+  if (ids.length) {
+    try {
+      const { data } = await sb.from('leaf_submissions').select('id,leaf_id,operator_id,summary,submitted_at,decision,decided_at,decision_note')
+        .in('leaf_id', ids).order('submitted_at', { ascending: false }).limit(40);
+      subs = data || [];
+    } catch (e) {}
+  }
+  if (map.submission_id) {
+    try {
+      const { data } = await sb.from('escrow_engagements').select('contract_address,network,price_cents,created_at')
+        .eq('project_id', map.submission_id).order('created_at', { ascending: false }).limit(1);
+      escrow = data?.[0] || null;
+    } catch (e) {}
+  }
+  if (!treasury) { try { treasury = (await treasuryStatus()).treasury_wallet || null; } catch (e) {} }
+  return { map, L, B, subs, escrow, treasury };
+}
+
+function dcBars(vals, color) {
+  const v = vals.length ? vals.slice(0, 12) : Array(10).fill(0);
+  const max = Math.max(...v, 0) || 1, w = 6, gap = 3, h = 30;
+  return `<svg class="dc-bars" viewBox="0 0 ${v.length * (w + gap) - gap} ${h}" style="color:${color}" aria-hidden="true">${v.map((x, i) => {
+    const bh = Math.max(3, Math.round((x / max) * h));
+    return `<rect x="${i * (w + gap)}" y="${h - bh}" width="${w}" height="${bh}" rx="1.5" opacity="${x ? 1 : .28}"/>`;
+  }).join('')}</svg>`;
+}
+function dcKpi(icon, label, value, unit, bars, foot, delta) {
+  return `<div class="dc-card dc-kpi">
+    <div class="dc-kpi-h"><span>${icon}${esc(label)}</span><span class="dc-more">···</span></div>
+    <div class="dc-kpi-m"><div class="dc-kpi-v">${value}${unit ? `<small>${unit}</small>` : ''}</div>${bars}</div>
+    <div class="dc-kpi-f"><span>${esc(foot)}</span>${delta ? `<span class="dc-delta ${delta[0]}">${esc(delta[1])}</span>` : ''}</div>
+  </div>`;
+}
+
+function dcOverviewHtml(d) {
+  if (!d) return dcEmptyHtml();
+  const { map, L, B, subs, escrow, treasury } = d;
+  const rate = l => l.scoped_rate_cents ?? (CANON.TIER_RATES[l.tier] || 0) * 100;
+  const labor = ls => ls.reduce((s, l) => s + Math.round((l.logs || 0) * rate(l)), 0);
+  const logs = ls => ls.reduce((s, l) => s + (l.logs || 0), 0);
+  const isDone = l => l.status === 'delivered';
+  const byCode = Object.fromEntries(L.map(l => [l.leaf_code, l]));
+  const blocked = new Set(L.filter(l => l.status === 'to-do' && (l.requires || []).some(c => byCode[c] && !isDone(byCode[c]))).map(l => l.id));
+  const review = new Set(subs.filter(s => s.decision === 'pending').map(s => s.leaf_id));
+  const done = L.filter(isDone), prog = L.filter(l => l.status === 'in progress');
+  const groups = B.map(b => ({ b, ls: L.filter(l => l.branch_id === b.id) }));
+  const steps = L.filter(l => l.kind !== 'genesis' && l.kind !== 'outcome').slice(0, 12);
+  const daily = f => { const v = Array(10).fill(0), d0 = new Date(); d0.setHours(23, 59, 59, 999);
+    done.forEach(l => { const i = 9 - Math.floor((d0 - new Date(l.verified_at || l.delivered_at || 0)) / 864e5); if (i >= 0 && i < 10) v[i] += f(l); }); return v; };
+  const week = Date.now() - 7 * 864e5;
+  const doneWeek = done.filter(l => new Date(l.verified_at || l.delivered_at || 0) > week).length;
+  const logsAll = logs(L), logsDone = logs(done), laborAll = labor(L), priceAll = L.length ? CANON.priceCents(laborAll) : 0;
+  const pct = (a, b) => b ? Math.round((a / b) * 100) : 0;
+
+  const kpis = [
+    dcKpi(DC_ICO.done, 'Steps done', `${done.length}`, ` / ${L.length}`, dcBars(daily(() => 1), '#3B82F6'),
+      `${prog.length} in progress · ${review.size} in review`, doneWeek ? ['up', `▲ ${doneWeek} this week`] : ['flat', 'none this week']),
+    dcKpi(DC_ICO.clock, 'LOGs delivered', `${logsDone}`, ` / ${logsAll}`, dcBars(daily(l => l.logs || 0), '#8B5CF6'),
+      'Hours of verified work', ['flat', `${pct(logsDone, logsAll)}% of the job`]),
+    dcKpi(DC_ICO.coin, 'Contract price', dcMoney(priceAll), '', dcBars(steps.map(l => labor([l])), '#F97316'),
+      `Labor ${dcMoney(laborAll)} · reserve built in`, escrow ? ['up', 'In escrow'] : ['flat', 'No escrow yet']),
+    dcKpi(DC_ICO.block, 'Blocked steps', `${blocked.size}`, '', dcBars(steps.map(l => blocked.has(l.id) ? (l.requires || []).filter(c => byCode[c] && !isDone(byCode[c])).length : 0), '#EF4444'),
+      'Waiting on earlier steps', blocked.size ? ['down', `▼ ${blocked.size} waiting`] : ['up', 'All clear']),
+  ];
+
+  const status = ls => !ls.length ? ['idle', 'No steps']
+    : ls.every(isDone) ? ['ok', 'Verified']
+    : ls.some(l => review.has(l.id)) ? ['rev', 'In review']
+    : ls.some(l => l.status === 'in progress') ? ['run', 'In progress']
+    : ls.every(l => isDone(l) || blocked.has(l.id)) ? ['wait', 'Waiting']
+    : ['idle', 'Ready'];
+  const gen = L.find(l => l.kind === 'genesis'), out = L.find(l => l.kind === 'outcome');
+  const shown = groups.slice(0, 3), extra = groups.length - shown.length;
+  const node = (cls, title, pill, rows) => `<div class="dc-node ${cls}">
+    <div class="dc-node-h"><b>${DC_ICO.node}<span>${esc(title)}</span></b>${pill ? dcPill(pill) : ''}</div>
+    ${rows.map(([k, v]) => `<div class="dc-node-r"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('')}
+  </div>`;
+  const tree = `<div class="dc-tree">
+    <div class="dc-lvl">${node('top', 'Genesis', gen ? status([gen]) : null, [[map.genesis_task || gen?.task || 'Where the job starts', `${L.length} steps`]])}</div>
+    <div class="dc-lvl">${shown.map(({ b, ls }) => node('mid', `${b.code} · ${b.title || 'Checkpoint'}`, status(ls), [['Share of LOGs', `${pct(logs(ls), logsAll)}%`], ['Steps', `${ls.filter(isDone).length}/${ls.length}`]])).join('')}
+      ${extra > 0 ? `<button class="dc-node mid more" onclick="dcGo('steps')">+${extra} more checkpoint${extra === 1 ? '' : 's'}</button>` : ''}
+      ${groups.length ? '' : '<div class="dc-node mid ghost">No checkpoints in this map</div>'}</div>
+    <div class="dc-lvl">${node('end', 'Outcome', out ? status([out]) : null, [[map.outcome_task || out?.task || 'The finished job', map.deadline ? `Due ${dcDate(map.deadline)}` : '']])}</div>
+  </div>`;
+  const updated = [...L.map(l => l.verified_at || l.delivered_at || l.submitted_at || l.started_at || l.created_at), map.created_at].filter(Boolean).sort().pop();
+
+  const name = id => (window._opNameCache || {})[id] || '—';
+  const leafOf = Object.fromEntries(L.map(l => [l.id, l]));
+  const rows = [];
+  subs.forEach(s => {
+    const l = leafOf[s.leaf_id];
+    rows.push({ at: s.decision !== 'pending' && s.decided_at ? s.decided_at : s.submitted_at, who: name(s.operator_id), step: l?.leaf_code || '—',
+      note: (s.decision === 'returned' && s.decision_note) || s.summary || '',
+      st: s.decision === 'verified' ? ['ok', 'Verified'] : s.decision === 'returned' ? ['bad', 'Returned'] : ['wait', 'Waiting'] });
+  });
+  L.forEach(l => {
+    const who = name(l.assigned_to || l.claimed_by);
+    if (l.started_at && !subs.some(s => s.leaf_id === l.id)) rows.push({ at: l.started_at, who, step: l.leaf_code, note: l.task || 'Work started', st: ['run', 'Started'] });
+  });
+  rows.sort((a, b) => new Date(b.at) - new Date(a.at));
+  const shownRows = (DC.filter === 'All' ? rows : rows.filter(r => r.st[1] === DC.filter)).slice(0, 8);
+  const table = `<section class="dc-card dc-table">
+    <div class="dc-card-h"><span>${DC_ICO.shield}Verification queue</span><button class="dc-btn" onclick="dcCycleFilter()">${DC_ICO.filter}${esc(DC.filter === 'All' ? 'Filter' : DC.filter)}</button></div>
+    <div class="dc-tw"><table>
+      <thead><tr><th>Time</th><th>Member</th><th>Step</th><th>Proof or note</th><th>Status</th></tr></thead>
+      <tbody>${shownRows.length ? shownRows.map(r => `<tr><td>${esc(dcWhen(r.at))}</td><td class="mono">${esc(r.who)}</td><td class="mono">${esc(r.step)}</td><td class="snip">“${esc(r.note.length > 64 ? r.note.slice(0, 62) + '…' : r.note)}”</td><td>${dcPill(r.st)}</td></tr>`).join('')
+        : `<tr><td colspan="5" class="dc-none">${DC.filter === 'All' ? 'No proof has been sent in yet. Submissions and reviews show here as they happen.' : `Nothing marked ${esc(DC.filter.toLowerCase())}.`}</td></tr>`}</tbody>
+    </table></div>
+  </section>`;
+
+  const tiers = ['apprentice', 'wrangler', 'architect', 'operator'];
+  const top = tiers.filter(t => L.some(l => l.tier === t)).pop();
+  const team = new Set(L.map(l => l.assigned_to || l.claimed_by).filter(Boolean));
+  const open = L.filter(l => !isDone(l) && !(l.assigned_to || l.claimed_by)).length;
+  const due = map.deadline ? Math.ceil((new Date(map.deadline + 'T23:59:59') - Date.now()) / 864e5) : null;
+  const kv = (k, v, chip) => `<div class="dc-kv"><span>${esc(k)}:</span><b>${esc(v || '—')}</b>${chip ? `<em>${esc(chip)}</em>` : ''}</div>`;
+  const mini = (title, rowsKv) => `<div class="dc-mini"><div class="dc-mini-t">${DC_ICO.node}${esc(title)}</div>${rowsKv.map(([k, v]) => `<div class="dc-mini-r"><span>${esc(k)}:</span><b>${esc(v)}</b></div>`).join('')}</div>`;
+  const prio = ls => ls.length && ls.every(isDone) ? ['ok', 'Done'] : ls.some(l => l.is_key) ? ['bad', 'Key'] : ['wait', 'Normal'];
+  const plan = `<section class="dc-card dc-plan">
+    <div class="dc-card-h"><span>${DC_ICO.plan}Job plan</span><button class="dc-btn" onclick="dcGo('map')">${DC_ICO.edit}Edit plan</button></div>
+    <div class="dc-sec"><div class="dc-sec-t">1. Intake (where it starts)</div>
+      <div class="dc-box">${kv('Client', map.prepared_for, 'CLIENT')}${kv('Goal', map.goal)}${kv('Deadline', map.deadline ? dcDate(map.deadline) : '', due == null ? '' : due >= 0 ? `${due} DAYS` : 'PAST DUE')}${kv('Mapped', dcDate(map.date_mapped || map.created_at), map.source_filename ? 'FILE' : '')}</div></div>
+    <div class="dc-sec"><div class="dc-sec-t">2. Team and money</div>
+      <div class="dc-minis">
+        ${mini('Tiers', [['Top tier', top ? top[0].toUpperCase() + top.slice(1) : '—'], ['Rate', top ? `$${CANON.TIER_RATES[top]}/LOG` : '—']])}
+        ${mini('Team', [['Members', String(team.size)], ['Open steps', String(open)]])}
+        ${mini('Escrow', [['Status', escrow ? (escrow.network || 'Created') : 'None yet'], ['Treasury', treasury ? `${treasury.slice(0, 6)}…${treasury.slice(-4)}` : 'Not set']])}
+      </div></div>
+    <div class="dc-sec"><div class="dc-sec-t">3. Checkpoints (order of work)</div>
+      ${groups.length ? groups.map(({ b, ls }, i) => `<div class="dc-rule">
+        <div class="dc-rule-h"><span>Checkpoint <b class="dc-num">${String(i + 1).padStart(2, '0')}</b>${dcPill(prio(ls))}</span><span class="dc-more">···</span></div>
+        <div class="dc-rule-t">${esc(b.code)} · ${esc(b.title || 'Checkpoint')}</div>
+        <div class="dc-if"><em>WHEN</em><i>|</i><span>${ls.length} step${ls.length === 1 ? '' : 's'}</span><i>=</i><span>verified</span><i>→</i><span>seal and pay</span></div>
+        ${kv('Value', dcMoney(ls.length ? CANON.priceCents(labor(ls)) : 0))}${kv('Due', b.due_date ? dcDate(b.due_date) : 'Not set')}${kv('LOGs', String(logs(ls)), `${ls.filter(isDone).length}/${ls.length}`)}
+      </div>`).join('') : '<div class="dc-none">This map has no checkpoints yet.</div>'}
+    </div>
+  </section>`;
+
+  return `<div class="dc-kpis">${kpis.join('')}</div>
+    <div class="dc-grid">
+      <div class="dc-col">
+        <section class="dc-card dc-graph">
+          <div class="dc-card-h"><span>${DC_ICO.graph}Map and critical path</span><button class="dc-btn" onclick="dcGo('steps')">View steps</button></div>
+          <div class="dc-canvas" id="dc-canvas"><span class="dc-stamp">Last updated · ${esc(updated ? dcDate(updated) : '—')}</span><svg class="dc-links" id="dc-links" aria-hidden="true"></svg>${tree}</div>
+        </section>
+        ${table}
+      </div>
+      ${plan}
+    </div>`;
+}
+
+function dcEmptyHtml() {
+  const z = (icon, label, color, foot) => dcKpi(icon, label, '0', '', dcBars([], color), foot, null);
+  return `<div class="dc-kpis">${z(DC_ICO.done, 'Steps done', '#3B82F6', 'No job mapped yet')}${z(DC_ICO.clock, 'LOGs delivered', '#8B5CF6', 'Hours of verified work')}${z(DC_ICO.coin, 'Contract price', '#F97316', 'Priced from the steps')}${z(DC_ICO.block, 'Blocked steps', '#EF4444', 'Waiting on earlier steps')}</div>
+    <div class="dc-grid">
+      <div class="dc-col">
+        <section class="dc-card dc-graph">
+          <div class="dc-card-h"><span>${DC_ICO.graph}Map and critical path</span></div>
+          <div class="dc-canvas dc-canvas-empty"><div class="dc-empty">
+            <b>No job mapped yet.</b>
+            <p>Upload a contract or a decomposition worksheet. Bixxville breaks it into steps, puts them in order, and prices each one.</p>
+            <button class="dc-new" onclick="document.getElementById('term-upload-file').click()">+ New map</button>
+          </div></div>
+        </section>
+        <section class="dc-card dc-table"><div class="dc-card-h"><span>${DC_ICO.shield}Verification queue</span></div>
+          <div class="dc-none">Proof sent in by members, and your reviews, show here.</div></section>
+      </div>
+      <section class="dc-card dc-plan"><div class="dc-card-h"><span>${DC_ICO.plan}Job plan</span></div>
+        <div class="dc-sec"><div class="dc-sec-t">1. Intake (where it starts)</div><div class="dc-box"><div class="dc-kv"><span>Client:</span><b>—</b></div><div class="dc-kv"><span>Goal:</span><b>—</b></div><div class="dc-kv"><span>Deadline:</span><b>—</b></div></div></div>
+        <div class="dc-sec"><div class="dc-sec-t">2. Team and money</div><div class="dc-none">Tiers, team and escrow appear once a job is mapped.</div></div>
+        <div class="dc-sec"><div class="dc-sec-t">3. Checkpoints (order of work)</div><div class="dc-none">Each checkpoint, what it pays and when it is due.</div></div>
+      </section>
+    </div>`;
+}
+
+// The lines between the nodes, drawn after layout so they follow the real positions.
+function dcDrawLinks() {
+  const cv = document.getElementById('dc-canvas'), svg = document.getElementById('dc-links');
+  if (!cv || !svg) return;
+  const r0 = cv.getBoundingClientRect();
+  const box = el => { const r = el.getBoundingClientRect(); return { cx: r.left - r0.left + r.width / 2, top: r.top - r0.top, bot: r.bottom - r0.top }; };
+  const top = cv.querySelector('.dc-node.top'), mids = [...cv.querySelectorAll('.dc-node.mid')], end = cv.querySelector('.dc-node.end');
+  if (!top || !end) return;
+  svg.setAttribute('viewBox', `0 0 ${r0.width} ${r0.height}`);
+  const t = box(top), e = box(end), ms = mids.map(box);
+  const elbow = (x1, y1, x2, y2) => { const my = (y1 + y2) / 2, rr = Math.min(8, Math.abs(x2 - x1) / 2), dx = x2 > x1 ? rr : -rr;
+    return Math.abs(x2 - x1) < 1 ? `M${x1} ${y1}V${y2}` : `M${x1} ${y1}V${my - rr}Q${x1} ${my} ${x1 + dx} ${my}H${x2 - dx}Q${x2} ${my} ${x2} ${my + rr}V${y2}`; };
+  const paths = ms.length ? [...ms.map(m => elbow(t.cx, t.bot, m.cx, m.top)), ...ms.map(m => elbow(m.cx, m.bot, e.cx, e.top))] : [elbow(t.cx, t.bot, e.cx, e.top)];
+  svg.innerHTML = paths.map(p => `<path d="${p}"/>`).join('') + `<circle cx="${t.cx}" cy="${t.bot}" r="2.5"/><circle cx="${e.cx}" cy="${e.top}" r="2.5"/>`;
+}
+window.addEventListener('resize', () => { clearTimeout(DC._rz); DC._rz = setTimeout(dcDrawLinks, 120); });
 
 // ── ANALOG: signed records that move with no internet (see analog/ANALOG.md) ──
 // link: this app's own address, so Analog's QR codes open the app from a phone's ordinary camera.
@@ -13159,7 +13686,7 @@ async function openDecomposition(mapId) {
   panel.innerHTML = `
     <div class="term-decomp-bar">
       <button class="term-timeline-dl" onclick="setTermView('decomposed')">← All maps</button>
-      <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Tracker</button>
+      <button class="term-timeline-dl" onclick="switchToMap('${esc(mapId)}').then(()=>setTermView('tracker'))">Open in Decomposition</button>
       <button class="term-timeline-dl" data-dv="gates" onclick="setDecompView('gates')">Gates</button>
       <button class="term-timeline-dl" data-dv="report" onclick="setDecompView('report')">Report</button>
       <button class="term-timeline-dl" data-dv="team" onclick="setDecompView('team')">Team plan</button>
@@ -14176,7 +14703,7 @@ async function renderTrackerBoard() {
   if (!trackerState || trackerState.source == null) await loadWorkMap();
 
   if (trackerState.source !== 'live' || !trackerState.leaves?.length) {
-    panel.innerHTML = `<div class="term-panel-head">Tracker</div>
+    panel.innerHTML = `<div class="term-panel-head">Decomposition</div>
       <div class="term-panel-empty">No live work map yet. Upload a decomposition worksheet with + to populate it.</div>`;
     updateSidebarCounts();
     return;
@@ -14226,7 +14753,7 @@ async function renderTrackerBoard() {
   const unscripted = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && !scriptStatusOf(l.id)).length : 0;
   const drafts = operator?.is_genesis ? trackerState.leaves.filter(l => l.status === 'to-do' && scriptStatusOf(l.id) === 'draft').length : 0;
   panel.innerHTML = `
-    <div class="term-panel-head">Tracker — ${esc(trackerState.map?.goal || '')}</div>
+    <div class="term-panel-head">Decomposition — ${esc(trackerState.map?.goal || '')}</div>
     ${unscripted || drafts ? `<div class="term-panel-tools">
       ${unscripted ? `<button class="term-card-btn" onclick="draftAllScripts(this)">Draft scripts for ${unscripted} step${unscripted === 1 ? '' : 's'} with BIX AI</button>` : ''}
       ${drafts ? `<span>${drafts} draft${drafts === 1 ? '' : 's'} waiting on your approval — open a step's Script to review it.</span>` : ''}
@@ -15002,6 +15529,7 @@ async function renderProgressFolders() {
 // Switch to a folder and show one of its tabs.
 async function openFolderAt(mapId, tab) {
   window._trackerFilter = tab;
+  DC.tab = 'steps';
   await loadWorkMap(mapId);
   setTermView('tracker');
 }
@@ -15076,6 +15604,7 @@ async function renderDeliveredBoard(items) {
 
 function setTrackerFilter(key) {
   window._trackerFilter = key;
+  DC.tab = 'steps';
   renderTrackerBoard();
 }
 
@@ -19724,7 +20253,7 @@ function renderTrackerBody(bodyEl) {
 
   if (trackerState.source === 'empty') {
     body.innerHTML = `
-      <div class="sig-title-row"><div class="sig-title">Tracker</div></div>
+      <div class="sig-title-row"><div class="sig-title">Decomposition</div></div>
       <div class="empty" style="padding:20px 18px">
         <div class="empty-line"></div>
         <div class="empty-label">No map yet</div>

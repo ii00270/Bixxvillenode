@@ -4154,6 +4154,13 @@ html.theme-light{
 #overlay .escrow-stage{border:0;background:rgba(10,10,10,.08);padding:3px 9px}
 #overlay .escrow-stage.s4{background:#0A0A0A;color:#fff}
 #overlay .escrow-done{color:#0E7A44}
+#overlay .rd-row{display:flex;gap:10px;padding:10px 12px;border-radius:14px;background:rgba(10,10,10,.06);margin-bottom:6px;font-size:13px;line-height:1.4}
+#overlay .rd-row small{font-family:var(--g-mono);color:var(--grey)}
+#overlay .rd-row span{color:var(--soft)}
+#overlay .rd-dot{flex:none;width:10px;height:10px;border-radius:50%;margin-top:5px;background:#0E7A44}
+#overlay .rd-row.warn .rd-dot{background:#C2410C}
+#overlay .rd-row.bad .rd-dot{background:#C81E1E}
+#overlay .rd-row.bad{box-shadow:inset 0 0 0 1.5px rgba(200,30,30,.35)}
 
 /* rows on the frame */
 #overlay .proj-card,#overlay .member-row{margin:0 12px 8px;padding:16px;border:0;border-radius:20px;background:var(--g-row)}
@@ -8229,7 +8236,7 @@ async function renderEscrowCreate(el, projectId, r, settings) {
   tax.networkCents = Math.floor(price * tax.networkBps / 10000);
   const lineTax = l => Math.floor(Number(l.labor_cents) * (Number(l.tax_bps) || 0) / 10000);
   const taxBlock = (tax.networkBps > 0 && !tax.networkWallet) ? 'The network tax rate is set but there is no tax wallet. Add it in your profile (Wallets).' : '';
-  window._escrowDraft = { projectId, lines, settings, roles, tax };
+  window._escrowDraft = { projectId, lines, settings, roles, tax, priceCents: price };
   el.innerHTML = `
     <div class="form-lbl">Escrow · ${ESCROW_NET.name}</div>
     <div class="escrow-lines">${lines.map((l, i) => `
@@ -8242,10 +8249,10 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     <div class="escrow-muted tax-c" style="margin-top:6px">Taxes${tax.fromCycle ? ` (Cycle ${tax.fromCycle} terms)` : ''}: network ${(tax.networkBps / 100).toFixed(2)}% of the price${tax.networkBps ? ` = ${escrowUsd(tax.networkCents)}, out of the reserve → ${tax.networkWallet ? shortAddr(tax.networkWallet) : 'no tax wallet'}` : ''} · member set-asides ${escrowUsd(lines.reduce((n, l) => n + lineTax(l), 0))}</div>
     ${taxBlock ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${esc(taxBlock)}</div>` : ''}
     <label class="form-lbl" for="esc-client">${esc(who?.name || 'Client')} wallet (pays and authorizes)</label>
-    <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(clientWallet)}" spellcheck="false"/>
+    <input class="form-input" id="esc-client" placeholder="0x…" value="${esc(clientWallet)}" spellcheck="false" onchange="runEscrowReadiness()"/>
     ${clientWallet ? '' : `<div class="escrow-muted">No wallet on file for this client yet. Paste it here, or add it on the Clients page.</div>`}
     ${ESCROW_NET.testToken ? `<label class="form-lbl" for="esc-token" style="margin-top:10px">Money</label>
-    <select class="form-input" id="esc-token">
+    <select class="form-input" id="esc-token" onchange="runEscrowReadiness()">
       <option value="usdc">Circle USDC (real test USDC from Circle's faucet)</option>
       <option value="test">Free test token (mUSDC) — for dry runs</option>
     </select>
@@ -8255,9 +8262,12 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     <div class="escrow-muted" style="margin-top:8px">Audits: ${roles.error ? `<span style="color:var(--red)">${esc(roles.error)}</span>` : `${esc(roles.name)} (${shortAddr(roles.wallet)})`}</div>
     ${settings.treasury_wallet && lines.some(l => l.payee_wallet === settings.treasury_wallet) ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">The treasury wallet is also a worker's wallet on this job. A wallet can't pay itself: use a different treasury or a different worker wallet.</div>` : ''}
     ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
+    <div class="form-lbl" style="margin-top:14px">Wallet check</div>
+    <div id="esc-ready"><div class="escrow-muted">Checking every wallet on ${esc(ESCROW_NET.name)}…</div></div>
     <div class="gate-err" id="esc-err"></div>
-    <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || taxBlock || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
+    <button class="act-btn" id="esc-create" onclick="createEscrow()" data-block="${missing.length || roles.error || taxBlock || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? '1' : ''}" disabled>Create escrow on ${ESCROW_NET.name}</button>
     <div class="escrow-muted" style="padding:0 18px 12px">Your wallet (MetaMask, HashPack or Robinhood Wallet) deploys the contract and pays a little ${ESCROW_NET.live ? '' : 'test '}HBAR in fees. No USDC moves until the client funds it.</div>`;
+  runEscrowReadiness();
 }
 
 // Genesis audits (the treasury wallet seals and pays); on a line where Genesis is the worker, another
@@ -8269,6 +8279,67 @@ function escrowRoles(lines, settings) {
   const alt = (settings.members || []).find(m => m.wallet && m.wallet !== g && !payees.has(m.wallet));
   if (alt) return { name: alt.name, wallet: alt.wallet };
   return { error: g ? 'Genesis is a worker on this job, and no other member has a wallet on file to audit and seal.' : 'Genesis has no wallet on file.' };
+}
+
+// ── Wallet check before an escrow is created. A payment that can't land would stop a line from being sealed, and one
+// stuck line also holds back the reserve. So every wallet that must receive USDC has to exist on Hedera and accept it
+// (red = blocks Create), and the wallets that sign need a little HBAR for fees (amber = a warning).
+async function escrowReadinessItems(d, clientWallet) {
+  const sym = ESCROW_NET.currency.symbol;
+  const wants = [];
+  const add = (who, addr, role) => { if (addr) wants.push({ who, addr: String(addr).toLowerCase(), role }); };
+  d.lines.forEach((l, i) => {
+    add(`${l.assignee || 'Worker'}, line ${i + 1}`, l.payee_wallet, 'payee');
+    if (Number(l.tax_bps) > 0) add(`${l.assignee || 'Worker'}'s tax wallet`, l.tax_wallet, 'payee');
+  });
+  if (d.tax.networkBps > 0) add('Network tax wallet', d.tax.networkWallet, 'payee');
+  add('Treasury (pays and seals)', d.settings.treasury_wallet, 'treasury');
+  add(`${d.roles.name || 'Auditor'} (audits)`, d.roles.wallet, 'auditor');
+  add('Client (funds it)', clientWallet, 'client');
+  const info = {};
+  await Promise.all([...new Set(wants.map(w => w.addr))].map(async a => { info[a] = await hederaReadiness(a); }));
+  const price = d.priceCents / 100;
+  return wants.map(w => {
+    const r = info[w.addr];
+    const row = (level, text) => ({ who: w.who, addr: w.addr, level, text });
+    if (r.error) return row(w.role === 'payee' || w.role === 'treasury' ? 'bad' : 'warn', 'Could not check Hedera right now. Check again in a moment.');
+    if (!r.exists) return row(w.role === 'payee' || w.role === 'treasury' ? 'bad' : 'warn', `Not on ${ESCROW_NET.name} yet. Send it a little ${sym} first.`);
+    if (w.role === 'payee') return r.acceptsUsdc ? row('ok', 'Ready. It accepts USDC.') : row('bad', 'Has not accepted USDC. In that wallet, add USDC to the account, then check again.');
+    if (w.role === 'treasury') {
+      if (!r.acceptsUsdc) return row('bad', 'Has not accepted USDC. Add USDC to this account, then check again.');
+      if (r.hbar < 4) return row('bad', `Holds ${r.hbar.toFixed(2)} ${sym}. It needs about 4 to deploy, plus a little for every seal.`);
+      return r.hbar < 10 ? row('warn', `Ready, but only ${r.hbar.toFixed(2)} ${sym} for fees. Top it up soon.`) : row('ok', `Ready. ${r.hbar.toFixed(1)} ${sym} for fees.`);
+    }
+    if (w.role === 'auditor') return r.hbar < 0.5 ? row('warn', `Holds ${r.hbar.toFixed(2)} ${sym}. It needs a little to sign the audit.`) : row('ok', 'Ready to sign.');
+    // the client
+    const notes = [];
+    if (r.hbar < 0.5) notes.push(`only ${r.hbar.toFixed(2)} ${sym} for fees`);
+    if (!r.acceptsUsdc) notes.push('has not accepted USDC, so a refund could not land');
+    else if ((r.usdc || 0) < price) notes.push(`holds ${(r.usdc || 0).toFixed(2)} USDC and the price is ${price.toFixed(2)}`);
+    return notes.length ? row('warn', `The client ${notes.join('; ')}. They can fix this before they fund it.`) : row('ok', 'Ready to fund.');
+  });
+}
+async function runEscrowReadiness() {
+  const box = document.getElementById('esc-ready'), btn = document.getElementById('esc-create');
+  const d = window._escrowDraft;
+  if (!box || !btn || !d) return;
+  const useTest = ESCROW_NET.testToken && document.getElementById('esc-token')?.value === 'test';
+  const client = (document.getElementById('esc-client')?.value || '').trim().toLowerCase();
+  const run = d.readyRun = {};
+  d.readiness = null; btn.disabled = true;
+  if (useTest) {
+    box.innerHTML = '<div class="escrow-muted">The free test token is worth nothing, so no wallet check is needed.</div>';
+    d.readiness = { bad: 0 }; btn.disabled = !!btn.dataset.block; return;
+  }
+  box.innerHTML = `<div class="escrow-muted">Checking every wallet on ${esc(ESCROW_NET.name)}…</div>`;
+  const items = await escrowReadinessItems(d, /^0x[0-9a-f]{40}$/.test(client) ? client : '');
+  if (d.readyRun !== run || !document.getElementById('esc-ready')) return;
+  const bad = items.filter(i => i.level === 'bad').length, warn = items.filter(i => i.level === 'warn').length;
+  d.readiness = { bad, warn };
+  box.innerHTML = `<div>${items.map(i => `<div class="rd-row ${i.level}"><i class="rd-dot"></i><div><b>${esc(i.who)}</b> <small>${esc(shortAddr(i.addr))}</small><br><span>${esc(i.text)}</span></div></div>`).join('')}</div>
+    <div class="escrow-muted" style="margin-top:6px">${bad ? `${bad} wallet${bad > 1 ? 's' : ''} must be fixed before this escrow can be created.` : warn ? 'Nothing blocks creating it. The amber items are worth fixing.' : 'Every wallet is ready.'}
+      <a href="#" onclick="event.preventDefault();runEscrowReadiness()" style="margin-left:6px">Check again</a></div>`;
+  btn.disabled = !!btn.dataset.block || bad > 0;
 }
 
 async function createEscrow() {
@@ -8288,6 +8359,8 @@ async function createEscrow() {
   if (client === treasury) return say('The client can’t also be the treasury.');
   if (payees.includes(treasury)) return say('The treasury wallet can’t also be a worker on this job.');
   if (d.lines.length > 32) return say('An escrow holds at most 32 lines.');
+  if (!d.readiness) return say('Still checking the wallets. Try again in a moment.');
+  if (d.readiness.bad) return say('Fix the red wallet items first, then check again.');
   const useTest = ESCROW_NET.testToken && document.getElementById('esc-token')?.value === 'test';
   const tokenAddr = useTest ? ESCROW_NET.testToken : ESCROW_NET.usdc;
   const ok = await osConfirm(useTest

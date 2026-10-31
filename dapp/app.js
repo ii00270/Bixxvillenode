@@ -31,7 +31,7 @@ const txLink = h => (net().explorer ? `<a href="${net().explorer}/transaction/${
 const addrLink = a => (net().explorer ? `<a href="${net().explorer}/account/${a}" target="_blank" rel="noopener">${a}</a>` : esc(a));
 
 async function init() {
-  S.nets = await (await fetch('networks.json')).json();
+  S.nets = await (await fetch('networks.json', { cache: 'no-store' })).json();
   if (!S.nets[S.target]) S.target = 'hedera-testnet';
   $('target').innerHTML = Object.entries(S.nets).map(([k, n]) => `<option value="${k}" ${k === S.target ? 'selected' : ''}>${esc(n.name)}</option>`).join('');
   $('target').onchange = () => { S.target = $('target').value; S.info = null; $('view').hidden = true; prefill().then(render); };

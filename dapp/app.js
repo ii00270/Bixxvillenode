@@ -24,6 +24,7 @@ const REASONS = {
   RolesOverlap: 'The same person holds two roles that must be separate.',
 };
 
+const isMoney = k => /^(fund|seal|release)/.test(k);
 const net = () => S.nets[S.target];
 const onRightNetwork = () => S.chainId === net().chainId;
 const nameOf = id => Object.values(S.nets).find(n => n.chainId === id)?.name || `chain ${id}`;
@@ -256,9 +257,10 @@ function render() {
     : !onRightNetwork() ? `<p class="nothing">Switch your wallet to ${esc(net().name)} first (button above).</p>`
     : acts.length ? acts.map(([k, label, why, minor]) => `
         <div class="step ${minor ? 'minor' : ''}"><span><b>${esc(label)}</b><small>${esc(why)}</small></span>
-        <button class="btn" data-act="${k}" ${S.busy ? 'disabled' : ''}>${S.busy === k ? 'Working…' : minor ? 'Do it' : 'Go'}</button></div>`).join('')
+        <button class="btn ${isMoney(k) ? 'money' : ''}" data-act="${k}" ${S.busy ? 'disabled' : ''}>${S.busy === k ? 'Working…' : minor ? 'Do it' : 'Go'}</button></div>`).join('')
     : I.status >= 2 ? `<p class="nothing">${esc(waitingOn(I))}</p>`
     : (mine.length ? `<p class="nothing">Nothing for you right now. ${esc(waitingOn(I))}</p>` : '') + turnBox(I, me);
+  $('next-card').dataset.money = acts.some(([k]) => isMoney(k)) ? '1' : '';
   const c2 = $('connect-2'); if (c2) c2.onclick = connect;
   const pa = $('pick-account'); if (pa) pa.onclick = pickAccount;
 
@@ -281,6 +283,7 @@ function render() {
 
   // ── engagement ──
   $('state').textContent = `${STATUSES[I.status]} · ${I.sealed} of ${I.lines.length} line${I.lines.length === 1 ? '' : 's'} paid`;
+  $('subline').textContent = $('state').textContent;
   // Arrived by link: the contract is known, so the loader box is just noise.
   const viaLink = params.get('engagement') && same(params.get('engagement'), I.addr);
   $('load-card').hidden = !!viaLink;
@@ -293,7 +296,7 @@ function render() {
     const chips = names.map((n, k) => {
       const done = l.times[k] > 0;
       const next = I.status === 1 && ((k === 0 && l.stage === 0 && !done) || (k > 0 && l.stage === k - 1));
-      return `<li class="${done ? 'done' : ''} ${next ? 'next' : ''} ${k === 0 ? 'opt' : ''}" data-stamp="${n}"><b>${n}</b><small>${by[k]}${k === 0 ? ' · optional' : ''}${done ? '<br>' + new Date(l.times[k] * 1000).toLocaleString() : ''}</small></li>`;
+      return `<li class="${done ? 'done' : ''} ${next ? 'next' : ''} ${next && k === 4 ? 'money' : ''} ${k === 0 ? 'opt' : ''}" data-stamp="${n}"><b>${n}</b><small>${by[k]}${k === 0 ? ' · optional' : ''}${done ? '<br>' + new Date(l.times[k] * 1000).toLocaleString() : ''}</small></li>`;
     }).join('');
     return `<div class="lineCard" data-line="${l.i}">
       <div class="lineHead"><span><b>Line ${l.i + 1}</b> · ${u(l.labor)}</span><span>worker ${addrLink(l.payee)}${same(me, l.payee) ? '<span class="you">YOU</span>' : ''}</span></div>

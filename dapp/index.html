@@ -7,11 +7,13 @@
 <meta name="robots" content="noindex">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=2026-10-31-turn">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Geist+Mono:wght@400;500&family=Inter+Tight:wght@400;500;600&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem("bx-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<link rel="stylesheet" href="style.css?v=2026-10-31-glass">
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.17.0/dist/ethers.umd.min.js"></script>
 </head>
 <body>
+<div class="bubble" aria-hidden="true"><i class="arc"></i><i class="glint"></i></div>
 <header class="top">
   <div class="brand"><span class="glyph"></span>ESCROW <small id="net-label">testnet</small></div>
   <div class="netbox">
@@ -35,6 +37,8 @@
   </section>
 
   <section id="view" hidden>
+    <h1 class="display">Engagement escrow</h1>
+    <p class="sub" id="subline"></p>
     <section class="card next" id="next-card">
       <h2>Your next step</h2>
       <p class="muted" id="you"></p>
@@ -63,11 +67,11 @@
     </section>
   </section>
 
-  <section class="card" id="logcard" hidden>
+  <section class="card dense" id="logcard" hidden>
     <h2>Transactions</h2>
     <ol class="log" id="log"></ol>
   </section>
 </main>
-<script type="module" src="app.js?v=2026-10-31-turn"></script>
+<script type="module" src="app.js?v=2026-10-31-glass"></script>
 </body>
 </html>

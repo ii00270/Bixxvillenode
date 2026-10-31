@@ -73,3 +73,9 @@ a.btn{text-decoration:none}
 .nothing{font-size:14px;margin-top:6px}
 .btn.busy{position:relative;opacity:.8}
 @media (max-width:560px){.step{flex-direction:column;align-items:stretch}.step .btn{width:100%}}
+
+/* who is next */
+.help.turn b:first-child{display:block;margin-bottom:4px}
+.turns{list-style:none;display:grid;gap:8px;margin:6px 0 10px}
+.turns li{border-left:3px solid var(--pink);padding:2px 10px}
+.turns small{color:var(--dim)}

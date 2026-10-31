@@ -7986,6 +7986,19 @@ function openJobsList() {
   });
 }
 
+// From a "next up" prompt: just this job's escrow panel, so the step's button is the first thing on screen.
+function openEscrowStep(projectId, title) {
+  openOverlay(title || 'Your turn', (body) => {
+    body.innerHTML = `<div style="padding:12px 18px"><div id="proj-escrow-${projectId}" class="escrow-panel"><div class="escrow-muted">Reading the contract…</div></div></div>`;
+    sb.rpc('escrow_for_project', { p_project: projectId }).then(({ data, error }) => {
+      const el = document.getElementById('proj-escrow-' + projectId);
+      if (!el) return;
+      if (error || !data?.length) { el.innerHTML = `<div class="escrow-muted">Could not load this escrow${error ? ': ' + esc(error.message) : ''}.</div>`; return; }
+      renderEscrowStatus(el, data[0]);
+    });
+  });
+}
+
 // ── ESCROW (Hedera) — money for a job lives in one BixxEngagement contract.
 // Genesis creates it from MetaMask; every line is one assigned scope, paid to
 // that member when the operator seals it. Members, the auditor and the client
@@ -8257,7 +8270,9 @@ async function escrowAct(btn, projectId, fn, lineIndex) {
     btn.textContent = 'Recording on Hedera…';
     await tx.wait();
     toast(`${label.replace(/\s*\(.*\)$/, '')} — done.`);
-    renderEscrowStatus(document.getElementById('proj-escrow-' + projectId), x);
+    const panel = document.getElementById('proj-escrow-' + projectId);
+    if (panel) renderEscrowStatus(panel, x);
+    if (document.getElementById('dash-prompt')) renderDashPrompt();
   } catch (e) {
     console.error(e);
     const reason = e?.code === 4001 || e?.code === 'ACTION_REJECTED' ? 'Cancelled in your wallet.'
@@ -11086,7 +11101,8 @@ async function buildNextUp() {
         const c = new ethers.Contract(x.contract_address, art.abi, rd);
         const sum = await c.summary();
         const st = Number(sum._status);
-        const open = () => openProject(x.project_id);
+        const open = () => openEscrowStep(x.project_id, short(x.title));
+        const copyLink = () => navigator.clipboard.writeText(new URL(escrowLink(x.contract_address), location.href).href).then(() => toast('Escrow link copied. Send it to the client.'));
         const ring = (n, of) => `<span class="np-mini"><i style="width:${of ? Math.round(n / of * 100) : 0}%"></i></span><small>${n} of ${of} paid</small>`;
         if (st === 0 && isExec()) out.push({ kind: 'escrow', tag: 'Escrow', q: `${short(x.title)}: waiting for ${x.client || 'the client'} to fund ${escrowUsd(x.price_cents)}. Send them the link?`, btn: 'Copy link',
           run: () => navigator.clipboard.writeText(new URL(escrowLink(x.contract_address), location.href).href).then(() => toast('Escrow link copied. Send it to the client.')) });
@@ -11095,11 +11111,13 @@ async function buildNextUp() {
         const fig = ring(Number(sum._sealedCount), x.lines.length);
         x.lines.forEach((l, i) => {
           const stage = Number(lines[i].stage), t = short(l.title || `line ${l.line_index + 1}`);
-          if (stage === 0 && l.payee_wallet === me) out.push({ kind: 'escrow', tag: 'Escrow', figure: fig, q: `“${t}” is funded. Mark it delivered when it’s done?`, btn: 'Open job', run: open });
-          if (stage === 1 && x.auditor_wallet === me) out.push({ kind: 'escrow', tag: 'Audit', figure: fig, q: `“${t}” was delivered. Audit the work?`, btn: 'Open job', run: open });
-          if (stage === 3 && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Pay', figure: fig, q: `“${t}” is approved. Seal it and pay ${escrowUsd(l.labor_cents)}?`, btn: 'Open job', run: open });
+          if (stage === 0 && l.payee_wallet === me) out.push({ kind: 'escrow', tag: 'Escrow', figure: fig, q: `“${t}” is funded. Mark it delivered when it’s done?`, btn: 'Mark delivered', run: open });
+          if (stage === 1 && x.auditor_wallet === me) out.push({ kind: 'escrow', tag: 'Audit', figure: fig, q: `“${t}” was delivered. Audit the work?`, btn: 'Audit now', run: open });
+          if (stage === 2 && x.client_wallet === me) out.push({ kind: 'escrow', tag: 'Approve', figure: fig, q: `“${t}” was audited. Authorize it so the worker can be paid?`, btn: 'Authorize now', run: open });
+          else if (stage === 2 && isExec()) out.push({ kind: 'escrow', tag: 'Escrow', figure: fig, q: `“${t}” was audited. Waiting for ${x.client || 'the client'} to authorize. Send them the link?`, btn: 'Copy link', run: copyLink });
+          if (stage === 3 && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Pay', figure: fig, q: `“${t}” is approved. Seal it and pay ${escrowUsd(l.labor_cents)}?`, btn: 'Seal and pay', run: open });
         });
-        if (Number(sum._sealedCount) === x.lines.length && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Reserve', figure: fig, q: `${short(x.title)}: every line is paid. Release the reserve to the treasury?`, btn: 'Open job', run: open });
+        if (Number(sum._sealedCount) === x.lines.length && canOperate(x, me)) out.push({ kind: 'escrow', tag: 'Reserve', figure: fig, q: `${short(x.title)}: every line is paid. Release the reserve to the treasury?`, btn: 'Release reserve', run: open });
       }));
     }
   } catch (e) { console.error(e); }

@@ -36,7 +36,7 @@ async function init() {
   $('target').innerHTML = Object.entries(S.nets).map(([k, n]) => `<option value="${k}" ${k === S.target ? 'selected' : ''}>${esc(n.name)}</option>`).join('');
   $('target').onchange = () => { S.target = $('target').value; S.info = null; $('view').hidden = true; prefill().then(render); };
   $('switch-hedera').onclick = () => switchTo(S.target);
-  $('connect').onclick = connect;
+  $('connect').onclick = () => (S.account ? pickAccount() : connect());
   $('load').onclick = load;
   if (!window.ethereum) { $('no-wallet').hidden = false; $('connect').disabled = true; $('switch-hedera').disabled = true; }
   else {
@@ -67,6 +67,21 @@ async function connect() {
     S.chainId = Number(await window.ethereum.request({ method: 'eth_chainId' }));
     refresh();
   } catch (e) { $('err').textContent = e.message; }
+}
+
+// Opens the wallet's own account list so the person can tick a different account,
+// instead of disconnecting and reconnecting by hand. Wallets that don't support
+// the request just show their normal connect prompt.
+async function pickAccount() {
+  $('err').textContent = '';
+  try {
+    try { await window.ethereum.request({ method: 'wallet_requestPermissions', params: [{ eth_accounts: {} }] }); }
+    catch (e) { if (e.code === 4001 || e.code === 'ACTION_REJECTED') throw e; }
+    const a = await window.ethereum.request({ method: 'eth_requestAccounts' });
+    S.account = a[0] ? ethers.getAddress(a[0]) : null;
+    S.chainId = Number(await window.ethereum.request({ method: 'eth_chainId' }));
+    await refresh();
+  } catch (e) { $('err').textContent = e.code === 4001 || e.code === 'ACTION_REJECTED' ? 'Cancelled in your wallet.' : e.message; }
 }
 
 // Adds the network to the wallet if needed and switches to it.
@@ -172,6 +187,39 @@ function waitingOn(I) {
   return `Waiting for ${who.slice(0, 3).join(', ')}${who.length > 3 ? ` and ${who.length - 3} more` : ''}.`;
 }
 
+// Who has to act next, by address, so the page can say which account to use.
+function whoseTurn(I) {
+  const R = I.roles, out = [];
+  const add = (role, addr, what) => {
+    const e = out.find(x => x.role === role && same(x.addr, addr));
+    if (e) e.what.push(what); else out.push({ role, addr, what: [what] });
+  };
+  if (I.status === 0) add('client', R.client, 'fund the escrow');
+  if (I.status === 1) {
+    for (const l of I.lines) {
+      const n = l.i + 1;
+      if (l.stage === 0) add('worker', l.payee, `deliver line ${n}`);
+      if (l.stage === 1) add('auditor', R.auditor, `audit line ${n}`);
+      if (l.stage === 2) add('client', R.client, `authorize line ${n}`);
+      if (l.stage === 3) add('operator', R.operator, `seal line ${n} and pay`);
+    }
+    if (I.sealed === I.lines.length) add('operator', R.operator, 'release the reserve');
+  }
+  return out;
+}
+const shortAddr = a => `${a.slice(0, 6)}…${a.slice(-4)}`;
+
+// Shown when nothing is for the connected wallet: who is next, and one tap to change account.
+function turnBox(I, me) {
+  const turns = whoseTurn(I);
+  if (!turns.length) return '';
+  const mineNow = turns.some(t => same(me, t.addr));
+  return `<div class="help turn"><b>Next up</b>
+    <ul class="turns">${turns.map(t => `<li><b>${esc(t.role)}</b> <code>${esc(shortAddr(t.addr))}</code>${same(me, t.addr) ? '<span class="you">YOU</span>' : ''}<br><small>${esc(t.what.join(', '))}</small></li>`).join('')}</ul>
+    ${mineNow ? '' : `<button class="btn small" id="pick-account">Use a different account</button><small> Your wallet will list your accounts. Pick the one shown above.</small>`}
+  </div>`;
+}
+
 function render() {
   $('net-label').textContent = net().live ? 'live' : 'testnet';
   $('net-label').className = net().live ? 'live' : '';
@@ -184,7 +232,8 @@ function render() {
     badge.textContent = `Wallet on: ${nameOf(S.chainId)}`;
     badge.className = 'badge ' + (onRightNetwork() ? 'ok' : 'bad');
   }
-  $('connect').textContent = S.account ? `${S.account.slice(0, 6)}…${S.account.slice(-4)}` : 'Connect wallet';
+  $('connect').textContent = S.account ? `${S.account.slice(0, 6)}…${S.account.slice(-4)} ▾` : 'Connect wallet';
+  $('connect').title = S.account ? 'Tap to use a different account' : 'Connect your wallet';
 
   const wrong = $('wrong-net');
   wrong.hidden = !window.ethereum || onRightNetwork();
@@ -209,8 +258,9 @@ function render() {
         <div class="step ${minor ? 'minor' : ''}"><span><b>${esc(label)}</b><small>${esc(why)}</small></span>
         <button class="btn" data-act="${k}" ${S.busy ? 'disabled' : ''}>${S.busy === k ? 'Working…' : minor ? 'Do it' : 'Go'}</button></div>`).join('')
     : I.status >= 2 ? `<p class="nothing">${esc(waitingOn(I))}</p>`
-    : mine.length ? `<p class="nothing">Nothing for you right now. ${esc(waitingOn(I))}</p>` : '';
+    : (mine.length ? `<p class="nothing">Nothing for you right now. ${esc(waitingOn(I))}</p>` : '') + turnBox(I, me);
   const c2 = $('connect-2'); if (c2) c2.onclick = connect;
+  const pa = $('pick-account'); if (pa) pa.onclick = pickAccount;
 
   // Wallet help: USDC for the client, HBAR for fees.
   const help = [];

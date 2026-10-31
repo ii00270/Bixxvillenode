@@ -7963,6 +7963,29 @@ function openProject(id) {
   }, null, null);
 }
 
+// Open jobs in one list, one tap from the Dashboard; each opens the job with its escrow.
+function openJobsList() {
+  openOverlay('Jobs & escrow', async (body) => {
+    const { data, error } = await sb.from('relation_submissions')
+      .select('id,title,relation_name,relation_code,status,created_at,bids(id,log_size,status)')
+      .in('status', ['open', 'settling'])
+      .order('created_at', { ascending: false });
+    if (error) { body.innerHTML = `<div class="empty"><div class="empty-msg">Could not load jobs: ${esc(error.message)}</div></div>`; return; }
+    if (!data?.length) { body.innerHTML = '<div class="empty"><div class="empty-msg">No open jobs.</div></div>'; return; }
+    body.innerHTML = `<div style="padding:12px 18px">${data.map(r => {
+      const scopes = r.bids || [];
+      const done = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
+      return `<div class="proj-card" onclick="openProject('${r.id}')">
+        <div class="proj-top">
+          <div class="proj-name">${esc(r.title || 'Untitled')}</div>
+          <div class="proj-status status-${esc(r.status)}">${esc(r.status.charAt(0).toUpperCase() + r.status.slice(1))}</div>
+        </div>
+        <div class="proj-meta">${esc(r.relation_name || r.relation_code || '')} · ${scopes.length} line${scopes.length === 1 ? '' : 's'} · ${done} delivered · open for escrow →</div>
+      </div>`;
+    }).join('')}</div>`;
+  });
+}
+
 // ── ESCROW (Hedera) — money for a job lives in one BixxEngagement contract.
 // Genesis creates it from MetaMask; every line is one assigned scope, paid to
 // that member when the operator seals it. Members, the auditor and the client
@@ -8055,7 +8078,7 @@ async function renderEscrowCreate(el, projectId, r, settings) {
     ${missing.length ? `<div class="escrow-muted" style="color:var(--red);margin-top:6px">No wallet on file for ${esc([...new Set(missing.map(l => l.assignee))].join(', '))}. Add it on the Clients page (Members → Add wallet), then reopen this job.</div>` : ''}
     <div class="gate-err" id="esc-err"></div>
     <button class="act-btn" id="esc-create" onclick="createEscrow()" ${missing.length || roles.error || taxBlock || !settings.treasury_wallet || lines.some(l => l.payee_wallet === settings.treasury_wallet) ? 'disabled' : ''}>Create escrow on ${ESCROW_NET.name}</button>
-    <div class="escrow-muted" style="padding:0 18px 12px">Your wallet (MetaMask, HashPack or Robinhood Wallet) deploys the contract and pays a little test HBAR in fees. No USDC moves until the client funds it.</div>`;
+    <div class="escrow-muted" style="padding:0 18px 12px">Your wallet (MetaMask, HashPack or Robinhood Wallet) deploys the contract and pays a little ${ESCROW_NET.live ? '' : 'test '}HBAR in fees. No USDC moves until the client funds it.</div>`;
 }
 
 // Genesis audits (the treasury wallet seals and pays); on a line where Genesis is the worker, another
@@ -11602,6 +11625,7 @@ function renderDashMe() {
       <button class="dash-btn" onclick="document.getElementById('term-upload-file').click()">Upload contract</button>
       <button class="dash-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-statements')?.scrollIntoView({ behavior: 'smooth' }), 500)">Statements</button>
       <button class="dash-btn" onclick="dcGo('overview')">Decomposition</button>
+      <button class="dash-btn" onclick="openJobsList()">Jobs &amp; escrow</button>
     </div>`;
 }
 

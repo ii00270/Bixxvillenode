@@ -11487,8 +11487,8 @@ async function buildNextUp() {
     if (!b && isExec() && bv?.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: `Cycle ${bv.cycle} has no Blitz yet. Start the opening sprint?`, btn: 'Start Blitz', run: () => { BZ.next = false; go(); } });
     if (!b && isExec() && bv && !bv.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: 'Amendment VI is waiting for your ratification. It defines the Blitz.', btn: 'Review', run: go });
     const mine = (b?.members || []).find(m => m.operator_id === operator?.id);
-    if (b && b.status === 'live' && mine && !mine.wallet) out.push({ kind: 'wallet', tag: 'Blitz', q: `You are on the Cycle ${b.cycle_number} Blitz as ${(mine.roles || [mine.role]).join(' and ')}, but there's no wallet to pay. Add one?`, btn: 'Add wallet', run: openAddWallet });
-    if (b && b.status === 'live' && mine?.wallet) out.push({ kind: 'continue', tag: 'Blitz', q: `The ${b.size_class} Blitz is live for Cycle ${b.cycle_number}. See where it stands?`, btn: 'Open', run: go });
+    if (b && !b.private && b.status === 'live' && mine && !mine.wallet) out.push({ kind: 'wallet', tag: 'Blitz', q: `You are on the Cycle ${b.cycle_number} Blitz as ${(mine.roles || [mine.role]).join(' and ')}, but there's no wallet to pay. Add one?`, btn: 'Add wallet', run: openAddWallet });
+    if (b && !b.private && b.status === 'live' && mine?.wallet) out.push({ kind: 'continue', tag: 'Blitz', q: `The ${b.size_class} Blitz is live for Cycle ${b.cycle_number}. See where it stands?`, btn: 'Open', run: go });
   } catch (e) { console.error(e); }
   // Escrow steps that are waiting on you, read live from Hedera
   try {
@@ -14122,7 +14122,7 @@ async function startCycle(num) {
 // It is also where a Cycle opens: the team, their wallets and the Cycle's terms are set here in one pass,
 // and the Decomposition builds out from it. Roles follow the canon's tiers (a tier covers the ones below it).
 const BZ_SIZES = [['Mini', 1], ['Micro', 4], ['Minor', 8], ['Medium', 16], ['Major', 32]];
-const BZ_ROLES = [['architect', 'Architect'], ['wrangler', 'Wrangler'], ['apprentice', 'Apprentice']];
+const BZ_ROLES = [['architect', 'Architect'], ['wrangler', 'Wrangler']];
 const BZ = { next: false, view: null, cands: null, w: null, timer: null, ready: {}, escrow: undefined };
 const bzTier = logs => tier(logs).toLowerCase();
 const bzCan = (c, role) => CANON.eligibleTiers(bzTier(c.total_logs), 0).includes(role);
@@ -14179,10 +14179,13 @@ async function bzTick() {
   try {
     const { data } = await sb.rpc('blitz_view', { p_cycle: bzCycleNum() });
     if (!bzPanelOn() || BZ.w) return;
+    const shape = b => !b ? 'none' : b.private ? 'private' : 'open';
+    const changed = shape(BZ.view?.blitz) !== shape(data?.blitz);
     BZ.view = data;
     if (trackerState?.mapId) await loadWorkMap(trackerState.mapId);
     const box = document.getElementById('bz-live');
-    if (box) { box.innerHTML = bzLiveInner(); bzCheckLive(); }
+    if (changed || (shape(data?.blitz) === 'open' && !box)) { bzDraw(); }
+    else if (box && shape(data?.blitz) === 'open') { box.innerHTML = bzLiveInner(); bzCheckLive(); }
   } catch (e) { /* the next tick tries again */ }
 }
 
@@ -14190,14 +14193,15 @@ const bzToggle = () => isExec() ? `<div class="lg-filters"><button class="lg-f $
 
 function bzBody() {
   const v = BZ.view, num = bzCycleNum();
-  if (v?.blitz) return bzToggle() + `<div id="bz-live">${bzLiveInner()}</div>`;
+  if (v?.blitz && !v.blitz.private) return bzToggle() + `<div id="bz-live">${bzLiveInner()}</div>`;
+  if (v?.blitz?.private) return bzToggle() + `<div class="bz-card bz-hero"><small>Cycle ${num}</small><h3>Blitz</h3><p>A Blitz is in progress for this Cycle. It is private to its group until it is completed, and then everyone can read it.</p></div>`;
   const head = `<div class="bz-card bz-hero"><small>Cycle ${num}</small><h3>Blitz</h3>
-    <p>The opening sprint of a Cycle: at most 14 days, wholly inside it, declared in writing before work starts. The Cycle's team, wallets and steps are set up here, and the work builds out from it. A Blitz carries no pay premium.</p></div>`;
+    <p>The opening sprint of a Cycle: it can start on any day of the Cycle, lasts at most 14 days and lies wholly inside it, and is declared in writing before work starts. It is for Architects and Operators, and you can invite up to two Wranglers. It stays private to its group until you complete it. The Cycle's wallets and steps are set up here too, and the work builds out from it. A Blitz carries no pay premium.</p></div>`;
   if (!v?.ratified) {
     return bzToggle() + head + (isExec()
       ? `<div class="bz-card"><h4 class="cy-h">Ratify Amendment VI first <span>the Blitz is defined in its §3</span></h4>
-          <p class="pp-muted">Write the decision in your own words. It is kept on record.</p>
-          <textarea id="bz-rat" class="pf-tax-in wide" rows="3" maxlength="500">I ratify Amendment VI. The Blitz is the opening sprint of a Cycle.</textarea>
+          <p class="pp-muted">Amendment VI says any assigned Member may join a Blitz. Your rule is narrower: Architects and Operators, with up to two invited Wranglers. Put it in the decision, in your own words, so the record shows it. It is kept on record.</p>
+          <textarea id="bz-rat" class="pf-tax-in wide" rows="3" maxlength="500">I ratify Amendment VI. The Blitz is the opening sprint of a Cycle. It is for Architects and Operators, who may invite up to two Wranglers, and it is private to them until it is completed.</textarea>
           <div class="gate-err" id="bz-err"></div><button class="act-btn" onclick="bzRatify()">Ratify Amendment VI</button></div>`
       : `<div class="bz-card"><p class="pp-muted">Amendment VI has not been ratified yet. The Executive Operator will start the Blitz once it is.</p></div>`);
   }
@@ -14269,7 +14273,7 @@ function bzLiveInner() {
     <div class="bz-card">${steps}</div>${money}${escrow}
     <div class="bz-card"><h4 class="cy-h">Team · ${(b.members || []).length}</h4>${team}
       ${me && !me.wallet ? `<button class="act-btn" onclick="openAddWallet()">Add your wallet</button>` : ''}
-      ${isExec() && b.status === 'live' ? `<div class="bz-acts"><button class="pf-btn" onclick="bzAddOpen()">+ Add to the team</button><button class="pf-btn" onclick="bzClose('${esc(b.id)}')">Close the Blitz</button></div>` : ''}</div>
+      ${isExec() && b.status === 'live' ? `<div class="bz-acts"><button class="pf-btn" onclick="bzAddOpen()">+ Add to the team</button><button class="pf-btn" onclick="bzClose('${esc(b.id)}')">Complete the Blitz</button></div>` : ''}</div>
     <div class="bz-card"><h4 class="cy-h">Declared in writing</h4><p class="pp-muted">${esc(b.statement)}</p></div>`;
 }
 
@@ -14284,10 +14288,10 @@ async function bzCheckLive() {
 }
 
 async function bzClose(id) {
-  if (!await osConfirm('Close this Blitz? The record stays; no more people can be added.')) return;
+  if (!await osConfirm('Complete this Blitz? It stops taking people, and from now on everyone on the network can read it.')) return;
   const { error } = await sb.rpc('blitz_close', { p_blitz: id });
   if (error) return toast(error.message);
-  toast('Blitz closed.'); renderBlitzPanel();
+  toast('Blitz completed.'); renderBlitzPanel();
 }
 
 async function bzAddOpen() {
@@ -14295,12 +14299,14 @@ async function bzAddOpen() {
   const [{ data: cands, error }, { data: cv }] = await Promise.all([sb.rpc('blitz_candidates'), sb.rpc('cycle_view', { p_cycle: b.cycle_number })]);
   if (error) return toast(error.message);
   const roster = new Set((cv?.roster || []).map(r => r.operator_id)), inB = new Set((b.members || []).map(m => m.operator_id));
-  const list = (cands || []).filter(c => roster.has(c.id) && !inB.has(c.id));
+  const guests = new Set((b.members || []).filter(m => m.tier === 'Wrangler').map(m => m.operator_id));
+  const list = (cands || []).filter(c => roster.has(c.id) && !inB.has(c.id) && bzTier(c.total_logs) !== 'apprentice');
   openOverlay('Add to the Blitz', body => {
-    body.innerHTML = `<div class="form-block"><p class="escrow-muted">Anyone on the Cycle's roster can join, including after it starts. Their role has to be at or below their tier.</p></div>`
-      + (list.length ? list.map(c => `<div class="form-block"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)}</small></div>
-          <div class="bz-roles">${BZ_ROLES.map(([k, l]) => `<button class="bz-role" ${bzCan(c, k) ? '' : 'disabled'} onclick="bzJoin('${c.id}','${k}')">${l}</button>`).join('')}</div></div>`).join('')
-        : `<div class="form-block"><p class="escrow-muted">Everyone on the roster is already on the Blitz.</p></div>`);
+    body.innerHTML = `<div class="form-block"><p class="escrow-muted">Architects and Operators on the Cycle's roster can join. A Wrangler can be invited too: up to two per Blitz (${guests.size} so far).</p></div>`
+      + (list.length ? list.map(c => { const isW = bzTier(c.total_logs) === 'wrangler', full = isW && guests.size >= 2;
+          return `<div class="form-block"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)}</small></div>
+          <div class="bz-roles">${(isW ? [['wrangler', 'Invite']] : BZ_ROLES).map(([k, l]) => `<button class="bz-role" ${bzCan(c, k) && !full ? '' : 'disabled'} onclick="bzJoin('${c.id}','${k}')">${l}</button>`).join('')}</div>${full ? '<div class="escrow-muted">Two Wranglers are already invited.</div>' : ''}</div>`; }).join('')
+        : `<div class="form-block"><p class="escrow-muted">No one else on the roster can join.</p></div>`);
   });
 }
 async function bzJoin(id, role) {
@@ -14317,7 +14323,7 @@ async function bzWizOpen() {
   const [c, st, cv] = await Promise.all([sb.rpc('blitz_candidates'), treasuryStatus().catch(() => ({})), sb.rpc('cycle_view', { p_cycle: num })]);
   if (c.error) return toast(c.error.message);
   BZ.cands = c.data || [];
-  BZ.w = { step: 1, cycle: num, first, last, from, to: bzAdd(from, 13) < last ? bzAdd(from, 13) : last, size: 'Medium', team: {}, pick: {}, hard: {}, note: '', statement: '',
+  BZ.w = { step: 1, cycle: num, first, last, from, to: bzAdd(from, 13) < last ? bzAdd(from, 13) : last, size: 'Medium', team: {}, extra: {}, pick: {}, hard: {}, note: '', statement: '',
     st, started: !!cv.data, rosterRows: cv.data?.roster || [] };
   for (const m of BZ.cands) BZ.w.pick[m.id] = { wallet: m.wallet || '', tax_wallet: m.tax_wallet || '', tax: pctOf(m.tax_bps) };
   bzDraw();
@@ -14340,23 +14346,30 @@ function bzWizHtml() {
   if (n === 3) {
     const rost = w.started ? new Set(w.rosterRows.map(r => r.operator_id)) : null;
     const list = BZ.cands.filter(c => !rost || rost.has(c.id));
-    const cnt = r => Object.values(w.team).filter(a => a.includes(r)).length;
-    body = `<h4 class="cy-h">3 · Team <span>an Architect, Wranglers and Apprentices. A tier covers the ones below it: an Operator can take every role, and an Apprentice can't take Architect work. One person can hold more than one role.</span></h4>
-      ${list.map(c => `<div class="bz-person ${w.team[c.id] ? 'on' : ''}"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)} · ${c.total_logs} LOGs</small></div>
-        <div class="bz-roles">${BZ_ROLES.map(([k, l]) => { const ok = bzCan(c, k); return `<button class="bz-role ${(w.team[c.id] || []).includes(k) ? 'on' : ''}" ${ok ? '' : `disabled title="Above ${esc(c.name)}'s tier"`} onclick="bzRole('${c.id}','${k}')">${l}</button>`; }).join('')}</div></div>`).join('') || '<p class="pp-muted">No one is available.</p>'}
-      <div class="bz-note">Architect ${cnt('architect')} · Wranglers ${cnt('wrangler')} · Apprentices ${cnt('apprentice')}</div>`;
+    const core = list.filter(c => bzTier(c.total_logs) === 'architect' || bzTier(c.total_logs) === 'operator'), guests = list.filter(c => bzTier(c.total_logs) === 'wrangler');
+    const has = (id, k) => (w.team[id] || []).includes(k);
+    const nArch = Object.values(w.team).filter(a => a.includes('architect')).length, nGuest = guests.filter(c => w.team[c.id]).length;
+    const person = (c, roles) => `<div class="bz-person ${w.team[c.id] ? 'on' : ''}"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)} · ${c.total_logs} LOGs</small></div>
+        <div class="bz-roles">${roles.map(([k, l]) => `<button class="bz-role ${has(c.id, k) ? 'on' : ''}" ${bzCan(c, k) ? '' : `disabled title="Above ${esc(c.name)}'s tier"`} onclick="bzRole('${c.id}','${k}')">${l}</button>`).join('')}</div></div>`;
+    body = `<h4 class="cy-h">3 · Team <span>Architects and Operators have access. One person can hold both roles.</span></h4>
+      ${core.map(c => person(c, BZ_ROLES)).join('') || '<p class="pp-muted">No Architect or Operator is available.</p>'}
+      <h4 class="cy-h">Invite Wranglers <span>up to two per Blitz</span></h4>
+      ${guests.map(c => person(c, [['wrangler', 'Invite']])).join('') || '<p class="pp-muted">No Wrangler is available to invite.</p>'}
+      <div class="bz-note">Architects ${nArch} · Invited Wranglers ${nGuest} of 2</div>`;
   }
   if (n === 4) {
-    const ids = Object.keys(w.team), st = w.st || {}, rate = Number(st.network_tax_bps) || 0;
+    const ids = [...Object.keys(w.team), ...Object.keys(w.extra).filter(i => w.extra[i])], st = w.st || {}, rate = Number(st.network_tax_bps) || 0;
+    const others = w.started ? [] : BZ.cands.filter(c => !w.team[c.id]);
     const warn = [!st.treasury_wallet && 'No treasury wallet yet (Profile → Wallets). Escrows can’t be created without it.', rate > 0 && !st.tax_wallet && 'The network tax rate is above zero but there is no tax wallet. Add it first (Profile → Wallets).'].filter(Boolean);
     const rows = ids.map(id => { const c = BZ.cands.find(x => x.id === id), p = w.pick[id], fixed = w.rosterRows.find(r => r.operator_id === id);
-      return `<div class="cy-row on"><div class="cy-who"><b>${esc(c.name)}</b><small>${esc(w.team[id].map(bzRoleName).join(' · '))} · <i class="bz-chip" id="bz-r-${id}">…</i></small></div>
+      return `<div class="cy-row on"><div class="cy-who"><b>${esc(c.name)}</b><small>${w.team[id] ? esc(w.team[id].map(bzRoleName).join(' · ')) : 'In the Cycle, not on the Blitz'} · <i class="bz-chip" id="bz-r-${id}">…</i></small></div>
         ${fixed ? `<div class="cy-tax tax-c">paid to ${fixed.wallet ? esc(shortAddr(fixed.wallet)) : 'no wallet'}${fixed.tax_bps ? ` · ${pctOf(fixed.tax_bps)}% set aside` : ''} (fixed by the Cycle)</div>`
         : `<div class="cy-fields"><label><span>Paid to</span><input class="pf-tax-in wide" value="${esc(p.wallet)}" placeholder="0x… wallet" spellcheck="false" oninput="BZ.w.pick['${id}'].wallet=this.value.trim()" onchange="bzCheckWallets()"></label>
           <label><span>Tax wallet</span><input class="pf-tax-in wide" value="${esc(p.tax_wallet)}" placeholder="0x… (optional)" spellcheck="false" oninput="BZ.w.pick['${id}'].tax_wallet=this.value.trim()"></label>
           <label><span>Set-aside %</span><input class="pf-tax-in" type="number" min="0" max="50" step="0.5" value="${esc(p.tax)}" oninput="BZ.w.pick['${id}'].tax=this.value"></label></div>`}</div>`; }).join('');
     const sel = (k, l) => `<label class="cy-score"><span>${l}</span><select class="pf-tax-in" onchange="BZ.w.hard['${k}']=this.value"><option value="">—</option>${Array.from({ length: 10 }, (_, i) => `<option ${String(w.hard[k]) === String(i + 1) ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>`;
-    body = `<h4 class="cy-h">4 · Wallets <span>everyone on the Blitz needs a wallet to be paid; each is checked on Hedera</span></h4>${rows}
+    body = `<h4 class="cy-h">4 · Wallets <span>everyone taking part needs a wallet to be paid; each is checked on Hedera</span></h4>${rows}
+      ${others.length ? `<h4 class="cy-h">Also in this Cycle <span>not on the Blitz, but taking part in the Cycle; tap a name to add them</span></h4><div class="cy-people">${others.map(c => `<button class="cy-chip ${w.extra[c.id] ? 'on' : ''}" onclick="bzExtra('${c.id}')">${w.extra[c.id] ? '✓ ' : '+ '}${esc(c.name)}</button>`).join('')}</div>` : ''}
       <h4 class="cy-h">Network terms</h4><div class="cy-terms"><div><small>Network tax</small><b>${pctOf(rate)}%</b><span>of each price, out of the reserve → ${st.tax_wallet ? esc(shortAddr(st.tax_wallet)) : 'no tax wallet'}</span></div>
       <div><small>Treasury</small><b>${st.treasury_wallet ? esc(shortAddr(st.treasury_wallet)) : 'Not set'}</b><span>seals lines, receives the reserve</span></div></div>
       ${warn.map(x => `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${esc(x)}</div>`).join('')}
@@ -14367,7 +14380,7 @@ function bzWizHtml() {
     const ids = Object.keys(w.team), who = r => ids.filter(i => w.team[i].includes(r)).map(i => BZ.cands.find(c => c.id === i).name).join(', ') || '—';
     body = `<h4 class="cy-h">5 · Declare <span>a Blitz is declared in writing, before work starts</span></h4>
       <div class="bz-card"><b>${w.size} Blitz · ${BZ_SIZES.find(s => s[0] === w.size)[1]} LOG${w.size === 'Mini' ? '' : 's'}</b>
-      <p class="pp-muted">Cycle ${w.cycle} · ${bzFmt(w.from)} to ${bzFmt(w.to)} (${bzDays(w.from, w.to) + 1} days)<br>Architect: ${esc(who('architect'))}<br>Wranglers: ${esc(who('wrangler'))}<br>Apprentices: ${esc(who('apprentice'))}</p></div>
+      <p class="pp-muted">Cycle ${w.cycle} · ${bzFmt(w.from)} to ${bzFmt(w.to)} (${bzDays(w.from, w.to) + 1} days)<br>Architect: ${esc(who('architect'))}<br>Wranglers: ${esc(who('wrangler'))}${Object.values(w.extra).some(Boolean) ? `<br>Also in the Cycle: ${Object.keys(w.extra).filter(i => w.extra[i]).map(i => esc(BZ.cands.find(c => c.id === i).name)).join(', ')}` : ''}</p></div>
       <label class="cy-note"><span>In your own words</span><textarea id="bz-stmt" class="pf-tax-in wide" rows="3" maxlength="500" placeholder="What this Blitz is for and what it should leave finished." oninput="BZ.w.statement=this.value">${esc(w.statement)}</textarea></label>`;
   }
   return dots + body + nav;
@@ -14381,16 +14394,18 @@ function bzDate() {
   w.from = from; w.to = to; f.value = from; t.value = to;
   document.getElementById('bz-len').textContent = `${bzDays(from, to) + 1} day${bzDays(from, to) ? 's' : ''}`;
 }
+function bzExtra(id) { BZ.w.extra[id] = !BZ.w.extra[id]; bzDraw(); }
 function bzRole(id, role) { const w = BZ.w, cur = new Set(w.team[id] || []); if (cur.has(role)) cur.delete(role); else cur.add(role); if (cur.size) w.team[id] = [...cur]; else delete w.team[id]; bzDraw(); }
 const bzWho = m => { const rl = (m.roles || [m.role]).map(bzRoleName); return (rl.length === 1 && rl[0] === m.tier ? [m.tier] : [m.tier, ...rl]).join(' · '); };
 const bzRoleName = k => (BZ_ROLES.find(r => r[0] === k) || [k, k])[1];
 const bzErr = m => { const e = document.getElementById('bz-err'); if (e) { e.textContent = m; e.classList.add('show'); } return false; };
 function bzBack() { BZ.w.step = Math.max(1, BZ.w.step - 1); bzDraw(); }
 function bzNext() {
-  const w = BZ.w, ids = Object.keys(w.team), isAddr = a => !a || /^0x[0-9a-fA-F]{40}$/.test(a);
+  const w = BZ.w, ids = [...Object.keys(w.team), ...Object.keys(w.extra).filter(i => w.extra[i])], isAddr = a => !a || /^0x[0-9a-fA-F]{40}$/.test(a);
   if (w.step === 3) {
-    if (!ids.some(i => w.team[i].includes('architect'))) return bzErr('Choose an Architect.');
-    if (!ids.some(i => w.team[i].includes('wrangler'))) return bzErr('Choose at least one Wrangler.');
+    const tids = Object.keys(w.team);
+    if (!tids.some(i => w.team[i].includes('architect'))) return bzErr('Choose an Architect.');
+    if (BZ.cands.filter(c => w.team[c.id] && bzTier(c.total_logs) === 'wrangler').length > 2) return bzErr('A Blitz can invite at most two Wranglers.');
   }
   if (w.step === 4) {
     const st = w.st || {};
@@ -14411,7 +14426,7 @@ function bzNext() {
 }
 async function bzCheckWallets() {
   const w = BZ.w; if (!w) return;
-  for (const id of Object.keys(w.team)) {
+  for (const id of [...Object.keys(w.team), ...Object.keys(w.extra).filter(i => w.extra[i])]) {
     const el = document.getElementById('bz-r-' + id); if (!el) continue;
     const fixed = w.rosterRows.find(r => r.operator_id === id), a = (fixed?.wallet || w.pick[id].wallet || '').toLowerCase();
     if (!/^0x[0-9a-f]{40}$/.test(a)) { el.textContent = 'needs a wallet'; el.className = 'bz-chip bad'; continue; }
@@ -14427,10 +14442,11 @@ async function bzDeclare() {
   const hs = ['infrastructure', 'economic', 'safety'].map(k => w.hard[k]);
   const hardship = hs.every(Boolean) ? { infrastructure: +hs[0], economic: +hs[1], safety: +hs[2] } : null;
   const members = ids.map(id => { const p = w.pick[id]; return { operator_id: id, roles: w.team[id], wallet: p.wallet || null, tax_wallet: p.tax_wallet || null, tax_bps: Math.round(parseFloat(p.tax || '0') * 100) }; });
+  const extra = Object.keys(w.extra).filter(i => w.extra[i]).map(id => { const p = w.pick[id]; return { operator_id: id, wallet: p.wallet || null, tax_wallet: p.tax_wallet || null, tax_bps: Math.round(parseFloat(p.tax || '0') * 100) }; });
   const budget = BZ_SIZES.find(s => s[0] === w.size)[1];
   if (!await osConfirm(`Declare a ${w.size} Blitz (${budget} LOG${budget === 1 ? '' : 's'}) for Cycle ${w.cycle}, ${bzFmt(w.from)} to ${bzFmt(w.to)}?${w.started ? '' : ` This also starts Cycle ${w.cycle}: the roster and tax terms are fixed once it starts.`} It is kept on record.`)) return;
   const btn = document.getElementById('bz-go'); if (btn) btn.disabled = true;
-  const { error } = await sb.rpc('blitz_start', { p_cycle: w.cycle, p_size: w.size, p_starts_on: w.from, p_ends_on: w.to, p_statement: stmt, p_members: members, p_hardship: hardship, p_note: w.note || null });
+  const { error } = await sb.rpc('blitz_start', { p_cycle: w.cycle, p_size: w.size, p_starts_on: w.from, p_ends_on: w.to, p_statement: stmt, p_members: members, p_hardship: hardship, p_note: w.note || null, p_extra: w.started ? [] : extra });
   if (error) { if (btn) btn.disabled = false; return bzErr(error.message); }
   BZ.w = null; toast('Blitz declared.'); renderBlitzPanel();
 }

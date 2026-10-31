@@ -26,5 +26,22 @@
       "address": "0x0000000000000000000000000000000000068cda",
       "source": "Circle (developers.circle.com/stablecoins/usdc-contract-addresses); faucet 10 USDC / 24h"
     }
+  },
+  "hedera-mainnet": {
+    "name": "Hedera Mainnet",
+    "chainId": 295,
+    "rpc": "https://mainnet.hashio.io/api",
+    "explorer": "https://hashscan.io/mainnet",
+    "currency": {
+      "name": "HBAR",
+      "symbol": "HBAR",
+      "decimals": 18
+    },
+    "live": true,
+    "usdc": {
+      "tokenId": "0.0.456858",
+      "address": "0x000000000000000000000000000000000006f89a",
+      "source": "Circle (developers.circle.com/stablecoins/usdc-contract-addresses)"
+    }
   }
 }

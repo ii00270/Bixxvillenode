@@ -35,7 +35,7 @@ async function init() {
   if (!S.nets[S.target]) S.target = 'hedera-testnet';
   $('target').innerHTML = Object.entries(S.nets).map(([k, n]) => `<option value="${k}" ${k === S.target ? 'selected' : ''}>${esc(n.name)}</option>`).join('');
   $('target').onchange = () => { S.target = $('target').value; S.info = null; $('view').hidden = true; prefill().then(render); };
-  $('switch-hedera').onclick = () => switchTo('hedera-testnet');
+  $('switch-hedera').onclick = () => switchTo(S.target);
   $('connect').onclick = connect;
   $('load').onclick = load;
   if (!window.ethereum) { $('no-wallet').hidden = false; $('connect').disabled = true; $('switch-hedera').disabled = true; }
@@ -77,7 +77,7 @@ async function switchTo(key) {
     ...(n.explorer ? { blockExplorerUrls: [n.explorer] } : {}),
   };
   try {
-    if (key === 'hedera-testnet') {
+    if (key.startsWith('hedera')) {
       await window.ethereum.request({ method: 'wallet_addEthereumChain', params: [params] });
     } else {
       try { await window.ethereum.request({ method: 'wallet_switchEthereumChain', params: [{ chainId: params.chainId }] }); }
@@ -173,6 +173,10 @@ function waitingOn(I) {
 }
 
 function render() {
+  $('net-label').textContent = net().live ? 'live' : 'testnet';
+  $('net-label').className = net().live ? 'live' : '';
+  $('switch-hedera').textContent = `Switch to ${net().name}`;
+  document.title = `Engagement Escrow — Bixxville (${net().live ? net().name : 'testnet'})`;
   const badge = $('net-badge');
   if (!window.ethereum) { badge.textContent = 'No wallet'; badge.className = 'badge'; }
   else {

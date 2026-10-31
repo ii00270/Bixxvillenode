@@ -8,6 +8,7 @@ body{background:var(--paper);color:var(--ink);font-family:var(--mono);font-size:
 .top::after{content:'';position:absolute;left:0;right:0;bottom:-1px;height:2px;background:var(--neon)}
 .brand{font-family:var(--display);font-size:20px;letter-spacing:.06em;display:flex;align-items:center;gap:9px}
 .brand small{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--orange);border:1px solid var(--orange);border-radius:999px;padding:1px 7px}
+.brand small.live{color:#fff;background:#c0262d;border-color:#c0262d}
 .glyph{width:14px;height:14px;border-radius:50%;background:var(--neon)}
 .netbox{display:flex;flex-wrap:wrap;align-items:center;gap:8px}
 .badge{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--soft)}

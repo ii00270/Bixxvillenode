@@ -4347,6 +4347,80 @@ html.theme-light{
   -webkit-mask:var(--owl) center/contain no-repeat;mask:var(--owl) center/contain no-repeat;filter:drop-shadow(0 1px 3px rgba(0,0,0,.45))}
 html.theme-light #term-fab .fab-lbl{color:#17171A;opacity:.75}
 html.theme-light #term-fab .fab-owl{background:#17171A;filter:drop-shadow(0 1px 2px rgba(255,255,255,.7))}
+
+/* ── BLITZ ── */
+.bz{display:grid;gap:14px;padding-bottom:30px}
+.bz-card{border-radius:24px;padding:18px 20px;background:linear-gradient(180deg,var(--g-dense-top),var(--g-dense-bottom));color:var(--term-fg);box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
+.bz-card h3{font-family:var(--g-sans);font-weight:500;font-size:clamp(1.8rem,7vw,2.4rem);letter-spacing:-.035em;line-height:1;margin:6px 0 8px}
+.bz-card small{font-size:12px;color:var(--term-dim)}
+.bz-card p{margin:6px 0 10px;line-height:1.55;font-family:var(--g-sans)}
+.bz-hero p{max-width:60ch;color:var(--term-dim)}
+.bz-dots{display:flex;gap:6px;flex-wrap:wrap}
+.bz-dots span{font-family:var(--g-sans);font-size:12px;font-weight:500;padding:6px 12px;border-radius:999px;background:var(--g-chip);color:var(--term-dim)}
+.bz-dots span.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift);font-weight:600}
+.bz-dots span.done{color:var(--term-fg)}
+.bz-nav{display:flex;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
+.bz-nav .act-btn{width:auto;flex:1;margin:0}
+.bz-dates{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:8px 0}
+.bz-dates input{width:100%;min-width:0}
+.bz-dates label span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim);margin:0 4px 6px}
+.bz-note{font-size:12.5px;color:var(--term-dim);margin:8px 2px;line-height:1.5}
+.bz-sizes{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin:8px 0}
+.bz-size{appearance:none;border:0;border-radius:20px;padding:16px 12px;background:var(--g-chip);color:var(--term-fg);cursor:pointer;display:flex;flex-direction:column;gap:4px;align-items:flex-start;font-family:var(--g-sans)}
+.bz-size b{font-size:20px;font-weight:500;letter-spacing:-.02em}
+.bz-size span{font-size:12.5px;color:var(--term-dim);font-family:var(--g-mono)}
+.bz-size.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift)}
+.bz-size.on span{color:#4F4D49}
+.bz-person{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 14px;border-radius:18px;background:var(--g-row2);margin-bottom:8px}
+.bz-person.on{background:var(--g-dense-on)}
+.bz-who{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.bz-who b{font-family:var(--g-sans);font-weight:500;font-size:15px}
+.bz-who b em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--g-chip);margin-left:6px}
+.bz-who small{font-size:12px;color:var(--term-dim)}
+.bz-roles{display:flex;gap:6px;flex-wrap:wrap}
+.bz-role{appearance:none;border:0;border-radius:999px;padding:8px 13px;min-height:36px;font:600 12.5px var(--g-sans);background:var(--g-chip);color:var(--term-fg);cursor:pointer}
+.bz-role.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift)}
+.bz-role:disabled{opacity:.3;cursor:not-allowed}
+.bz-wal{display:flex;gap:8px;align-items:center;font:12px var(--g-mono);color:var(--term-dim);flex-wrap:wrap}
+.bz-chip{font-style:normal;font:600 11px var(--g-sans);padding:3px 9px;border-radius:999px;background:var(--g-chip);color:var(--term-dim)}
+.bz-chip.ok{color:#2FBF71;background:rgba(47,191,113,.14)}
+.bz-chip.bad{color:var(--red);background:rgba(var(--red-rgb),.14)}
+.bz-live-h .lg-tag{vertical-align:middle;margin-left:8px}
+.bz-gate{display:flex;gap:16px;align-items:center}
+.bz-gate>div:last-child{flex:1;min-width:0}
+.bz-gate small{display:block;margin:2px 0}
+#terminal-shell .cy-row,#terminal-shell .cy-row.on{border:0;border-radius:20px;background:var(--g-row2);padding:14px 16px;margin-bottom:8px}
+.bz-gate b{font-family:var(--g-sans);font-weight:500;font-size:17px;letter-spacing:-.01em}
+.bz-leaf{position:relative;flex:none;width:76px;height:76px;display:grid;place-items:center;color:var(--term-dim)}
+.bz-leaf svg{position:absolute;inset:0;width:100%;height:100%;fill:currentColor;opacity:.35;stroke:currentColor;stroke-width:1.5;stroke-linejoin:round}
+.bz-leaf b{position:relative;font:600 22px var(--g-mono);color:var(--term-fg);margin-top:6px}
+.bz-leaf.lit{color:#F3F1EC}
+.bz-leaf.lit svg{opacity:.95;fill:#F3F1EC;stroke:#fff;filter:drop-shadow(0 0 10px rgba(255,255,255,.55));animation:bzglow 2.6s ease-in-out infinite}
+.bz-leaf.lit b{color:#0A0A0A}
+html.theme-light .bz-leaf.lit{color:#17171A}
+html.theme-light .bz-leaf.lit svg{fill:#17171A;stroke:#0A0A0A;filter:drop-shadow(0 0 8px rgba(0,0,0,.25))}
+html.theme-light .bz-leaf.lit b{color:#fff}
+@keyframes bzglow{0%,100%{filter:drop-shadow(0 0 5px rgba(255,255,255,.35));transform:scale(1)}50%{filter:drop-shadow(0 0 16px rgba(255,255,255,.8));transform:scale(1.04)}}
+.bz-bar{height:6px;border-radius:3px;background:var(--g-chip);overflow:hidden;margin:10px 0 6px}
+.bz-bar i{display:block;height:100%;background:var(--g-silver);border-radius:3px;transition:width .6s}
+.bz-money{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin:8px 0}
+.bz-money small{display:block}
+.bz-money b{display:block;font:500 22px var(--g-mono);letter-spacing:-.02em;margin:2px 0}
+.bz-money span{font-size:12px;color:var(--term-dim)}
+.bz-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+@media (prefers-reduced-motion:reduce){.bz-leaf.lit svg{animation:none}}
+
+/* Jobs and Proof */
+.jb-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}
+.jb-top h3{font-size:clamp(1.4rem,5.5vw,1.9rem);margin:4px 0 6px}
+.jb-esc{font-family:var(--g-sans);font-size:13.5px;margin:6px 0 4px;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.pr-row{appearance:none;border:0;width:100%;display:flex;justify-content:space-between;align-items:center;gap:12px;text-align:left;padding:13px 14px;margin-bottom:8px;border-radius:18px;background:var(--g-row2);color:var(--term-fg);font-family:var(--g-sans);cursor:pointer}
+.pr-row.static{cursor:default}
+.pr-row span{min-width:0}
+.pr-row b{display:block;font-weight:500;font-size:14.5px}
+.pr-row small{display:block;font-size:12px;color:var(--term-dim);margin-top:2px}
+.pr-row em{font-style:normal;font-weight:600;font-size:12.5px;white-space:nowrap}
+.pr-row:not(.static):hover{background:var(--g-chip-hi)}
 </style>
 </head>
 <body>
@@ -4979,6 +5053,7 @@ const CANON = (() => {
     III: { title: 'Delivery, Timeliness & Visual Identity', status: 'proposed' },
     IV:  { title: 'The Name in Public', status: 'proposed' },
     V:   { title: 'Sealing at Checkpoints', status: 'proposed' },
+    VI:  { title: 'Tokens: Tickets, Work Badges and Editions (the Blitz is §3)', status: 'proposed' },
   };
   const isRatified = n => AMENDMENTS[n]?.status === 'ratified';
 
@@ -8230,27 +8305,8 @@ function openProject(id) {
 }
 
 // Open jobs in one list, one tap from the Dashboard; each opens the job with its escrow.
-function openJobsList() {
-  openOverlay('Jobs & escrow', async (body) => {
-    const { data, error } = await sb.from('relation_submissions')
-      .select('id,title,relation_name,relation_code,status,created_at,bids(id,log_size,status)')
-      .in('status', ['open', 'settling'])
-      .order('created_at', { ascending: false });
-    if (error) { body.innerHTML = `<div class="empty"><div class="empty-msg">Could not load jobs: ${esc(error.message)}</div></div>`; return; }
-    if (!data?.length) { body.innerHTML = '<div class="empty"><div class="empty-msg">No open jobs.</div></div>'; return; }
-    body.innerHTML = `<div style="padding:12px 18px">${data.map(r => {
-      const scopes = r.bids || [];
-      const done = scopes.filter(s => s.status === 'delivered' || s.status === 'confirmed').length;
-      return `<div class="proj-card" onclick="openProject('${r.id}')">
-        <div class="proj-top">
-          <div class="proj-name">${esc(r.title || 'Untitled')}</div>
-          <div class="proj-status status-${esc(r.status)}">${esc(r.status.charAt(0).toUpperCase() + r.status.slice(1))}</div>
-        </div>
-        <div class="proj-meta">${esc(r.relation_name || r.relation_code || '')} · ${scopes.length} line${scopes.length === 1 ? '' : 's'} · ${done} delivered · open for escrow →</div>
-      </div>`;
-    }).join('')}</div>`;
-  });
-}
+// Jobs & escrow now live in Decomposition, on the Jobs tab.
+function openJobsList() { DC.tab = 'jobs'; setTermView('tracker'); }
 
 // From a "next up" prompt: just this job's escrow panel, so the step's button is the first thing on screen.
 function openEscrowStep(projectId, title) {
@@ -11423,6 +11479,17 @@ async function buildNextUp() {
     const noWallet = (CL.members || []).filter(m => !m.wallet_address && m.active !== false);
     if (noWallet.length) out.push({ kind: 'wallet', tag: 'Members', q: `${noWallet.length} member${noWallet.length > 1 ? 's' : ''} can’t be paid yet — no wallet on file (${short(noWallet.map(m => m.peer_name).join(', '))}). Add them?`, btn: 'Add wallets', run: () => { CL.tab = 'members'; setTermView('clients'); } });
   }
+  // The Blitz: the opening sprint of the Cycle
+  try {
+    const { data: bv } = await sb.rpc('blitz_view');
+    const go = () => { DC.tab = 'blitz'; setTermView('tracker'); };
+    const b = bv?.blitz;
+    if (!b && isExec() && bv?.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: `Cycle ${bv.cycle} has no Blitz yet. Start the opening sprint?`, btn: 'Start Blitz', run: () => { BZ.next = false; go(); } });
+    if (!b && isExec() && bv && !bv.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: 'Amendment VI is waiting for your ratification. It defines the Blitz.', btn: 'Review', run: go });
+    const mine = (b?.members || []).find(m => m.operator_id === operator?.id);
+    if (b && b.status === 'live' && mine && !mine.wallet) out.push({ kind: 'wallet', tag: 'Blitz', q: `You are on the Cycle ${b.cycle_number} Blitz as ${(mine.roles || [mine.role]).join(' and ')}, but there's no wallet to pay. Add one?`, btn: 'Add wallet', run: openAddWallet });
+    if (b && b.status === 'live' && mine?.wallet) out.push({ kind: 'continue', tag: 'Blitz', q: `The ${b.size_class} Blitz is live for Cycle ${b.cycle_number}. See where it stands?`, btn: 'Open', run: go });
+  } catch (e) { console.error(e); }
   // Escrow steps that are waiting on you, read live from Hedera
   try {
     const { data: list } = await sb.rpc('escrow_list');
@@ -12483,7 +12550,7 @@ async function renderNotificationsPanel() {
       <div><h2>Notifications</h2><p>What needs you, and what’s happened on the network.</p></div>
       <div class="pp-head-acts"><button class="pp-btn" ${unread.length ? '' : 'disabled'} onclick="ntMarkAll()">${ico(ICON.check)}Mark all read</button></div>
     </div>
-    ${NT.attention.length ? `<div class="nt-sec"><h4>Needs your attention <em>${NT.attention.length}</em></h4>
+    ${NT.attention.length ? `<div class="nt-sec"><h4>Needs your attention <em>${NT.attention.length}</em> <button class="pf-btn" style="margin-left:8px" onclick="dcGo('proof')">Open the Proof queue</button></h4>
       <div class="nt-att">${NT.attention.map((a, i) => `<button class="nt-att-row k-${a.kind}" onclick="ntOpenAttention(${i})">
         <span class="nt-att-ico">${ico(a.kind === 'verify' ? ICON.check : ICON.flag)}</span>
         <span class="nt-att-txt"><b>${esc(a.title)}</b><small>${esc(a.sub)}${a.when ? ' · ' + (a.kind === 'verify' ? 'submitted ' + esc(agoText(a.when)) : 'due ' + esc(fmtDate(a.when))) : ''}</small></span>
@@ -13363,8 +13430,11 @@ function setTermView(view) {
 // Overview is drawn here. Steps, Maps and Places are the existing screens, shown under the same
 // header and tabs (see the wrappers below), so everything they do still works from one place.
 var DC = { tab: 'overview', mapId: null, maps: null, filter: 'All' };
-const DC_TABS = [['overview', 'Overview'], ['steps', 'Steps'], ['map', 'Maps'], ['places', 'Places']];
+const DC_TABS = [['blitz', 'Blitz'], ['overview', 'Overview'], ['jobs', 'Jobs'], ['steps', 'Steps'], ['proof', 'Proof'], ['map', 'Maps'], ['places', 'Places']];
 const DC_ICO = {
+  jobs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
+  proof: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.4 7.5 9 4.3-1.6 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>',
+  blitz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
   logo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/></svg>',
   overview: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>',
   steps: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/></svg>',
@@ -13418,6 +13488,7 @@ function dcHeadHtml(tab) {
     : `<option>${DC.maps ? 'No jobs mapped yet' : 'Loading jobs…'}</option>`;
   const days = Math.floor((Date.now() - GENESIS_DATE) / 864e5);
   const left = CYCLE_DAYS - (days % CYCLE_DAYS);
+  requestAnimationFrame(() => document.querySelector('.dc-tabset button.on')?.scrollIntoView({ inline: 'center', block: 'nearest' }));
   return `<div class="dc dc-head">
     <div class="dc-bar">
       <div class="dc-crumb">
@@ -13460,6 +13531,9 @@ function dcGo(tab) {
   setTermView('tracker');
 }
 function renderDecomposition() {
+  if (DC.tab === 'blitz') return renderBlitzPanel();
+  if (DC.tab === 'jobs') return renderJobsPanel();
+  if (DC.tab === 'proof') return renderProofPanel();
   if (DC.tab === 'steps') return renderTrackerBoard();
   if (DC.tab === 'map') return renderDecomposedPanel();
   if (DC.tab === 'places') return renderPlacesPanel();
@@ -14041,6 +14115,396 @@ async function startCycle(num) {
   CY.pick = {};
   toast(`Cycle ${num} started.`);
   renderCyclePanel();
+}
+
+// ── BLITZ — the opening sprint of a Cycle (Amendment VI §3) ───────────────────────────────────────────
+// Declared in writing by the Executive Operator: at most 14 days, wholly inside one Cycle, no pay premium.
+// It is also where a Cycle opens: the team, their wallets and the Cycle's terms are set here in one pass,
+// and the Decomposition builds out from it. Roles follow the canon's tiers (a tier covers the ones below it).
+const BZ_SIZES = [['Mini', 1], ['Micro', 4], ['Minor', 8], ['Medium', 16], ['Major', 32]];
+const BZ_ROLES = [['architect', 'Architect'], ['wrangler', 'Wrangler'], ['apprentice', 'Apprentice']];
+const BZ = { next: false, view: null, cands: null, w: null, timer: null, ready: {}, escrow: undefined };
+const bzTier = logs => tier(logs).toLowerCase();
+const bzCan = (c, role) => CANON.eligibleTiers(bzTier(c.total_logs), 0).includes(role);
+const bzToday = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Puerto_Rico' }).format(new Date());
+const bzAdd = (iso, n) => { const d = new Date(iso + 'T00:00:00Z'); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const bzDays = (a, b) => Math.round((new Date(b + 'T00:00:00Z') - new Date(a + 'T00:00:00Z')) / 864e5);
+const bzFmt = iso => new Date(iso + 'T00:00:00Z').toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+const bzCycleNum = () => { const c = getActiveCycle(); return BZ.next ? c.num + 1 : c.num; };
+const bzPanelOn = () => document.getElementById('terminal-shell')?.dataset.view === 'tracker' && DC.tab === 'blitz';
+
+async function renderBlitzPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('blitz') + '<div class="dc dc-body"><div class="dc-loading">Reading the Blitz…</div></div>';
+  await dcLoadMaps();
+  const { data, error } = await sb.rpc('blitz_view', { p_cycle: bzCycleNum() });
+  if (!bzPanelOn()) return;
+  if (error) { panel.innerHTML = dcHeadHtml('blitz') + `<div class="dc dc-body"><div class="bz-card">Could not read the Blitz: ${esc(error.message)}</div></div>`; return; }
+  BZ.view = data;
+  if (data?.ratified && CANON.AMENDMENTS.VI) CANON.AMENDMENTS.VI.status = 'ratified';
+  await bzLoadSteps();
+  if (!bzPanelOn()) return;
+  bzDraw();
+  clearInterval(BZ.timer); BZ.timer = setInterval(bzTick, 8000);
+}
+
+// The steps come from the job chosen in the header; the escrow is the one for that job.
+async function bzLoadSteps() {
+  const maps = DC.maps || [];
+  BZ.escrow = undefined;
+  if (!maps.length) return;
+  const want = maps.some(m => m.id === (DC.mapId || trackerState?.mapId)) ? (DC.mapId || trackerState.mapId) : maps[0].id;
+  DC.mapId = want;
+  if (trackerState?.mapId !== want || trackerState.source !== 'live') await loadWorkMap(want);
+  const pid = trackerState?.map?.submission_id;
+  if (pid) { try { const { data } = await sb.rpc('escrow_for_project', { p_project: pid }); BZ.escrow = data?.[0] || null; } catch (e) { BZ.escrow = null; } }
+}
+
+function bzDraw() {
+  const panel = document.getElementById('term-panel');
+  if (!panel) return;
+  panel.classList.add('dc-on');
+  panel.innerHTML = dcHeadHtml('blitz') + `<div class="dc dc-body bz">${BZ.w ? bzWizHtml() : bzBody()}</div>`;
+  if (BZ.w?.step === 4) bzCheckWallets();
+  if (!BZ.w && BZ.view?.blitz) bzCheckLive();
+}
+
+// Live: the team, the steps and the money refresh by themselves while this screen is open.
+async function bzTick() {
+  if (!bzPanelOn()) { clearInterval(BZ.timer); BZ.timer = null; return; }
+  if (BZ.w || document.hidden) return;
+  const ae = document.activeElement;
+  if (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName) && document.getElementById('term-panel').contains(ae)) return;
+  try {
+    const { data } = await sb.rpc('blitz_view', { p_cycle: bzCycleNum() });
+    if (!bzPanelOn() || BZ.w) return;
+    BZ.view = data;
+    if (trackerState?.mapId) await loadWorkMap(trackerState.mapId);
+    const box = document.getElementById('bz-live');
+    if (box) { box.innerHTML = bzLiveInner(); bzCheckLive(); }
+  } catch (e) { /* the next tick tries again */ }
+}
+
+const bzToggle = () => isExec() ? `<div class="lg-filters"><button class="lg-f ${BZ.next ? '' : 'on'}" onclick="BZ.next=false;BZ.w=null;renderBlitzPanel()">This Cycle (${getActiveCycle().num})</button><button class="lg-f ${BZ.next ? 'on' : ''}" onclick="BZ.next=true;BZ.w=null;renderBlitzPanel()">Next Cycle (${getActiveCycle().num + 1})</button></div>` : '';
+
+function bzBody() {
+  const v = BZ.view, num = bzCycleNum();
+  if (v?.blitz) return bzToggle() + `<div id="bz-live">${bzLiveInner()}</div>`;
+  const head = `<div class="bz-card bz-hero"><small>Cycle ${num}</small><h3>Blitz</h3>
+    <p>The opening sprint of a Cycle: at most 14 days, wholly inside it, declared in writing before work starts. The Cycle's team, wallets and steps are set up here, and the work builds out from it. A Blitz carries no pay premium.</p></div>`;
+  if (!v?.ratified) {
+    return bzToggle() + head + (isExec()
+      ? `<div class="bz-card"><h4 class="cy-h">Ratify Amendment VI first <span>the Blitz is defined in its §3</span></h4>
+          <p class="pp-muted">Write the decision in your own words. It is kept on record.</p>
+          <textarea id="bz-rat" class="pf-tax-in wide" rows="3" maxlength="500">I ratify Amendment VI. The Blitz is the opening sprint of a Cycle.</textarea>
+          <div class="gate-err" id="bz-err"></div><button class="act-btn" onclick="bzRatify()">Ratify Amendment VI</button></div>`
+      : `<div class="bz-card"><p class="pp-muted">Amendment VI has not been ratified yet. The Executive Operator will start the Blitz once it is.</p></div>`);
+  }
+  return bzToggle() + head + (isExec()
+    ? `<div class="bz-card"><p>No Blitz yet for Cycle ${num}.${v.cycle_started ? ' The Cycle has started, so the Blitz can only use its roster.' : ' Starting one also opens the Cycle.'}</p><button class="act-btn" onclick="bzWizOpen()">Start Blitz</button></div>`
+    : `<div class="bz-card"><p class="pp-muted">No Blitz has been declared for Cycle ${num} yet. The Executive Operator starts it and chooses the team.</p></div>`);
+}
+
+async function bzRatify() {
+  const err = document.getElementById('bz-err'), say = m => { err.textContent = m; err.classList.add('show'); };
+  err.classList.remove('show');
+  const statement = (document.getElementById('bz-rat')?.value || '').trim();
+  if (statement.length < 20) return say('Write the decision in a sentence or two.');
+  if (!await osConfirm('Ratify Amendment VI? This is your written decision as Executive Operator, and it is kept on record.')) return;
+  const { error } = await sb.rpc('ratify_amendment', { p_amendment: 'VI', p_statement: statement });
+  if (error) return say(error.message);
+  toast('Amendment VI ratified.');
+  renderBlitzPanel();
+}
+
+// ── the live view ──
+function bzSteps() {
+  const L = trackerState?.source === 'live' ? (trackerState.leaves || []).filter(l => l.logs > 0) : [];
+  if (!L.length) return null;
+  const bid = b => b.branch_id ?? b.id;
+  const B = [...(trackerState.branches || [])].sort((a, b) => (a.position ?? 1e9) - (b.position ?? 1e9) || byLeafCode(a.code || '', b.code || ''));
+  const gates = B.map(b => ({ b, ls: L.filter(l => l.branch_id === bid(b)) })).filter(g => g.ls.length);
+  const open = gates.findIndex(g => g.ls.some(l => l.status !== 'delivered'));
+  const cur = open < 0 ? null : gates[open];
+  const cents = ls => ls.reduce((n, l) => n + Math.round(l.logs * leafRateCents(l)), 0);
+  const delivered = L.filter(l => l.status === 'delivered'), me = operator?.id;
+  const mine = L.filter(l => l.assigned_to === me || l.claimed_by === me);
+  const labor = cents(L), price = CANON.priceCents(labor);
+  return { total: L.length, delivered: delivered.length, gates: gates.length, gateNo: open < 0 ? gates.length : open + 1, cleared: open < 0,
+    gateTitle: cur ? `${cur.b.code} · ${cur.b.title || 'Checkpoint'}` : '', left: cur ? cur.ls.filter(l => l.status !== 'delivered').length : 0,
+    labor, done: cents(delivered), price, reserve: price - labor, mineN: mine.length, mine: cents(mine), mineDone: cents(mine.filter(l => l.status === 'delivered')) };
+}
+
+function bzLiveInner() {
+  const v = BZ.view, b = v.blitz, today = v.today, S = bzSteps();
+  const total = bzDays(b.starts_on, b.ends_on) + 1, before = today < b.starts_on, after = today > b.ends_on;
+  const day = before ? 0 : Math.min(total, bzDays(b.starts_on, today) + 1), left = after ? 0 : Math.max(0, bzDays(today, b.ends_on));
+  const state = b.status === 'closed' ? 'Closed' : after ? 'Ended' : before ? `Starts ${bzFmt(b.starts_on)}` : `Day ${day} of ${total}`;
+  const me = (b.members || []).find(m => m.operator_id === operator?.id);
+  const leaf = `<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 54C10 26 28 8 58 8c0 28-18 46-48 46z"/><path d="M10 54 40 24" fill="none"/></svg>`;
+  const steps = S ? `<div class="bz-gate"><div class="bz-leaf ${S.left ? 'lit' : ''}">${leaf}<b>${S.left}</b></div>
+      <div><b>${S.cleared ? 'Every gate is cleared' : `${S.left} step${S.left === 1 ? '' : 's'} to the next gate`}</b>
+      <small>${S.cleared ? `${S.delivered} of ${S.total} steps delivered` : `Gate ${S.gateNo} of ${S.gates} · ${esc(S.gateTitle)}`}</small>
+      <div class="bz-bar"><i style="width:${S.total ? Math.round(S.delivered / S.total * 100) : 0}%"></i></div><small>${S.delivered} of ${S.total} steps delivered</small></div></div>`
+    : `<div class="bz-gate"><div class="bz-leaf">${leaf}<b>0</b></div><div><b>No steps yet</b><small>Map a job and its steps become the gates of this Blitz.</small>
+      <button class="pf-btn" onclick="document.getElementById('term-upload-file').click()">+ New map</button></div></div>`;
+  const money = S ? `<div class="bz-card"><h4 class="cy-h">Money building <span>from steps delivered; paid when the operator seals each line</span></h4>
+      <div class="bz-money"><div><small>Verified so far</small><b>${escrowUsd(S.done)}</b><span>of ${escrowUsd(S.labor)} in labor</span></div>
+      <div><small>Escrow price</small><b>${escrowUsd(S.price)}</b><span>labor plus the ${escrowUsd(S.reserve)} reserve</span></div>
+      ${S.mineN ? `<div><small>Yours</small><b>${escrowUsd(S.mineDone)}</b><span>of ${escrowUsd(S.mine)} on ${S.mineN} step${S.mineN === 1 ? '' : 's'}</span></div>` : ''}</div>
+      <div class="bz-bar"><i style="width:${S.labor ? Math.round(S.done / S.labor * 100) : 0}%"></i></div></div>` : '';
+  const pid = trackerState?.map?.submission_id, ex = BZ.escrow;
+  const escrow = S ? `<div class="bz-card"><h4 class="cy-h">Escrow <span>the money is held until each line is sealed</span></h4>
+      ${ex === undefined ? '<p class="pp-muted">Reading the escrow…</p>'
+        : ex ? `<p><span class="lg-tag act">Prepared</span> ${esc(ex.network || '')} · price ${escrowUsd(ex.price_cents)}</p><button class="pf-btn" onclick="openEscrowStep('${esc(pid)}', 'Escrow')">Open the escrow</button>`
+        : pid ? `<p class="pp-muted">No escrow for this job yet.</p>${isExec() ? `<button class="act-btn" onclick="openProject('${esc(pid)}')">Prepare the escrow</button>` : ''}`
+        : '<p class="pp-muted">This job is not linked to a client yet.</p>'}</div>` : '';
+  const team = (b.members || []).map(m => `<div class="bz-person on"><div class="bz-who"><b>${esc(m.name)}${m.operator_id === operator?.id ? ' <em>you</em>' : ''}</b>
+      <small>${esc(bzWho(m))}</small></div>
+      <div class="bz-wal"><span>${m.wallet ? esc(shortAddr(m.wallet)) : 'no wallet'}</span><i class="bz-chip" data-w="${esc(m.wallet || '')}">${m.wallet ? '…' : 'needs a wallet'}</i></div></div>`).join('');
+  return `<div class="bz-card bz-live-h"><div><small>Cycle ${b.cycle_number} · declared ${esc(new Date(b.declared_at).toLocaleDateString())} by ${esc(b.declared_by_name || '—')}</small>
+      <h3>${esc(b.size_class)} Blitz <span class="lg-tag ${b.status === 'live' && !after ? 'act' : ''}">${esc(state)}</span></h3>
+      <p>${b.budget_logs} LOG${b.budget_logs === 1 ? '' : 's'} · ${bzFmt(b.starts_on)} to ${bzFmt(b.ends_on)}${b.status === 'live' && !after && !before ? ` · ${left} day${left === 1 ? '' : 's'} left` : ''}</p></div></div>
+    <div class="bz-card">${steps}</div>${money}${escrow}
+    <div class="bz-card"><h4 class="cy-h">Team · ${(b.members || []).length}</h4>${team}
+      ${me && !me.wallet ? `<button class="act-btn" onclick="openAddWallet()">Add your wallet</button>` : ''}
+      ${isExec() && b.status === 'live' ? `<div class="bz-acts"><button class="pf-btn" onclick="bzAddOpen()">+ Add to the team</button><button class="pf-btn" onclick="bzClose('${esc(b.id)}')">Close the Blitz</button></div>` : ''}</div>
+    <div class="bz-card"><h4 class="cy-h">Declared in writing</h4><p class="pp-muted">${esc(b.statement)}</p></div>`;
+}
+
+async function bzCheckLive() {
+  for (const el of document.querySelectorAll('.bz-chip[data-w]')) {
+    const w = el.dataset.w; if (!w) continue;
+    const c = BZ.ready[w];
+    const r = c && Date.now() - c.at < 60000 ? c.r : (BZ.ready[w] = { at: Date.now(), r: await hederaReadiness(w) }).r;
+    el.textContent = r.error ? 'could not check' : !r.exists ? 'not on Hedera yet' : r.acceptsUsdc ? 'ready' : 'has not accepted USDC';
+    el.className = 'bz-chip ' + (r.error ? '' : r.exists && r.acceptsUsdc ? 'ok' : 'bad');
+  }
+}
+
+async function bzClose(id) {
+  if (!await osConfirm('Close this Blitz? The record stays; no more people can be added.')) return;
+  const { error } = await sb.rpc('blitz_close', { p_blitz: id });
+  if (error) return toast(error.message);
+  toast('Blitz closed.'); renderBlitzPanel();
+}
+
+async function bzAddOpen() {
+  const b = BZ.view?.blitz; if (!b) return;
+  const [{ data: cands, error }, { data: cv }] = await Promise.all([sb.rpc('blitz_candidates'), sb.rpc('cycle_view', { p_cycle: b.cycle_number })]);
+  if (error) return toast(error.message);
+  const roster = new Set((cv?.roster || []).map(r => r.operator_id)), inB = new Set((b.members || []).map(m => m.operator_id));
+  const list = (cands || []).filter(c => roster.has(c.id) && !inB.has(c.id));
+  openOverlay('Add to the Blitz', body => {
+    body.innerHTML = `<div class="form-block"><p class="escrow-muted">Anyone on the Cycle's roster can join, including after it starts. Their role has to be at or below their tier.</p></div>`
+      + (list.length ? list.map(c => `<div class="form-block"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)}</small></div>
+          <div class="bz-roles">${BZ_ROLES.map(([k, l]) => `<button class="bz-role" ${bzCan(c, k) ? '' : 'disabled'} onclick="bzJoin('${c.id}','${k}')">${l}</button>`).join('')}</div></div>`).join('')
+        : `<div class="form-block"><p class="escrow-muted">Everyone on the roster is already on the Blitz.</p></div>`);
+  });
+}
+async function bzJoin(id, role) {
+  const { error } = await sb.rpc('blitz_add_member', { p_blitz: BZ.view.blitz.id, p_operator: id, p_role: role });
+  if (error) return toast(error.message);
+  closeOverlay?.(); toast('Added.'); renderBlitzPanel();
+}
+
+// ── the guided start ──
+async function bzWizOpen() {
+  const num = bzCycleNum(), first = cycleStartDate(num).toISOString().slice(0, 10), last = bzAdd(first, 27), today = bzToday();
+  const from = today > first ? today : first;
+  if (from > last) return toast(`Cycle ${num} has ended.`);
+  const [c, st, cv] = await Promise.all([sb.rpc('blitz_candidates'), treasuryStatus().catch(() => ({})), sb.rpc('cycle_view', { p_cycle: num })]);
+  if (c.error) return toast(c.error.message);
+  BZ.cands = c.data || [];
+  BZ.w = { step: 1, cycle: num, first, last, from, to: bzAdd(from, 13) < last ? bzAdd(from, 13) : last, size: 'Medium', team: {}, pick: {}, hard: {}, note: '', statement: '',
+    st, started: !!cv.data, rosterRows: cv.data?.roster || [] };
+  for (const m of BZ.cands) BZ.w.pick[m.id] = { wallet: m.wallet || '', tax_wallet: m.tax_wallet || '', tax: pctOf(m.tax_bps) };
+  bzDraw();
+}
+const bzSteps5 = ['Days', 'Size', 'Team', 'Wallets', 'Declare'];
+function bzWizHtml() {
+  const w = BZ.w, n = w.step;
+  const dots = `<div class="bz-dots">${bzSteps5.map((l, i) => `<span class="${i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''}">${i + 1 < n ? '✓' : i + 1} ${l}</span>`).join('')}</div>`;
+  const nav = `<div class="gate-err" id="bz-err"></div><div class="bz-nav"><button class="pf-btn" onclick="${n === 1 ? 'BZ.w=null;bzDraw()' : 'bzBack()'}">${n === 1 ? 'Cancel' : 'Back'}</button>`
+    + (n < 5 ? `<button class="act-btn" onclick="bzNext()">Next</button>` : `<button class="act-btn" id="bz-go" onclick="bzDeclare()">Declare the Blitz${w.started ? '' : ` and start Cycle ${w.cycle}`}</button>`) + `</div>`;
+  let body = '';
+  if (n === 1) body = `<h4 class="cy-h">1 · Days <span>at most 14, wholly inside Cycle ${w.cycle} (${bzFmt(w.first)} to ${bzFmt(w.last)})</span></h4>
+    ${bzToggle().replace(/BZ\.w=null;renderBlitzPanel\(\)/g, 'bzWizSwitch()')}
+    <div class="bz-dates"><label><span>First day</span><input id="bz-from" type="date" class="pf-tax-in" min="${w.from}" max="${w.last}" value="${w.from}" onchange="bzDate()"></label>
+      <label><span>Last day</span><input id="bz-to" type="date" class="pf-tax-in" min="${w.from}" max="${w.last}" value="${w.to}" onchange="bzDate()"></label></div>
+    <div class="bz-note" id="bz-len">${bzDays(w.from, w.to) + 1} day${bzDays(w.from, w.to) ? 's' : ''}</div>
+    ${w.started ? `<div class="bz-note">Cycle ${w.cycle} has already started. Its roster is fixed, so only people on it can join.</div>` : `<div class="bz-note">Cycle ${w.cycle} has not started. Declaring the Blitz starts it, with the team you choose.</div>`}`;
+  if (n === 2) body = `<h4 class="cy-h">2 · Size <span>the Blitz's total LOG budget (1 LOG = 1 hour of qualified work)</span></h4>
+    <div class="bz-sizes">${BZ_SIZES.map(([k, l]) => `<button class="bz-size ${w.size === k ? 'on' : ''}" onclick="BZ.w.size='${k}';bzDraw()"><b>${k}</b><span>${l} LOG${l === 1 ? '' : 's'}</span></button>`).join('')}</div>`;
+  if (n === 3) {
+    const rost = w.started ? new Set(w.rosterRows.map(r => r.operator_id)) : null;
+    const list = BZ.cands.filter(c => !rost || rost.has(c.id));
+    const cnt = r => Object.values(w.team).filter(a => a.includes(r)).length;
+    body = `<h4 class="cy-h">3 · Team <span>an Architect, Wranglers and Apprentices. A tier covers the ones below it: an Operator can take every role, and an Apprentice can't take Architect work. One person can hold more than one role.</span></h4>
+      ${list.map(c => `<div class="bz-person ${w.team[c.id] ? 'on' : ''}"><div class="bz-who"><b>${esc(c.name)}</b><small>${esc(c.tier)} · ${c.total_logs} LOGs</small></div>
+        <div class="bz-roles">${BZ_ROLES.map(([k, l]) => { const ok = bzCan(c, k); return `<button class="bz-role ${(w.team[c.id] || []).includes(k) ? 'on' : ''}" ${ok ? '' : `disabled title="Above ${esc(c.name)}'s tier"`} onclick="bzRole('${c.id}','${k}')">${l}</button>`; }).join('')}</div></div>`).join('') || '<p class="pp-muted">No one is available.</p>'}
+      <div class="bz-note">Architect ${cnt('architect')} · Wranglers ${cnt('wrangler')} · Apprentices ${cnt('apprentice')}</div>`;
+  }
+  if (n === 4) {
+    const ids = Object.keys(w.team), st = w.st || {}, rate = Number(st.network_tax_bps) || 0;
+    const warn = [!st.treasury_wallet && 'No treasury wallet yet (Profile → Wallets). Escrows can’t be created without it.', rate > 0 && !st.tax_wallet && 'The network tax rate is above zero but there is no tax wallet. Add it first (Profile → Wallets).'].filter(Boolean);
+    const rows = ids.map(id => { const c = BZ.cands.find(x => x.id === id), p = w.pick[id], fixed = w.rosterRows.find(r => r.operator_id === id);
+      return `<div class="cy-row on"><div class="cy-who"><b>${esc(c.name)}</b><small>${esc(w.team[id].map(bzRoleName).join(' · '))} · <i class="bz-chip" id="bz-r-${id}">…</i></small></div>
+        ${fixed ? `<div class="cy-tax tax-c">paid to ${fixed.wallet ? esc(shortAddr(fixed.wallet)) : 'no wallet'}${fixed.tax_bps ? ` · ${pctOf(fixed.tax_bps)}% set aside` : ''} (fixed by the Cycle)</div>`
+        : `<div class="cy-fields"><label><span>Paid to</span><input class="pf-tax-in wide" value="${esc(p.wallet)}" placeholder="0x… wallet" spellcheck="false" oninput="BZ.w.pick['${id}'].wallet=this.value.trim()" onchange="bzCheckWallets()"></label>
+          <label><span>Tax wallet</span><input class="pf-tax-in wide" value="${esc(p.tax_wallet)}" placeholder="0x… (optional)" spellcheck="false" oninput="BZ.w.pick['${id}'].tax_wallet=this.value.trim()"></label>
+          <label><span>Set-aside %</span><input class="pf-tax-in" type="number" min="0" max="50" step="0.5" value="${esc(p.tax)}" oninput="BZ.w.pick['${id}'].tax=this.value"></label></div>`}</div>`; }).join('');
+    const sel = (k, l) => `<label class="cy-score"><span>${l}</span><select class="pf-tax-in" onchange="BZ.w.hard['${k}']=this.value"><option value="">—</option>${Array.from({ length: 10 }, (_, i) => `<option ${String(w.hard[k]) === String(i + 1) ? 'selected' : ''}>${i + 1}</option>`).join('')}</select></label>`;
+    body = `<h4 class="cy-h">4 · Wallets <span>everyone on the Blitz needs a wallet to be paid; each is checked on Hedera</span></h4>${rows}
+      <h4 class="cy-h">Network terms</h4><div class="cy-terms"><div><small>Network tax</small><b>${pctOf(rate)}%</b><span>of each price, out of the reserve → ${st.tax_wallet ? esc(shortAddr(st.tax_wallet)) : 'no tax wallet'}</span></div>
+      <div><small>Treasury</small><b>${st.treasury_wallet ? esc(shortAddr(st.treasury_wallet)) : 'Not set'}</b><span>seals lines, receives the reserve</span></div></div>
+      ${warn.map(x => `<div class="escrow-muted" style="color:var(--red);margin-top:6px">${esc(x)}</div>`).join('')}
+      ${w.started ? '' : `<h4 class="cy-h">Hardship reading <span>LOG 4 §13: taken once at Cycle open; the highest of the three governs</span></h4><div class="cy-scores">${sel('infrastructure', 'Infrastructure')}${sel('economic', 'Economic')}${sel('safety', 'Safety')}</div>
+      <label class="cy-note"><span>Note (optional)</span><input class="pf-tax-in wide" maxlength="140" value="${esc(w.note)}" oninput="BZ.w.note=this.value"></label>`}`;
+  }
+  if (n === 5) {
+    const ids = Object.keys(w.team), who = r => ids.filter(i => w.team[i].includes(r)).map(i => BZ.cands.find(c => c.id === i).name).join(', ') || '—';
+    body = `<h4 class="cy-h">5 · Declare <span>a Blitz is declared in writing, before work starts</span></h4>
+      <div class="bz-card"><b>${w.size} Blitz · ${BZ_SIZES.find(s => s[0] === w.size)[1]} LOG${w.size === 'Mini' ? '' : 's'}</b>
+      <p class="pp-muted">Cycle ${w.cycle} · ${bzFmt(w.from)} to ${bzFmt(w.to)} (${bzDays(w.from, w.to) + 1} days)<br>Architect: ${esc(who('architect'))}<br>Wranglers: ${esc(who('wrangler'))}<br>Apprentices: ${esc(who('apprentice'))}</p></div>
+      <label class="cy-note"><span>In your own words</span><textarea id="bz-stmt" class="pf-tax-in wide" rows="3" maxlength="500" placeholder="What this Blitz is for and what it should leave finished." oninput="BZ.w.statement=this.value">${esc(w.statement)}</textarea></label>`;
+  }
+  return dots + body + nav;
+}
+function bzWizSwitch() { BZ.w = null; bzWizOpen(); }
+function bzDate() {
+  const w = BZ.w, f = document.getElementById('bz-from'), t = document.getElementById('bz-to');
+  let from = f.value || w.from, to = t.value || w.to;
+  if (from < w.from) from = w.from; if (from > w.last) from = w.last;
+  if (to < from) to = from; if (to > w.last) to = w.last; if (bzDays(from, to) > 13) to = bzAdd(from, 13);
+  w.from = from; w.to = to; f.value = from; t.value = to;
+  document.getElementById('bz-len').textContent = `${bzDays(from, to) + 1} day${bzDays(from, to) ? 's' : ''}`;
+}
+function bzRole(id, role) { const w = BZ.w, cur = new Set(w.team[id] || []); if (cur.has(role)) cur.delete(role); else cur.add(role); if (cur.size) w.team[id] = [...cur]; else delete w.team[id]; bzDraw(); }
+const bzWho = m => { const rl = (m.roles || [m.role]).map(bzRoleName); return (rl.length === 1 && rl[0] === m.tier ? [m.tier] : [m.tier, ...rl]).join(' · '); };
+const bzRoleName = k => (BZ_ROLES.find(r => r[0] === k) || [k, k])[1];
+const bzErr = m => { const e = document.getElementById('bz-err'); if (e) { e.textContent = m; e.classList.add('show'); } return false; };
+function bzBack() { BZ.w.step = Math.max(1, BZ.w.step - 1); bzDraw(); }
+function bzNext() {
+  const w = BZ.w, ids = Object.keys(w.team), isAddr = a => !a || /^0x[0-9a-fA-F]{40}$/.test(a);
+  if (w.step === 3) {
+    if (!ids.some(i => w.team[i].includes('architect'))) return bzErr('Choose an Architect.');
+    if (!ids.some(i => w.team[i].includes('wrangler'))) return bzErr('Choose at least one Wrangler.');
+  }
+  if (w.step === 4) {
+    const st = w.st || {};
+    if (!st.treasury_wallet) return bzErr('Set the treasury wallet first (Profile → Wallets).');
+    if (Number(st.network_tax_bps) > 0 && !st.tax_wallet) return bzErr('Set the tax wallet first (Profile → Wallets).');
+    for (const id of ids) {
+      const c = BZ.cands.find(x => x.id === id), p = w.pick[id], pct = parseFloat(p.tax || '0');
+      if (w.rosterRows.find(r => r.operator_id === id)) continue;
+      if (!p.wallet) return bzErr(`${c.name} needs a wallet to be paid. Type one in, or have them add one in their profile.`);
+      if (!isAddr(p.wallet) || !isAddr(p.tax_wallet)) return bzErr(`${c.name}: a wallet starts with 0x and has 40 more letters and numbers.`);
+      if (!(pct >= 0 && pct <= 50)) return bzErr(`${c.name}: the set-aside is 0 to 50%.`);
+      if (pct > 0 && !p.tax_wallet) return bzErr(`${c.name}: add a tax wallet for the set-aside, or set it to 0%.`);
+    }
+    const hs = ['infrastructure', 'economic', 'safety'].map(k => w.hard[k]);
+    if (hs.some(Boolean) && !hs.every(Boolean)) return bzErr('Score all three hardship conditions, or leave all three blank.');
+  }
+  w.step = Math.min(5, w.step + 1); bzDraw();
+}
+async function bzCheckWallets() {
+  const w = BZ.w; if (!w) return;
+  for (const id of Object.keys(w.team)) {
+    const el = document.getElementById('bz-r-' + id); if (!el) continue;
+    const fixed = w.rosterRows.find(r => r.operator_id === id), a = (fixed?.wallet || w.pick[id].wallet || '').toLowerCase();
+    if (!/^0x[0-9a-f]{40}$/.test(a)) { el.textContent = 'needs a wallet'; el.className = 'bz-chip bad'; continue; }
+    const r = await hederaReadiness(a);
+    if (!document.getElementById('bz-r-' + id)) return;
+    el.textContent = r.error ? 'could not check' : !r.exists ? 'not on Hedera yet' : r.acceptsUsdc ? 'ready' : 'has not accepted USDC';
+    el.className = 'bz-chip ' + (r.error ? '' : r.exists && r.acceptsUsdc ? 'ok' : 'bad');
+  }
+}
+async function bzDeclare() {
+  const w = BZ.w, ids = Object.keys(w.team), stmt = (w.statement || '').trim();
+  if (stmt.length < 20) return bzErr('Write the declaration in a sentence or two.');
+  const hs = ['infrastructure', 'economic', 'safety'].map(k => w.hard[k]);
+  const hardship = hs.every(Boolean) ? { infrastructure: +hs[0], economic: +hs[1], safety: +hs[2] } : null;
+  const members = ids.map(id => { const p = w.pick[id]; return { operator_id: id, roles: w.team[id], wallet: p.wallet || null, tax_wallet: p.tax_wallet || null, tax_bps: Math.round(parseFloat(p.tax || '0') * 100) }; });
+  const budget = BZ_SIZES.find(s => s[0] === w.size)[1];
+  if (!await osConfirm(`Declare a ${w.size} Blitz (${budget} LOG${budget === 1 ? '' : 's'}) for Cycle ${w.cycle}, ${bzFmt(w.from)} to ${bzFmt(w.to)}?${w.started ? '' : ` This also starts Cycle ${w.cycle}: the roster and tax terms are fixed once it starts.`} It is kept on record.`)) return;
+  const btn = document.getElementById('bz-go'); if (btn) btn.disabled = true;
+  const { error } = await sb.rpc('blitz_start', { p_cycle: w.cycle, p_size: w.size, p_starts_on: w.from, p_ends_on: w.to, p_statement: stmt, p_members: members, p_hardship: hardship, p_note: w.note || null });
+  if (error) { if (btn) btn.disabled = false; return bzErr(error.message); }
+  BZ.w = null; toast('Blitz declared.'); renderBlitzPanel();
+}
+
+// ── JOBS and PROOF — two more tabs of the Decomposition ───────────────────────────────────────────────
+// Jobs: every open job with its lines and its escrow. Proof: everything waiting on a review, across all jobs,
+// your own steps, and the latest decisions. Both used to live in other places (the Dashboard's Jobs & escrow
+// popup, the Notifications screen); the work now starts and ends in one section.
+const dcTabIs = t => document.getElementById('terminal-shell')?.dataset.view === 'tracker' && DC.tab === t;
+const DC_TIMERS = {};
+const dcPoll = (tab, fn, ms = 12000) => {
+  clearInterval(DC_TIMERS[tab]);
+  DC_TIMERS[tab] = setInterval(() => {
+    if (!dcTabIs(tab)) { clearInterval(DC_TIMERS[tab]); return; }
+    const ae = document.activeElement;
+    if (document.hidden || (ae && /INPUT|TEXTAREA|SELECT/.test(ae.tagName) && document.getElementById('term-panel').contains(ae))) return;
+    fn();
+  }, ms);
+};
+
+async function renderJobsPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('jobs') + '<div class="dc dc-body"><div class="dc-loading">Reading the jobs…</div></div>';
+  await dcLoadMaps();
+  const [jobs, escs] = await Promise.all([
+    sb.from('relation_submissions').select('id,title,relation_name,relation_code,status,created_at,bids(id,log_size,status)').in('status', ['open', 'settling']).order('created_at', { ascending: false }),
+    sb.rpc('escrow_list')]);
+  if (!dcTabIs('jobs')) return;
+  if (jobs.error) { panel.innerHTML = dcHeadHtml('jobs') + `<div class="dc dc-body"><div class="bz-card">Could not load the jobs: ${esc(jobs.error.message)}</div></div>`; return; }
+  const byJob = Object.fromEntries((escs.data || []).map(e => [e.project_id, e]));
+  const cards = (jobs.data || []).map(r => {
+    const lines = r.bids || [], done = lines.filter(b => b.status === 'delivered' || b.status === 'confirmed').length, e = byJob[r.id];
+    return `<div class="bz-card jb"><div class="jb-top"><div><small>${esc(r.relation_name || r.relation_code || '')}</small><h3>${esc(r.title || 'Untitled')}</h3></div>
+        <span class="lg-tag ${r.status === 'open' ? 'act' : 'pay'}">${esc(r.status)}</span></div>
+      <p class="pp-muted">${lines.length} line${lines.length === 1 ? '' : 's'} · ${done} delivered</p>
+      <div class="jb-esc">${e ? `<span class="lg-tag act">Escrow prepared</span> <span class="mono">${escrowUsd(e.price_cents)}</span> · ${(e.lines || []).length} line${(e.lines || []).length === 1 ? '' : 's'}` : '<span class="pp-muted">No escrow yet</span>'}</div>
+      <div class="bz-acts"><button class="pf-btn" onclick="openProject('${esc(r.id)}')">Open the job</button>
+        ${e ? `<button class="pf-btn" onclick="openEscrowStep('${esc(r.id)}', ${esc(JSON.stringify(r.title || 'Escrow'))})">Escrow</button>` : ''}</div></div>`;
+  });
+  panel.innerHTML = dcHeadHtml('jobs') + `<div class="dc dc-body bz">
+    <div class="bz-card bz-hero"><small>Jobs and their escrows</small><h3>Jobs</h3><p>Every open job, how far its lines have come, and where its escrow stands. The escrow is prepared inside the job, and from here you open either.</p></div>
+    ${cards.join('') || '<div class="bz-card"><p class="pp-muted">No open jobs yet.</p></div>'}</div>`;
+  dcPoll('jobs', renderJobsPanel, 15000);
+}
+
+async function renderProofPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('proof') + '<div class="dc dc-body"><div class="dc-loading">Reading the proof queue…</div></div>';
+  await dcLoadMaps(); await dcNames().catch(() => {});
+  const [att, subs] = await Promise.all([loadAttention().catch(() => []), sb.from('leaf_submissions').select('id,leaf_id,operator_id,summary,submitted_at,decision,decided_at,decision_note').order('submitted_at', { ascending: false }).limit(25)]);
+  if (!dcTabIs('proof')) return;
+  const rows = (subs.data || []).filter(x => x.decision !== 'pending');
+  let leafOf = {};
+  if (rows.length) {
+    const { data: ls } = await sb.from('work_leaves').select('id,leaf_code,task,map_id').in('id', [...new Set(rows.map(x => x.leaf_id))]);
+    leafOf = Object.fromEntries((ls || []).map(l => [l.id, l]));
+  }
+  const goalOf = Object.fromEntries((DC.maps || []).map(m => [m.id, m.goal]));
+  if (!dcTabIs('proof')) return;
+  window._dcAtt = att;
+  const wait = att.map((a, i) => ({ a, i })).filter(x => x.a.kind === 'verify'), mine = att.map((a, i) => ({ a, i })).filter(x => x.a.kind !== 'verify');
+  const attRow = ({ a, i }) => `<button class="pr-row" onclick="openAttentionItem(window._dcAtt[${i}])"><span><b>${esc(a.title)}</b>
+      <small>${esc(a.sub)}${a.when ? ' · ' + (a.kind === 'verify' ? 'submitted ' + esc(agoText(a.when)) : 'due ' + esc(fmtDate(a.when))) : ''}</small></span><em>${{ verify: 'Review', start: 'Start', continue: 'Open' }[a.kind]} →</em></button>`;
+  const done = rows.slice(0, 12).map(x => { const l = leafOf[x.leaf_id] || {}, who = (window._opNameCache || {})[x.operator_id] || '';
+    return `<div class="pr-row static"><span><b>${esc(l.leaf_code || '')} ${esc(l.task || '')}</b><small>${esc(goalOf[l.map_id] || '')}${who ? ' · ' + esc(who) : ''} · ${esc(agoText(x.decided_at || x.submitted_at))}${x.decision_note ? ` · “${esc(x.decision_note)}”` : ''}</small></span>
+      <i class="bz-chip ${x.decision === 'verified' ? 'ok' : 'bad'}">${esc(x.decision)}</i></div>`; });
+  panel.innerHTML = dcHeadHtml('proof') + `<div class="dc dc-body bz">
+    <div class="bz-card bz-hero"><small>Across every job</small><h3>Proof</h3><p>Work that has been sent in and is waiting to be checked, your own steps, and the latest decisions. Checking proof is how a step becomes delivered, and delivered steps are what the money builds from.</p></div>
+    ${isExec() ? `<div class="bz-card"><h4 class="cy-h">Waiting for review · ${wait.length}</h4>${wait.map(attRow).join('') || '<p class="pp-muted">Nothing is waiting for you to check.</p>'}</div>` : ''}
+    <div class="bz-card"><h4 class="cy-h">Your steps · ${mine.length}</h4>${mine.map(attRow).join('') || '<p class="pp-muted">No steps are assigned to you right now.</p>'}</div>
+    <div class="bz-card"><h4 class="cy-h">Latest decisions</h4>${done.join('') || '<p class="pp-muted">No proof has been decided yet. Reviews show here as they happen.</p>'}</div></div>`;
+  dcPoll('proof', renderProofPanel, 12000);
 }
 
 // ── LEDGER: everything you've done in the network (Activity) and every payment on the blockchain

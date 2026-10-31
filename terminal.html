@@ -51,7 +51,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Geist+Mono:wght@400;500&family=IBM+Plex+Mono:wght@300;400;500;600&family=Inter:wght@300;400;500;600;700&family=Inter+Tight:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.110.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/ethers@6.17.0/dist/ethers.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -4081,6 +4081,172 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
   input:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=color]):not([type=file]),select,textarea,
   #term-input,#term-composer #term-input,.pp-form input,.pp-form textarea,.gw-input{font-size:16px !important}
 }
+
+/* ── GLASS KIT for popups and forms (31 Oct 2026) ──
+   The popup sheet is the frame: graphite in the dark theme, warm grey in the light theme, with one soft highlight.
+   Forms and the escrow panel sit on light cards. The active option is lifted, never ringed. Real-money buttons are silver.
+   Scoped to #overlay, so nothing else on screen changes. */
+:root{
+  --g-frame:radial-gradient(95% 55% at 50% 0%,#2A2A2E 0%,#18181B 55%,#0B0B0E 100%);
+  --g-card-top:#F3F3F2; --g-card-bottom:#CDCDCD; --g-open:#EFEFEE;
+  --g-row:rgba(255,255,255,.055); --g-field:rgba(255,255,255,.07); --g-field-hi:rgba(255,255,255,.12);
+  --g-silver:linear-gradient(180deg,#FFFFFF 0%,#E6E6E3 48%,#C8C8C4 100%);
+  --g-lift:0 1px 0 rgba(255,255,255,.9) inset,0 12px 28px rgba(0,0,0,.16);
+  --g-lift-strong:0 1px 0 #fff inset,0 18px 40px rgba(0,0,0,.28);
+  --g-btn:#EFEFEE; --g-btn-ink:#0A0A0A; --g-hl:rgba(255,255,255,.2);
+  --g-sans:'Helvetica Neue',Helvetica,'Inter Tight',Arial,sans-serif;
+  --g-mono:'Geist Mono',ui-monospace,Menlo,monospace;
+}
+html.theme-light{
+  --g-frame:radial-gradient(95% 55% at 50% 0%,#F6F3ED 0%,#E8E4DD 55%,#D3CFC7 100%);
+  --g-card-top:#F8F6F2; --g-card-bottom:#DAD7D1; --g-open:#F1EFEA;
+  --g-row:rgba(20,18,14,.06); --g-field:rgba(20,18,14,.06); --g-field-hi:rgba(20,18,14,.1);
+  --g-btn:#0A0A0A; --g-btn-ink:#FFFFFF; --g-hl:rgba(255,255,255,.85);
+}
+#overlay{background:var(--g-frame);--mono:var(--g-mono);--sans:var(--g-sans);border-top-color:var(--hairline)}
+#overlay::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(70% 16% at 82% 0%,var(--g-hl),transparent 72%)}
+#overlay>*{position:relative}
+#overlay .ov-head{height:56px;border-bottom:0;padding:0 16px}
+#overlay .ov-title{font-family:var(--g-sans);font-size:15px;font-weight:500;letter-spacing:-.01em;text-transform:none}
+#overlay .ov-back,#overlay .ov-action{font-family:var(--g-sans);font-size:13px;font-weight:600;letter-spacing:0;color:var(--cream);
+  background:rgba(127,127,127,.2);border-radius:999px;padding:8px 14px;min-height:36px}
+#overlay .form-lbl{font-family:var(--g-sans);font-size:11px;font-weight:500;letter-spacing:.1em}
+
+/* light cards: inside them the colors flip to ink on light, and the accent becomes ink (no pink) */
+#overlay .form-block,#overlay .escrow-panel{
+  --cream:#0A0A0A; --soft:#3A3A3A; --grey:#57544E; --line:rgba(10,10,10,.1); --line2:rgba(10,10,10,.2);
+  --green:#0A0A0A; --green-rgb:10,10,10; --orange:#C2410C; --orange-rgb:194,65,12; --red:#C81E1E; --red-rgb:200,30,30; --yellow:#8A6D00;
+  --surface:rgba(10,10,10,.05); --surface2:rgba(10,10,10,.08); --tint:rgba(10,10,10,.04); --on-accent:#FFFFFF;
+  --g-btn:#0A0A0A; --g-btn-ink:#FFFFFF; --g-field:rgba(10,10,10,.055); --g-field-hi:var(--g-open);
+  margin:0 12px 10px;padding:18px;border:0;border-radius:24px;color:#0A0A0A;
+  background:linear-gradient(180deg,var(--g-card-top),var(--g-card-bottom));
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 22px 44px rgba(0,0,0,.16)}
+#overlay .form-block:last-child{border-bottom:0}
+
+/* fields */
+#overlay .form-input,#overlay .form-textarea,#overlay .form-select{
+  background:var(--g-field);color:var(--cream);border:1.5px solid transparent;border-radius:16px;
+  padding:13px 14px;min-height:48px;font-family:var(--g-sans);transition:box-shadow .25s,background .25s}
+#overlay .form-textarea{min-height:96px}
+#overlay .form-input:focus,#overlay .form-textarea:focus,#overlay .form-select:focus{background:var(--g-field-hi);border-color:transparent;box-shadow:var(--g-lift)}
+#overlay .form-input::placeholder,#overlay .form-textarea::placeholder{color:var(--grey)}
+
+/* buttons: light pill on the dark frame, black pill on light cards; silver where real money moves */
+#overlay .act-btn{width:calc(100% - 24px);margin:12px;background:var(--g-btn);color:var(--g-btn-ink);border:0;border-radius:999px;
+  font-family:var(--g-sans);font-size:15px;font-weight:600;letter-spacing:-.005em;text-transform:none;padding:14px 20px;min-height:48px}
+#overlay .act-btn:hover{background:var(--g-btn);filter:brightness(1.07)}
+#overlay .act-btn.secondary{background:rgba(127,127,127,.22);color:var(--cream)}
+#overlay .act-btn.danger{background:rgba(var(--red-rgb),.14);color:var(--red)}
+#overlay .act-btn-sm{background:rgba(127,127,127,.22);color:var(--cream);border:0;border-radius:999px;font-family:var(--g-sans);font-size:12.5px;font-weight:600;
+  letter-spacing:0;text-transform:none;padding:8px 14px;min-height:36px}
+#overlay .act-btn-sm:hover{background:rgba(127,127,127,.32)}
+#overlay .form-block .act-btn,#overlay .escrow-panel .act-btn{width:100%;margin:12px 0 0}
+#overlay .act-btn.money,#overlay #esc-create{background:var(--g-silver);color:#0A0A0A;box-shadow:0 1px 0 #fff inset,0 6px 16px rgba(0,0,0,.22)}
+#overlay .act-btn:disabled{opacity:.35}
+
+/* the escrow panel */
+#overlay .escrow-panel{margin-top:4px}
+#overlay .escrow-line{border:0;border-radius:16px;background:rgba(10,10,10,.06);padding:12px}
+#overlay .escrow-next{border:0;border-radius:20px;background:var(--g-open);box-shadow:var(--g-lift);padding:14px 14px 6px}
+#overlay .escrow-next .act-btn,#overlay .escrow-next .act-btn-sm{display:block;width:100%;margin:0 0 8px}
+#overlay .escrow-next .act-btn-sm{background:rgba(10,10,10,.08);color:#0A0A0A}
+#overlay .escrow-stage{border:0;background:rgba(10,10,10,.08);padding:3px 9px}
+#overlay .escrow-stage.s4{background:#0A0A0A;color:#fff}
+#overlay .escrow-done{color:#0E7A44}
+
+/* rows on the frame */
+#overlay .proj-card,#overlay .member-row{margin:0 12px 8px;padding:16px;border:0;border-radius:20px;background:var(--g-row)}
+#overlay .proj-card:active,#overlay .member-row:active{background:var(--g-field-hi)}
+
+/* other popup families: the same pills and soft fields */
+#overlay{--term-bg:var(--g-row);--term-fg:var(--cream);--term-dim:var(--grey);--term-line:rgba(127,127,127,.24)}
+#overlay .form-block,#overlay .escrow-panel{--term-bg:rgba(10,10,10,.055);--term-fg:#0A0A0A;--term-dim:#57544E;--term-line:rgba(10,10,10,.14)}
+#overlay .pp-btn,#overlay .pf-btn,#overlay .lm-btn,#overlay .term-card-btn{border:0;border-radius:999px;background:rgba(127,127,127,.22);color:var(--term-fg);
+  font-family:var(--g-sans);font-size:13px;font-weight:600;letter-spacing:0;min-height:36px;height:auto;padding:9px 16px}
+#overlay .pp-btn:hover,#overlay .pf-btn:hover,#overlay .lm-btn:hover,#overlay .term-card-btn:hover{border:0;background:rgba(127,127,127,.32);color:var(--term-fg);box-shadow:none}
+#overlay .pp-btn.solid,#overlay .pf-btn.solid,#overlay .lm-btn.solid,#overlay .term-card-btn.primary,#overlay .ig-btn{
+  background:var(--g-btn);color:var(--g-btn-ink);border:0;border-radius:999px;box-shadow:none;font-family:var(--g-sans);font-weight:600}
+#overlay .pp-btn.solid:hover,#overlay .pf-btn.solid:hover,#overlay .lm-btn.solid:hover,#overlay .term-card-btn.primary:hover{background:var(--g-btn);color:var(--g-btn-ink);filter:brightness(1.07);box-shadow:none}
+#overlay .ig-btn.ghost{background:rgba(127,127,127,.22);color:var(--cream)}
+#overlay .pp-btn.big{width:100%;justify-content:center;padding:14px 16px;font-size:15px;min-height:48px}
+#overlay .rel-q-input,#overlay .rel-q-textarea,#overlay .prof-field-input,#overlay .gw-input,
+#overlay .pp-form input:not([type=checkbox]):not([type=radio]):not([type=file]):not([type=range]),#overlay .pp-form textarea,#overlay .pp-form select{
+  background:var(--g-field);border:1.5px solid transparent;border-radius:16px;padding:13px 14px;min-height:48px;color:var(--cream);font-family:var(--g-sans);box-shadow:none}
+#overlay .rel-q-input:focus,#overlay .rel-q-textarea:focus,#overlay .prof-field-input:focus,#overlay .gw-input:focus,#overlay .pp-form input:focus,#overlay .pp-form textarea:focus,#overlay .pp-form select:focus{
+  background:var(--g-field-hi);border-color:transparent;box-shadow:var(--g-lift)}
+#overlay .wl-tile,#overlay .rel-wallet-box{border:0;border-radius:20px;background:var(--g-row)}
+#overlay .wl-tile.ok{background:rgba(46,157,107,.16)}
+#overlay .term-wf,#overlay .wl-how,#overlay .wl-lead,#overlay .wl-foot{font-family:var(--g-sans)}
+
+/* ── GLASS KIT for the main panels (31 Oct 2026) ──
+   Accents only: the layout and row heights stay as they are. Panels sit on glass cards over the same frame as the popups,
+   the active option is lifted (never ringed), gradients are grey-white, and the type is Helvetica Neue with mono for numbers. */
+:root{
+  --g-dense-top:#262626; --g-dense-bottom:#141414; --g-dense-edge:rgba(255,255,255,.08); --g-dense-shadow:0 18px 40px rgba(0,0,0,.35);
+  --g-dense-on:linear-gradient(180deg,#35353B,#1E1E22);
+  --g-row2:rgba(255,255,255,.045); --g-chip:rgba(255,255,255,.08); --g-chip-hi:rgba(255,255,255,.15);
+}
+html.theme-light{
+  --g-dense-top:#F8F6F2; --g-dense-bottom:#DAD7D1; --g-dense-edge:rgba(255,255,255,.8); --g-dense-shadow:0 18px 40px rgba(0,0,0,.14);
+  --g-dense-on:linear-gradient(180deg,#FFFFFF,#EDEBE6);
+  --g-row2:rgba(20,18,14,.055); --g-chip:rgba(20,18,14,.07); --g-chip-hi:rgba(20,18,14,.13);
+}
+#terminal-shell,#overlay{--neon:var(--g-silver);--neon-v:var(--g-silver)}
+#terminal-shell{--mono:var(--g-mono);--sans:var(--g-sans);
+  background:radial-gradient(70% 14% at 82% 0%,var(--g-hl),transparent 72%),var(--g-frame)}
+#terminal-shell #term-main{background:transparent}
+#terminal-shell .pp-head h2{font-family:var(--g-sans);font-weight:500;font-size:clamp(2rem,9vw,2.6rem);line-height:1;letter-spacing:-.04em;text-transform:none}
+
+/* cards */
+#terminal-shell .dash-card,#terminal-shell .np-wrap,#terminal-shell .lg-card,#terminal-shell .lm-side{
+  border:0;border-radius:24px;padding:18px 20px;
+  background:linear-gradient(180deg,var(--g-dense-top),var(--g-dense-bottom));color:var(--term-fg);
+  box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
+#terminal-shell .lm-side{padding:0}
+#terminal-shell .lg-card{border-left:0;padding:14px 18px;border-radius:20px}
+#terminal-shell .lm-mapbox{border:0;border-radius:24px;box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow);overflow:hidden}
+#terminal-shell .dash-mkt.on{background:var(--g-dense-on);box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
+#terminal-shell .np-ask{background:var(--g-row2);border:0;border-radius:18px}
+#terminal-shell .np-card{background:var(--g-row2);border:0;border-radius:20px;color:var(--term-fg)}
+#terminal-shell .np-chips button,#terminal-shell .dash-chip{background:var(--g-chip);border:0;color:var(--term-fg);font-family:var(--g-sans);font-weight:500}
+#terminal-shell .dash-chip{padding:3px 10px}
+#terminal-shell .dash-mcard{background:var(--g-silver);box-shadow:0 1px 0 #fff inset,0 18px 40px rgba(0,0,0,.28);border-radius:24px}
+#terminal-shell .dash-mcard::after{border-color:rgba(255,255,255,.7)}
+
+/* chips, tabs and buttons: soft pills, the active one lifted */
+#terminal-shell .lg-f,#terminal-shell .pp-chip{border:0;border-radius:999px;background:var(--g-chip);color:var(--term-dim);font-family:var(--g-sans);font-size:13px;font-weight:500;padding:8px 14px;min-height:36px}
+#terminal-shell .lg-f span,#terminal-shell .pp-chip em{color:inherit;opacity:.7}
+#terminal-shell .lg-f.on,#terminal-shell .pp-chip.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift)}
+#terminal-shell .dash-tabs{border:0;background:var(--g-chip);padding:3px}
+#terminal-shell .dash-tabs button{font-family:var(--g-sans);font-size:12px;font-weight:500;padding:6px 12px}
+#terminal-shell .dash-tabs button.on{background:var(--g-open);color:#0A0A0A;font-weight:600;box-shadow:var(--g-lift)}
+#terminal-shell .dash-btn,#terminal-shell .lm-btn,#terminal-shell .pp-btn,#terminal-shell .pf-btn,#terminal-shell .term-card-btn,#terminal-shell .np-go{
+  border:0;border-radius:999px;background:var(--g-chip);color:var(--term-fg);font-family:var(--g-sans);font-size:13px;font-weight:600;letter-spacing:0;padding:9px 16px;min-height:36px;height:auto}
+#terminal-shell .dash-btn:hover,#terminal-shell .lm-btn:hover,#terminal-shell .pp-btn:hover,#terminal-shell .pf-btn:hover,#terminal-shell .term-card-btn:hover,#terminal-shell .np-go:hover{
+  background:var(--g-chip-hi);border:0;color:var(--term-fg);box-shadow:none}
+#terminal-shell .dash-btn.sm{padding:5px 12px;min-height:30px}
+#terminal-shell .dash-btn.solid,#terminal-shell .pp-btn.solid,#terminal-shell .pf-btn.solid,#terminal-shell .lm-btn.solid,#terminal-shell .term-card-btn.primary{
+  background:var(--g-silver);color:#0A0A0A;box-shadow:0 1px 0 #fff inset,0 6px 16px rgba(0,0,0,.22)}
+#terminal-shell .lm-btn.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift)}
+
+/* ledger rows */
+#terminal-shell .lg-row{border:0;border-radius:16px;background:var(--g-row2);margin-bottom:6px;padding:12px 14px}
+#terminal-shell .lg-main small{font-family:var(--g-mono)}
+
+/* sidebar */
+#terminal-shell .term-sb-item{border-radius:14px;padding:10px 12px;font-family:var(--g-sans);font-size:14px}
+#terminal-shell .term-sb-item:hover{background:var(--g-chip)}
+#terminal-shell .term-sb-item.active{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift);font-weight:600}
+#terminal-shell .term-sb-item.active .term-sb-icon{color:#0A0A0A}
+#terminal-shell .term-sb-item.active::after{display:none}
+#terminal-shell .term-sb-subitem{font-family:var(--g-sans)}
+#terminal-shell #term-sidebar{border-right:0}
+#term-fab{background:var(--g-silver);color:#0A0A0A;border-color:transparent;box-shadow:0 1px 0 #fff inset,0 8px 20px rgba(0,0,0,.3)}
+#terminal-shell .nt-row{background:var(--g-row2);border-radius:14px;padding:11px 14px;margin-bottom:6px}
+
+/* the terminal's own input */
+#terminal-shell #term-input{background:var(--g-chip);border:0;border-radius:999px;padding:12px 18px;color:var(--term-fg);font-family:var(--g-sans)}
 </style>
 </head>
 <body>
@@ -8222,7 +8388,7 @@ async function renderEscrowStatus(el, x) {
     ${sum ? `<div class="escrow-muted">Held in the contract now: ${escrowUsd(Number(sum._held) / 10000)}</div>` : ''}
     ${mine.length ? `<div class="escrow-next">
         <div class="form-lbl" style="margin:0 0 8px">Your next step</div>
-        ${mine.map(([fn, i, label, kind]) => `<button class="${kind === 'ghost' ? 'act-btn-sm' : 'act-btn'} escrow-go" onclick="escrowAct(this,'${x.project_id}','${fn}',${i})">${esc(label)}</button>`).join('')}
+        ${mine.map(([fn, i, label, kind]) => `<button class="${kind === 'ghost' ? 'act-btn-sm' : 'act-btn'} escrow-go${fn === 'seal' || fn === 'releaseReserve' ? ' money' : ''}" onclick="escrowAct(this,'${x.project_id}','${fn}',${i})">${esc(label)}</button>`).join('')}
         <div class="gate-err" id="esc-act-err-${x.project_id}"></div>
       </div>` : ''}
     ${done ? `<div class="escrow-done">${done}</div>` : waiting.length ? `<div class="escrow-muted" style="margin:6px 0">Waiting for ${waiting.slice(0, 3).join(' · ')}${waiting.length > 3 ? ` · +${waiting.length - 3} more` : ''}</div>` : ''}

@@ -2,9 +2,9 @@
    All grey and white. The active option is lifted, and steps where real money moves lift higher and get a silver button. */
 :root{
   --page:#E6E2DB; --on-page:#1A1814; --on-page2:#57544E; --grain-op:.06; --grain-blend:multiply;
-  --card-top:#F8F6F2; --card-bottom:#DAD7D1; --row:rgba(20,18,14,.07); --open:#F1EFEA;
+  --card-top:#EFECE6; --card-bottom:#DAD6CF; --row:rgba(20,18,14,.07); --open:#F4F2EE;
   --ink:#0A0A0A; --ink2:#4F4D49; --chip:#CFCCC5; --field:rgba(10,10,10,.05);
-  --dense-top:#F8F6F2; --dense-bottom:#DAD7D1; --dense-row:rgba(20,18,14,.05); --dense-ink:#0A0A0A; --dense-ink2:#4F4D49;
+  --dense-top:#EFECE6; --dense-bottom:#DBD7D0; --dense-row:rgba(20,18,14,.05); --dense-ink:#0A0A0A; --dense-ink2:#4F4D49;
   --bar:rgba(230,226,219,.82);
   --bub-base:radial-gradient(95% 70% at 50% 36%,#F6F3ED 0%,#E8E4DD 52%,#D3CFC7 100%);
   --hl-a:rgba(255,255,255,.75); --hl-soft:rgba(255,255,255,.5); --sheen:rgba(255,255,255,.28);
@@ -16,6 +16,7 @@
   --mono:'Geist Mono',ui-monospace,Menlo,monospace;
   --display:'Anton','Impact',sans-serif;
   --ease:cubic-bezier(.2,.7,.2,1);
+  --card-shadow:0 1px 0 rgba(255,255,255,.4) inset,0 18px 40px rgba(60,50,40,.12);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --page:#141414; --on-page:#EDEDED; --on-page2:#A6A6A6; --grain-op:.1; --grain-blend:screen;
@@ -25,6 +26,7 @@
   --bar:rgba(20,20,20,.78);
   --bub-base:radial-gradient(95% 70% at 50% 36%,#2A2A2E 0%,#18181B 52%,#0B0B0E 100%);
   --hl-a:rgba(255,255,255,.5); --hl-soft:rgba(255,255,255,.34); --sheen:rgba(255,255,255,.18);
+  --card-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 26px 54px rgba(0,0,0,.16);
   --ok:#2FBF71; color-scheme:dark}}
 :root[data-theme="dark"]{
   --page:#141414; --on-page:#EDEDED; --on-page2:#A6A6A6; --grain-op:.1; --grain-blend:screen;
@@ -34,6 +36,7 @@
   --bar:rgba(20,20,20,.78);
   --bub-base:radial-gradient(95% 70% at 50% 36%,#2A2A2E 0%,#18181B 52%,#0B0B0E 100%);
   --hl-a:rgba(255,255,255,.5); --hl-soft:rgba(255,255,255,.34); --sheen:rgba(255,255,255,.18);
+  --card-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 26px 54px rgba(0,0,0,.16);
   --ok:#2FBF71; color-scheme:dark}
 
 *{box-sizing:border-box;margin:0;padding:0}
@@ -70,7 +73,7 @@ h2{font-size:11px;letter-spacing:.1em;text-transform:uppercase;font-weight:500;m
 
 /* cards */
 .card{position:relative;border-radius:28px;padding:18px;margin-bottom:14px;background:linear-gradient(180deg,var(--card-top),var(--card-bottom));color:var(--ink);
-  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 26px 54px rgba(0,0,0,.16)}
+  box-shadow:var(--card-shadow)}
 .card::before{content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;background:linear-gradient(118deg,var(--sheen) 0%,rgba(255,255,255,0) 38%)}
 .card>*{position:relative}
 .card.dense{background:linear-gradient(180deg,var(--dense-top),var(--dense-bottom));color:var(--dense-ink)}

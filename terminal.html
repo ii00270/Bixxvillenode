@@ -4099,7 +4099,7 @@ button,a,summary,label,[onclick]{touch-action:manipulation}
 }
 html.theme-light{
   --g-frame:radial-gradient(95% 55% at 50% 0%,#F6F3ED 0%,#E8E4DD 55%,#D3CFC7 100%);
-  --g-card-top:#F8F6F2; --g-card-bottom:#DAD7D1; --g-open:#F1EFEA;
+  --g-card-top:#EFECE6; --g-card-bottom:#DAD6CF; --g-open:#F4F2EE;
   --g-row:rgba(20,18,14,.06); --g-field:rgba(20,18,14,.06); --g-field-hi:rgba(20,18,14,.1);
   --g-btn:#0A0A0A; --g-btn-ink:#FFFFFF; --g-hl:rgba(255,255,255,.85);
 }
@@ -4195,8 +4195,8 @@ html.theme-light{
   --g-row2:rgba(255,255,255,.045); --g-chip:rgba(255,255,255,.08); --g-chip-hi:rgba(255,255,255,.15);
 }
 html.theme-light{
-  --g-dense-top:#F8F6F2; --g-dense-bottom:#DAD7D1; --g-dense-edge:rgba(255,255,255,.8); --g-dense-shadow:0 18px 40px rgba(0,0,0,.14);
-  --g-dense-on:linear-gradient(180deg,#FFFFFF,#EDEBE6);
+  --g-dense-top:#EFECE6; --g-dense-bottom:#DBD7D0; --g-dense-edge:rgba(255,255,255,.4); --g-dense-shadow:0 14px 32px rgba(60,50,40,.10);
+  --g-dense-on:linear-gradient(180deg,#F4F2EE,#E4E1DB);
   --g-row2:rgba(20,18,14,.055); --g-chip:rgba(20,18,14,.07); --g-chip-hi:rgba(20,18,14,.13);
 }
 #terminal-shell,#overlay{--neon:var(--g-silver);--neon-v:var(--g-silver)}
@@ -4254,6 +4254,56 @@ html.theme-light{
 
 /* the terminal's own input */
 #terminal-shell #term-input{background:var(--g-chip);border:0;border-radius:999px;padding:12px 18px;color:var(--term-fg);font-family:var(--g-sans)}
+
+/* ── GLASS KIT: everything that was still square (31 Oct 2026) ──
+   The confirm prompt, and the buttons, fields and chips that sit on the main panels (Cycle, Clients and the rest). */
+#confirm-dialog{background:rgba(0,0,0,.55);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+.confirm-box{max-width:340px;border:0;border-radius:28px;padding:24px;
+  background:linear-gradient(180deg,var(--g-card-top),var(--g-card-bottom));
+  box-shadow:0 1px 0 rgba(255,255,255,.6) inset,0 30px 60px rgba(0,0,0,.4)}
+.confirm-msg{font-family:var(--g-sans);font-size:15px;line-height:1.55;color:#1A1814}
+.confirm-actions{gap:10px}
+.confirm-ok,.confirm-cancel{border:0;border-radius:999px;font-family:var(--g-sans);font-size:14px;font-weight:600;letter-spacing:0;text-transform:none;padding:13px;min-height:46px}
+.confirm-cancel{background:rgba(10,10,10,.09);color:#0A0A0A}
+.confirm-ok{background:#0A0A0A;color:#FFFFFF}
+
+#terminal-shell .act-btn{width:100%;margin:14px 0;background:var(--g-btn);color:var(--g-btn-ink);border:0;border-radius:999px;
+  font-family:var(--g-sans);font-size:15px;font-weight:600;letter-spacing:-.005em;text-transform:none;padding:14px 20px;min-height:48px}
+#terminal-shell .act-btn:hover{background:var(--g-btn);filter:brightness(1.07)}
+#terminal-shell .act-btn.secondary{background:var(--g-chip);color:var(--term-fg)}
+#terminal-shell .act-btn.danger{background:rgba(var(--red-rgb),.14);color:var(--red)}
+#terminal-shell .act-btn:disabled{opacity:.35}
+#terminal-shell .act-btn-sm{background:var(--g-chip);color:var(--term-fg);border:0;border-radius:999px;font-family:var(--g-sans);font-size:12.5px;font-weight:600;
+  letter-spacing:0;text-transform:none;padding:8px 14px;min-height:36px}
+#terminal-shell .act-btn-sm:hover{background:var(--g-chip-hi)}
+#terminal-shell .cy-chip,#terminal-shell .prof-add-btn,#terminal-shell .dl-filter-btn,#terminal-shell .uni-chip-btn{border:0;border-radius:999px;background:var(--g-chip);color:var(--term-fg);
+  font-family:var(--g-sans);font-size:13px;font-weight:500;padding:8px 14px;min-height:36px}
+#terminal-shell .cy-chip:hover{background:var(--g-chip-hi)}
+#terminal-shell .sk-verify-btn,#terminal-shell .export-btn,#terminal-shell .sg-btn,#terminal-shell .ig-btn,#terminal-shell .gw-btn,#terminal-shell .tk-btn,#terminal-shell .dash-action-btn,#terminal-shell .dag-view-btn{
+  border:0;border-radius:999px;background:var(--g-chip);color:var(--term-fg);font-family:var(--g-sans);font-size:13px;font-weight:600;letter-spacing:0;text-transform:none;padding:9px 16px;min-height:36px}
+#terminal-shell .ig-btn{background:var(--g-btn);color:var(--g-btn-ink)}
+
+/* fields on the main panels: soft rounded boxes */
+#terminal-shell select,#terminal-shell textarea,
+#terminal-shell input:where(:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=hidden]):not(#term-input)){
+  background-color:var(--g-field);border:1.5px solid transparent;border-radius:16px;color:var(--term-fg);font-family:var(--g-sans);box-shadow:none;transition:box-shadow .25s,background-color .25s}
+#terminal-shell select:not(.pf-tax-in),#terminal-shell textarea,
+#terminal-shell input:where(:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=hidden]):not(#term-input)):not(.pf-tax-in){padding:11px 14px;min-height:44px}
+#terminal-shell .pf-tax-in{padding:8px 12px;min-height:40px}
+#terminal-shell select:focus,#terminal-shell textarea:focus,
+#terminal-shell input:where(:not([type=checkbox]):not([type=radio]):not([type=range]):not([type=file]):not([type=color]):not([type=hidden]):not(#term-input)):focus{
+  background-color:var(--g-chip-hi);border-color:transparent;outline:none;box-shadow:var(--g-lift)}
+#terminal-shell .np-ask input{background:transparent;border:0;border-radius:0;min-height:0;padding:0;box-shadow:none}
+
+/* the remaining bordered boxes on the panels become glass cards */
+#terminal-shell .an-card,#terminal-shell .ca-side,#terminal-shell .ca-main,#terminal-shell .pp-card,#terminal-shell .nt-list,#terminal-shell .dc-box,#terminal-shell .dc-card,#terminal-shell .cy-terms>div{
+  border:0;border-radius:24px;background:linear-gradient(180deg,var(--g-dense-top),var(--g-dense-bottom));color:var(--term-fg);
+  box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
+#terminal-shell .cy-terms>div{padding:16px 18px}
+#terminal-shell .dc-card,#terminal-shell .dc-box{overflow:hidden}
+#terminal-shell .pp-search,#terminal-shell .dc-search{border:0;border-radius:999px;background:var(--g-field)}
+#terminal-shell .pp-search input,#terminal-shell .dc-search input{background:transparent;border:0;border-radius:0;box-shadow:none;min-height:0;padding:0}
+#terminal-shell .dc-tabset{border:0;border-radius:999px;background:var(--g-chip);padding:3px}
 </style>
 </head>
 <body>

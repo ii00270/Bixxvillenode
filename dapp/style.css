@@ -30,6 +30,7 @@ input:focus,select:focus{border-color:var(--ink)}
   font-family:var(--mono);font-size:13px;font-weight:600;padding:11px 16px;border-radius:12px;cursor:pointer}
 .btn.small{padding:6px 11px;font-size:12px;border-radius:999px}
 .btn.ghost{background:transparent;color:var(--ink)}
+a.btn{text-decoration:none}
 .btn:disabled{opacity:.35;cursor:not-allowed}
 .muted{color:var(--dim);font-size:12.5px;margin-top:8px}
 .err{color:var(--bad);font-size:13px;margin-top:10px;min-height:1em}

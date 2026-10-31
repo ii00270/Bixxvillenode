@@ -176,6 +176,7 @@ function render() {
   $('net-label').textContent = net().live ? 'live' : 'testnet';
   $('net-label').className = net().live ? 'live' : '';
   $('switch-hedera').textContent = `Switch to ${net().name}`;
+  $('switch-hedera').style.display = window.ethereum && onRightNetwork() ? 'none' : '';
   document.title = `Engagement Escrow — Bixxville (${net().live ? net().name : 'testnet'})`;
   const badge = $('net-badge');
   if (!window.ethereum) { badge.textContent = 'No wallet'; badge.className = 'badge'; }

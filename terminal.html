@@ -11479,12 +11479,12 @@ async function buildNextUp() {
     const noWallet = (CL.members || []).filter(m => !m.wallet_address && m.active !== false);
     if (noWallet.length) out.push({ kind: 'wallet', tag: 'Members', q: `${noWallet.length} member${noWallet.length > 1 ? 's' : ''} can’t be paid yet — no wallet on file (${short(noWallet.map(m => m.peer_name).join(', '))}). Add them?`, btn: 'Add wallets', run: () => { CL.tab = 'members'; setTermView('clients'); } });
   }
-  // The Blitz: the opening sprint of the Cycle
+  // The Blitz: a focused sprint inside the Cycle
   try {
     const { data: bv } = await sb.rpc('blitz_view');
     const go = () => { DC.tab = 'blitz'; setTermView('tracker'); };
     const b = bv?.blitz;
-    if (!b && isExec() && bv?.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: `Cycle ${bv.cycle} has no Blitz yet. Start the opening sprint?`, btn: 'Start Blitz', run: () => { BZ.next = false; go(); } });
+    if (!b && isExec() && bv?.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: `Cycle ${bv.cycle} has no Blitz yet. Start one?`, btn: 'Start Blitz', run: () => { BZ.next = false; go(); } });
     if (!b && isExec() && bv && !bv.ratified) out.push({ kind: 'escrow', tag: 'Blitz', q: 'Amendment VI is waiting for your ratification. It defines the Blitz.', btn: 'Review', run: go });
     const mine = (b?.members || []).find(m => m.operator_id === operator?.id);
     if (b && !b.private && b.status === 'live' && mine && !mine.wallet) out.push({ kind: 'wallet', tag: 'Blitz', q: `You are on the Cycle ${b.cycle_number} Blitz as ${(mine.roles || [mine.role]).join(' and ')}, but there's no wallet to pay. Add one?`, btn: 'Add wallet', run: openAddWallet });
@@ -14117,7 +14117,7 @@ async function startCycle(num) {
   renderCyclePanel();
 }
 
-// ── BLITZ — the opening sprint of a Cycle (Amendment VI §3) ───────────────────────────────────────────
+// ── BLITZ — a focused sprint inside a Cycle, called any day of it (Amendment VI §3) ───────────────────────────────────────────
 // Declared in writing by the Executive Operator: at most 14 days, wholly inside one Cycle, no pay premium.
 // It is also where a Cycle opens: the team, their wallets and the Cycle's terms are set here in one pass,
 // and the Decomposition builds out from it. Roles follow the canon's tiers (a tier covers the ones below it).
@@ -14196,12 +14196,12 @@ function bzBody() {
   if (v?.blitz && !v.blitz.private) return bzToggle() + `<div id="bz-live">${bzLiveInner()}</div>`;
   if (v?.blitz?.private) return bzToggle() + `<div class="bz-card bz-hero"><small>Cycle ${num}</small><h3>Blitz</h3><p>A Blitz is in progress for this Cycle. It is private to its group until it is completed, and then everyone can read it.</p></div>`;
   const head = `<div class="bz-card bz-hero"><small>Cycle ${num}</small><h3>Blitz</h3>
-    <p>The opening sprint of a Cycle: it can start on any day of the Cycle, lasts at most 14 days and lies wholly inside it, and is declared in writing before work starts. It is for Architects and Operators, and you can invite up to two Wranglers. It stays private to its group until you complete it. The Cycle's wallets and steps are set up here too, and the work builds out from it. A Blitz carries no pay premium.</p></div>`;
+    <p>A focused sprint inside a Cycle: it can be called on any day of the Cycle, lasts at most 14 days and lies wholly inside it, and is declared in writing before work starts. It is for Architects and Operators, and you can invite up to two Wranglers. It stays private to its group until you complete it. The Cycle's wallets and steps are set up here too, and the work builds out from it. A Blitz carries no pay premium.</p></div>`;
   if (!v?.ratified) {
     return bzToggle() + head + (isExec()
       ? `<div class="bz-card"><h4 class="cy-h">Ratify Amendment VI first <span>the Blitz is defined in its §3</span></h4>
           <p class="pp-muted">Amendment VI says any assigned Member may join a Blitz. Your rule is narrower: Architects and Operators, with up to two invited Wranglers. Put it in the decision, in your own words, so the record shows it. It is kept on record.</p>
-          <textarea id="bz-rat" class="pf-tax-in wide" rows="3" maxlength="500">I ratify Amendment VI. The Blitz is the opening sprint of a Cycle. It is for Architects and Operators, who may invite up to two Wranglers, and it is private to them until it is completed.</textarea>
+          <textarea id="bz-rat" class="pf-tax-in wide" rows="3" maxlength="500">I ratify Amendment VI. The Blitz is a focused sprint inside a Cycle, called on any day of it. It is for Architects and Operators, who may invite up to two Wranglers, and it is private to them until it is completed.</textarea>
           <div class="gate-err" id="bz-err"></div><button class="act-btn" onclick="bzRatify()">Ratify Amendment VI</button></div>`
       : `<div class="bz-card"><p class="pp-muted">Amendment VI has not been ratified yet. The Executive Operator will start the Blitz once it is.</p></div>`);
   }

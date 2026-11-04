@@ -4350,6 +4350,76 @@ html.theme-light #term-fab .fab-owl{background:#17171A;filter:drop-shadow(0 1px 
 
 /* ── BLITZ ── */
 .bz{display:grid;gap:14px;padding-bottom:30px}
+/* ── Trade tracker ── */
+:root{--tkr-pos:#3DDC97;--tkr-neg:#FF6B7A;--tkr-pos-bg:rgba(61,220,151,.13);--tkr-neg-bg:rgba(255,107,122,.13)}
+:root.theme-light{--tkr-pos:#0F7A55;--tkr-neg:#C0283C;--tkr-pos-bg:rgba(15,122,85,.12);--tkr-neg-bg:rgba(192,40,60,.10)}
+.tkr{display:flex;flex-direction:column;gap:14px;padding:4px 2px 80px}
+.tkr .pos{color:var(--tkr-pos)}.tkr .neg{color:var(--tkr-neg)}
+.tkr-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.tkr-tab{appearance:none;border:0;cursor:pointer;font-family:var(--g-sans);font-size:12.5px;font-weight:500;padding:7px 14px;border-radius:999px;background:var(--g-chip);color:var(--term-dim)}
+.tkr-tab.on{background:var(--g-open);color:#0A0A0A;box-shadow:var(--g-lift);font-weight:600}
+.tkr-bal small,.tkr-tile small{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim)}
+.tkr-big{display:block;font-family:var(--g-sans);font-weight:500;font-size:clamp(2rem,9vw,3rem);letter-spacing:-.035em;line-height:1.1;margin:6px 0 2px}
+.tkr-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px}
+.tkr-tile{border-radius:20px;padding:14px 16px;background:linear-gradient(180deg,var(--g-dense-top),var(--g-dense-bottom));box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
+.tkr-tile b{display:block;font-family:var(--g-sans);font-weight:500;font-size:22px;letter-spacing:-.02em;margin-top:6px}
+.tkr-tile em{font-style:normal;font-size:12px;color:var(--term-dim);font-family:var(--g-mono)}
+.tkr-spark{width:100%;height:150px;margin-top:8px;display:block}
+.tkr-line{fill:none;stroke:var(--term-fg);stroke-width:2;vector-effect:non-scaling-stroke}
+.tkr-area{fill:var(--g-chip);stroke:none}.tkr-zero{stroke:var(--term-line);stroke-width:1;stroke-dasharray:4 4;vector-effect:non-scaling-stroke}
+.tkr-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:10px 0}
+.tkr label>span,.tkr-wide>span{display:block;font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim);margin:0 4px 6px}
+.tkr input,.tkr select,.tkr textarea{width:100%;min-width:0;box-sizing:border-box}
+.tkr-wide{display:block;margin:6px 0 10px}
+.tkr-calhead{display:flex;align-items:center;justify-content:space-between;font-family:var(--g-sans);font-size:17px}
+.tkr-nav{appearance:none;border:0;background:var(--g-chip);color:var(--term-fg);width:36px;height:36px;border-radius:12px;font-size:20px;cursor:pointer}
+.tkr-total{font-family:var(--g-sans);font-weight:500;font-size:clamp(1.8rem,7vw,2.4rem);letter-spacing:-.03em;margin:10px 0 8px}
+.tkr-bar{height:5px;border-radius:99px;background:var(--tkr-neg);overflow:hidden}.tkr-bar i{display:block;height:100%;background:var(--tkr-pos)}
+.tkr-barlbl{display:flex;justify-content:space-between;font-size:12px;font-family:var(--g-mono);margin:6px 0 14px}
+.tkr-dow{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;font-size:11px;color:var(--term-dim);text-align:center;margin-bottom:6px}
+.tkr-days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.tkr-cell{appearance:none;border:1px solid transparent;border-radius:12px;min-height:58px;padding:6px;background:var(--g-row2);color:var(--term-fg);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:space-between;font-family:var(--g-sans);min-width:0}
+.tkr-cell.void{background:none;border:0;cursor:default}
+.tkr-cell i{font-style:normal;font-size:10.5px;color:var(--term-dim);align-self:flex-start}
+.tkr-cell b{font-weight:600;font-size:clamp(10px,2.9vw,14px);letter-spacing:-.01em;margin:auto 0}
+.tkr-cell.pos{background:var(--tkr-pos-bg)}.tkr-cell.pos b{color:var(--tkr-pos)}
+.tkr-cell.neg{background:var(--tkr-neg-bg)}.tkr-cell.neg b{color:var(--tkr-neg)}
+.tkr-cell.today{border-color:var(--term-dim)}.tkr-cell.sel{border-color:var(--term-fg)}
+.tkr-alert{padding:12px 14px;border-radius:18px;background:var(--g-row2);margin:8px 0}
+.tkr-alert b{font-family:var(--g-sans);font-weight:500;font-size:15px}.tkr-alert em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--g-chip);margin-left:8px}
+.tkr-alert span{margin-left:8px;font-family:var(--g-mono);font-size:13px;color:var(--term-dim)}
+.tkr-alert p{margin:6px 0 4px;font-size:13.5px}.tkr-alert small{color:var(--term-dim);font-size:12px}
+.tkr-how b{word-break:break-all}.tkr-how{margin-top:10px;font-size:13.5px;line-height:1.55}.tkr-how summary{cursor:pointer;color:var(--term-dim)}.tkr-how ol{padding-left:20px}.tkr-how textarea{margin:6px 0;font-family:var(--g-mono);font-size:12px}
+.tkr-ctl{display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end;margin:10px 0}.tkr-ctl label{flex:1 1 120px;min-width:110px}
+.tkr-fxline{font-size:13.5px;margin:6px 0 4px}
+.tkr-axis{display:grid;grid-template-columns:130px 1fr 30px;gap:8px;align-items:end;font-size:10.5px;color:var(--term-dim);margin-top:6px}
+.tkr-axis>div{position:relative;height:16px;grid-column:2}.tkr-axis>div span{position:absolute;transform:translateX(-50%);font-family:var(--g-mono)}
+.tkr-axl{grid-column:1;font-size:10px;letter-spacing:.08em;text-transform:uppercase}
+.tkr-rows{display:flex;flex-direction:column;gap:6px;margin-top:4px}
+.tkr-row{display:grid;grid-template-columns:130px 1fr 30px;grid-template-areas:"who bars x" "when bars x";gap:0 8px;align-items:center}
+.tkr-who{grid-area:who;display:flex;flex-direction:column;line-height:1.25;min-width:0;align-self:end}.tkr-who b{font-family:var(--g-sans);font-weight:500;font-size:14px}.tkr-who small,.tkr-off{color:var(--term-dim);font-size:11px}
+.tkr-when{grid-area:when;display:flex;flex-direction:column;line-height:1.25;align-self:start;font-family:var(--g-mono);font-size:11.5px}
+.tkr-bars{grid-area:bars;position:relative;display:grid;grid-template-columns:repeat(24,1fr);height:44px;border-radius:12px;overflow:hidden;cursor:ew-resize;touch-action:none;background:var(--g-row2)}
+.tkr-bars i{display:flex;align-items:center;justify-content:center;font-style:normal;font-size:9.5px;color:var(--term-dim);font-family:var(--g-mono)}
+.tkr-bars i[data-h]::before{content:attr(data-h)}
+.tkr-bars i.w{background:rgba(150,140,200,.42)}.tkr-bars i.s{background:rgba(150,140,200,.16)}.tkr-bars i.n{background:rgba(0,0,0,.18)}
+:root.theme-light .tkr-bars i.n{background:rgba(0,0,0,.09)}
+.tkr-bars i.mid{box-shadow:inset 1px 0 0 var(--term-dim)}
+.tkr-bars i.x{background:rgba(0,0,0,.18)}.tkr-bars i.f0{background:rgba(150,140,200,.12)}.tkr-bars i.f1{background:rgba(150,140,200,.28)}.tkr-bars i.f2{background:rgba(150,140,200,.46)}.tkr-bars i.f3{background:rgba(150,140,200,.62)}.tkr-bars i.f4{background:rgba(150,140,200,.78)}
+.tkr-win{position:absolute;top:0;bottom:0;border:1.5px solid var(--term-fg);border-radius:10px;background:rgba(255,255,255,.08);pointer-events:none}
+.tkr-now{position:absolute;top:0;bottom:0;width:2px;background:var(--tkr-neg);pointer-events:none}
+.tkr-x{grid-area:x;appearance:none;border:0;background:none;color:var(--term-dim);font-size:20px;cursor:pointer;width:30px}.tkr-x.void{visibility:hidden;display:block;width:30px}
+.tkr-verdict{font-size:13.5px;line-height:1.55;margin:12px 2px 4px}
+@media(max-width:560px){.tkr-row{grid-template-columns:1fr auto 24px;grid-template-areas:"who when x" "bars bars bars";row-gap:4px;margin-bottom:6px}.tkr-when{align-self:end;text-align:right}.tkr-axis{grid-template-columns:1fr}.tkr-axis>div,.tkr-axl{grid-column:1}.tkr-ctl label{flex:1 1 150px}.tkr-x,.tkr-x.void{width:24px}.tkr-cell{min-height:50px;padding:4px}.tkr-hb{grid-template-columns:70px 1fr 90px}.tkr-cell u{display:none}}
+
+.tkr-tr{display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center;padding:12px 14px;border-radius:18px;background:var(--g-row2);margin:8px 0;cursor:pointer;border:1px solid transparent;text-align:left;width:100%;color:var(--term-fg);font-family:var(--g-sans)}
+.tkr-tr:hover{border-color:var(--term-line)}.tkr-tr b{font-weight:500;font-size:15px}.tkr-tr em{font-style:normal;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:999px;background:var(--g-chip);margin-left:8px}
+.tkr-tr .tkr-pn{font-weight:600;font-size:16px;text-align:right}.tkr-tr small{color:var(--term-dim);font-size:12px}.tkr-tr .tkr-sub{grid-column:1 / -1;font-size:12.5px;color:var(--term-dim);font-family:var(--g-mono)}
+.tkr-bars-h{display:flex;flex-direction:column;gap:6px;margin-top:8px}.tkr-hb{display:grid;grid-template-columns:90px 1fr 80px;gap:10px;align-items:center;font-size:13px}
+.tkr-hb i{display:block;height:10px;border-radius:99px;background:var(--tkr-pos)}.tkr-hb i.neg{background:var(--tkr-neg)}.tkr-hb span{font-family:var(--g-mono);font-size:12px;text-align:right}
+.tkr-mk{display:inline-block;margin-right:14px}.tkr-fxline{display:flex;flex-wrap:wrap;gap:4px 0}
+.tkr-filters{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.tkr-cell u{font-style:normal;text-decoration:none;font-size:9.5px;color:var(--term-dim);font-family:var(--g-mono)}
 .bz-card{border-radius:24px;padding:18px 20px;background:linear-gradient(180deg,var(--g-dense-top),var(--g-dense-bottom));color:var(--term-fg);box-shadow:0 1px 0 var(--g-dense-edge) inset,var(--g-dense-shadow)}
 .bz-card h3{font-family:var(--g-sans);font-weight:500;font-size:clamp(1.8rem,7vw,2.4rem);letter-spacing:-.035em;line-height:1;margin:6px 0 8px}
 .bz-card small{font-size:12px;color:var(--term-dim)}
@@ -4619,6 +4689,12 @@ html.theme-light .bz-leaf.lit b{color:#fff}
       <button class="term-sb-item" data-view="ledger" onclick="setTermView('ledger')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg>
         <span>Ledger</span>
+      </button>
+    </div>
+    <div class="term-sb-group" id="sb-tkr-grp" style="display:none">
+      <button class="term-sb-item" data-view="trades" onclick="setTermView('trades')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 20h18"/><path d="M5 20V10M10 20V5M15 20v-8M20 20V8"/></svg>
+        <span>Trade tracker</span>
       </button>
     </div>
     <button class="term-sb-me" id="term-sb-me" onclick="openProfilePanel()" aria-label="Open your profile">
@@ -6154,6 +6230,7 @@ async function enterShell() {
   startPresence();
   startWalletPoll();
   if (isExec()) watchPresence();
+  const trkGrp = document.getElementById('sb-tkr-grp'); if (trkGrp) trkGrp.style.display = isExec() ? '' : 'none';
   setTimeout(openPendingScan, 600);
 }
 
@@ -13397,6 +13474,7 @@ function setTermView(view) {
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
   if (view !== 'chat') clearInterval(CH.timer);
+  if (view !== 'trades') clearInterval(TKR.timer);
   document.getElementById('terminal-shell')?.setAttribute('data-view', view);
   const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
@@ -13416,6 +13494,7 @@ function setTermView(view) {
     else if (view === 'places') renderPlacesPanel();
     else if (view === 'analog') renderAnalogPanel();
     else if (view === 'ledger') renderLedgerPanel();
+    else if (view === 'trades') renderTrackerPanel();
     else if (view === 'cycle') renderCyclePanel();
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
@@ -14521,6 +14600,413 @@ async function renderProofPanel() {
     <div class="bz-card"><h4 class="cy-h">Your steps · ${mine.length}</h4>${mine.map(attRow).join('') || '<p class="pp-muted">No steps are assigned to you right now.</p>'}</div>
     <div class="bz-card"><h4 class="cy-h">Latest decisions</h4>${done.join('') || '<p class="pp-muted">No proof has been decided yet. Reviews show here as they happen.</p>'}</div></div>`;
   dcPoll('proof', renderProofPanel, 12000);
+}
+
+// ── TRADE TRACKER: the Executive Operator's own trade journal (migration 0041) ──
+// Trades are typed in, or sent automatically (closed trades only) by a read-only MetaTrader add-on.
+// It reads nothing from tastyfx directly and cannot place, change or close a trade.
+const TKR = { tab: 'journal', month: null, trades: [], key: null, newKey: null, edit: null, timer: null, err: null, asset: 'all', sig: '' };
+const TKR_TABS = [['journal', 'Journal'], ['calendar', 'Calendar'], ['stats', 'Stats'], ['timeline', 'Timeline'], ['connect', 'Connect']];
+const trkOn = () => document.getElementById('terminal-shell')?.getAttribute('data-view') === 'trades';
+const tkrIso = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const tkrNum = s => { const t = String(s ?? '').replace(/[$,\s]/g, ''); if (t === '' || t === '-' || t === '+') return null; const n = Number(t); return Number.isFinite(n) ? n : NaN; };
+const tkrCents = s => { const n = tkrNum(s); return n == null || Number.isNaN(n) ? n : Math.round(n * 100); };
+function tkrMoney(c, o = {}) {
+  if (c == null) return '—';
+  const a = Math.abs(c) / 100, sign = o.sign ? (c > 0 ? '+' : c < 0 ? '−' : '') : (c < 0 ? '−' : '');
+  const t = o.compact && a >= 1000 ? (a / 1000).toFixed(2).replace(/\.?0+$/, '') + 'K' : a.toLocaleString(undefined, { minimumFractionDigits: o.compact ? 0 : 2, maximumFractionDigits: 2 });
+  return `${sign}$${t}`;
+}
+const tkrCls = c => c > 0 ? 'pos' : c < 0 ? 'neg' : '';
+const tkrDay = t => tkrIso(new Date(t.closed_at));
+const tkrClosed = () => TKR.trades.filter(t => t.closed_at && t.pnl_cents != null);
+const tkrLocalInput = iso => { if (!iso) return ''; const d = new Date(iso); return `${tkrIso(d)}T${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`; };
+
+async function renderTrackerPanel() {
+  const panel = document.getElementById('term-panel');
+  if (!TKR.month) { const n = new Date(); TKR.month = new Date(n.getFullYear(), n.getMonth(), 1); }
+  if (!panel.querySelector(':scope > .tkr')) panel.innerHTML = '<div class="tkr"><div class="bz-card">Opening the Trade tracker…</div></div>';
+  await tkrLoad();
+  if (!trkOn()) return;
+  tkrDraw();
+  clearInterval(TKR.timer); TKR.timer = setInterval(tkrTick, 15000);
+}
+async function tkrLoad() {
+  const [t, k] = await Promise.all([sb.rpc('trades_list', { p_limit: 2000 }), sb.rpc('trade_feed_status')]);
+  TKR.err = t.error?.message || k.error?.message || null;
+  TKR.trades = t.data || []; TKR.key = k.data || {};
+  TKR.sig = tkrSig();
+}
+const tkrSig = () => TKR.trades.length + ':' + (TKR.trades[0]?.updated_at || '') + ':' + (TKR.key?.last_seen || '');
+async function tkrTick() {
+  if (!trkOn()) { clearInterval(TKR.timer); return; }
+  if (TKR.tab === 'timeline') { tkrTzUpdate(); return; }
+  if (TKR.edit) return;                       // never redraw under a form someone is filling in
+  const before = TKR.sig; await tkrLoad();
+  if (trkOn() && !TKR.edit && TKR.sig !== before) tkrDraw();
+}
+function tkrTab(t) { TKR.tab = t; TKR.edit = null; tkrDraw(); }
+function tkrDraw() {
+  const panel = document.getElementById('term-panel');
+  if (!panel || !trkOn()) return;
+  const keep = panel.scrollTop;
+  const tabs = TKR_TABS.map(([k, l]) => `<button class="tkr-tab${TKR.tab === k ? ' on' : ''}" onclick="tkrTab('${k}')">${l}</button>`).join('');
+  const body = TKR.err ? `<div class="bz-card">Could not read the Trade tracker: ${esc(TKR.err)}</div>`
+    : TKR.tab === 'calendar' ? tkrCalendarHtml() : TKR.tab === 'stats' ? tkrStatsHtml() : TKR.tab === 'timeline' ? tkrZonesHtml() : TKR.tab === 'connect' ? tkrConnectHtml() : tkrJournalHtml();
+  panel.innerHTML = `<div class="tkr"><div class="bz-card bz-hero"><small>Your journal</small><h3>Trade tracker</h3>
+    <p>Your trades, results and market hours, kept for you alone. It records trades; it cannot place or change one.</p>
+    <div class="tkr-tabs">${tabs}</div></div>${body}</div>`;
+  panel.scrollTop = keep;
+  if (TKR.tab === 'timeline') tkrTzInit();
+}
+
+// ---------- the numbers ----------
+function tkrStats(list) {
+  const c = list || tkrClosed(), win = c.filter(t => t.pnl_cents > 0), loss = c.filter(t => t.pnl_cents < 0);
+  const sum = a => a.reduce((s, t) => s + Number(t.pnl_cents), 0);
+  const gw = sum(win), gl = Math.abs(sum(loss)), net = sum(c);
+  const ord = c.slice().sort((a, b) => new Date(a.closed_at) - new Date(b.closed_at));
+  let best = 0, run = 0; for (const t of ord) { run = t.pnl_cents > 0 ? run + 1 : 0; best = Math.max(best, run); }
+  let cur = 0; for (let i = ord.length - 1; i >= 0 && ord[i].pnl_cents > 0; i--) cur++;
+  return { n: c.length, win: win.length, loss: loss.length, net, gw, gl, rate: c.length ? win.length / c.length : null,
+    avgW: win.length ? gw / win.length : null, avgL: loss.length ? -gl / loss.length : null, pf: gl ? gw / gl : (gw ? Infinity : null),
+    exp: c.length ? net / c.length : null, bestT: c.length ? c.reduce((a, b) => b.pnl_cents > a.pnl_cents ? b : a) : null,
+    worstT: c.length ? c.reduce((a, b) => b.pnl_cents < a.pnl_cents ? b : a) : null, streakBest: best, streakNow: cur, ord };
+}
+function tkrSpark(ord) {
+  if (ord.length < 2) return '<div class="bz-note">The curve appears once you have two closed trades.</div>';
+  let run = 0; const pts = ord.map(t => (run += Number(t.pnl_cents)));
+  const lo = Math.min(0, ...pts), hi = Math.max(0, ...pts), W = 640, H = 140, pad = 8, span = (hi - lo) || 1;
+  const x = i => pad + (W - 2 * pad) * i / (pts.length - 1), y = v => H - pad - (H - 2 * pad) * (v - lo) / span;
+  const path = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)} ${y(v).toFixed(1)}`).join(' ');
+  return `<svg class="tkr-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Running total of your closed trades">
+    <line x1="${pad}" x2="${W - pad}" y1="${y(0).toFixed(1)}" y2="${y(0).toFixed(1)}" class="tkr-zero"/>
+    <path d="${path} L${x(pts.length - 1).toFixed(1)} ${y(0).toFixed(1)} L${x(0).toFixed(1)} ${y(0).toFixed(1)} Z" class="tkr-area"/><path d="${path}" class="tkr-line"/></svg>`;
+}
+
+// ---------- journal ----------
+function tkrJournalHtml() {
+  const filters = ['all', 'forex', 'futures', 'options'].map(a => `<button class="tkr-tab${TKR.asset === a ? ' on' : ''}" onclick="TKR.asset='${a}';tkrDraw()">${a === 'all' ? 'All' : a[0].toUpperCase() + a.slice(1)}</button>`).join('');
+  const list = TKR.trades.filter(t => TKR.asset === 'all' || t.asset === TKR.asset);
+  const rows = list.slice(0, 200).map(t => {
+    const open = !t.closed_at;
+    const when = t.closed_at ? new Date(t.closed_at).toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'open';
+    const px = t.entry_price != null ? `${t.entry_price}${t.exit_price != null ? ' → ' + t.exit_price : ''}` : '';
+    return `<button class="tkr-tr" onclick="tkrEdit('${esc(t.id)}')"><span><b>${esc(t.symbol)}</b><em class="${t.side === 'buy' ? 'pos' : 'neg'}">${esc(t.side)}</em><em>${t.source === 'metatrader' ? 'MT' : t.source === 'import' ? 'file' : 'manual'}</em></span>
+      <span class="tkr-pn ${tkrCls(t.pnl_cents)}">${open ? 'open' : tkrMoney(t.pnl_cents, { sign: true })}</span>
+      <span class="tkr-sub">${[t.qty != null ? t.qty + (t.asset === 'forex' ? ' lots' : ' contracts') : '', px, t.setup || '', when].filter(Boolean).map(esc).join(' · ')}</span></button>`;
+  }).join('');
+  return `<div class="bz-card"><small>Trades</small><div class="tkr-filters">${filters}</div>
+    <div class="bz-nav"><button class="act-btn" onclick="tkrEdit('new')">Add a trade</button></div>
+    ${rows || '<p class="bz-note">No trades yet. Add one, or connect MetaTrader on the Connect tab to record them automatically.</p>'}
+    ${list.length > 200 ? `<p class="bz-note">Showing the latest 200 of ${list.length}.</p>` : ''}</div>${TKR.edit ? tkrFormHtml(TKR.edit) : ''}`;
+}
+function tkrEdit(id) { TKR.edit = id; if (TKR.tab !== 'journal' && TKR.tab !== 'calendar') TKR.tab = 'journal'; tkrDraw(); setTimeout(() => document.getElementById('tkr-form')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 30); }
+function tkrFormHtml(id) {
+  const t = id === 'new' ? null : TKR.trades.find(x => x.id === id);
+  const v = k => t && t[k] != null ? esc(String(t[k])) : '';
+  const sel = (k, opts) => opts.map(o => `<option value="${o}"${(t ? t[k] : (k === 'asset' ? 'forex' : 'buy')) === o ? ' selected' : ''}>${o}</option>`).join('');
+  const now = new Date(), prefill = id === 'new' && TKR.prefillDay ? TKR.prefillDay + 'T16:00' : '';
+  return `<div class="bz-card" id="tkr-form"><small>${t ? 'Edit ' + esc(t.symbol) : 'Add a trade'}${t && t.source !== 'manual' ? ' · from ' + (t.source === 'metatrader' ? 'MetaTrader' : 'a file') + '; a re-send from MetaTrader can overwrite the result, exit and fees' : ''}</small>
+    <div class="tkr-grid">
+      <label><span>Symbol</span><input id="tkr-sym" maxlength="24" placeholder="EURUSD, ES, SPY" value="${v('symbol')}"></label>
+      <label><span>Market</span><select id="tkr-asset">${sel('asset', ['forex', 'futures', 'options', 'other'])}</select></label>
+      <label><span>Direction</span><select id="tkr-side">${sel('side', ['buy', 'sell'])}</select></label>
+      <label><span>Size (lots or contracts)</span><input id="tkr-qty" inputmode="decimal" value="${v('qty')}"></label>
+      <label><span>Entry price</span><input id="tkr-ent" inputmode="decimal" value="${v('entry_price')}"></label>
+      <label><span>Exit price</span><input id="tkr-ext" inputmode="decimal" value="${v('exit_price')}"></label>
+      <label><span>Stop</span><input id="tkr-stp" inputmode="decimal" value="${v('stop_price')}"></label>
+      <label><span>Target</span><input id="tkr-tgt" inputmode="decimal" value="${v('target_price')}"></label>
+      <label><span>Opened</span><input type="datetime-local" id="tkr-op" value="${esc(tkrLocalInput(t?.opened_at))}"></label>
+      <label><span>Closed (leave empty while open)</span><input type="datetime-local" id="tkr-cl" value="${esc(tkrLocalInput(t?.closed_at) || prefill)}"></label>
+      <label><span>Result after fees ($, − for a loss)</span><input id="tkr-pnl" inputmode="decimal" placeholder="e.g. 125.50 or -40" value="${t && t.pnl_cents != null ? (t.pnl_cents / 100).toString() : ''}"></label>
+      <label><span>Fees ($, optional)</span><input id="tkr-fee" inputmode="decimal" value="${t && t.fees_cents ? (t.fees_cents / 100).toString() : ''}"></label>
+    </div>
+    <label class="tkr-wide"><span>Setup (optional)</span><input id="tkr-set" maxlength="60" placeholder="Breakout, news, reversal…" value="${v('setup')}"></label>
+    <label class="tkr-wide"><span>Notes (optional)</span><input id="tkr-note" maxlength="1000" placeholder="What you saw, what you did, what you'd change" value="${v('notes')}"></label>
+    <div class="bz-nav"><button class="act-btn" onclick="tkrSave('${esc(id)}')">Save trade</button><button class="act-btn ghost" onclick="TKR.edit=null;tkrDraw()">Cancel</button>${t ? `<button class="act-btn ghost" onclick="tkrDelete('${esc(id)}')">Delete</button>` : ''}</div></div>`;
+}
+async function tkrSave(id) {
+  const g = i => document.getElementById(i)?.value ?? '';
+  const sym = g('tkr-sym').trim(); if (!sym) return toast('Type the symbol.');
+  const nums = ['tkr-qty', 'tkr-ent', 'tkr-ext', 'tkr-stp', 'tkr-tgt'].map(i => tkrNum(g(i)));
+  if (nums.some(Number.isNaN)) return toast('Size and prices need to be numbers.');
+  const pnl = tkrCents(g('tkr-pnl')), fee = tkrCents(g('tkr-fee'));
+  if (Number.isNaN(pnl) || Number.isNaN(fee)) return toast('Result and fees need to be numbers.');
+  const cl = g('tkr-cl'), op = g('tkr-op');
+  if (cl && pnl == null && !await osConfirm('This trade is closed but has no result. Save it anyway? It will not count in the totals.')) return;
+  const p = { symbol: sym, asset: g('tkr-asset'), side: g('tkr-side'), qty: nums[0], entry_price: nums[1], exit_price: nums[2], stop_price: nums[3], target_price: nums[4],
+    opened_at: op ? new Date(op).toISOString() : null, closed_at: cl ? new Date(cl).toISOString() : null, pnl_cents: pnl, fees_cents: fee || 0, setup: g('tkr-set') || null, notes: g('tkr-note') || null };
+  if (id !== 'new') p.id = id;
+  const { error } = await sb.rpc('trade_save', { p });
+  if (error) return toast(error.message);
+  toast('Saved.'); TKR.edit = null; TKR.prefillDay = null; await tkrLoad(); tkrDraw();
+}
+async function tkrDelete(id) {
+  if (!await osConfirm('Delete this trade? This cannot be undone.')) return;
+  const { error } = await sb.rpc('trade_delete', { p_id: id });
+  if (error) return toast(error.message);
+  TKR.edit = null; await tkrLoad(); tkrDraw();
+}
+
+// ---------- calendar ----------
+function tkrMonthMove(n) { TKR.month = new Date(TKR.month.getFullYear(), TKR.month.getMonth() + n, 1); tkrDraw(); }
+function tkrCalendarHtml() {
+  const y = TKR.month.getFullYear(), m = TKR.month.getMonth(), key = `${y}-${String(m + 1).padStart(2, '0')}`;
+  const by = {}; for (const t of tkrClosed()) { const d = tkrDay(t); if (d.startsWith(key)) (by[d] = by[d] || []).push(t); }
+  const day = d => { const a = by[d] || []; return { n: a.length, pnl: a.reduce((s, t) => s + Number(t.pnl_cents), 0) }; };
+  const days = Object.keys(by).sort().map(d => ({ d, ...day(d) }));
+  const wSum = days.filter(x => x.pnl > 0).reduce((s, x) => s + x.pnl, 0), lSum = days.filter(x => x.pnl < 0).reduce((s, x) => s + x.pnl, 0), tot = wSum + lSum;
+  const share = wSum + Math.abs(lSum) ? Math.round(100 * wSum / (wSum + Math.abs(lSum))) : 0;
+  const first = new Date(y, m, 1), lead = (first.getDay() + 6) % 7, dim = new Date(y, m + 1, 0).getDate(), today = tkrIso(new Date()), cells = [];
+  for (let i = 0; i < lead; i++) cells.push('<div class="tkr-cell void"></div>');
+  for (let d = 1; d <= dim; d++) {
+    const iso = `${key}-${String(d).padStart(2, '0')}`, x = day(iso), has = x.n > 0;
+    cells.push(`<button class="tkr-cell ${has ? 'has ' + tkrCls(x.pnl) : ''}${iso === today ? ' today' : ''}" onclick="tkrPickDay('${iso}')" aria-label="${iso}${has ? ', ' + tkrMoney(x.pnl, { sign: true }) : ''}"><i>${d}</i>${has ? `<b>${tkrMoney(x.pnl, { sign: true, compact: true })}</b><u>${x.n} trade${x.n === 1 ? '' : 's'}</u>` : ''}</button>`);
+  }
+  const name = TKR.month.toLocaleString(undefined, { month: 'long', year: 'numeric' });
+  return `<div class="bz-card tkr-cal"><div class="tkr-calhead"><button class="tkr-nav" onclick="tkrMonthMove(-1)" aria-label="Previous month">‹</button><b>${esc(name)}</b><button class="tkr-nav" onclick="tkrMonthMove(1)" aria-label="Next month">›</button></div>
+    <div class="tkr-total ${tkrCls(tot)}">${days.length ? tkrMoney(tot, { sign: true }) : '—'}</div><div class="tkr-bar"><i style="width:${days.length ? share : 0}%"></i></div>
+    <div class="tkr-barlbl"><span class="pos">${days.filter(x => x.pnl > 0).length} winning days · ${tkrMoney(wSum)}</span><span class="neg">${days.filter(x => x.pnl < 0).length} losing days · ${tkrMoney(Math.abs(lSum))}</span></div>
+    <div class="tkr-dow">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<span>${x}</span>`).join('')}</div><div class="tkr-days">${cells.join('')}</div>
+    <div class="bz-note">${days.length ? 'Days are by the day a trade closed, in your time zone. Tap a day to see its trades or add one.' : 'No closed trades this month yet.'}</div></div>
+    ${TKR.day ? tkrDayHtml(TKR.day) : ''}${TKR.edit ? tkrFormHtml(TKR.edit) : ''}`;
+}
+function tkrPickDay(iso) { TKR.day = iso; TKR.edit = null; tkrDraw(); setTimeout(() => document.getElementById('tkr-day')?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 30); }
+function tkrDayHtml(iso) {
+  const list = tkrClosed().filter(t => tkrDay(t) === iso);
+  const rows = list.map(t => `<button class="tkr-tr" onclick="tkrEdit('${esc(t.id)}')"><span><b>${esc(t.symbol)}</b><em class="${t.side === 'buy' ? 'pos' : 'neg'}">${esc(t.side)}</em></span><span class="tkr-pn ${tkrCls(t.pnl_cents)}">${tkrMoney(t.pnl_cents, { sign: true })}</span><span class="tkr-sub">${esc(t.setup || t.notes || '')}</span></button>`).join('');
+  return `<div class="bz-card" id="tkr-day"><small>${esc(iso)}</small>${rows || '<p class="bz-note">No trades closed this day.</p>'}<div class="bz-nav"><button class="act-btn" onclick="TKR.prefillDay='${esc(iso)}';tkrEdit('new')">Add a trade for this day</button></div></div>`;
+}
+
+// ---------- stats ----------
+function tkrGroup(list, keyFn) {
+  const g = {}; for (const t of list) (g[keyFn(t)] = g[keyFn(t)] || []).push(t);
+  return Object.entries(g).map(([k, a]) => ({ k, n: a.length, net: a.reduce((s, t) => s + Number(t.pnl_cents), 0), wins: a.filter(t => t.pnl_cents > 0).length }));
+}
+function tkrBars(rows, title) {
+  if (!rows.length) return '';
+  const max = Math.max(...rows.map(r => Math.abs(r.net)), 1);
+  return `<div class="bz-card"><small>${title}</small><div class="tkr-bars-h">${rows.map(r => `<div class="tkr-hb"><b>${esc(r.k)}</b><div><i class="${r.net < 0 ? 'neg' : ''}" style="width:${Math.max(3, Math.round(100 * Math.abs(r.net) / max))}%"></i></div><span class="${tkrCls(r.net)}">${tkrMoney(r.net, { sign: true, compact: true })} · ${r.n}</span></div>`).join('')}</div></div>`;
+}
+function tkrStatsHtml() {
+  const s = tkrStats(), tile = (l, v, c = '', sub = '') => `<div class="tkr-tile"><small>${l}</small><b class="${c}">${v}</b>${sub ? `<em>${sub}</em>` : ''}</div>`;
+  if (!s.n) return '<div class="bz-card"><p class="bz-note">Numbers appear once you have closed trades with a result.</p></div>';
+  const pf = s.pf == null ? '—' : s.pf === Infinity ? '∞' : s.pf.toFixed(2);
+  const wd = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+  const byDay = tkrGroup(s.ord, t => wd[new Date(t.closed_at).getDay()]).sort((a, b) => wd.indexOf(a.k) - wd.indexOf(b.k));
+  return `<div class="tkr-tiles">
+      ${tile('Net result', tkrMoney(s.net, { sign: true }), tkrCls(s.net), s.n + ' closed trades')}
+      ${tile('Win rate', Math.round(s.rate * 100) + '%', '', `${s.win} won · ${s.loss} lost`)}
+      ${tile('Profit factor', pf, '', 'gross wins ÷ gross losses')}
+      ${tile('Average win', tkrMoney(s.avgW, { sign: true }), 'pos')}
+      ${tile('Average loss', tkrMoney(s.avgL, { sign: true }), 'neg')}
+      ${tile('Expectancy', tkrMoney(Math.round(s.exp), { sign: true }), tkrCls(s.exp), 'average per trade')}
+      ${tile('Best trade', tkrMoney(s.bestT.pnl_cents, { sign: true }), 'pos', s.bestT.symbol)}
+      ${tile('Worst trade', tkrMoney(s.worstT.pnl_cents, { sign: true }), 'neg', s.worstT.symbol)}
+      ${tile('Winning streak', s.streakNow + ' now', '', 'best ' + s.streakBest)}
+    </div>
+    <div class="bz-card"><small>Running total</small>${tkrSpark(s.ord)}</div>
+    ${tkrBars(tkrGroup(s.ord, t => t.symbol).sort((a, b) => b.net - a.net).slice(0, 10), 'By symbol (net · trades)')}
+    ${tkrBars(byDay, 'By weekday')}
+    ${tkrBars(tkrGroup(s.ord.filter(t => t.setup), t => t.setup).sort((a, b) => b.net - a.net).slice(0, 8), 'By setup')}
+    ${tkrBars(tkrGroup(s.ord, t => t.asset), 'By market')}`;
+}
+
+// ---------- connect MetaTrader ----------
+const tkrFeed = () => TKR.newKey ? `${SB_URL}/functions/v1/trade-feed?k=${TKR.newKey}` : '';
+async function tkrMakeKey() {
+  if (TKR.key?.has_key && !await osConfirm('Make a new link? The old one stops working, so the MetaTrader add-on needs the new one.')) return;
+  const { data, error } = await sb.rpc('trade_feed_key_new');
+  if (error) return toast(error.message);
+  TKR.newKey = data; TKR.key = { has_key: true, created_at: new Date().toISOString(), last_seen: null }; tkrDraw();
+}
+async function tkrCopy(id) {
+  const el = document.getElementById(id); if (!el) return;
+  try { await navigator.clipboard.writeText(el.value ?? el.textContent); toast('Copied.'); } catch (e) { el.select?.(); toast('Press Cmd+C to copy.'); }
+}
+function tkrConnectHtml() {
+  const k = TKR.key || {}, seen = k.last_seen ? `Last heard from MetaTrader ${new Date(k.last_seen).toLocaleString()}.` : (k.has_key ? 'Nothing received yet.' : '');
+  const link = TKR.newKey ? `<label class="tkr-wide"><span>Your private link (shown once; keep it private)</span><input id="tkr-hook" readonly value="${esc(tkrFeed())}" onfocus="this.select()"></label>
+      <div class="bz-nav"><button class="act-btn" onclick="tkrCopy('tkr-hook')">Copy the link</button></div>` : '';
+  const base = SB_URL;
+  return `<div class="bz-card"><small>Automatic tracking from MetaTrader</small>
+    <p>${k.has_key ? 'Your link is set up. ' + esc(seen) : 'Make a private link, then give it to the MetaTrader add-on. It reports each trade when it closes.'}</p>${link}
+    <div class="bz-nav"><button class="act-btn${k.has_key ? ' ghost' : ''}" onclick="tkrMakeKey()">${k.has_key ? 'Make a new link' : 'Make my link'}</button></div>
+    <details class="tkr-how" open><summary>Install the add-on</summary><ol>
+      <li>Find the file for your MetaTrader version in the project folder <b>Bixxville Operating System / trading</b>: <b>BixxvilleTradeFeed.mq5</b> for MetaTrader 5, <b>BixxvilleTradeFeed.mq4</b> for MetaTrader 4.</li>
+      <li>In MetaTrader choose File, then Open Data Folder. Open MQL5 (or MQL4), then Experts, and copy the file in.</li>
+      <li>Open MetaEditor from MetaTrader (F4), open the file and press Compile (F7). It should say 0 errors.</li>
+      <li>Back in MetaTrader: Tools, Options, Expert Advisors. Tick <b>Allow WebRequest for listed URL</b> and add <b>${esc(base)}</b>.</li>
+      <li>Drag the add-on from the Navigator onto any chart. In its Inputs tab, paste your private link into <b>FeedURL</b>. Leave the chart's algo trading button on; the add-on never trades.</li>
+      <li>Open the Experts tab at the bottom of MetaTrader. You should see "sent". Your last 30 days of closed trades arrive within a minute.</li></ol>
+      <p class="bz-note">The add-on only reads your closed trades and sends them here. It has no code that can place, change or close a trade. MetaTrader must be running for trades to be sent; when it starts again it catches up. It was written without a live MetaTrader to test on, so tell me what the Experts tab says if anything fails.</p></details></div>
+    <div class="bz-card"><small>Other ways in</small><p class="bz-note">Add a trade by hand from the Journal tab. File import is not built yet; send me one exported history file and I will match its layout. TradingView cannot report real trades, so it is not part of this.</p></div>`;
+}
+
+// ---------- time zones and forex sessions ----------
+// One column of 24 hours, the same moments in every city. Drag the window to see what time it is everywhere.
+// Daylight saving comes from the browser, so it is right on the day. Forex session hours are approximate.
+const TKR_CITIES = [['Honolulu', 'Pacific/Honolulu'], ['Los Angeles', 'America/Los_Angeles'], ['Mexico City', 'America/Mexico_City'], ['Chicago', 'America/Chicago'],
+  ['New York', 'America/New_York'], ['Toronto', 'America/Toronto'], ['San Juan', 'America/Puerto_Rico'], ['São Paulo', 'America/Sao_Paulo'], ['London', 'Europe/London'],
+  ['Paris', 'Europe/Paris'], ['Frankfurt', 'Europe/Berlin'], ['Zurich', 'Europe/Zurich'], ['Johannesburg', 'Africa/Johannesburg'], ['Dubai', 'Asia/Dubai'],
+  ['Mumbai', 'Asia/Kolkata'], ['Singapore', 'Asia/Singapore'], ['Hong Kong', 'Asia/Hong_Kong'], ['Tokyo', 'Asia/Tokyo'], ['Sydney', 'Australia/Sydney'], ['Auckland', 'Pacific/Auckland']];
+const TKR_FX = [['Sydney', 'Australia/Sydney'], ['Tokyo', 'Asia/Tokyo'], ['London', 'Europe/London'], ['New York', 'America/New_York']];
+const TKR_TZ = (() => {
+  let s = {}; try { s = JSON.parse(localStorage.getItem('tkr-tz') || '{}') || {}; } catch (e) {}
+  const home = (() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || 'America/New_York'; } catch (e) { return 'America/New_York'; } })();
+  const n = new Date(), q = Math.floor(n.getMinutes() / 15) * 15;
+  return Object.assign({ from: home, date: tkrIso(n), time: `${String(n.getHours()).padStart(2, '0')}:${String(q).padStart(2, '0')}`, dur: 60,
+    cities: ['America/New_York', 'Europe/London', 'Asia/Tokyo', 'Australia/Sydney'], ws: 9, we: 17, h24: true, fx: true }, s);
+})();
+const tkrTzSave = () => { try { localStorage.setItem('tkr-tz', JSON.stringify(TKR_TZ)); } catch (e) {} };
+const tkrCityName = tz => (TKR_CITIES.find(c => c[1] === tz) || [tz.split('/').pop().replace(/_/g, ' ')])[0];
+const tkrFmtCache = {};
+function tkrParts(ms, tz) {
+  const f = tkrFmtCache[tz] || (tkrFmtCache[tz] = new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: 'numeric', day: 'numeric', hour: 'numeric', minute: 'numeric', weekday: 'short' }));
+  const o = {}; for (const p of f.formatToParts(new Date(ms))) o[p.type] = p.value;
+  return { y: +o.year, mo: +o.month, d: +o.day, h: (+o.hour) % 24, mi: +o.minute, wd: o.weekday };
+}
+const tkrOffMs = (ms, tz) => { const p = tkrParts(ms, tz); return Date.UTC(p.y, p.mo - 1, p.d, p.h, p.mi) - Math.floor(ms / 60000) * 60000; };
+function tkrLocalToMs(dateStr, timeStr, tz) {
+  const [y, mo, d] = dateStr.split('-').map(Number), [h, mi] = timeStr.split(':').map(Number), guess = Date.UTC(y, mo - 1, d, h, mi);
+  const first = guess - tkrOffMs(guess, tz);
+  return guess - tkrOffMs(first, tz);
+}
+function tkrOffLabel(ms, tz) { const m = tkrOffMs(ms, tz) / 60000, a = Math.abs(m); return 'UTC' + (m < 0 ? '−' : '+') + Math.floor(a / 60) + (a % 60 ? ':' + String(a % 60).padStart(2, '0') : ''); }
+function tkrClock(p) {
+  const mm = String(p.mi).padStart(2, '0');
+  if (TKR_TZ.h24) return `${String(p.h).padStart(2, '0')}:${mm}`;
+  return `${p.h % 12 || 12}:${mm} ${p.h < 12 ? 'am' : 'pm'}`;
+}
+const tkrFxOpen = ms => { const p = tkrParts(ms, 'America/New_York'); return !((p.wd === 'Fri' && p.h >= 17) || p.wd === 'Sat' || (p.wd === 'Sun' && p.h < 17)); };
+const tkrFutOpen = ms => { const p = tkrParts(ms, 'America/New_York'); if (p.wd === 'Sat' || (p.wd === 'Fri' && p.h >= 17)) return false; if (p.wd === 'Sun') return p.h >= 18; return p.h !== 17; };
+const tkrOptOpen = ms => { const p = tkrParts(ms, 'America/New_York'), m = p.h * 60 + p.mi; return !['Sat', 'Sun'].includes(p.wd) && m >= 570 && m < 960; };
+const TKR_MKTS = [['forex', 'Forex', 'tkrFxOpen'], ['futures', 'Futures', 'tkrFutOpen'], ['options', 'Options', 'tkrOptOpen']];
+const tkrMktOpen = (k, ms) => k === 'forex' ? tkrFxOpen(ms) : k === 'futures' ? tkrFutOpen(ms) : tkrOptOpen(ms);
+function tkrNextChange(k, now) {
+  const s = tkrMktOpen(k, now); let t = now;
+  for (let i = 0; i < 9 * 96 && tkrMktOpen(k, t) === s; i++) t += 15 * 60000;
+  while (tkrMktOpen(k, t - 60000) !== s) t -= 60000;
+  return t;
+}
+const tkrFxActive = ms => TKR_FX.filter(([, tz]) => { const h = tkrParts(ms, tz).h; return h >= 8 && h < 17; }).map(c => c[0]);
+const tkrT0 = () => tkrLocalToMs(TKR_TZ.date, '00:00', TKR_TZ.from);
+const tkrSel = () => tkrLocalToMs(TKR_TZ.date, TKR_TZ.time, TKR_TZ.from);
+const tkrTzList = () => [TKR_TZ.from, ...TKR_TZ.cities.filter(t => t !== TKR_TZ.from)];
+
+function tkrCityOptions(sel) {
+  const list = TKR_CITIES.some(c => c[1] === sel) || !sel ? TKR_CITIES : [[tkrCityName(sel), sel], ...TKR_CITIES];
+  return list.map(c => `<option value="${esc(c[1])}"${c[1] === sel ? ' selected' : ''}>${esc(c[0])}</option>`).join('');
+}
+const tkrHourOpts = sel => Array.from({ length: 25 }, (_, h) => `<option value="${h}"${h === sel ? ' selected' : ''}>${String(h).padStart(2, '0')}:00</option>`).join('');
+function tkrTzRowsHtml() {
+  const t0 = tkrT0(), H = 3600000;
+  const axis = Array.from({ length: 9 }, (_, i) => { const p = tkrParts(t0 + i * 3 * H, TKR_TZ.from); return `<span style="left:${(i / 8) * 100}%">${TKR_TZ.h24 ? String(p.h).padStart(2, '0') : (p.h % 12 || 12) + (p.h < 12 ? 'am' : 'pm')}</span>`; }).join('');
+  const row = (tz, i) => {
+    const cells = Array.from({ length: 24 }, (_, h) => {
+      const p = tkrParts(t0 + h * H, tz), work = p.h >= TKR_TZ.ws && p.h < TKR_TZ.we, night = p.h >= 22 || p.h < 6;
+      return `<i class="${work ? 'w' : night ? 'n' : 's'}${p.h === 0 && p.mi === 0 ? ' mid' : ''}"${p.mi === 0 && p.h % 3 === 0 ? ` data-h="${String(p.h).padStart(2, '0')}"` : ''}></i>`;
+    }).join('');
+    return `<div class="tkr-row" data-tz="${esc(tz)}"><div class="tkr-who"><b>${esc(tkrCityName(tz))}</b><small class="tkr-day"></small></div>
+      <div class="tkr-when"><span class="tkr-range"></span><small class="tkr-off"></small></div>
+      <div class="tkr-bars" title="Drag to move the window">${cells}<u class="tkr-win"></u><u class="tkr-now"></u></div>
+      ${i ? `<button class="tkr-x" onclick="tkrTzRemove('${esc(tz)}')" aria-label="Remove ${esc(tkrCityName(tz))}">×</button>` : '<span class="tkr-x void"></span>'}</div>`;
+  };
+  const mk = TKR_TZ.fx ? TKR_MKTS.map(([k, name]) => `<div class="tkr-row fx" data-tz="m:${k}"><div class="tkr-who"><b>${name}</b><small>${k === 'forex' ? 'Sun 17:00 to Fri 17:00 ET' : k === 'futures' ? 'Globex, break 17:00 ET' : 'US regular hours'}</small></div><div class="tkr-when"><span class="tkr-range"></span><small class="tkr-off"></small></div>
+      <div class="tkr-bars">${Array.from({ length: 24 }, (_, h) => { const ms = t0 + h * H, op = tkrMktOpen(k, ms); return `<i class="${!op ? 'x' : k === 'forex' ? 'f' + tkrFxActive(ms).length : k === 'futures' ? 'f2' : 'f3'}"></i>`; }).join('')}<u class="tkr-win"></u><u class="tkr-now"></u></div>${k === 'forex' ? '<button class="tkr-x" onclick="tkrTzSet(\'fx\',false)" aria-label="Hide market rows">×</button>' : '<span class="tkr-x void"></span>'}</div>`).join('') : '';
+  return `<div class="tkr-axis"><span class="tkr-axl">${esc(tkrCityName(TKR_TZ.from))} hours</span><div>${axis}</div></div>${tkrTzList().map(row).join('')}${mk}`;
+}
+function tkrZonesHtml() {
+  const durs = [[30, '30 min'], [60, '1 hour'], [120, '2 hours'], [180, '3 hours'], [240, '4 hours'], [480, '8 hours']];
+  const add = TKR_CITIES.filter(c => !tkrTzList().includes(c[1]));
+  return `<div class="bz-card tkr-zones"><small>Market hours and time zones</small>
+    <div class="tkr-fxline" id="tkr-fxline"></div>
+    <div class="tkr-ctl">
+      <label><span>Converting from</span><select onchange="tkrTzSet('from',this.value)">${tkrCityOptions(TKR_TZ.from)}</select></label>
+      <label><span>Date</span><input type="date" value="${esc(TKR_TZ.date)}" onchange="tkrTzSet('date',this.value)"></label>
+      <label><span>Time</span><input type="time" id="tkr-time" value="${esc(TKR_TZ.time)}" step="900" onchange="tkrTzSet('time',this.value,true)"></label>
+      <label><span>Window</span><select onchange="tkrTzSet('dur',+this.value,true)">${durs.map(([m, l]) => `<option value="${m}"${m === TKR_TZ.dur ? ' selected' : ''}>${l}</option>`).join('')}</select></label>
+      <label><span>Work day from</span><select onchange="tkrTzSet('ws',+this.value)">${tkrHourOpts(TKR_TZ.ws)}</select></label>
+      <label><span>to</span><select onchange="tkrTzSet('we',+this.value)">${tkrHourOpts(TKR_TZ.we)}</select></label>
+      <label><span>Clock</span><select onchange="tkrTzSet('h24',this.value==='24',true)"><option value="24"${TKR_TZ.h24 ? ' selected' : ''}>24 hour</option><option value="12"${TKR_TZ.h24 ? '' : ' selected'}>12 hour</option></select></label>
+      <button class="pf-btn" onclick="tkrTzNow()">Now</button>
+    </div>
+    <div class="tkr-rows" id="tkr-tz-rows">${tkrTzRowsHtml()}</div>
+    <p class="tkr-verdict" id="tkr-verdict"></p>
+    <div class="tkr-ctl"><label><span>Add a city</span><select id="tkr-add"><option value="">Choose…</option>${add.map(c => `<option value="${esc(c[1])}">${esc(c[0])}</option>`).join('')}</select></label>
+      <button class="pf-btn" onclick="tkrTzAdd()">Add</button>${TKR_TZ.fx ? '' : '<button class="pf-btn" onclick="tkrTzSet(\'fx\',true)">Show market rows</button>'}</div>
+    <p class="bz-note">Bright bars are your work hours in each city, dark bars are night. Market rows: forex is shaded darker to lighter by how many of the Sydney, Tokyo, London and New York sessions (8:00 to 17:00 local, approximate) are open, and is empty from Friday 17:00 to Sunday 17:00 New York time. Futures follow CME Globex (Sunday 18:00 to Friday 17:00 New York time, with a daily break at 17:00). Options follow US regular hours, 9:30 to 16:00 New York time, weekdays. Holidays are not modeled.</p></div>`;
+}
+function tkrTzSet(k, v, soft) {
+  if (k === 'from' && !TKR_TZ.cities.includes(TKR_TZ.from)) { /* keep the old home as a city */ TKR_TZ.cities.push(TKR_TZ.from); }
+  TKR_TZ[k] = v; if (k === 'from') TKR_TZ.cities = TKR_TZ.cities.filter(t => t !== v);
+  tkrTzSave(); soft ? tkrTzUpdate() : tkrDraw();
+}
+function tkrTzAdd() { const v = document.getElementById('tkr-add')?.value; if (!v) return; TKR_TZ.cities.push(v); tkrTzSave(); tkrDraw(); }
+function tkrTzRemove(tz) { TKR_TZ.cities = TKR_TZ.cities.filter(t => t !== tz); tkrTzSave(); tkrDraw(); }
+function tkrTzNow() {
+  const n = Date.now(), p = tkrParts(n, TKR_TZ.from);
+  TKR_TZ.date = `${p.y}-${String(p.mo).padStart(2, '0')}-${String(p.d).padStart(2, '0')}`;
+  TKR_TZ.time = `${String(p.h).padStart(2, '0')}:${String(Math.floor(p.mi / 15) * 15).padStart(2, '0')}`; tkrTzSave(); tkrDraw();
+}
+function tkrTzUpdate() {
+  const rows = document.getElementById('tkr-tz-rows'); if (!rows) return;
+  const H = 3600000, t0 = tkrT0(), sel = tkrSel(), end = sel + TKR_TZ.dur * 60000, now = Date.now();
+  const left = Math.max(0, (sel - t0) / (24 * H)) * 100, width = Math.min(100 - left, TKR_TZ.dur / 1440 * 100);
+  const cls = { work: [], early: [], night: [] };
+  rows.querySelectorAll('.tkr-row').forEach(r => {
+    const tz = r.dataset.tz, win = r.querySelector('.tkr-win'), nowEl = r.querySelector('.tkr-now');
+    win.style.left = left + '%'; win.style.width = width + '%';
+    nowEl.style.display = now >= t0 && now < t0 + 24 * H ? '' : 'none'; nowEl.style.left = ((now - t0) / (24 * H) * 100) + '%';
+    if (tz.startsWith('m:')) {
+      const k = tz.slice(2), open = tkrMktOpen(k, sel), a = k === 'forex' && open ? tkrFxActive(sel) : [];
+      r.querySelector('.tkr-range').textContent = open ? (a.length ? a.join(' + ') : 'Open') : 'Closed'; r.querySelector('.tkr-off').textContent = a.length > 1 ? 'overlap' : '';
+      return;
+    }
+    const a = tkrParts(sel, tz), b = tkrParts(end, tz), mid = tkrParts(sel + TKR_TZ.dur * 30000, tz);
+    r.querySelector('.tkr-range').textContent = `${tkrClock(a)} to ${tkrClock(b)}`;
+    r.querySelector('.tkr-day').textContent = `${a.wd} ${a.d} ${['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][a.mo - 1]}`;
+    r.querySelector('.tkr-off').textContent = tkrOffLabel(sel, tz);
+    const inWork = h => h >= TKR_TZ.ws && h < TKR_TZ.we;
+    const kind = inWork(a.h) && (inWork(b.h) || (b.h === TKR_TZ.we && b.mi === 0)) ? 'work' : (mid.h >= 22 || mid.h < 6) ? 'night' : 'early';
+    cls[kind].push(tkrCityName(tz));
+  });
+  const list = a => a.length < 3 ? a.join(' and ') : a.slice(0, -1).join(', ') + ' and ' + a.slice(-1);
+  const bits = [];
+  if (cls.work.length) bits.push(`Work hours in <b>${esc(list(cls.work))}</b>.`);
+  if (cls.early.length) bits.push(`Early or late for <b>${esc(list(cls.early))}</b>.`);
+  if (cls.night.length) bits.push(`The middle of the night in <b>${esc(list(cls.night))}</b>.`);
+  const v = document.getElementById('tkr-verdict'); if (v) v.innerHTML = bits.join(' ');
+  const line = document.getElementById('tkr-fxline');
+  if (line) {
+    line.innerHTML = TKR_MKTS.map(([k, name]) => {
+      const open = tkrMktOpen(k, now), t = tkrNextChange(k, now), p = tkrParts(t, TKR_TZ.from);
+      return `<span class="tkr-mk"><b class="${open ? 'pos' : 'neg'}">${name} ${open ? 'open' : 'closed'}</b> <small>${open ? 'closes' : 'opens'} ${esc(p.wd)} ${esc(tkrClock(p))}</small></span>`;
+    }).join('') + `<small class="tkr-mk">in ${esc(tkrCityName(TKR_TZ.from))} time. US holidays are not modeled.</small>`;
+  }
+  const ti = document.getElementById('tkr-time'); if (ti && ti.value !== TKR_TZ.time) ti.value = TKR_TZ.time;
+}
+function tkrTzInit() {
+  const rows = document.getElementById('tkr-tz-rows'); if (!rows) return;
+  let drag = null;
+  rows.addEventListener('pointerdown', e => {
+    const bars = e.target.closest('.tkr-bars'); if (!bars) return;
+    const r = bars.getBoundingClientRect(), t0 = tkrT0(), selMin = (tkrSel() - t0) / 60000, at = (e.clientX - r.left) / r.width * 1440;
+    drag = { r, t0, off: at >= selMin && at <= selMin + TKR_TZ.dur ? at - selMin : TKR_TZ.dur / 2, bars };
+    bars.setPointerCapture?.(e.pointerId); move(e); e.preventDefault();
+  });
+  const move = e => {
+    if (!drag) return;
+    let m = (e.clientX - drag.r.left) / drag.r.width * 1440 - drag.off;
+    m = Math.round(m / 15) * 15; m = Math.max(0, Math.min(1440 - TKR_TZ.dur, m));
+    const p = tkrParts(drag.t0 + m * 60000, TKR_TZ.from);
+    TKR_TZ.time = `${String(p.h).padStart(2, '0')}:${String(p.mi).padStart(2, '0')}`; tkrTzUpdate();
+  };
+  rows.addEventListener('pointermove', move);
+  const stop = () => { if (drag) { drag = null; tkrTzSave(); } };
+  rows.addEventListener('pointerup', stop); rows.addEventListener('pointercancel', stop);
+  tkrTzUpdate();
 }
 
 // ── LEDGER: everything you've done in the network (Activity) and every payment on the blockchain

@@ -3175,6 +3175,124 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 #term-mkts{display:inline-flex;gap:16px;white-space:nowrap}
 #term-mkts i{font-style:normal}
 #term-mkts i.up{color:var(--up)} #term-mkts i.down{color:var(--down)}
+/* ── Dashboard home: profile, wallet wheel, Add / Share, Decomposed ── */
+:root{--dh-accent:#FF7A1A;--dh-btn:linear-gradient(180deg,#FFFFFF,#E3E3E0);--dh-ink:#0A0A0A;--dh-glass:rgba(34,34,38,.4);--dh-glass-line:rgba(255,255,255,.18);--dh-card:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.025));--dh-card-line:rgba(255,255,255,.11);--dh-dim:rgba(255,255,255,.55);--dh-veil:rgba(0,0,0,.45);--dh-sheet:rgba(28,28,32,.8)}
+html.theme-light{--dh-accent:#D9560B;--dh-btn:linear-gradient(180deg,#2A2A2E,#0A0A0A);--dh-ink:#FFFFFF;--dh-glass:rgba(255,255,255,.42);--dh-glass-line:rgba(0,0,0,.1);--dh-card:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.45));--dh-card-line:rgba(0,0,0,.08);--dh-dim:rgba(20,18,14,.55);--dh-veil:rgba(20,18,14,.28);--dh-sheet:rgba(250,249,246,.82)}
+.dh{width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;font-family:var(--g-sans,'Helvetica Neue',Helvetica,Arial,sans-serif)}
+.dh button{font-family:inherit}
+.dh-top{display:flex;justify-content:flex-end}
+.dh-pill{display:inline-flex;align-items:center;height:40px;border-radius:999px;border:1px solid var(--dh-card-line);background:var(--dh-card)}
+.dh-pill button{appearance:none;border:0;background:none;color:var(--term-fg);width:44px;height:40px;display:grid;place-items:center;cursor:pointer;border-radius:999px;transition:background .2s}
+.dh-pill button:hover{background:var(--dh-card-line)}
+.dh-pill svg{width:18px;height:18px;transition:transform .3s}
+.dh.min #dh-chev svg{transform:rotate(180deg)}
+.dh-hero{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px}
+.dh-av{appearance:none;border:2px dashed var(--dh-accent);background:none;border-radius:50%;padding:5px;width:96px;height:96px;cursor:pointer;transition:transform .25s}
+.dh-av:hover{transform:scale(1.04)}
+.dh-av-in{display:grid;place-items:center;width:100%;height:100%;border-radius:50%;overflow:hidden;background:var(--dh-card-line)}
+.dh-name{margin:10px 0 0;font-size:24px;font-weight:600;letter-spacing:-.02em;color:var(--term-fg)}
+.dh-handle{font-size:13px;color:var(--dh-dim)}
+.dh-stats{display:grid;grid-template-columns:repeat(3,1fr);width:100%;margin-top:14px;overflow:hidden;max-height:90px;opacity:1;transition:max-height .35s ease,opacity .25s ease,margin .35s ease}
+.dh.min .dh-stats{max-height:0;opacity:0;margin-top:0}
+.dh-stat{display:flex;flex-direction:column;align-items:center;gap:2px;padding:4px 6px;border-left:1px solid var(--dh-card-line)}
+.dh-stat:first-child{border-left:0}
+.dh-stat b{display:flex;align-items:center;gap:6px;font-size:18px;font-weight:600;color:var(--term-fg);white-space:nowrap}
+.dh-stat b svg{width:18px;height:18px;color:var(--dh-accent);flex:none}
+.dh-stat > span{font-size:12px;color:var(--dh-dim)}
+.dh-wallet{position:relative}
+.dh-stack{position:relative;height:312px;perspective:1000px;touch-action:none;outline:0;user-select:none;-webkit-user-select:none}
+.dh-wc{position:absolute;left:0;right:0;top:64px;height:236px;border-radius:28px;border:1px solid var(--dh-card-line);background:var(--dh-card);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);box-shadow:0 14px 34px rgba(0,0,0,.22);transform-origin:50% 0;transition:transform .5s cubic-bezier(.2,.85,.25,1),opacity .4s ease;color:var(--term-fg);cursor:pointer;will-change:transform}
+.dh-wc.cur{cursor:default}
+.dh-wc-tab{display:flex;justify-content:space-between;align-items:center;height:28px;padding:0 20px;font-size:12px;color:var(--dh-dim)}
+.dh-wc.cur .dh-wc-tab{display:none}
+.dh-wc-body{display:none;height:100%;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:18px 20px;text-align:center}
+.dh-wc.cur .dh-wc-body{display:flex}
+.dh-wc-lbl{position:absolute;left:22px;top:18px;font-size:13px;color:var(--dh-dim)}
+.dh-refresh{position:absolute;right:14px;top:10px;appearance:none;border:0;background:none;color:var(--dh-dim);width:34px;height:34px;border-radius:50%;display:grid;place-items:center;cursor:pointer}
+.dh-refresh:hover{color:var(--term-fg);background:var(--dh-card-line)}
+.dh-refresh svg{width:18px;height:18px}
+.dh-refresh.spin svg{animation:dhSpin .8s linear infinite}
+@keyframes dhSpin{to{transform:rotate(360deg)}}
+.dh-sel{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--dh-card-line);background:var(--dh-card-line);color:var(--term-fg);border-radius:999px;padding:6px 14px;font-size:14px;cursor:pointer;appearance:none}
+.dh-sel svg{width:14px;height:14px;opacity:.7}
+.dh-avail{font-size:14px;color:var(--dh-dim);margin-top:6px}
+.dh-amt{font-size:44px;font-weight:600;letter-spacing:-.03em;line-height:1.05;color:var(--term-fg);font-variant-numeric:tabular-nums}
+.dh-amt small{font-size:.38em;font-weight:500;letter-spacing:0;color:var(--dh-dim);margin-left:6px}
+.dh-addr{font:12px var(--g-mono,ui-monospace,Menlo,monospace);color:var(--dh-dim)}
+.dh-dots{position:absolute;right:-18px;top:50%;transform:translateY(-10%);display:flex;flex-direction:column;gap:6px}
+.dh-dots i{width:5px;height:5px;border-radius:50%;background:var(--dh-card-line);transition:background .25s,transform .25s}
+.dh-dots i.on{background:var(--dh-accent);transform:scale(1.3)}
+@media (max-width:640px){.dh-dots{right:-12px}}
+.dh-acts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dh-act{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dh-act>svg{width:18px;height:18px;color:var(--dh-dim)}
+.dh-act button{appearance:none;width:100%;border:0;border-radius:20px;padding:15px 12px;font-size:16px;font-weight:600;color:var(--dh-ink);background:var(--dh-btn);cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 10px 24px rgba(0,0,0,.18);transition:transform .2s,box-shadow .2s}
+.dh-act button:hover{transform:translateY(-1px)}
+.dh-act button:active{transform:scale(.97)}
+.dh-link{appearance:none;border:0;background:none;color:var(--dh-dim);font-size:12px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;align-self:center}
+.dh-tools{max-width:100%}
+.dh-dec{display:flex;flex-direction:column;gap:12px}
+.dh-dec-h{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dh-dec-h h3{margin:0;font-size:20px;font-weight:500;letter-spacing:-.01em;color:var(--term-dim);font-family:inherit}
+.dh-seg{display:inline-flex;gap:4px;padding:4px;border-radius:999px;background:var(--dh-card-line)}
+.dh-seg button{appearance:none;border:0;background:none;color:var(--term-fg);font-size:14px;padding:8px 16px;border-radius:999px;cursor:pointer;transition:background .2s,color .2s}
+.dh-seg button.on{background:var(--dh-btn);color:var(--dh-ink)}
+.dh-sum{font-size:12px;color:var(--dh-dim)}
+.dh-list{display:flex;flex-direction:column;gap:8px;max-height:460px;overflow-y:auto;scrollbar-width:thin}
+.dh-row{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:22px;border:1px solid var(--dh-card-line);background:var(--dh-card)}
+.dh-rico{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--dh-card-line);color:var(--dh-accent)}
+.dh-rico svg{width:20px;height:20px}
+.dh-rmain{min-width:0;flex:1}
+.dh-rmain b{display:block;font-size:16px;font-weight:600;color:var(--term-fg);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dh-rmain small{font-size:12.5px;color:var(--dh-dim)}
+.dh-rval{text-align:right;white-space:nowrap}
+.dh-rval b{display:block;font-size:17px;font-weight:600;color:var(--up);font-variant-numeric:tabular-nums}
+.dh-rval b i{font-style:normal;font-size:.62em;color:var(--dh-dim);margin-left:3px;font-weight:500}
+.dh-rval small{font-size:12px;color:var(--dh-dim)}
+.dh-empty{padding:26px 16px;text-align:center;border-radius:22px;border:1px dashed var(--dh-card-line);color:var(--dh-dim);font-size:13.5px}
+/* glass pop-ups: the Add and Share menus, the settings menu, and the sheets they open */
+.dh-veil{position:fixed;inset:0;z-index:9980;opacity:0;transition:opacity .25s ease}
+.dh-veil.on{opacity:1}
+.dh-veil.dim{background:var(--dh-veil);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);display:grid;place-items:center;padding:16px}
+.dh-pop,.dh-sheet{background:var(--dh-glass);backdrop-filter:blur(24px) saturate(1.5);-webkit-backdrop-filter:blur(24px) saturate(1.5);border:1px solid var(--dh-glass-line);box-shadow:0 24px 60px rgba(0,0,0,.32),0 1px 0 rgba(255,255,255,.18) inset;color:var(--term-fg);font-family:var(--g-sans,'Helvetica Neue',Helvetica,Arial,sans-serif)}
+.dh-pop{position:fixed;z-index:9990;width:290px;max-width:calc(100vw - 16px);padding:8px;border-radius:24px;opacity:0;transform:translateY(10px) scale(.93);transform-origin:var(--ox,50%) var(--oy,0%);transition:opacity .22s ease,transform .32s cubic-bezier(.2,.9,.3,1.15)}
+.dh-pop.on{opacity:1;transform:none}
+.dh-pi{appearance:none;display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;color:inherit;text-align:left;padding:11px 12px;border-radius:16px;cursor:pointer;transition:background .18s}
+.dh-pi:hover,.dh-pi:focus-visible{background:var(--dh-card-line);outline:0}
+.dh-pi-ico{flex:none;width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:var(--dh-card-line);color:var(--dh-accent)}
+.dh-pi-ico svg{width:19px;height:19px}
+.dh-pi b{display:block;font-size:15px;font-weight:600}
+.dh-pi small{display:block;font-size:12px;color:var(--dh-dim);line-height:1.35;margin-top:1px}
+.dh-pi .dh-cur{margin-left:auto;font-size:12.5px;color:var(--dh-dim);white-space:nowrap}
+.dh-langs{display:grid;grid-template-columns:1fr 1fr;gap:4px;max-height:0;overflow:hidden;opacity:0;transition:max-height .35s ease,opacity .25s ease,padding .35s ease;padding:0 4px}
+.dh-langs.open{max-height:260px;opacity:1;padding:4px}
+.dh-langs button{appearance:none;border:0;background:none;color:inherit;font-size:14px;padding:9px 10px;border-radius:12px;cursor:pointer;text-align:left}
+.dh-langs button:hover{background:var(--dh-card-line)}
+.dh-langs button.on{background:var(--dh-btn);color:var(--dh-ink);font-weight:600}
+.dh-pop .dh-seg{width:100%}
+.dh-pop .dh-seg button{flex:1;padding:8px 10px;font-size:13.5px}
+.dh-sheet{background:var(--dh-sheet);width:min(380px,100%);border-radius:28px;padding:18px;transform:translateY(14px) scale(.95);transition:transform .35s cubic-bezier(.2,.9,.3,1.1)}
+.dh-veil.on .dh-sheet{transform:none}
+.dh-sheet-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.dh-sheet-h b{font-size:17px;font-weight:600}
+.dh-x{appearance:none;border:0;background:var(--dh-card-line);color:inherit;width:32px;height:32px;border-radius:50%;font-size:20px;line-height:1;cursor:pointer}
+.dh-sheet-b{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;font-size:13.5px}
+.dh-qr{background:#fff;padding:14px;border-radius:20px;line-height:0}
+.dh-qr svg{display:block}
+.dh-code{font:12px var(--g-mono,ui-monospace,Menlo,monospace);word-break:break-all;color:var(--dh-dim)}
+.dh-cam{position:relative;width:100%;aspect-ratio:1;border-radius:22px;overflow:hidden;background:#000}
+.dh-cam video{width:100%;height:100%;object-fit:cover}
+.dh-cam::after{content:"";position:absolute;inset:18%;border:2px solid var(--dh-accent);border-radius:18px;box-shadow:0 0 0 999px rgba(0,0,0,.35)}
+.dh-in{width:100%;border:1px solid var(--dh-card-line);background:var(--dh-card-line);color:inherit;border-radius:14px;padding:11px 12px;font:14px inherit}
+.dh-btn{appearance:none;border:0;border-radius:16px;padding:12px 16px;font-size:15px;font-weight:600;color:var(--dh-ink);background:var(--dh-btn);cursor:pointer;width:100%}
+.dh-btn.ghost{background:var(--dh-card-line);color:inherit}
+.dh-kv{display:grid;grid-template-columns:auto 1fr;gap:4px 14px;width:100%;text-align:left;font-size:13px}
+.dh-kv dt{color:var(--dh-dim)} .dh-kv dd{margin:0;text-align:right;font-weight:500}
+.dh-handle,.dh-amt,.dh-addr,.dh-stat b span,.dh-stat > span.no-i18n,.dh-rval,.dh-code,.dh-sum,.dh-pi .dh-cur{direction:ltr;unicode-bidi:isolate}
+html[dir="rtl"] .dh-pi,html[dir="rtl"] .dh-langs button,html[dir="rtl"] .dh-kv{text-align:right}
+html[dir="rtl"] .dh-pi .dh-cur{margin-left:0;margin-right:auto}
+@media (prefers-reduced-motion:reduce){.dh *,.dh-pop,.dh-sheet,.dh-veil{transition:none!important}}
+.dash-nomkts .dash-top{display:none}
 .dash-nomkts .dash-mkts,.dash-nomkts .dash-chart,#term-mkts.off{display:none}
 .dash-nomkts .dash-top,.dash-nomkts .dash-mid{grid-template-columns:1fr}
 @media (max-width:1100px){
@@ -11357,6 +11475,523 @@ function toggleSbCollapse() {
   try { localStorage.setItem('bixx-sb-mini', on ? '1' : '0'); } catch (e) { /* private mode */ }
 }
 
+// ── Languages ──────────────────────────────────────────────────────────────────────
+// Ten major languages. The English text stays in the page; each word or sentence listed here is swapped
+// for its translation as it appears, and swapped back when English is chosen. Anything not listed yet
+// stays in English. Order of each entry: Chinese | Hindi | Spanish | French | Arabic | Bengali | Portuguese | Russian | Urdu.
+const LANGS = [['en', 'English', 'en-US'], ['zh', '中文', 'zh-CN'], ['hi', 'हिन्दी', 'hi-IN-u-nu-latn'], ['es', 'Español', 'es'], ['fr', 'Français', 'fr'],
+  ['ar', 'العربية', 'ar-u-nu-latn'], ['bn', 'বাংলা', 'bn-BD-u-nu-latn'], ['pt', 'Português', 'pt-BR'], ['ru', 'Русский', 'ru'], ['ur', 'اردو', 'ur-PK-u-nu-latn']];
+const LANG_ORDER = ['zh', 'hi', 'es', 'fr', 'ar', 'bn', 'pt', 'ru', 'ur'];
+const I18N_RAW = {
+  'Dashboard': '仪表板|डैशबोर्ड|Panel|Tableau de bord|لوحة التحكم|ড্যাশবোর্ড|Painel|Панель|ڈیش بورڈ',
+  'Decomposition': '分解|विघटन|Descomposición|Décomposition|التفكيك|বিভাজন|Decomposição|Декомпозиция|تجزیہ',
+  'Clients': '客户|ग्राहक|Clientes|Clients|العملاء|ক্লায়েন্ট|Clientes|Клиенты|کلائنٹس',
+  'Cycle': '周期|चक्र|Ciclo|Cycle|دورة|চক্র|Ciclo|Цикл|سائیکل',
+  'Ledger': '账本|खाता-बही|Libro mayor|Registre|السجل|খতিয়ান|Livro-razão|Реестр|کھاتہ',
+  'Notifications': '通知|सूचनाएँ|Notificaciones|Notifications|الإشعارات|বিজ্ঞপ্তি|Notificações|Уведомления|اطلاعات',
+  'Chat': '聊天|चैट|Chat|Chat|الدردشة|চ্যাট|Chat|Чат|چیٹ',
+  'Calendar': '日历|कैलेंडर|Calendario|Calendrier|التقويم|ক্যালেন্ডার|Calendário|Календарь|کیلنڈر',
+  'Level': '等级|स्तर|Nivel|Niveau|المستوى|স্তর|Nível|Уровень|سطح',
+  'Cycles': '周期|चक्र|Ciclos|Cycles|الدورات|চক্র|Ciclos|Циклы|سائیکلز',
+  'Efficiency score': '效率分数|दक्षता स्कोर|Puntuación de eficiencia|Score d’efficacité|درجة الكفاءة|দক্ষতার স্কোর|Pontuação de eficiência|Показатель эффективности|کارکردگی سکور',
+  'Wallet balance': '钱包余额|वॉलेट बैलेंस|Saldo de la billetera|Solde du portefeuille|رصيد المحفظة|ওয়ালেট ব্যালেন্স|Saldo da carteira|Баланс кошелька|والٹ بیلنس',
+  'Available balance': '可用余额|उपलब्ध बैलेंस|Saldo disponible|Solde disponible|الرصيد المتاح|উপলব্ধ ব্যালেন্স|Saldo disponível|Доступный баланс|دستیاب بیلنس',
+  'Add': '添加|जोड़ें|Añadir|Ajouter|إضافة|যোগ করুন|Adicionar|Добавить|شامل کریں',
+  'Share': '分享|साझा करें|Compartir|Partager|مشاركة|শেয়ার করুন|Compartilhar|Поделиться|شیئر کریں',
+  'Wallet': '钱包|वॉलेट|Billetera|Portefeuille|المحفظة|ওয়ালেট|Carteira|Кошелёк|والٹ',
+  'Member': '成员|सदस्य|Miembro|Membre|عضو|সদস্য|Membro|Участник|رکن',
+  'Contract': '合同|अनुबंध|Contrato|Contrat|عقد|চুক্তি|Contrato|Контракт|معاہدہ',
+  'Member ID': '成员编号|सदस्य आईडी|ID de miembro|ID de membre|معرّف العضو|সদস্য আইডি|ID de membro|ID участника|رکن کی شناخت',
+  'Scan a QR code': '扫描二维码|QR कोड स्कैन करें|Escanear un código QR|Scanner un code QR|مسح رمز QR|QR কোড স্ক্যান করুন|Escanear um código QR|Сканировать QR-код|QR کوڈ اسکین کریں',
+  'Scan a member QR code': '扫描成员二维码|सदस्य का QR कोड स्कैन करें|Escanear el QR de un miembro|Scanner le QR d’un membre|مسح رمز QR لعضو|সদস্যের QR কোড স্ক্যান করুন|Escanear o QR de um membro|Сканировать QR-код участника|رکن کا QR کوڈ اسکین کریں',
+  'Upload a contract to decompose': '上传合同进行分解|विघटन के लिए अनुबंध अपलोड करें|Sube un contrato para descomponerlo|Téléversez un contrat à décomposer|ارفع عقدًا لتفكيكه|বিভাজনের জন্য একটি চুক্তি আপলোড করুন|Envie um contrato para decompor|Загрузите контракт для декомпозиции|تجزیے کے لیے معاہدہ اپ لوڈ کریں',
+  'Add a wallet to your account': '将钱包添加到您的账户|अपने खाते में वॉलेट जोड़ें|Añade una billetera a tu cuenta|Ajoutez un portefeuille à votre compte|أضف محفظة إلى حسابك|আপনার অ্যাকাউন্টে একটি ওয়ালেট যোগ করুন|Adicione uma carteira à sua conta|Добавьте кошелёк в свой аккаунт|اپنے اکاؤنٹ میں والٹ شامل کریں',
+  'Show your wallet as a QR code': '以二维码显示您的钱包|अपना वॉलेट QR कोड के रूप में दिखाएँ|Muestra tu billetera como código QR|Affichez votre portefeuille en code QR|اعرض محفظتك كرمز QR|আপনার ওয়ালেট QR কোড হিসেবে দেখান|Mostre sua carteira como código QR|Показать кошелёк как QR-код|اپنا والٹ QR کوڈ کے طور پر دکھائیں',
+  'Show your member ID as a QR code': '以二维码显示您的成员编号|अपनी सदस्य आईडी QR कोड के रूप में दिखाएँ|Muestra tu ID de miembro como código QR|Affichez votre ID de membre en code QR|اعرض معرّف عضويتك كرمز QR|আপনার সদস্য আইডি QR কোড হিসেবে দেখান|Mostre seu ID de membro como código QR|Показать ID участника как QR-код|اپنی رکن کی شناخت QR کوڈ کے طور پر دکھائیں',
+  'Decomposed': '已分解|विघटित|Descompuesto|Décomposé|تم تفكيكه|বিভাজিত|Decomposto|Декомпозировано|تجزیہ شدہ',
+  'View all': '查看全部|सभी देखें|Ver todo|Tout voir|عرض الكل|সব দেখুন|Ver tudo|Показать все|سب دیکھیں',
+  'Recent': '最近|हाल के|Recientes|Récents|الأخيرة|সাম্প্রতিক|Recentes|Недавние|حالیہ',
+  'Dollar value': '美元价值|डॉलर मूल्य|Valor en dólares|Valeur en dollars|القيمة بالدولار|ডলার মূল্য|Valor em dólares|Стоимость в долларах|ڈالر مالیت',
+  'Nothing decomposed yet.': '尚无已分解内容。|अभी तक कुछ भी विघटित नहीं हुआ।|Aún no hay nada descompuesto.|Rien n’est encore décomposé.|لم يتم تفكيك أي شيء بعد.|এখনও কিছু বিভাজিত হয়নি।|Nada decomposto ainda.|Пока ничего не декомпозировано.|ابھی کچھ بھی تجزیہ نہیں ہوا۔',
+  'Completed work appears here with its date and time.': '已完成的工作将与日期和时间一起显示在这里。|पूरा किया गया काम तारीख और समय के साथ यहाँ दिखेगा।|El trabajo completado aparece aquí con su fecha y hora.|Le travail terminé apparaît ici avec sa date et son heure.|يظهر العمل المكتمل هنا مع تاريخه ووقته.|সম্পন্ন কাজ তারিখ ও সময়সহ এখানে দেখাবে।|O trabalho concluído aparece aqui com data e hora.|Завершённая работа появится здесь с датой и временем.|مکمل شدہ کام تاریخ اور وقت کے ساتھ یہاں نظر آئے گا۔',
+  'Language': '语言|भाषा|Idioma|Langue|اللغة|ভাষা|Idioma|Язык|زبان',
+  'Appearance': '外观|दिखावट|Apariencia|Apparence|المظهر|চেহারা|Aparência|Оформление|ظاہری شکل',
+  'Light': '浅色|हल्का|Claro|Clair|فاتح|হালকা|Claro|Светлая|روشن',
+  'Dark': '深色|गहरा|Oscuro|Sombre|داكن|গাঢ়|Escuro|Тёмная|گہرا',
+  'Wallet tools': '钱包工具|वॉलेट टूल|Herramientas de billetera|Outils du portefeuille|أدوات المحفظة|ওয়ালেট টুল|Ferramentas da carteira|Инструменты кошелька|والٹ ٹولز',
+  'Personal wallet': '个人钱包|व्यक्तिगत वॉलेट|Billetera personal|Portefeuille personnel|المحفظة الشخصية|ব্যক্তিগত ওয়ালেট|Carteira pessoal|Личный кошелёк|ذاتی والٹ',
+  'Tax wallet': '税务钱包|कर वॉलेट|Billetera de impuestos|Portefeuille fiscal|محفظة الضرائب|কর ওয়ালেট|Carteira de impostos|Налоговый кошелёк|ٹیکس والٹ',
+  'Treasury wallet': '国库钱包|ट्रेज़री वॉलेट|Billetera del tesoro|Portefeuille de trésorerie|محفظة الخزينة|ট্রেজারি ওয়ালেট|Carteira do tesouro|Кошелёк казначейства|خزانہ والٹ',
+  'Network tax wallet': '网络税务钱包|नेटवर्क कर वॉलेट|Billetera de impuestos de la red|Portefeuille fiscal du réseau|محفظة ضرائب الشبكة|নেটওয়ার্ক কর ওয়ালেট|Carteira de impostos da rede|Налоговый кошелёк сети|نیٹ ورک ٹیکس والٹ',
+  'Copy address': '复制地址|पता कॉपी करें|Copiar dirección|Copier l’adresse|نسخ العنوان|ঠিকানা কপি করুন|Copiar endereço|Копировать адрес|پتہ کاپی کریں',
+  'Copy member ID': '复制成员编号|सदस्य आईडी कॉपी करें|Copiar ID de miembro|Copier l’ID de membre|نسخ معرّف العضو|সদস্য আইডি কপি করুন|Copiar ID de membro|Копировать ID участника|رکن کی شناخت کاپی کریں',
+  'Close': '关闭|बंद करें|Cerrar|Fermer|إغلاق|বন্ধ করুন|Fechar|Закрыть|بند کریں',
+  'No wallet yet': '还没有钱包|अभी कोई वॉलेट नहीं|Aún no hay billetera|Pas encore de portefeuille|لا توجد محفظة بعد|এখনও কোনো ওয়ালেট নেই|Ainda sem carteira|Кошелька пока нет|ابھی کوئی والٹ نہیں',
+  'Add a wallet': '添加钱包|वॉलेट जोड़ें|Añadir una billetera|Ajouter un portefeuille|إضافة محفظة|ওয়ালেট যোগ করুন|Adicionar uma carteira|Добавить кошелёк|والٹ شامل کریں',
+  'Point the camera at a member QR code.': '请将摄像头对准成员二维码。|कैमरे को सदस्य के QR कोड की ओर करें।|Apunta la cámara al código QR de un miembro.|Dirigez la caméra vers le code QR d’un membre.|وجّه الكاميرا إلى رمز QR الخاص بالعضو.|ক্যামেরাটি সদস্যের QR কোডের দিকে ধরুন।|Aponte a câmera para o QR de um membro.|Наведите камеру на QR-код участника.|کیمرہ رکن کے QR کوڈ کی طرف کریں۔',
+  'Refresh': '刷新|ताज़ा करें|Actualizar|Actualiser|تحديث|রিফ্রেশ|Atualizar|Обновить|ریفریش',
+  'More options': '更多选项|और विकल्प|Más opciones|Plus d’options|المزيد من الخيارات|আরও বিকল্প|Mais opções|Ещё|مزید اختیارات',
+  'Show or hide your stats': '显示或隐藏统计|अपने आँकड़े दिखाएँ या छिपाएँ|Mostrar u ocultar tus estadísticas|Afficher ou masquer vos statistiques|إظهار أو إخفاء إحصائياتك|আপনার পরিসংখ্যান দেখান বা লুকান|Mostrar ou ocultar suas estatísticas|Показать или скрыть статистику|اپنے اعداد و شمار دکھائیں یا چھپائیں',
+  'Ask BIX AI': '询问 BIX AI|BIX AI से पूछें|Pregunta a BIX AI|Demandez à BIX AI|اسأل BIX AI|BIX AI-কে জিজ্ঞাসা করুন|Pergunte à BIX AI|Спросить BIX AI|BIX AI سے پوچھیں',
+  'Upload contract': '上传合同|अनुबंध अपलोड करें|Subir contrato|Téléverser un contrat|رفع عقد|চুক্তি আপলোড করুন|Enviar contrato|Загрузить контракт|معاہدہ اپ لوڈ کریں',
+  'Statements': '对账单|विवरण|Estados de cuenta|Relevés|كشوف الحساب|বিবরণী|Extratos|Выписки|گوشوارے',
+  'Jobs & escrow': '工作与托管|कार्य और एस्क्रो|Trabajos y depósito en garantía|Travaux et séquestre|الوظائف والضمان|কাজ ও এসক্রো|Trabalhos e custódia|Работы и эскроу|کام اور ایسکرو',
+  'Member card': '会员卡|सदस्य कार्ड|Tarjeta de miembro|Carte de membre|بطاقة العضو|সদস্য কার্ড|Cartão de membro|Карта участника|رکن کارڈ',
+  'Profile': '个人资料|प्रोफ़ाइल|Perfil|Profil|الملف الشخصي|প্রোফাইল|Perfil|Профиль|پروفائل',
+  'Tracker': '跟踪器|ट्रैकर|Seguimiento|Suivi|المتتبع|ট্র্যাকার|Rastreador|Трекер|ٹریکر',
+  'To-do': '待办|करने के लिए|Por hacer|À faire|المهام|করণীয়|A fazer|К выполнению|کرنے کے کام',
+  'In progress': '进行中|प्रगति में|En curso|En cours|قيد التنفيذ|চলমান|Em andamento|В работе|جاری ہے',
+  'Delivered': '已交付|वितरित|Entregado|Livré|تم التسليم|সরবরাহিত|Entregue|Доставлено|فراہم شدہ',
+  'All': '全部|सभी|Todos|Tous|الكل|সব|Todos|Все|سب',
+};
+const I18N_D = {};
+for (const [en, row] of Object.entries(I18N_RAW)) { const p = row.split('|'); if (p.length === LANG_ORDER.length) I18N_D[en] = Object.fromEntries(LANG_ORDER.map((l, i) => [l, p[i]])); else console.warn('translation row malformed:', en); }
+const I18N = { lang: 'en', seen: new WeakMap(), obs: null, busy: false };
+const I18N_ATTRS = ['placeholder', 'title', 'aria-label'];
+const I18N_SKIP = new Set(['SCRIPT', 'STYLE', 'TEXTAREA', 'CODE', 'PRE', 'SVG', 'svg']);
+const i18nTarget = src => I18N.lang === 'en' ? src : (I18N_D[src]?.[I18N.lang] ?? src);
+function i18nText(n) {
+  const cur = n.nodeValue, trimmed = cur.trim();
+  if (!trimmed) return;
+  const info = I18N.seen.get(n);
+  const src = info && info.out === trimmed ? info.src : trimmed;
+  const out = i18nTarget(src);
+  if (out !== trimmed) { const i = cur.indexOf(trimmed); n.nodeValue = cur.slice(0, i) + out + cur.slice(i + trimmed.length); }
+  if (out !== src) I18N.seen.set(n, { src, out }); else if (info) I18N.seen.delete(n);
+}
+function i18nAttrs(el) {
+  for (const a of I18N_ATTRS) {
+    const cur = el.getAttribute?.(a);
+    if (!cur) continue;
+    const key = '_i18n_' + a, info = el[key];
+    const src = info && info.out === cur ? info.src : cur;
+    const out = i18nTarget(src);
+    if (out !== cur) el.setAttribute(a, out);
+    if (out !== src) el[key] = { src, out }; else if (info) el[key] = null;
+  }
+}
+function i18nWalk(root) {
+  if (!root) return;
+  if (root.nodeType === 3) { if (!I18N_SKIP.has(root.parentNode?.nodeName) && !root.parentElement?.closest('.no-i18n')) i18nText(root); return; }
+  if (root.nodeType !== 1 || I18N_SKIP.has(root.nodeName) || root.closest?.('.no-i18n')) return;
+  i18nAttrs(root);
+  const w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT, { acceptNode: n => (n.nodeType === 1 && (I18N_SKIP.has(n.nodeName) || n.classList?.contains('no-i18n'))) ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT });
+  let n; while ((n = w.nextNode())) { if (n.nodeType === 3) i18nText(n); else i18nAttrs(n); }
+}
+function i18nStart() {
+  if (I18N.obs) return;
+  I18N.obs = new MutationObserver(muts => {
+    if (I18N.busy) return;
+    I18N.busy = true;
+    try {
+      for (const m of muts) {
+        if (m.type === 'characterData') { if (!I18N_SKIP.has(m.target.parentNode?.nodeName) && !m.target.parentElement?.closest('.no-i18n')) i18nText(m.target); }
+        else if (m.type === 'attributes') { if (!m.target.closest?.('.no-i18n')) i18nAttrs(m.target); }
+        else m.addedNodes.forEach(i18nWalk);
+      }
+    } finally { I18N.obs.takeRecords(); I18N.busy = false; }
+  });
+  I18N.obs.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: I18N_ATTRS });
+}
+function setLang(code, quiet) {
+  if (!LANGS.some(l => l[0] === code)) code = 'en';
+  I18N.lang = code;
+  try { localStorage.setItem('bx-lang', code); } catch (e) { /* private mode */ }
+  const rtl = code === 'ar' || code === 'ur';
+  document.documentElement.lang = code;
+  document.documentElement.dir = rtl ? 'rtl' : 'ltr';
+  I18N.busy = true; try { i18nWalk(document.body); } finally { I18N.obs?.takeRecords(); I18N.busy = false; }
+  if (code !== 'en') i18nStart();
+  if (!quiet) document.dispatchEvent(new CustomEvent('bx-lang', { detail: code }));
+}
+const langLocale = () => (LANGS.find(l => l[0] === I18N.lang) || LANGS[0])[2];
+(() => { let s = null; try { s = localStorage.getItem('bx-lang'); } catch (e) {} if (s && s !== 'en') { const go = () => setLang(s, true); document.readyState === 'loading' ? document.addEventListener('DOMContentLoaded', go) : go(); } })();
+
+// ── Dashboard home ────────────────────────────────────────────────────────────────
+// One screen for you: your photo and standing, a wheel of the wallets on file, Add and Share, and the
+// work you have decomposed. The older wallet tools (connect, switch network) sit behind "Wallet tools".
+const DH = { idx: 0, wallets: [], bal: {}, balAt: 0, tab: 'recent', done: null, cycles: null, loading: false, bound: false };
+const DH_ICO = {
+  chev: '<path d="m6 9 6 6 6-6"/>', dots: '<circle cx="12" cy="5" r="1.4" fill="currentColor"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/><circle cx="12" cy="19" r="1.4" fill="currentColor"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>', share: '<path d="M7 17 17 7M9 7h8v8"/>', refresh: '<path d="M20 11a8 8 0 1 0-2.3 6"/><path d="M20 4v7h-7"/>',
+  wallet: '<path d="M3 7a2 2 0 0 1 2-2h13v4"/><rect x="3" y="7" width="18" height="13" rx="2"/><circle cx="16.5" cy="13.5" r="1.2" fill="currentColor"/>',
+  member: '<circle cx="12" cy="8" r="3.6"/><path d="M5 20c0-3.6 3-6 7-6s7 2.4 7 6"/>', doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/>',
+  qr: '<rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><path d="M14 14h2v2h-2zM18 14h2v2M14 18h2v2h4"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>', badge: '<path d="M12 3 4.5 6v5.5c0 4.4 3 7.9 7.5 9.5 4.5-1.6 7.5-5.1 7.5-9.5V6z"/><path d="m8.8 12 2.4 2.4 4.2-4.6"/>',
+  pulse: '<path d="M3 12h4l2.5-6 4 12 2.5-6H21"/>', cyc: '<path d="M20 12a8 8 0 1 1-3-6.2"/><path d="M20 4v5h-5"/>', lang: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.8 5.6 3.8 9S14.6 18.4 12 21c-2.6-2.6-3.8-5.6-3.8-9S9.4 5.6 12 3z"/>',
+  moon: '<path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.6 8.6 0 1 0 10.6 10.6z"/>',
+};
+const dhSvg = (k, cls = '') => `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${DH_ICO[k]}</svg>`;
+const dhMoney = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const dhStamp = d => new Date(d).toLocaleString(langLocale(), { month: 'short', day: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit' });
+const dhShort = a => a ? a.slice(0, 6) + '…' + a.slice(-4) : '';
+const dhEl = id => document.getElementById(id);
+
+function ensureDashHome() {
+  let h = dhEl('dash-home');
+  if (h) return h;
+  const d = dhEl('term-dash');
+  if (!d) return null;
+  d.insertAdjacentHTML('afterbegin', `<div class="dh" id="dash-home">
+    <div class="dh-top"><div class="dh-pill">
+      <button type="button" id="dh-chev" onclick="dhToggleHero()" title="Show or hide your stats" aria-label="Show or hide your stats">${dhSvg('chev')}</button>
+      <button type="button" id="dh-more" onclick="dhMenu(this)" title="More options" aria-label="More options">${dhSvg('dots')}</button>
+    </div></div>
+    <div class="dh-hero" id="dh-hero"></div>
+    <div class="dh-wallet" id="dh-wallet"></div>
+    <div class="dh-acts">
+      <div class="dh-act">${dhSvg('plus')}<button type="button" onclick="dhPop('add', this)">Add</button></div>
+      <div class="dh-act">${dhSvg('share')}<button type="button" onclick="dhPop('share', this)">Share</button></div>
+    </div>
+    <button type="button" class="dh-link" id="dh-tools-btn" onclick="dhTools()">Wallet tools</button>
+    <div class="dash-card dash-bal dh-tools" id="dash-bal" hidden></div>
+    <div class="dh-dec" id="dh-dec"></div>
+  </div>`);
+  return dhEl('dash-home');
+}
+
+async function renderDashHome() {
+  if (!operator || !ensureDashHome()) return;
+  dhHero();
+  dhDrawWallets();
+  dhLoadDone();
+  const list = [];
+  const seen = new Set();
+  const add = (kind, label, addr) => { if (!addr || !/^0x[0-9a-fA-F]{40}$/.test(addr)) return; const k = addr.toLowerCase(); if (seen.has(k)) return; seen.add(k); list.push({ kind, label, addr }); };
+  add('personal', 'Personal wallet', operator.wallet_address);
+  add('tax', 'Tax wallet', operator.tax_wallet);
+  if (isExec()) {
+    let st = {}; try { st = await treasuryStatus(); } catch (e) { st = { treasury_wallet: TREASURY_ADDR }; }
+    add('treasury', 'Treasury wallet', st.treasury_wallet);
+    add('nettax', 'Network tax wallet', st.tax_wallet);
+  }
+  DH.wallets = list;
+  if (DH.idx >= list.length) DH.idx = Math.max(0, list.length - 1);
+  dhDrawWallets();
+  dhBalances(false);
+}
+
+function dhHero() {
+  const el = dhEl('dh-hero');
+  if (!el || !operator) return;
+  const handle = operator.handle || '@' + (operator.peer_name || '').replace(/\s/g, '').toLowerCase();
+  const rep = operator.reputation_score != null && operator.reputation_score !== '' ? Math.round(Number(operator.reputation_score) * 100) : null;
+  const lvl = operator.is_genesis ? 'Executive Operator' : tier(operator.total_logs);
+  el.innerHTML = `
+    <button type="button" class="dh-av" onclick="openProfilePanel()" aria-label="Profile"><span class="dh-av-in">${avatarHtml(operator.peer_name, operator.avatar_url, 38)}</span></button>
+    <h2 class="dh-name no-i18n">${esc(operator.peer_name || '')}</h2>
+    <div class="dh-handle no-i18n">${esc(handle)}</div>
+    <div class="dh-stats">
+      <div class="dh-stat" title="Efficiency score"><b>${dhSvg('pulse')}<span class="no-i18n">${rep == null ? '—' : rep + '%'}</span></b><span class="no-i18n">ES%</span></div>
+      <div class="dh-stat"><b>${dhSvg('badge')}<span class="no-i18n">${esc(lvl)}</span></b><span>Level</span></div>
+      <div class="dh-stat"><b>${dhSvg('cyc')}<span class="no-i18n" id="dh-cycles">${DH.cycles == null ? '…' : DH.cycles}</span></b><span>Cycles</span></div>
+    </div>`;
+}
+function dhToggleHero() { dhEl('dash-home')?.classList.toggle('min'); }
+
+// ── the wheel of wallets ──
+function dhDrawWallets() {
+  const box = dhEl('dh-wallet');
+  if (!box) return;
+  const L = DH.wallets;
+  if (!L.length) {
+    box.innerHTML = `<div class="dh-stack" style="height:250px"><div class="dh-wc cur" style="top:14px"><div class="dh-wc-body"><div class="dh-avail">Wallet balance</div><div class="dh-amt">—</div><div class="dh-addr">No wallet yet</div><button type="button" class="dh-sel" onclick="openAddWallet()">Add a wallet</button></div></div></div>`;
+    return;
+  }
+  if (!dhEl('dh-stack')) {
+    box.innerHTML = `<div class="dh-stack" id="dh-stack" tabindex="0" role="listbox" aria-label="Wallet balance"></div><div class="dh-dots" id="dh-dots"></div>`;
+    dhBindWheel(box.querySelector('.dh-stack'));
+  }
+  const st = box.querySelector('.dh-stack');
+  st.style.height = '312px';
+  st.innerHTML = L.map((w, i) => `<div class="dh-wc" data-i="${i}" role="option" onclick="dhGo(${i})">
+      <div class="dh-wc-tab"><span>${esc(w.label)}</span><span class="no-i18n">···· ${esc(w.addr.slice(-4))}</span></div>
+      <div class="dh-wc-body">
+        <span class="dh-wc-lbl">Wallet balance</span>
+        <button type="button" class="dh-refresh" id="dh-refresh" onclick="event.stopPropagation();dhBalances(true)" title="Refresh" aria-label="Refresh">${dhSvg('refresh')}</button>
+        <button type="button" class="dh-sel" onclick="event.stopPropagation();dhGo((DH.idx+1)%DH.wallets.length)"><span>${esc(w.label)}</span>${dhSvg('chev')}</button>
+        <div class="dh-avail">Available balance</div>
+        <div class="dh-amt no-i18n" data-bal="${esc(w.addr.toLowerCase())}">${dhBalHtml(w.addr)}</div>
+        <div class="dh-addr no-i18n">${esc(dhShort(w.addr))} · Hedera</div>
+      </div></div>`).join('');
+  dhLayout();
+}
+function dhBalHtml(addr) {
+  const b = DH.bal[addr.toLowerCase()];
+  return b === undefined ? '…<small>US$</small>' : `${dhMoney(b || 0)}<small>US$</small>`;
+}
+function dhLayout() {
+  const st = dhEl('dh-stack');
+  if (!st) return;
+  st.querySelectorAll('.dh-wc').forEach(c => {
+    const o = +c.dataset.i - DH.idx;
+    c.classList.toggle('cur', o === 0);
+    c.setAttribute('aria-selected', o === 0 ? 'true' : 'false');
+    if (o === 0) { c.style.transform = 'none'; c.style.opacity = '1'; c.style.zIndex = '20'; c.style.pointerEvents = ''; }
+    else if (o < 0) { const k = -o; c.style.transform = `translateY(${-k * 28}px) scale(${Math.max(.8, 1 - k * .045)}) rotateX(${k * 3}deg)`; c.style.opacity = k > 2 ? '0' : String(1 - (k - 1) * .45); c.style.zIndex = String(20 - k); c.style.pointerEvents = k > 2 ? 'none' : ''; }
+    else { c.style.transform = `translateY(${o * 44}px) scale(.94) rotateX(${-Math.min(o, 3) * 24}deg)`; c.style.opacity = '0'; c.style.zIndex = String(20 - o); c.style.pointerEvents = 'none'; }
+  });
+  const dots = dhEl('dh-dots');
+  if (dots) dots.innerHTML = DH.wallets.length > 1 ? DH.wallets.map((_, i) => `<i class="${i === DH.idx ? 'on' : ''}"></i>`).join('') : '';
+}
+function dhGo(i) {
+  const n = DH.wallets.length;
+  if (!n) return;
+  DH.idx = Math.max(0, Math.min(n - 1, i));
+  dhLayout();
+}
+function dhBindWheel(st) {
+  let acc = 0, lock = 0, y0 = null, moved = false;
+  st.addEventListener('wheel', e => {
+    const n = DH.wallets.length; if (n < 2) return;
+    const dir = Math.sign(e.deltaY);
+    if ((dir > 0 && DH.idx >= n - 1) || (dir < 0 && DH.idx <= 0)) { acc = 0; return; }   // at an end: let the page scroll
+    e.preventDefault();
+    acc += e.deltaY;
+    if (Date.now() - lock < 260 || Math.abs(acc) < 36) return;
+    lock = Date.now(); dhGo(DH.idx + Math.sign(acc)); acc = 0;
+  }, { passive: false });
+  st.addEventListener('pointerdown', e => { y0 = e.clientY; moved = false; });
+  st.addEventListener('pointermove', e => {
+    if (y0 == null) return;
+    const dy = e.clientY - y0;
+    if (Math.abs(dy) > 34) { moved = true; dhGo(DH.idx + (dy < 0 ? 1 : -1)); y0 = e.clientY; }
+  });
+  const end = () => { y0 = null; };
+  st.addEventListener('pointerup', end); st.addEventListener('pointercancel', end); st.addEventListener('pointerleave', end);
+  st.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+  st.addEventListener('keydown', e => { if (e.key === 'ArrowDown' || e.key === 'ArrowRight') { e.preventDefault(); dhGo(DH.idx + 1); } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') { e.preventDefault(); dhGo(DH.idx - 1); } });
+}
+async function dhBalances(force) {
+  if (!force && Date.now() - DH.balAt < 45000 && DH.wallets.every(w => DH.bal[w.addr.toLowerCase()] !== undefined)) return;
+  const r = dhEl('dh-refresh'); r?.classList.add('spin');
+  await Promise.all(DH.wallets.map(async w => {
+    const k = w.addr.toLowerCase();
+    const b = await fetchUsdcBalance(w.addr).catch(() => undefined);
+    if (b !== undefined) DH.bal[k] = b;                      // null: Hedera has no account yet, shown as 0.00
+    else if (DH.bal[k] === undefined) DH.bal[k] = null;
+    document.querySelectorAll(`.dh-amt[data-bal="${k}"]`).forEach(el => { el.innerHTML = dhBalHtml(w.addr); });
+  }));
+  DH.balAt = Date.now();
+  dhEl('dh-refresh')?.classList.remove('spin');
+}
+function dhTools() {
+  const el = dhEl('dash-bal');
+  if (!el) return;
+  el.hidden = !el.hidden;
+  if (!el.hidden) renderDashBalance();
+}
+
+// ── glass pop-ups ──
+function dhCloseAll() {
+  dhStopCam();
+  document.querySelectorAll('.dh-veil').forEach(v => { v.classList.remove('on'); setTimeout(() => v.remove(), 280); });
+}
+function dhPopHtml(items) {
+  return items.map(it => `<button type="button" class="dh-pi" ${it.id ? `id="${it.id}"` : ''} onclick="${it.run}"><span class="dh-pi-ico">${dhSvg(it.ico)}</span><span><b>${it.t}</b><small>${it.s}</small></span></button>`).join('');
+}
+function dhPlace(pop, btn) {
+  const r = btn.getBoundingClientRect(), vw = innerWidth, vh = innerHeight;
+  const w = pop.offsetWidth, h = pop.offsetHeight;
+  let left = r.left + r.width / 2 - w / 2; left = Math.max(8, Math.min(vw - w - 8, left));
+  const below = r.bottom + 10 + h <= vh - 10;
+  pop.style.left = left + 'px'; pop.style.top = Math.max(8, below ? r.bottom + 10 : r.top - 10 - h) + 'px';
+  pop.style.setProperty('--ox', (r.left + r.width / 2 - left) + 'px'); pop.style.setProperty('--oy', below ? '0%' : '100%');
+}
+function dhOpenPop(html, btn, cls) {
+  dhCloseAll();
+  const v = document.createElement('div'); v.className = 'dh-veil';
+  v.addEventListener('click', e => { if (e.target === v) dhCloseAll(); });
+  v.innerHTML = `<div class="dh-pop ${cls || ''}" role="menu">${html}</div>`;
+  document.body.appendChild(v);
+  const pop = v.firstElementChild;
+  dhPlace(pop, btn);
+  requestAnimationFrame(() => { v.classList.add('on'); pop.classList.add('on'); });
+  return pop;
+}
+function dhPop(kind, btn) {
+  const items = kind === 'add'
+    ? [{ ico: 'wallet', t: 'Wallet', s: 'Add a wallet to your account', run: 'dhCloseAll();openAddWallet()' },
+       { ico: 'member', t: 'Member', s: 'Scan a member QR code', run: 'dhScanSheet()' },
+       { ico: 'doc', t: 'Contract', s: 'Upload a contract to decompose', run: "dhCloseAll();document.getElementById('term-upload-file').click()" }]
+    : [{ ico: 'wallet', t: 'Wallet', s: 'Show your wallet as a QR code', run: 'dhShareWallet()' },
+       { ico: 'qr', t: 'Member ID', s: 'Show your member ID as a QR code', run: 'dhShareMember()' }];
+  dhOpenPop(dhPopHtml(items), btn);
+}
+function dhMenu(btn) {
+  const cur = LANGS.find(l => l[0] === I18N.lang)[1];
+  const lt = currentTheme();
+  const pop = dhOpenPop(`
+    <button type="button" class="dh-pi" onclick="document.getElementById('dh-langs').classList.toggle('open')"><span class="dh-pi-ico">${dhSvg('lang')}</span><span><b>Language</b></span><span class="dh-cur no-i18n">${esc(cur)}</span></button>
+    <div class="dh-langs" id="dh-langs">${LANGS.map(l => `<button type="button" class="no-i18n ${l[0] === I18N.lang ? 'on' : ''}" onclick="dhPickLang('${l[0]}')">${l[1]}</button>`).join('')}</div>
+    <div class="dh-pi" style="cursor:default"><span class="dh-pi-ico">${dhSvg('moon')}</span><span style="flex:1"><b>Appearance</b>
+      <div class="dh-seg" style="margin-top:8px"><button type="button" data-t="light" class="${lt === 'light' ? 'on' : ''}" onclick="dhPickTheme('light')">Light</button><button type="button" data-t="dark" class="${lt === 'dark' ? 'on' : ''}" onclick="dhPickTheme('dark')">Dark</button></div></span></div>`, btn);
+  pop.style.width = '300px';
+  dhPlace(pop, btn);
+}
+function dhPickLang(code) {
+  setLang(code);
+  dhCloseAll();
+  setTimeout(() => { dhHero(); dhDrawWallets(); dhRenderDone(); }, 0);
+}
+function dhPickTheme(t) {
+  setTheme(t);
+  document.querySelectorAll('.dh-pop .dh-seg button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
+}
+function dhSheet(title, html, onClose) {
+  dhCloseAll();
+  const v = document.createElement('div'); v.className = 'dh-veil dim';
+  v.innerHTML = `<div class="dh-sheet" role="dialog" aria-label="${esc(title)}"><div class="dh-sheet-h"><b>${esc(title)}</b><button type="button" class="dh-x" aria-label="Close" onclick="dhCloseAll()">×</button></div><div class="dh-sheet-b">${html}</div></div>`;
+  v.addEventListener('click', e => { if (e.target === v) dhCloseAll(); });
+  document.body.appendChild(v);
+  requestAnimationFrame(() => v.classList.add('on'));
+  return v;
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape' && document.querySelector('.dh-veil')) dhCloseAll(); });
+
+// ── share: wallet and member ID as QR codes ──
+async function dhQr(text) {
+  await ckLoadQR();
+  return `<div class="dh-qr">${ckQrSvg(text, 220)}</div>`;
+}
+async function dhShareWallet() {
+  const w = DH.wallets[DH.idx];
+  if (!w) { dhCloseAll(); toast('Add a wallet first.'); openAddWallet(); return; }
+  const v = dhSheet(w.label, '<div class="dh-code">…</div>');
+  try {
+    const qr = await dhQr(w.addr);
+    v.querySelector('.dh-sheet-b').innerHTML = `${qr}<div class="dh-code no-i18n">${esc(w.addr)}</div>
+      <button type="button" class="dh-btn" onclick="copyText('${esc(w.addr)}','Wallet address')">Copy address</button>`;
+  } catch (e) { v.querySelector('.dh-sheet-b').textContent = e.message; }
+}
+async function dhShareMember() {
+  if (!memberIds) await loadMemberIds().catch(() => {});
+  const ids = memberIds?.[operator.id] || {};
+  if (!ids.member_id) { dhCloseAll(); toast('Your member ID is not ready yet.'); return; }
+  const v = dhSheet('Member ID', '<div class="dh-code">…</div>');
+  try {
+    const qr = await dhQr('BXM1.' + ids.member_id);
+    v.querySelector('.dh-sheet-b').innerHTML = `${qr}<b class="no-i18n" style="font-size:16px">${esc(operator.peer_name || '')}</b><div class="dh-code no-i18n">${esc(ids.member_id)}</div>
+      <button type="button" class="dh-btn" onclick="copyText('${esc(ids.member_id)}','Member ID')">Copy member ID</button>`;
+  } catch (e) { v.querySelector('.dh-sheet-b').textContent = e.message; }
+}
+
+// ── add: scan a member's QR code ──
+let DH_CAM = null;
+function dhStopCam() {
+  if (!DH_CAM) return;
+  cancelAnimationFrame(DH_CAM.raf);
+  DH_CAM.stream?.getTracks().forEach(t => t.stop());
+  DH_CAM = null;
+}
+function dhScanSheet() {
+  const v = dhSheet('Scan a member QR code', `<div class="dh-cam"><video id="dh-video" playsinline muted></video></div>
+    <div class="dh-code" id="dh-smsg">Starting the camera…</div>
+    <form style="display:flex;gap:8px;width:100%" onsubmit="event.preventDefault();dhScanResult(document.getElementById('dh-code').value)">
+      <input class="dh-in" id="dh-code" placeholder="BXM1.…" autocomplete="off" spellcheck="false"><button type="submit" class="dh-btn" style="width:auto">OK</button></form>`);
+  dhStartCam();
+  return v;
+}
+async function dhStartCam() {
+  const msg = t => { const m = dhEl('dh-smsg'); if (m) m.textContent = t; };
+  try {
+    if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser has no camera access. Type the code instead.');
+    await ckLoadScan();
+    const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false });
+    const vid = dhEl('dh-video');
+    if (!vid) { stream.getTracks().forEach(t => t.stop()); return; }
+    DH_CAM = { stream, raf: 0 };
+    vid.srcObject = stream; await vid.play();
+    msg('Point the camera at a member QR code.');
+    const cv = document.createElement('canvas'), cx = cv.getContext('2d', { willReadFrequently: true });
+    const det = window.BarcodeDetector ? new BarcodeDetector({ formats: ['qr_code'] }) : null;
+    const tick = async () => {
+      if (!DH_CAM) return;
+      if (vid.readyState >= 2 && vid.videoWidth) {
+        let text = null;
+        try {
+          if (det) { const r = await det.detect(vid); text = r[0]?.rawValue || null; }
+          if (!text) {
+            const w = Math.min(640, vid.videoWidth), h = Math.round(vid.videoHeight * w / vid.videoWidth); cv.width = w; cv.height = h;
+            cx.drawImage(vid, 0, 0, w, h);
+            text = window.jsQR(cx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'attemptBoth' })?.data || null;
+          }
+        } catch (e) {}
+        if (text && /^(BXM1\.|0x[0-9a-fA-F]{40}$)/.test(text.trim())) { dhStopCam(); dhScanResult(text); return; }
+      }
+      DH_CAM.raf = requestAnimationFrame(tick);
+    };
+    tick();
+  } catch (e) { msg(e.name === 'NotAllowedError' ? 'Camera permission was declined. Type the code instead.' : e.message || 'The camera could not start.'); }
+}
+async function dhScanResult(raw) {
+  const code = String(raw || '').trim();
+  dhStopCam();
+  if (/^0x[0-9a-fA-F]{40}$/.test(code)) {
+    dhSheet('Wallet', `<div class="dh-code no-i18n">${esc(code)}</div><button type="button" class="dh-btn" onclick="copyText('${esc(code)}','Wallet address')">Copy address</button>`);
+    return;
+  }
+  const mid = code.replace(/^BXM1\./, '');
+  if (!/^BXM1\./.test(code) || !mid) { toast('That is not a member code.'); return; }
+  const v = dhSheet('Member', '<div class="dh-code">…</div>');
+  try {
+    if (!memberIds) await loadMemberIds();
+    const row = Object.values(memberIds || {}).find(r => r.member_id === mid);
+    if (!row) throw new Error('No member has that ID.');
+    const { data: ops } = await sb.rpc('list_operators');
+    const o = (ops || []).find(x => x.id === row.id) || {};
+    const name = o.peer_name || row.peer_name || row.name || mid;
+    const rep = o.reputation_score != null ? Math.round(Number(o.reputation_score) * 100) + '%' : '—';
+    const wal = o.wallet_address || row.wallet_address || '';
+    v.querySelector('.dh-sheet-b').innerHTML = `
+      <div class="dh-av" style="width:76px;height:76px;cursor:default"><span class="dh-av-in">${avatarHtml(name, o.avatar_url, 30)}</span></div>
+      <b class="no-i18n" style="font-size:18px">${esc(name)}</b><div class="dh-code no-i18n">${esc([mid, row.bix_id, o.handle].filter(Boolean).join(' · '))}</div>
+      <dl class="dh-kv"><dt>Level</dt><dd class="no-i18n">${esc(tier(o.total_logs))}</dd><dt>ES%</dt><dd class="no-i18n">${rep}</dd><dt>LOGs</dt><dd class="no-i18n">${Number(o.total_logs || 0).toLocaleString()}</dd></dl>
+      ${wal ? `<div class="dh-code no-i18n">${esc(wal)}</div>
+        <input class="dh-in" id="lm-amt" type="number" min="0.01" step="0.01" inputmode="decimal" placeholder="Amount in USDC">
+        <button type="button" class="dh-btn" onclick="lmSendUsdc('${esc(wal)}','${esc(name).replace(/'/g, '')}')">Send USDC</button>
+        <button type="button" class="dh-btn ghost" onclick="copyText('${esc(wal)}','Wallet address')">Copy address</button>` : '<div class="dh-code">No wallet on file.</div>'}`;
+  } catch (e) { v.querySelector('.dh-sheet-b').textContent = e.message; }
+}
+
+// ── Decomposed: the work you have completed ──
+async function dhLoadDone() {
+  if (DH.loading || !operator) { dhRenderDone(); return; }
+  DH.loading = true;
+  try {
+    const [leaves, ledger] = await Promise.all([
+      sb.from('work_leaves').select('id,leaf_code,task,tier,logs,scoped_rate_cents,status,verified_at,delivered_at').eq('assigned_to', operator.id).eq('status', 'delivered'),
+      sb.from('log_ledger').select('log_date').eq('peer', operator.peer_name),
+    ]);
+    DH.done = (leaves.data || []).map(l => ({ id: l.id, code: l.leaf_code, task: l.task, logs: Number(l.logs) || 0, cents: leafRateCents(l) * (Number(l.logs) || 0), when: l.verified_at || l.delivered_at }))
+      .filter(r => r.when).sort((a, b) => new Date(b.when) - new Date(a.when));
+    const cyc = new Set();
+    DH.done.forEach(r => cyc.add(cycleNumberForDate(new Date(r.when))));
+    (ledger.data || []).forEach(r => { if (r.log_date) cyc.add(cycleNumberForDate(new Date(r.log_date + 'T12:00:00'))); });
+    DH.cycles = cyc.size;
+    const c = dhEl('dh-cycles'); if (c) c.textContent = DH.cycles;
+  } catch (e) { console.warn('decomposed list', e); DH.done = DH.done || []; }
+  DH.loading = false;
+  dhRenderDone();
+}
+function dhRenderDone() {
+  const el = dhEl('dh-dec');
+  if (!el) return;
+  const all = DH.done || [];
+  const rows = DH.tab === 'recent' ? all.slice(0, 5) : all;
+  const logs = all.reduce((n, r) => n + r.logs, 0), cents = all.reduce((n, r) => n + r.cents, 0);
+  el.innerHTML = `
+    <div class="dh-dec-h"><h3>Decomposed</h3>
+      <div class="dh-seg"><button type="button" class="${DH.tab === 'all' ? 'on' : ''}" onclick="DH.tab='all';dhRenderDone()">View all</button><button type="button" class="${DH.tab === 'recent' ? 'on' : ''}" onclick="DH.tab='recent';dhRenderDone()">Recent</button></div></div>
+    ${all.length ? `<div class="dh-sum no-i18n">${all.length} · ${logs.toLocaleString()} LOGs · ${dhMoney(cents / 100)} US$</div>
+      <div class="dh-list">${rows.map(r => `<div class="dh-row">
+        <span class="dh-rico">${dhSvg('check')}</span>
+        <div class="dh-rmain no-i18n"><b>${esc(r.code)} · ${esc(r.task)}</b><small>${esc(dhStamp(r.when))}</small></div>
+        <div class="dh-rval no-i18n"><b>+${dhMoney(r.cents / 100)}<i>US$</i></b><small>+${r.logs.toLocaleString()} LOGs</small></div></div>`).join('')}</div>`
+      : `<div class="dh-empty">${DH.done ? '<b>Nothing decomposed yet.</b><br>Completed work appears here with its date and time.' : '…'}</div>`}`;
+}
+document.addEventListener('bx-lang', () => { if (dhEl('dash-home')) { dhHero(); dhDrawWallets(); dhRenderDone(); } });
+
 // ── Dashboard — the Terminal's home: wallet, markets, tracker, cycle ─────
 // Everything here is live and real. Markets come from free public sources
 // that answer browsers directly (no keys): CoinGecko for Bitcoin,
@@ -11477,7 +12112,6 @@ async function renderDashboard() {
     d.dataset.built = '1';
     d.innerHTML = `
       <div class="dash-row dash-top">
-        <div class="dash-card dash-bal" id="dash-bal"></div>
         <div class="dash-mkts" id="dash-mkts"></div>
       </div>
       <div class="dash-row dash-mid">
@@ -11490,12 +12124,14 @@ async function renderDashboard() {
       </div>
 `;
   }
-  if (!document.getElementById('dash-prompt')) d.insertAdjacentHTML('afterbegin', '<div class="dash-row" id="dash-prompt"></div>');
+  ensureDashHome();
+  if (!document.getElementById('dash-prompt')) document.getElementById('dash-home').insertAdjacentHTML('afterend', '<div class="dash-row" id="dash-prompt"></div>');
   renderDashPrompt();
   renderDashMe();
   if (!memberIds) loadMemberIds().then(renderDashMe).catch(() => {});
   renderDashCycle();
   renderDashTracker();
+  renderDashHome();
   renderDashBalance();
   d.classList.toggle('dash-nomkts', MKTS_HIDDEN);
   document.getElementById('term-mkts')?.classList.toggle('off', MKTS_HIDDEN);

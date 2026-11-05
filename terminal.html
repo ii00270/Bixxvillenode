@@ -6230,7 +6230,9 @@ async function enterShell() {
   startPresence();
   startWalletPoll();
   if (isExec()) watchPresence();
-  const trkGrp = document.getElementById('sb-tkr-grp'); if (trkGrp) trkGrp.style.display = isExec() ? '' : 'none';
+  // The Trade tracker is built but hidden for now. Set TKR_HIDDEN to false to bring it back; nothing is deleted.
+  const TKR_HIDDEN = true;
+  const trkGrp = document.getElementById('sb-tkr-grp'); if (trkGrp) trkGrp.style.display = (isExec() && !TKR_HIDDEN) ? '' : 'none';
   setTimeout(openPendingScan, 600);
 }
 

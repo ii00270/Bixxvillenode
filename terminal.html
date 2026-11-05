@@ -3180,7 +3180,8 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 html.theme-light{--dh-accent:#D9560B;--dh-btn:linear-gradient(180deg,#2A2A2E,#0A0A0A);--dh-ink:#FFFFFF;--dh-glass:rgba(255,255,255,.42);--dh-glass-line:rgba(0,0,0,.1);--dh-card:linear-gradient(180deg,rgba(255,255,255,.82),rgba(255,255,255,.45));--dh-card-line:rgba(0,0,0,.08);--dh-dim:rgba(20,18,14,.55);--dh-veil:rgba(20,18,14,.28);--dh-sheet:rgba(250,249,246,.82)}
 .dh{width:100%;max-width:560px;margin:0 auto;display:flex;flex-direction:column;gap:18px;font-family:var(--g-sans,'Helvetica Neue',Helvetica,Arial,sans-serif)}
 .dh button{font-family:inherit}
-.dh-top{display:flex;justify-content:flex-end}
+.dh-top{display:flex;justify-content:flex-end;margin-top:-10px}
+@media (max-width:767px){#term-dash:has(.dh){padding-top:0}.dh-top{margin-top:-44px;margin-bottom:-14px}}
 .dh-pill{display:inline-flex;align-items:center;height:40px;border-radius:999px;border:1px solid var(--dh-card-line);background:var(--dh-card)}
 .dh-pill button{appearance:none;border:0;background:none;color:var(--term-fg);width:44px;height:40px;display:grid;place-items:center;cursor:pointer;border-radius:999px;transition:background .2s}
 .dh-pill button:hover{background:var(--dh-card-line)}
@@ -3319,6 +3320,7 @@ html[dir="rtl"] .dh-pi .dh-cur{margin-left:0;margin-right:auto}
 html.theme-light #os-theme .t-sun{display:none}
 html.theme-light #os-theme .t-moon{display:block}
 @media print{#os-theme{display:none}}
+#os-theme{display:none !important}   /* the theme switch now lives in the Dashboard's menu (arrow-down and three dots) */
 /* keep panel headers' right-hand buttons clear of the theme button */
 #term-panel .pp-head,#term-panel .term-panel-head{padding-right:60px}
 #term-home{flex:1;min-height:0;overflow-y:auto;padding:18px 20px 10px;-webkit-overflow-scrolling:touch}
@@ -11968,7 +11970,10 @@ async function dhLoadDone() {
     const cyc = new Set();
     DH.done.forEach(r => cyc.add(cycleNumberForDate(new Date(r.when))));
     (ledger.data || []).forEach(r => { if (r.log_date) cyc.add(cycleNumberForDate(new Date(r.log_date + 'T12:00:00'))); });
-    DH.cycles = cyc.size;
+    // Cycles you have been in: every Cycle since you joined through the one running now. The Executive Operator
+    // has been in every Cycle since the start. Fall back to the Cycles you have worked in if the join date is missing.
+    const nowC = getActiveCycle().num, joined = operator.is_genesis ? 1 : (operator.created_at ? cycleNumberForDate(new Date(operator.created_at)) : null);
+    DH.cycles = Math.max(cyc.size, joined ? Math.max(1, nowC - joined + 1) : 0);
     const c = dhEl('dh-cycles'); if (c) c.textContent = DH.cycles;
   } catch (e) { console.warn('decomposed list', e); DH.done = DH.done || []; }
   DH.loading = false;
@@ -12125,8 +12130,7 @@ async function renderDashboard() {
 `;
   }
   ensureDashHome();
-  if (!document.getElementById('dash-prompt')) document.getElementById('dash-home').insertAdjacentHTML('afterend', '<div class="dash-row" id="dash-prompt"></div>');
-  renderDashPrompt();
+  // The "What do you need?" prompt, its chips and the Blitz card are off the Dashboard for now (renderDashPrompt is kept).
   renderDashMe();
   if (!memberIds) loadMemberIds().then(renderDashMe).catch(() => {});
   renderDashCycle();
@@ -12762,7 +12766,6 @@ function renderDashMe() {
       </div>
     </div>
     <div class="dash-quick">
-      <button class="dash-btn" onclick="toggleAgent(true); document.getElementById('term-input').focus()">Ask BIX AI</button>
       <button class="dash-btn" onclick="document.getElementById('term-upload-file').click()">Upload contract</button>
       <button class="dash-btn" onclick="openProfilePanel(); setTimeout(() => document.getElementById('pf-statements')?.scrollIntoView({ behavior: 'smooth' }), 500)">Statements</button>
       <button class="dash-btn" onclick="dcGo('overview')">Decomposition</button>

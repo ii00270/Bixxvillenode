@@ -3224,7 +3224,7 @@ html.theme-light{--dh-accent:#D9560B;--dh-btn:linear-gradient(180deg,#2A2A2E,#0A
 .dh-dots i{width:5px;height:5px;border-radius:50%;background:var(--dh-card-line);transition:background .25s,transform .25s}
 .dh-dots i.on{background:var(--dh-accent);transform:scale(1.3)}
 @media (max-width:640px){.dh-dots{right:-12px}}
-.dh-acts{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.dh-acts{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:6px}
 .dh-act{display:flex;flex-direction:column;align-items:center;gap:6px}
 .dh-act>svg{width:18px;height:18px;color:var(--dh-dim)}
 .dh-act button{appearance:none;width:100%;border:0;border-radius:20px;padding:15px 12px;font-size:16px;font-weight:600;color:var(--dh-ink);background:var(--dh-btn);cursor:pointer;box-shadow:0 1px 0 rgba(255,255,255,.7) inset,0 10px 24px rgba(0,0,0,.18);transition:transform .2s,box-shadow .2s}
@@ -3294,6 +3294,49 @@ html[dir="rtl"] .dh-pi,html[dir="rtl"] .dh-langs button,html[dir="rtl"] .dh-kv{t
 html[dir="rtl"] .dh-pi .dh-cur{margin-left:0;margin-right:auto}
 @media (prefers-reduced-motion:reduce){.dh *,.dh-pop,.dh-sheet,.dh-veil{transition:none!important}}
 .dash-nomkts .dash-top{display:none}
+.dh-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.dh-day{appearance:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 12px;border-radius:18px;border:1.5px solid transparent;background:var(--dh-card);color:var(--term-dim);cursor:pointer;transition:transform .2s,border-color .25s,background .25s}
+.dh-day:hover{transform:translateY(-2px)}
+.dh-day-dots{display:flex;gap:3px;height:6px;align-items:center}
+.dh-day-dots i{width:5px;height:5px;border-radius:50%;background:var(--dh-accent)}
+.dh-day-dots i.ok{background:var(--up)} .dh-day-dots i.none{background:transparent}
+.dh-day-w{font-size:12px}
+.dh-day b{font-size:17px;font-weight:600;color:var(--term-fg);font-variant-numeric:tabular-nums}
+.dh-day.cur{border-color:var(--dh-accent);background:var(--dh-card-line)}
+.dh-day.cur .dh-day-w{color:var(--term-fg)}
+@media (max-width:420px){.dh-cal{gap:5px}.dh-day{border-radius:14px}.dh-day-w{font-size:11px}}
+.dh-sheet.wide,.dh-sheet.cal{width:min(540px,100%);max-height:88vh;display:flex;flex-direction:column}
+.dh-sheet.cal{background:var(--dh-sheet)}
+.dh-sheet.cal .dh-sheet-b{align-items:stretch;text-align:left;overflow-y:auto;gap:10px;scrollbar-width:thin}
+.dh-cal-nav{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.dh-cal-title{text-align:center;min-width:0}
+.dh-cal-title b{display:block;font-size:16px}
+.dh-cal-title small{font-size:12px;color:var(--dh-dim)}
+.dh-cal-sum{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.dh-cal-sum.small{margin-top:10px}
+.dh-cal-sum > div{display:flex;flex-direction:column;gap:2px;padding:10px;border-radius:16px;background:var(--dh-card-line);min-width:0}
+.dh-cal-sum span{font-size:11.5px;color:var(--dh-dim)}
+.dh-cal-sum b{font-size:15px;font-weight:600;overflow-wrap:anywhere}
+.dh-cal-sum b small{font-size:.7em;font-weight:500;color:var(--dh-dim)}
+@media (max-width:480px){.dh-cal-sum{grid-template-columns:1fr 1fr}}
+.dh-sheet.cal h4{margin:8px 0 0;font-size:13px;letter-spacing:.06em;text-transform:uppercase;color:var(--dh-dim);font-weight:600}
+.dh-grp{display:flex;flex-direction:column;gap:6px}
+.dh-grp-h{display:flex;justify-content:space-between;gap:10px;font-size:13px;margin-top:4px}
+.dh-grp-h small{color:var(--dh-dim)}
+.dh-lf{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;padding:12px 14px;border-radius:16px;background:var(--dh-card);border:1px solid var(--dh-card-line)}
+.dh-lf-main{min-width:0}
+.dh-lf-main b{display:block;font-size:14px;font-weight:600}
+.dh-lf-main small{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:4px;font-size:12px;color:var(--dh-dim)}
+.dh-lf-val{text-align:right;white-space:nowrap}
+.dh-lf-val b{display:block;font-size:14px;font-weight:600;color:var(--up)}
+.dh-lf-val small{font-size:12px;color:var(--dh-dim)}
+.dh-chip{display:inline-block;border-radius:999px;padding:2px 9px;font-size:11px;background:var(--dh-card-line);color:var(--term-fg);border:0}
+.dh-chip.ok{background:rgba(61,220,151,.18);color:var(--up)} .dh-chip.prog{background:rgba(255,122,26,.18);color:var(--dh-accent)} .dh-chip.rev{background:rgba(160,140,255,.2)}
+.dh-chip.btn{appearance:none;cursor:pointer;font-family:inherit}
+.dh-whole{display:flex;flex-direction:column;gap:6px}
+.dh-whole-goal{font-size:13px;color:var(--dh-dim)}
+.dh-bar{height:8px;border-radius:4px;background:var(--dh-card-line);overflow:hidden}
+.dh-bar i{display:block;height:100%;background:linear-gradient(90deg,#FFEA00,#FF7A1A,#FF2D95)}
 .dash-nomkts .dash-mkts,.dash-nomkts .dash-chart,#term-mkts.off{display:none}
 .dash-nomkts .dash-top,.dash-nomkts .dash-mid{grid-template-columns:1fr}
 @media (max-width:1100px){
@@ -11545,6 +11588,18 @@ const I18N_RAW = {
   'In progress': '进行中|प्रगति में|En curso|En cours|قيد التنفيذ|চলমান|Em andamento|В работе|جاری ہے',
   'Delivered': '已交付|वितरित|Entregado|Livré|تم التسليم|সরবরাহিত|Entregue|Доставлено|فراہم شدہ',
   'All': '全部|सभी|Todos|Tous|الكل|সব|Todos|Все|سب',
+  'Today': '今天|आज|Hoy|Aujourd’hui|اليوم|আজ|Hoje|Сегодня|آج',
+  'Steps due': '到期步骤|देय चरण|Pasos con vencimiento|Étapes à rendre|الخطوات المستحقة|নির্ধারিত ধাপ|Etapas com prazo|Шаги к сроку|مقررہ مراحل',
+  'Value': '价值|मूल्य|Valor|Valeur|القيمة|মূল্য|Valor|Ценность|قدر',
+  'Worth': '金额|कीमत|Valor monetario|Valeur monétaire|القيمة المالية|অর্থমূল্য|Valor monetário|Стоимость|مالیت',
+  'Whole decomposition': '完整分解|पूरा विघटन|Descomposición completa|Décomposition complète|التفكيك الكامل|সম্পূর্ণ বিভাজন|Decomposição completa|Полная декомпозиция|مکمل تجزیہ',
+  'Not granted': '未分配|आवंटित नहीं|Sin asignar|Non attribué|غير مُسند|বরাদ্দ হয়নি|Não atribuído|Не назначено|تفویض نہیں',
+  'Nothing is due on this day.': '当天没有到期事项。|इस दिन कुछ भी देय नहीं है।|No hay nada con vencimiento este día.|Rien n’est à rendre ce jour-là.|لا شيء مستحق في هذا اليوم.|এই দিনে কিছু নির্ধারিত নেই।|Nada com prazo neste dia.|На этот день ничего не запланировано.|اس دن کچھ مقرر نہیں ہے۔',
+  'Upcoming': '即将到来|आगामी|Próximos|À venir|القادمة|আসন্ন|Próximos|Предстоящие|آنے والے',
+  'Contract price': '合同价格|अनुबंध मूल्य|Precio del contrato|Prix du contrat|سعر العقد|চুক্তির মূল্য|Preço do contrato|Цена контракта|معاہدے کی قیمت',
+  'Labor': '劳务|श्रम|Mano de obra|Main-d’œuvre|العمالة|শ্রম|Mão de obra|Труд|محنت',
+  'To do': '待办|करने के लिए|Por hacer|À faire|المهام|করণীয়|A fazer|К выполнению|کرنے کے کام',
+  'No contract yet. Upload one with Add → Contract.': '还没有合同。请通过 添加 → 合同 上传。|अभी कोई अनुबंध नहीं। जोड़ें → अनुबंध से अपलोड करें।|Aún no hay contrato. Sube uno con Añadir → Contrato.|Pas encore de contrat. Téléversez-en un avec Ajouter → Contrat.|لا يوجد عقد بعد. ارفع واحدًا عبر إضافة ← عقد.|এখনও কোনো চুক্তি নেই। যোগ করুন → চুক্তি দিয়ে আপলোড করুন।|Ainda sem contrato. Envie um com Adicionar → Contrato.|Контракта пока нет. Загрузите его через Добавить → Контракт.|ابھی کوئی معاہدہ نہیں۔ شامل کریں ← معاہدہ سے اپ لوڈ کریں۔',
 };
 const I18N_D = {};
 for (const [en, row] of Object.entries(I18N_RAW)) { const p = row.split('|'); if (p.length === LANG_ORDER.length) I18N_D[en] = Object.fromEntries(LANG_ORDER.map((l, i) => [l, p[i]])); else console.warn('translation row malformed:', en); }
@@ -11641,6 +11696,7 @@ function ensureDashHome() {
     </div></div>
     <div class="dh-hero" id="dh-hero"></div>
     <div class="dh-wallet" id="dh-wallet"></div>
+    <div class="dh-cal" id="dh-cal"></div>
     <div class="dh-acts">
       <div class="dh-act">${dhSvg('plus')}<button type="button" onclick="dhPop('add', this)">Add</button></div>
       <div class="dh-act">${dhSvg('share')}<button type="button" onclick="dhPop('share', this)">Share</button></div>
@@ -11656,6 +11712,7 @@ async function renderDashHome() {
   if (!operator || !ensureDashHome()) return;
   dhHero();
   dhDrawWallets();
+  renderDashCal();
   dhLoadDone();
   const list = [];
   const seen = new Set();
@@ -11840,10 +11897,10 @@ function dhPickTheme(t) {
   setTheme(t);
   document.querySelectorAll('.dh-pop .dh-seg button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
 }
-function dhSheet(title, html, onClose) {
+function dhSheet(title, html, onClose, cls) {
   dhCloseAll();
   const v = document.createElement('div'); v.className = 'dh-veil dim';
-  v.innerHTML = `<div class="dh-sheet" role="dialog" aria-label="${esc(title)}"><div class="dh-sheet-h"><b>${esc(title)}</b><button type="button" class="dh-x" aria-label="Close" onclick="dhCloseAll()">×</button></div><div class="dh-sheet-b">${html}</div></div>`;
+  v.innerHTML = `<div class="dh-sheet ${cls || ''}" role="dialog" aria-label="${esc(title)}"><div class="dh-sheet-h"><b>${esc(title)}</b><button type="button" class="dh-x" aria-label="Close" onclick="dhCloseAll()">×</button></div><div class="dh-sheet-b">${html}</div></div>`;
   v.addEventListener('click', e => { if (e.target === v) dhCloseAll(); });
   document.body.appendChild(v);
   requestAnimationFrame(() => v.classList.add('on'));
@@ -11995,7 +12052,99 @@ function dhRenderDone() {
         <div class="dh-rval no-i18n"><b>+${dhMoney(r.cents / 100)}<i>US$</i></b><small>+${r.logs.toLocaleString()} LOGs</small></div></div>`).join('')}</div>`
       : `<div class="dh-empty">${DH.done ? '<b>Nothing decomposed yet.</b><br>Completed work appears here with its date and time.' : '…'}</div>`}`;
 }
-document.addEventListener('bx-lang', () => { if (dhEl('dash-home')) { dhHero(); dhDrawWallets(); dhRenderDone(); } });
+// ── Calendar: the week around today; tap a day for its decomposition, who holds each step, and what it is worth ──
+const dhKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+const dhFromKey = k => { const [y, m, d] = k.split('-').map(Number); return new Date(y, m - 1, d); };
+const dhAddDays = (k, n) => { const d = dhFromKey(k); d.setDate(d.getDate() + n); return dhKey(d); };
+const dhCalLeaves = () => (trackerState?.source === 'live' ? trackerState.leaves || [] : []);
+// A step belongs to a day when it is due that day or was delivered that day.
+function dhLeafDay(l) {
+  const at = l.status === 'delivered' ? (l.verified_at || l.delivered_at) : null;
+  return { due: l.target_date ? String(l.target_date).slice(0, 10) : null, done: at ? dhKey(new Date(at)) : null };
+}
+const dhWorth = l => Math.round(leafRateCents(l) * (Number(l.logs) || 0));
+async function dhOwners() {
+  if (window._opNameCache) return;
+  const { data: ops } = await sb.rpc('list_operators');
+  window._opNameCache = {};
+  (ops || []).forEach(o => { window._opNameCache[o.id] = o.handle || '@' + (o.peer_name || '').replace(/\s/g, '').toUpperCase(); });
+}
+async function renderDashCal() {
+  dhDrawCal();
+  try { if (!trackerState || trackerState.source == null) await loadWorkMap(); } catch (e) { return; }
+  dhDrawCal();
+}
+function dhDrawCal() {
+  const el = dhEl('dh-cal');
+  if (!el) return;
+  const today = dhKey(new Date()), L = dhCalLeaves(), loc = langLocale();
+  const by = {};
+  L.forEach(l => { const d = dhLeafDay(l); [d.due, d.done].filter(Boolean).forEach(k => { (by[k] = by[k] || new Map()).set(l.id, l); }); });
+  el.innerHTML = [-3, -2, -1, 0, 1, 2, 3].map(off => {
+    const k = dhAddDays(today, off), d = dhFromKey(k), items = [...(by[k]?.values() || [])];
+    const dots = items.slice(0, 3).map(l => `<i class="${l.status === 'delivered' ? 'ok' : ''}"></i>`).join('');
+    return `<button type="button" class="dh-day ${off === 0 ? 'cur' : ''}" onclick="dhCalOpen('${k}')" aria-label="${esc(d.toLocaleDateString(loc, { weekday: 'long', month: 'long', day: 'numeric' }))}">
+      <span class="dh-day-dots">${dots || '<i class="none"></i>'}</span>
+      <span class="dh-day-w no-i18n">${esc(d.toLocaleDateString(loc, { weekday: 'short' }))}</span><b class="no-i18n">${d.getDate()}</b></button>`;
+  }).join('');
+}
+async function dhCalOpen(key) {
+  try { if (!trackerState || trackerState.source == null) await loadWorkMap(); await dhOwners(); } catch (e) {}
+  const html = dhCalHtml(key);
+  const open = document.querySelector('.dh-sheet.cal');
+  if (open) { open.querySelector('.dh-sheet-b').innerHTML = html; open.querySelector('.dh-sheet-b').scrollTop = 0; return; }
+  dhSheet('Calendar', html, null, 'cal');
+}
+function dhCalHtml(key) {
+  const loc = langLocale(), d = dhFromKey(key), today = dhKey(new Date());
+  const L = dhCalLeaves(), live = trackerState?.source === 'live';
+  const money = c => dhMoney(c / 100) + ' US$';
+  const day = L.filter(l => { const x = dhLeafDay(l); return x.due === key || x.done === key; });
+  const dueN = day.filter(l => dhLeafDay(l).due === key).length, doneN = day.filter(l => dhLeafDay(l).done === key).length;
+  const logs = day.reduce((n, l) => n + (Number(l.logs) || 0), 0), worth = day.reduce((n, l) => n + dhWorth(l), 0);
+  const cyc = cycleNumberForDate(d);
+  const who = l => l.assigned_to ? (window._opNameCache?.[l.assigned_to] || '—') : null;
+  const state = l => l.status === 'delivered' ? ['Delivered', 'ok'] : l.submitted_at ? ['Awaiting verification', 'rev'] : l.status === 'in progress' ? ['In progress', 'prog'] : ['To do', ''];
+  const groups = (trackerState?.branches || []).map(b => ({ b, ls: day.filter(l => l.branch_id === b.id) })).filter(g => g.ls.length);
+  const loose = day.filter(l => !(trackerState?.branches || []).some(b => b.id === l.branch_id));
+  if (loose.length) groups.push({ b: null, ls: loose });
+  const row = l => { const [st, cls] = state(l), o = who(l); return `<div class="dh-lf">
+      <div class="dh-lf-main"><b class="no-i18n">${esc(l.leaf_code)} · ${esc(l.task)}</b>
+        <small><span class="dh-chip ${cls}">${st}</span> <span class="${o ? 'no-i18n' : ''}">${o ? esc(o) : 'Not granted'}</span></small></div>
+      <div class="dh-lf-val no-i18n"><b>${money(dhWorth(l))}</b><small>${(Number(l.logs) || 0).toLocaleString()} LOGs</small></div></div>`; };
+  const laborAll = L.reduce((n, l) => n + dhWorth(l), 0), logsAll = L.reduce((n, l) => n + (Number(l.logs) || 0), 0);
+  const logsDone = L.filter(l => l.status === 'delivered').reduce((n, l) => n + (Number(l.logs) || 0), 0);
+  const pct = logsAll ? Math.round(logsDone / logsAll * 100) : 0;
+  const upcoming = [...new Set(L.filter(l => l.status !== 'delivered' && l.target_date && String(l.target_date).slice(0, 10) > key).map(l => String(l.target_date).slice(0, 10)))].sort().slice(0, 3);
+  return `
+    <div class="dh-cal-nav">
+      <button type="button" class="dh-x" onclick="dhCalOpen('${dhAddDays(key, -1)}')" aria-label="Previous day">‹</button>
+      <div class="dh-cal-title"><b class="no-i18n">${esc(d.toLocaleDateString(loc, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' }))}</b>
+        <small><span class="no-i18n">${esc('Cycle')} ${cyc}</span>${key === today ? ' · <span>Today</span>' : ''}</small></div>
+      <button type="button" class="dh-x" onclick="dhCalOpen('${dhAddDays(key, 1)}')" aria-label="Next day">›</button>
+    </div>
+    <div class="dh-cal-sum">
+      <div><span>Steps due</span><b class="no-i18n">${dueN}</b></div>
+      <div><span>Delivered</span><b class="no-i18n">${doneN}</b></div>
+      <div><span>Value</span><b class="no-i18n">${logs.toLocaleString()}<small> LOGs</small></b></div>
+      <div><span>Worth</span><b class="no-i18n">${money(worth)}</b></div>
+    </div>
+    <h4>Decomposition</h4>
+    ${!live ? '<div class="dh-empty">No contract yet. Upload one with Add → Contract.</div>'
+      : groups.length ? groups.map(g => `<div class="dh-grp"><div class="dh-grp-h no-i18n">${g.b ? `<b>${esc(g.b.code)} · ${esc(g.b.title || '')}</b><small>${g.b.due_date ? esc(fmtDate(g.b.due_date)) : ''}</small>` : ''}</div>${g.ls.sort((a, b) => byLeafCode(a.leaf_code, b.leaf_code)).map(row).join('')}</div>`).join('')
+      : `<div class="dh-empty">Nothing is due on this day.${upcoming.length ? `<br><small>Upcoming</small> ${upcoming.map(u => `<button type="button" class="dh-chip btn no-i18n" onclick="dhCalOpen('${u}')">${esc(dhFromKey(u).toLocaleDateString(loc, { month: 'short', day: 'numeric' }))}</button>`).join(' ')}` : ''}</div>`}
+    ${live && L.length ? `<h4>Whole decomposition</h4>
+      <div class="dh-whole"><div class="dh-whole-goal no-i18n">${esc(trackerState.map?.goal || '')}</div>
+        <div class="dh-bar"><i style="width:${pct}%"></i></div>
+        <div class="dh-cal-sum small">
+          <div><span>Delivered</span><b class="no-i18n">${pct}%</b></div>
+          <div><span>Value</span><b class="no-i18n">${logsAll.toLocaleString()}<small> LOGs</small></b></div>
+          <div><span>Labor</span><b class="no-i18n">${money(laborAll)}</b></div>
+          <div><span>Contract price</span><b class="no-i18n">${money(CANON.priceCents(laborAll))}</b></div>
+        </div></div>` : ''}`;
+}
+
+document.addEventListener('bx-lang', () => { if (dhEl('dash-home')) { dhHero(); dhDrawWallets(); dhDrawCal(); dhRenderDone(); } });
 
 // ── Dashboard — the Terminal's home: wallet, markets, tracker, cycle ─────
 // Everything here is live and real. Markets come from free public sources

@@ -3175,6 +3175,8 @@ html.theme-light{--up:#0F9D58;--down:#C81E1E}
 #term-mkts{display:inline-flex;gap:16px;white-space:nowrap}
 #term-mkts i{font-style:normal}
 #term-mkts i.up{color:var(--up)} #term-mkts i.down{color:var(--down)}
+.dash-nomkts .dash-mkts,.dash-nomkts .dash-chart,#term-mkts.off{display:none}
+.dash-nomkts .dash-top,.dash-nomkts .dash-mid{grid-template-columns:1fr}
 @media (max-width:1100px){
   .dash-top,.dash-mid,.dash-low{grid-template-columns:1fr}
 }
@@ -11406,6 +11408,9 @@ async function loadMarkets(force) {
 // every ~30 s (that is how often gold-api.com updates). DXY and EUR/USD come
 // from the ECB's once-a-day reference rates, so they do not move intraday and
 // are not animated. Everything shown moving is a real price just fetched.
+// The Dashboard's price tiles, chart and the footer ticker are built but hidden for now (nothing deleted).
+// Set MKTS_HIDDEN to false to bring them back.
+const MKTS_HIDDEN = true;
 const LIVE = { BTC: [], XAU: [], XAG: [] };
 const LIVE_MAX = 300;
 let liveTimer = null, liveGold = 0, dashRange = 'live', dashHover = false;
@@ -11492,6 +11497,9 @@ async function renderDashboard() {
   renderDashCycle();
   renderDashTracker();
   renderDashBalance();
+  d.classList.toggle('dash-nomkts', MKTS_HIDDEN);
+  document.getElementById('term-mkts')?.classList.toggle('off', MKTS_HIDDEN);
+  if (MKTS_HIDDEN) { clearInterval(liveTimer); clearInterval(dashTimer); return; }
   const m = await loadMarkets();
   renderDashMarkets(m);
   renderDashChart(m);

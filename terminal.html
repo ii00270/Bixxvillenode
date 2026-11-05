@@ -11758,12 +11758,34 @@ async function dhBuildWallets() {
     if (w) w.connected = true; else list.push({ kind: 'wallet', label: hit.name, addr: hit.address, connected: true, ext: true });
   }
   const ck = DH.conn ? DH.conn.addr.toLowerCase() : '';
-  if (DH.connAddr !== undefined && ck && ck !== DH.connAddr) { const i = list.findIndex(w => w.connected); if (i >= 0) DH.idx = i; }   // the account changed: show it
+  if (ck && ck !== DH.connAddr) { const i = list.findIndex(w => w.connected); if (i >= 0) DH.idx = i; }   // first look, or the account changed: show the one the wallet app is on
   DH.connAddr = ck;
   DH.wallets = list;
   if (DH.idx >= list.length) DH.idx = Math.max(0, list.length - 1);
   dhDrawWallets();
   dhBalances(true);
+  if (dhEl('dash-bal') && !dhEl('dash-bal').hidden) renderDashBalance();
+}
+// The Wallet tools card follows the wheel. On the wallet the wallet app is connected to, the full card shows
+// (network, switch to Hedera). On any other wallet it shows that wallet's own balances on every network.
+async function dhToolsFor() {
+  const el = dhEl('dash-bal'), w = DH.wallets[DH.idx];
+  if (!el || !w || w.connected) return false;
+  const conn = DH.conn ? `${esc(DH.conn.name)} is on a different account (${esc(dhShort(DH.conn.addr))}).` : 'No wallet is connected in this browser.';
+  el.innerHTML = `
+    <div class="dash-lbl"><span>${esc(w.label)}</span><span class="dash-chip no-i18n">${esc(dhShort(w.addr))}</span></div>
+    <div class="dash-big" id="dash-big-v">…</div>
+    <div class="dash-bar"><i style="width:100%"></i></div>
+    <div class="dash-sub" id="dash-sub-c" data-here="${esc(w.label)}">${esc(dhShort(w.addr))} · ${conn}</div>
+    <div class="dash-nets" id="dash-nets">Checking all networks…</div>
+    <div class="dash-acts">
+      <button class="dash-btn solid" onclick="dhSwitchAccount()">${DH.conn ? 'Switch account in your wallet' : 'Connect a wallet'}</button>
+      <button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(w.addr)}');toast('Wallet address copied.')">Copy address</button>
+      <button class="dash-btn" onclick="setTermView('ledger')">Ledger</button>
+      <button class="dash-btn" onclick="openWalletsInProfile()">${isExec() ? 'Wallets · treasury' : 'Wallets'}</button>
+    </div>`;
+  fillAllNetworks(w.addr.toLowerCase());
+  return true;
 }
 // Opens the wallet app's own account chooser; when an account is picked the wheel follows it.
 async function dhSwitchAccount() {
@@ -11843,6 +11865,7 @@ function dhGo(i) {
   if (!n) return;
   DH.idx = Math.max(0, Math.min(n - 1, i));
   dhLayout();
+  if (dhEl('dash-bal') && !dhEl('dash-bal').hidden) renderDashBalance();
 }
 function dhBindWheel(st) {
   let acc = 0, lock = 0, y0 = null, moved = false;
@@ -12846,6 +12869,7 @@ let dashBalBusy = false, dashBalAgain = false;
 async function renderDashBalance() {
   const el = document.getElementById('dash-bal');
   if (!el) return;
+  if (typeof dhToolsFor === 'function' && await dhToolsFor()) return;     // the wheel is on a wallet the wallet app is not on
   if (dashBalBusy) { dashBalAgain = true; return; }          // a change arrived mid-update: run once more when this one ends
   dashBalBusy = true;
   try { await drawDashBalance(el); } finally { dashBalBusy = false; }

@@ -3294,6 +3294,20 @@ html[dir="rtl"] .dh-pi,html[dir="rtl"] .dh-langs button,html[dir="rtl"] .dh-kv{t
 html[dir="rtl"] .dh-pi .dh-cur{margin-left:0;margin-right:auto}
 @media (prefers-reduced-motion:reduce){.dh *,.dh-pop,.dh-sheet,.dh-veil{transition:none!important}}
 .dash-nomkts .dash-top{display:none}
+.dh-calwrap{display:flex;flex-direction:column;gap:10px}
+.dh-cal-bar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.dh-cal-nav2{display:flex;align-items:center;gap:8px}
+.dh-cal-nav2 b{font-size:15px;font-weight:600;color:var(--term-fg);min-width:7.5em;text-align:center}
+.dh-nav{appearance:none;border:0;width:32px;height:32px;border-radius:50%;background:var(--dh-card-line);color:var(--term-fg);font-size:20px;line-height:1;cursor:pointer;display:grid;place-items:center;transition:background .2s}
+.dh-nav:hover{background:var(--dh-glass-line)}
+.dh-day.mid{border-color:var(--dh-card-line)}
+.dh-mgrid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dh-mhead span{text-align:center;font-size:11.5px;color:var(--dh-dim);padding:4px 0}
+.dh-mcell{appearance:none;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 0;border-radius:14px;border:1.5px solid transparent;background:var(--dh-card);color:var(--term-fg);cursor:pointer;transition:background .2s}
+.dh-mcell:hover{background:var(--dh-card-line)}
+.dh-mcell b{font-size:14px;font-weight:600;font-variant-numeric:tabular-nums}
+.dh-mcell.out{opacity:.35}
+.dh-mcell.cur{border-color:var(--dh-accent)}
 .dh-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .dh-day{appearance:none;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 0 12px;border-radius:18px;border:1.5px solid transparent;background:var(--dh-card);color:var(--term-dim);cursor:pointer;transition:transform .2s,border-color .25s,background .25s}
 .dh-day:hover{transform:translateY(-2px)}
@@ -11588,6 +11602,8 @@ const I18N_RAW = {
   'In progress': '进行中|प्रगति में|En curso|En cours|قيد التنفيذ|চলমান|Em andamento|В работе|جاری ہے',
   'Delivered': '已交付|वितरित|Entregado|Livré|تم التسليم|সরবরাহিত|Entregue|Доставлено|فراہم شدہ',
   'All': '全部|सभी|Todos|Tous|الكل|সব|Todos|Все|سب',
+  'Full calendar': '完整日历|पूरा कैलेंडर|Calendario completo|Calendrier complet|التقويم الكامل|পূর্ণ ক্যালেন্ডার|Calendário completo|Полный календарь|مکمل کیلنڈر',
+  'Open the Calendar page': '打开日历页面|कैलेंडर पेज खोलें|Abrir la página del calendario|Ouvrir la page Calendrier|فتح صفحة التقويم|ক্যালেন্ডার পেজ খুলুন|Abrir a página do calendário|Открыть страницу календаря|کیلنڈر کا صفحہ کھولیں',
   'Today': '今天|आज|Hoy|Aujourd’hui|اليوم|আজ|Hoje|Сегодня|آج',
   'Steps due': '到期步骤|देय चरण|Pasos con vencimiento|Étapes à rendre|الخطوات المستحقة|নির্ধারিত ধাপ|Etapas com prazo|Шаги к сроку|مقررہ مراحل',
   'Value': '价值|मूल्य|Valor|Valeur|القيمة|মূল্য|Valor|Ценность|قدر',
@@ -11696,7 +11712,7 @@ function ensureDashHome() {
     </div></div>
     <div class="dh-hero" id="dh-hero"></div>
     <div class="dh-wallet" id="dh-wallet"></div>
-    <div class="dh-cal" id="dh-cal"></div>
+    <div class="dh-calwrap"><div class="dh-cal-bar" id="dh-cal-bar"></div><div class="dh-cal" id="dh-cal"></div></div>
     <div class="dh-acts">
       <div class="dh-act">${dhSvg('plus')}<button type="button" onclick="dhPop('add', this)">Add</button></div>
       <div class="dh-act">${dhSvg('share')}<button type="button" onclick="dhPop('share', this)">Share</button></div>
@@ -12075,25 +12091,94 @@ async function renderDashCal() {
   dhDrawCal();
 }
 function dhDrawCal() {
-  const el = dhEl('dh-cal');
+  const el = dhEl('dh-cal'), bar = dhEl('dh-cal-bar');
   if (!el) return;
-  const today = dhKey(new Date()), L = dhCalLeaves(), loc = langLocale();
-  const by = {};
-  L.forEach(l => { const d = dhLeafDay(l); [d.due, d.done].filter(Boolean).forEach(k => { (by[k] = by[k] || new Map()).set(l.id, l); }); });
+  const today = dhKey(new Date()), mid = DH.calMid || today, L = dhCalLeaves(), loc = langLocale();
+  const by = dhCalIndex(L);
+  if (bar) {
+    const m = dhFromKey(mid);
+    bar.innerHTML = `<div class="dh-cal-nav2">
+        <button type="button" class="dh-nav" onclick="dhCalShift(-7)" aria-label="Previous week">‹</button>
+        <b class="no-i18n">${esc(m.toLocaleDateString(loc, { month: 'long', year: 'numeric' }))}</b>
+        <button type="button" class="dh-nav" onclick="dhCalShift(7)" aria-label="Next week">›</button>
+        ${mid !== today ? '<button type="button" class="dh-chip btn" onclick="dhCalToday()">Today</button>' : ''}
+      </div>
+      <button type="button" class="dh-link" onclick="dhMonthOpen('${mid.slice(0, 7)}')">Full calendar</button>`;
+  }
   el.innerHTML = [-3, -2, -1, 0, 1, 2, 3].map(off => {
-    const k = dhAddDays(today, off), d = dhFromKey(k), items = [...(by[k]?.values() || [])];
+    const k = dhAddDays(mid, off), d = dhFromKey(k), items = [...(by[k]?.values() || [])];
     const dots = items.slice(0, 3).map(l => `<i class="${l.status === 'delivered' ? 'ok' : ''}"></i>`).join('');
-    return `<button type="button" class="dh-day ${off === 0 ? 'cur' : ''}" onclick="dhCalOpen('${k}')" aria-label="${esc(d.toLocaleDateString(loc, { weekday: 'long', month: 'long', day: 'numeric' }))}">
+    return `<button type="button" class="dh-day ${k === today ? 'cur' : ''} ${off === 0 && mid !== today ? 'mid' : ''}" onclick="dhCalOpen('${k}')" aria-label="${esc(d.toLocaleDateString(loc, { weekday: 'long', month: 'long', day: 'numeric' }))}">
       <span class="dh-day-dots">${dots || '<i class="none"></i>'}</span>
       <span class="dh-day-w no-i18n">${esc(d.toLocaleDateString(loc, { weekday: 'short' }))}</span><b class="no-i18n">${d.getDate()}</b></button>`;
   }).join('');
+  dhBindCalSwipe(el);
+}
+function dhCalIndex(L) {
+  const by = {};
+  L.forEach(l => { const d = dhLeafDay(l); [d.due, d.done].filter(Boolean).forEach(k => { (by[k] = by[k] || new Map()).set(l.id, l); }); });
+  return by;
+}
+function dhCalShift(n) { DH.calMid = dhAddDays(DH.calMid || dhKey(new Date()), n); dhDrawCal(); }
+function dhCalToday() { DH.calMid = null; dhDrawCal(); }
+function dhBindCalSwipe(el) {
+  if (el._swipe) return;
+  el._swipe = true;
+  let x0 = null, moved = false;
+  el.style.touchAction = 'pan-y';
+  el.addEventListener('pointerdown', e => { x0 = e.clientX; moved = false; });
+  el.addEventListener('pointerup', e => {
+    if (x0 == null) return;
+    const dx = e.clientX - x0; x0 = null;
+    if (Math.abs(dx) > 45) { moved = true; dhCalShift(dx < 0 ? 7 : -7); }
+  });
+  el.addEventListener('pointercancel', () => { x0 = null; });
+  el.addEventListener('click', e => { if (moved) { e.stopPropagation(); e.preventDefault(); moved = false; } }, true);
+}
+function dhCalSheet(html) {
+  const open = document.querySelector('.dh-sheet.cal');
+  if (open) { const b = open.querySelector('.dh-sheet-b'); b.innerHTML = html; b.scrollTop = 0; return; }
+  dhSheet('Calendar', html, null, 'cal');
 }
 async function dhCalOpen(key) {
   try { if (!trackerState || trackerState.source == null) await loadWorkMap(); await dhOwners(); } catch (e) {}
-  const html = dhCalHtml(key);
-  const open = document.querySelector('.dh-sheet.cal');
-  if (open) { open.querySelector('.dh-sheet-b').innerHTML = html; open.querySelector('.dh-sheet-b').scrollTop = 0; return; }
-  dhSheet('Calendar', html, null, 'cal');
+  dhCalSheet(dhCalHtml(key));
+}
+// The whole month at a glance; tap a day to open it.
+async function dhMonthOpen(ym) {
+  try { if (!trackerState || trackerState.source == null) await loadWorkMap(); await dhOwners(); } catch (e) {}
+  dhCalSheet(dhMonthHtml(ym));
+}
+function dhMonthHtml(ym) {
+  const loc = langLocale(), [y, m] = ym.split('-').map(Number), first = new Date(y, m - 1, 1), today = dhKey(new Date());
+  const prev = dhKey(new Date(y, m - 2, 1)).slice(0, 7), next = dhKey(new Date(y, m, 1)).slice(0, 7);
+  const L = dhCalLeaves(), by = dhCalIndex(L);
+  const lead = (first.getDay() + 6) % 7;                    // weeks start on Monday
+  const days = new Date(y, m, 0).getDate(), cells = Math.ceil((lead + days) / 7) * 7;
+  const wk = [...Array(7)].map((_, i) => new Date(2024, 0, 1 + i).toLocaleDateString(loc, { weekday: 'short' }));   // 1 Jan 2024 was a Monday
+  const inMonth = L.filter(l => { const x = dhLeafDay(l); return (x.due && x.due.startsWith(ym)) || (x.done && x.done.startsWith(ym)); });
+  const dueN = L.filter(l => dhLeafDay(l).due?.startsWith(ym)).length, doneN = L.filter(l => dhLeafDay(l).done?.startsWith(ym)).length;
+  const worth = inMonth.reduce((n, l) => n + dhWorth(l), 0), logs = inMonth.reduce((n, l) => n + (Number(l.logs) || 0), 0);
+  const grid = [...Array(cells)].map((_, i) => {
+    const d = new Date(y, m - 1, 1 - lead + i), k = dhKey(d), out = d.getMonth() !== m - 1, items = [...(by[k]?.values() || [])];
+    return `<button type="button" class="dh-mcell ${k === today ? 'cur' : ''} ${out ? 'out' : ''}" onclick="dhCalOpen('${k}')">
+      <b class="no-i18n">${d.getDate()}</b><span class="dh-day-dots">${items.slice(0, 3).map(l => `<i class="${l.status === 'delivered' ? 'ok' : ''}"></i>`).join('') || '<i class="none"></i>'}</span></button>`;
+  }).join('');
+  return `
+    <div class="dh-cal-nav">
+      <button type="button" class="dh-x" onclick="dhMonthOpen('${prev}')" aria-label="Previous month">‹</button>
+      <div class="dh-cal-title"><b class="no-i18n">${esc(first.toLocaleDateString(loc, { month: 'long', year: 'numeric' }))}</b></div>
+      <button type="button" class="dh-x" onclick="dhMonthOpen('${next}')" aria-label="Next month">›</button>
+    </div>
+    <div class="dh-mgrid dh-mhead">${wk.map(w => `<span class="no-i18n">${esc(w)}</span>`).join('')}</div>
+    <div class="dh-mgrid">${grid}</div>
+    <div class="dh-cal-sum">
+      <div><span>Steps due</span><b class="no-i18n">${dueN}</b></div>
+      <div><span>Delivered</span><b class="no-i18n">${doneN}</b></div>
+      <div><span>Value</span><b class="no-i18n">${logs.toLocaleString()}<small> LOGs</small></b></div>
+      <div><span>Worth</span><b class="no-i18n">${dhMoney(worth / 100)} US$</b></div>
+    </div>
+    <button type="button" class="dh-btn ghost" onclick="dhCloseAll();setTermView('calendar')">Open the Calendar page</button>`;
 }
 function dhCalHtml(key) {
   const loc = langLocale(), d = dhFromKey(key), today = dhKey(new Date());
@@ -12123,6 +12208,7 @@ function dhCalHtml(key) {
         <small><span class="no-i18n">${esc('Cycle')} ${cyc}</span>${key === today ? ' · <span>Today</span>' : ''}</small></div>
       <button type="button" class="dh-x" onclick="dhCalOpen('${dhAddDays(key, 1)}')" aria-label="Next day">›</button>
     </div>
+    <button type="button" class="dh-link" style="align-self:center" onclick="dhMonthOpen('${key.slice(0, 7)}')">Full calendar</button>
     <div class="dh-cal-sum">
       <div><span>Steps due</span><b class="no-i18n">${dueN}</b></div>
       <div><span>Delivered</span><b class="no-i18n">${doneN}</b></div>

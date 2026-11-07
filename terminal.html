@@ -11609,6 +11609,8 @@ const I18N_RAW = {
   'All': '全部|सभी|Todos|Tous|الكل|সব|Todos|Все|سب',
   'Full calendar': '完整日历|पूरा कैलेंडर|Calendario completo|Calendrier complet|التقويم الكامل|পূর্ণ ক্যালেন্ডার|Calendário completo|Полный календарь|مکمل کیلنڈر',
   'Open the Calendar page': '打开日历页面|कैलेंडर पेज खोलें|Abrir la página del calendario|Ouvrir la page Calendrier|فتح صفحة التقويم|ক্যালেন্ডার পেজ খুলুন|Abrir a página do calendário|Открыть страницу календаря|کیلنڈر کا صفحہ کھولیں',
+  'all networks': '所有网络|सभी नेटवर्क|todas las redes|tous les réseaux|كل الشبكات|সব নেটওয়ার্ক|todas as redes|все сети|تمام نیٹ ورکس',
+  'Connect this account in': '在此连接该账户：|इस खाते को कनेक्ट करें:|Conecta esta cuenta en|Connectez ce compte dans|اربط هذا الحساب في|এই অ্যাকাউন্টটি সংযুক্ত করুন:|Conecte esta conta em|Подключите этот аккаунт в|یہ اکاؤنٹ منسلک کریں:',
   'Connected in': '已连接于|में कनेक्टेड|Conectada en|Connecté dans|متصل في|সংযুক্ত আছে|Conectada em|Подключён в|میں منسلک',
   'Connected': '已连接|कनेक्टेड|Conectada|Connecté|متصل|সংযুক্ত|Conectada|Подключён|منسلک',
   'Switch account in your wallet': '在您的钱包中切换账户|अपने वॉलेट में खाता बदलें|Cambia de cuenta en tu billetera|Changez de compte dans votre portefeuille|بدّل الحساب في محفظتك|আপনার ওয়ালেটে অ্যাকাউন্ট বদলান|Troque de conta na sua carteira|Смените аккаунт в кошельке|اپنے والٹ میں اکاؤنٹ تبدیل کریں',
@@ -11745,6 +11747,7 @@ async function renderDashHome() {
 // (switching accounts in MetaMask), the wheel follows it.
 async function dhBuildWallets() {
   if (!operator || !dhEl('dh-wallet')) return;
+  const seq = DH.buildSeq = (DH.buildSeq || 0) + 1;            // a slower, older build must not overwrite a newer one
   const list = [];
   const seen = new Set();
   const add = (kind, label, addr) => { if (!addr || !/^0x[0-9a-fA-F]{40}$/.test(addr)) return; const k = addr.toLowerCase(); if (seen.has(k)) return; seen.add(k); list.push({ kind, label, addr }); };
@@ -11756,18 +11759,22 @@ async function dhBuildWallets() {
     add('nettax', 'Network tax wallet', st.tax_wallet);
   }
   let hit = null; try { hit = await withTimeout(detectWallet(), 7000, 'The wallet'); } catch (e) {}
-  DH.conn = hit ? { addr: hit.address, name: hit.name } : null;
+  let chain = null;
+  if (hit) { try { const id = parseInt(await withTimeout(hit.provider.request({ method: 'eth_chainId' }), 4000, 'The wallet'), 16); chain = chainName(id) || `network ${id}`; } catch (e) {} }
+  if (seq !== DH.buildSeq) return;
+  DH.conn = hit ? { addr: hit.address, name: hit.name, chain } : null;
   if (hit) {
     const w = list.find(x => x.addr.toLowerCase() === hit.address.toLowerCase());
     if (w) w.connected = true; else list.push({ kind: 'wallet', label: hit.name, addr: hit.address, connected: true, ext: true });
   }
+  if (seq !== DH.buildSeq) return;
   const ck = DH.conn ? DH.conn.addr.toLowerCase() : '';
   if (ck && ck !== DH.connAddr) { const i = list.findIndex(w => w.connected); if (i >= 0) DH.idx = i; }   // first look, or the account changed: show the one the wallet app is on
   DH.connAddr = ck;
   DH.wallets = list;
   if (DH.idx >= list.length) DH.idx = Math.max(0, list.length - 1);
   dhDrawWallets();
-  dhBalances(true);
+  dhBalances(false);
   if (dhEl('dash-bal') && !dhEl('dash-bal').hidden) renderDashBalance();
 }
 // The Wallet tools card follows the wheel. On the wallet the wallet app is connected to, the full card shows
@@ -11775,7 +11782,7 @@ async function dhBuildWallets() {
 async function dhToolsFor() {
   const el = dhEl('dash-bal'), w = DH.wallets[DH.idx];
   if (!el || !w || w.connected) return false;
-  const conn = DH.conn ? `${esc(DH.conn.name)} is on a different account (${esc(dhShort(DH.conn.addr))}).` : 'No wallet is connected in this browser.';
+  const conn = DH.conn ? `${esc(DH.conn.name)} has only shared ${esc(dhShort(DH.conn.addr))} with this site. Switching accounts in ${esc(DH.conn.name)} is not enough: connect this account to the site too.` : 'No wallet is connected in this browser.';
   el.innerHTML = `
     <div class="dash-lbl"><span>${esc(w.label)}</span><span class="dash-chip no-i18n">${esc(dhShort(w.addr))}</span></div>
     <div class="dash-big" id="dash-big-v">…</div>
@@ -11783,7 +11790,7 @@ async function dhToolsFor() {
     <div class="dash-sub" id="dash-sub-c" data-here="${esc(w.label)}">${esc(dhShort(w.addr))} · ${conn}</div>
     <div class="dash-nets" id="dash-nets">Checking all networks…</div>
     <div class="dash-acts">
-      <button class="dash-btn solid" onclick="dhSwitchAccount()">${DH.conn ? 'Switch account in your wallet' : 'Connect a wallet'}</button>
+      <button class="dash-btn solid" onclick="dhSwitchAccount()">${DH.conn ? `Connect this account in ${esc(DH.conn.name)}` : 'Connect a wallet'}</button>
       <button class="dash-btn" onclick="navigator.clipboard?.writeText('${esc(w.addr)}');toast('Wallet address copied.')">Copy address</button>
       <button class="dash-btn" onclick="setTermView('ledger')">Ledger</button>
       <button class="dash-btn" onclick="openWalletsInProfile()">${isExec() ? 'Wallets · treasury' : 'Wallets'}</button>
@@ -11791,7 +11798,9 @@ async function dhToolsFor() {
   fillAllNetworks(w.addr.toLowerCase());
   return true;
 }
-// Opens the wallet app's own account chooser; when an account is picked the wheel follows it.
+// Opens the wallet app's own "connect accounts" chooser. A wallet only shows this site the accounts connected to it,
+// so switching to an unconnected account inside MetaMask changes nothing here until that account is connected.
+// When an account is connected and chosen, the wheel follows it.
 async function dhSwitchAccount() {
   const p = ACTIVE_WALLET?.provider;
   if (!p) { connectWalletHere(); return; }
@@ -11837,13 +11846,13 @@ function dhDrawWallets() {
       <div class="dh-wc-tab"><span>${esc(w.label)}</span><span class="no-i18n">···· ${esc(w.addr.slice(-4))}</span></div>
       <div class="dh-wc-body">
         <span class="dh-wc-lbl">Wallet balance</span>
-        <button type="button" class="dh-refresh" id="dh-refresh" onclick="event.stopPropagation();dhBalances(true)" title="Refresh" aria-label="Refresh">${dhSvg('refresh')}</button>
+        <button type="button" class="dh-refresh" onclick="event.stopPropagation();dhBalances(true)" title="Refresh" aria-label="Refresh">${dhSvg('refresh')}</button>
         <button type="button" class="dh-sel" onclick="event.stopPropagation();dhGo((DH.idx+1)%DH.wallets.length)"><span>${esc(w.label)}</span>${dhSvg('chev')}</button>
         <div class="dh-avail">Available balance</div>
         <div class="dh-amt no-i18n" data-bal="${esc(w.addr.toLowerCase())}">${dhBalHtml(w.addr)}</div>
-        <div class="dh-addr no-i18n">${esc(dhShort(w.addr))} · Hedera USDC</div>
-        ${w.connected ? `<div class="dh-conn"><i></i><span>Connected in</span> <b class="no-i18n">${esc(DH.conn?.name || 'wallet')}</b></div>` : ''}
-        ${w.connected ? '' : `<button type="button" class="dh-wc-act" onclick="event.stopPropagation();dhSwitchAccount()">${DH.conn ? 'Switch account in your wallet' : 'Connect a wallet'}</button>`}
+        <div class="dh-addr"><span class="no-i18n">${esc(dhShort(w.addr))}</span> · <span>all networks</span></div>
+        ${w.connected ? `<div class="dh-conn"><i></i><span>Connected in</span> <b class="no-i18n">${esc(DH.conn?.name || 'wallet')}</b>${DH.conn?.chain ? ` <span class="no-i18n">· ${esc(DH.conn.chain)}</span>` : ''}</div>` : ''}
+        ${w.connected ? '' : `<button type="button" class="dh-wc-act" onclick="event.stopPropagation();dhSwitchAccount()">${DH.conn ? `<span>Connect this account in</span> <span class="no-i18n">${esc(DH.conn.name)}</span>` : 'Connect a wallet'}</button>`}
       </div></div>`).join('');
   dhLayout();
 }
@@ -11896,16 +11905,19 @@ function dhBindWheel(st) {
 }
 async function dhBalances(force) {
   if (!force && Date.now() - DH.balAt < 45000 && DH.wallets.every(w => DH.bal[w.addr.toLowerCase()] !== undefined)) return;
-  const r = dhEl('dh-refresh'); r?.classList.add('spin');
+  const spin = on => document.querySelectorAll('.dh-wc.cur .dh-refresh').forEach(b => b.classList.toggle('spin', on));
+  spin(true);
+  const price = await ethUsd().catch(() => null);
   await Promise.all(DH.wallets.map(async w => {
     const k = w.addr.toLowerCase();
-    const b = await fetchUsdcBalance(w.addr).catch(() => undefined);
-    if (b !== undefined) DH.bal[k] = b;                      // null: Hedera has no account yet, shown as 0.00
-    else if (DH.bal[k] === undefined) DH.bal[k] = null;
+    // the same read as the block under the card: every network, added up
+    const rows = await scanNetworks(k, force).catch(() => null);
+    if (rows && rows.some(x => x.ok)) DH.bal[k] = netTotals(rows, price).totalUsd;
+    else if (DH.bal[k] === undefined) DH.bal[k] = (await fetchUsdcBalance(w.addr).catch(() => null)) ?? 0;
     document.querySelectorAll(`.dh-amt[data-bal="${k}"]`).forEach(el => { el.innerHTML = dhBalHtml(w.addr); });
   }));
   DH.balAt = Date.now();
-  dhEl('dh-refresh')?.classList.remove('spin');
+  spin(false);
 }
 function dhTools() {
   const el = dhEl('dash-bal');
@@ -12701,8 +12713,8 @@ let walletRefreshTimer = null;
 function scheduleWalletRefresh() { clearTimeout(walletRefreshTimer); walletRefreshTimer = setTimeout(refreshWalletViews, 400); }
 function refreshWalletViews() {
   if (!operator) return;
-  if (document.getElementById('dash-bal')) renderDashBalance();
-  if (document.getElementById('dh-wallet') && typeof dhBuildWallets === 'function') dhBuildWallets();
+  if (document.getElementById('dh-wallet') && typeof dhBuildWallets === 'function') dhBuildWallets();   // it redraws the tools card too
+  else if (document.getElementById('dash-bal')) renderDashBalance();
   if (typeof profileOpen === 'function' && profileOpen()) fillProfileWallets(operator);
 }
 const WALLET_ANNOUNCED = new Set();
@@ -12802,7 +12814,7 @@ const SCAN_NETWORKS = [
   { id: 137,   name: 'Polygon',         sym: 'POL', rpc: ['https://polygon-bor-rpc.publicnode.com'] },
   { id: 4663,  name: 'Robinhood Chain', sym: 'ETH', rpc: ['https://rpc.mainnet.chain.robinhood.com/'] },
   { id: 295,   name: 'Hedera',          sym: 'HBAR', rpc: ['https://mainnet.hashio.io/api'] },
-  { id: 296,   name: 'Hedera Testnet',  sym: 'HBAR', rpc: ['https://testnet.hashio.io/api'], test: true },
+  // Hedera Testnet is not read: its public node refuses requests from web pages, so it only ever showed "couldn't read".
 ];
 let SCAN_CACHE = {};
 async function rpcCall(urls, method, params) {
@@ -12843,6 +12855,14 @@ async function ethUsd() {
   try { const j = await (await fetch('https://api.coinbase.com/v2/prices/ETH-USD/spot')).json(); ETH_USD = { at: Date.now(), v: Number(j.data.amount) }; return ETH_USD.v; }
   catch (e) { return ETH_USD?.v ?? null; }
 }
+// What a wallet holds across the networks, and the total on real networks (coin on Ethereum-type networks and USDC).
+// One place for the sum, so the wheel and the block under the card can never disagree.
+function netTotals(rows, price) {
+  const holds = rows.filter(r => (r.usdc || 0) > 0 || (r.native || 0) > 0);
+  const real = holds.filter(r => !r.test);
+  const totalUsd = real.reduce((n, r) => n + (r.usdc || 0) + (r.sym === 'ETH' && price ? (r.native || 0) * price : 0), 0);
+  return { holds, real, totalUsd };
+}
 // The block under the card: every network that holds something, and the total on real networks.
 async function fillAllNetworks(address) {
   const box = document.getElementById('dash-nets'); if (!box) return;
@@ -12852,9 +12872,7 @@ async function fillAllNetworks(address) {
   const price = await ethUsd();
   const money = n => '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const num = n => n.toLocaleString('en-US', { maximumFractionDigits: 4 });
-  const holds = rows.filter(r => (r.usdc || 0) > 0 || (r.native || 0) > 0);
-  const real = holds.filter(r => !r.test);
-  const totalUsd = real.reduce((n, r) => n + (r.usdc || 0) + (r.sym === 'ETH' && price ? (r.native || 0) * price : 0), 0);
+  const { holds, real, totalUsd } = netTotals(rows, price);
   const hasOtherCoin = real.some(r => r.sym !== 'ETH' && (r.native || 0) > 0);
   const failed = rows.filter(r => !r.ok).map(r => r.name);
   const line = r => `<div class="nt-row ${r.test ? 'test' : ''}"><span>${esc(r.name)}${r.test ? ' · test' : ''}</span><b>${[(r.usdc || 0) > 0 ? money(r.usdc) + ' USDC' : '', (r.native || 0) > 0 ? num(r.native) + ' ' + esc(r.sym) : ''].filter(Boolean).join(' · ')}</b></div>`;
@@ -12867,7 +12885,7 @@ async function fillAllNetworks(address) {
   box.innerHTML = `
     <div class="nt-head"><span>All networks</span><b>${real.length ? '≈ ' + money(totalUsd) : '$0.00'}</b></div>
     ${holds.length ? holds.map(line).join('') : '<div class="nt-row"><span>Nothing found on the networks checked</span></div>'}
-    <small class="nt-note">Ethereum, Base, Arbitrum, Optimism, Polygon, Robinhood Chain and Hedera Testnet · coin and USDC only${hasOtherCoin ? ' · other coins not valued' : ''}${failed.length ? ' · couldn’t read: ' + esc(failed.join(', ')) : ''}.</small>`;
+    <small class="nt-note">Ethereum, Base, Arbitrum, Optimism, Polygon, Robinhood Chain and Hedera · coin and USDC only${hasOtherCoin ? ' · other coins not valued' : ''}${failed.length ? ' · couldn’t read: ' + esc(failed.join(', ')) : ''}.</small>`;
 }
 
 let dashBalBusy = false, dashBalAgain = false;

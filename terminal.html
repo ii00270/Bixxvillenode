@@ -13584,7 +13584,8 @@ const PR_TARGET_H = 24;                                                         
 const PR_SERVICES = {
   'readiness-decomposition': 'Readiness Decomposition', 'market-and-supply-readiness': 'Market and Supply Readiness',
   'project-mapping': 'Project Mapping', 'continuity-and-communications': 'Continuity and Communications Plans',
-  'talent-management': 'Talent Management', 'brand-and-voice': 'Brand and Voice', general: 'Not sure yet',
+  'talent-management': 'Talent Management', 'brand-and-voice': 'Brand and Voice',
+  'full-build': 'Full Business Build', 'teaching-and-training': 'Teaching and Training', general: 'Not sure yet',
 };
 const prSvc = k => PR_SERVICES[k] || k || 'Not sure yet';
 const prHours = iso => Math.max(0, (Date.now() - new Date(iso).getTime()) / 36e5);

@@ -11,7 +11,7 @@
 // Database calls (Supabase) are never handled here. The page keeps its own
 // offline copy of data (see "OFFLINE COPY" in terminal.html).
 
-const CACHE_NAME = 'bixxville-v6';   // bump busts every older cache on activate
+const CACHE_NAME = 'bixxville-v7';   // bump busts every older cache on activate
 const LIB_CACHE = 'bixxville-libs-v1';
 const SHELL = ['./', './index.html', './terminal.html', './manifest.json',
   './analog/src/ui.js', './analog/src/canon.js', './analog/src/schema.js', './analog/src/keys.js', './analog/src/store.js', './analog/src/record.js', './analog/src/log.js',
@@ -99,4 +99,22 @@ self.addEventListener('fetch', (event) => {
       .catch(async () => (await caches.match(req)) || (await caches.match(req, { ignoreSearch: true })) ||
         (req.mode === 'navigate' ? await caches.match('./terminal.html') : undefined) || Response.error())
   );
+});
+
+// ── Alerts (migration 0043): a push from the push-alert function becomes a notification; tapping it opens the Agents tab. ──
+self.addEventListener('push', event => {
+  let d = {};
+  try { d = event.data ? event.data.json() : {}; } catch (e) { d = { title: 'Bixxville', body: event.data ? event.data.text() : '' }; }
+  event.waitUntil(self.registration.showNotification(d.title || 'Bixxville', {
+    body: d.body || '', tag: d.tag || 'bixxville', renotify: true,
+    icon: 'icon-192.png', badge: 'icon-192.png', data: { url: d.url || 'terminal.html' },
+  }));
+});
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = new URL((event.notification.data && event.notification.data.url) || 'terminal.html', self.registration.scope).href;
+  event.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+    for (const c of list) { if ('focus' in c) { c.postMessage({ type: 'open-agents' }); return c.focus(); } }
+    return self.clients.openWindow(url);
+  }));
 });

@@ -3755,6 +3755,153 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .rq-in{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:10px;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:14px;padding:10px 12px;outline:none}
 .rq-in:focus{border-color:var(--term-fg);box-shadow:0 0 0 4px rgba(var(--green-rgb),.1)}
 
+/* Agent portal (Decomposition > Agents): KPI cards, a board by stage, and a list with the full story of each prospect (ap-).
+   Colors: the Decomposition tokens (--dc-*) and the accent (--green-rgb). Stage order is one hue getting stronger. */
+.ap{container-type:inline-size;padding:2px 0 40px}
+.ap button{font-family:inherit}
+.ap-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:4px 0 14px}
+.ap-top h3{font-size:22px;font-weight:600;letter-spacing:-.015em;margin:0 0 4px}
+.ap-top p{margin:0;color:var(--dc-dim);font-size:13px;line-height:1.5;max-width:560px}
+.ap-top-r{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ap-btn{appearance:none;border:1px solid var(--dc-line);background:var(--dc-card);color:var(--dc-fg);border-radius:10px;padding:8px 13px;font-size:12.5px;font-weight:500;cursor:pointer;display:inline-flex;gap:7px;align-items:center;white-space:nowrap}
+.ap-btn svg{width:14px;height:14px}
+.ap-btn:hover{background:var(--dc-card2)}
+.ap-btn.dark{background:var(--dc-fg);color:var(--term-bg);border-color:var(--dc-fg);font-weight:600}
+.ap-btn.dark:hover{opacity:.88}
+.ap-btn:disabled{opacity:.4;cursor:not-allowed}
+.ap-on{color:var(--st-done)}
+.ap-note{font-size:12px;color:var(--dc-dim);line-height:1.5;padding:10px 12px;border:1px solid var(--dc-line);border-radius:10px;background:var(--dc-card);margin:0 0 14px}
+.ap-note b{color:var(--dc-fg);font-weight:600}
+.ap-c{background:var(--dc-card);border:1px solid var(--dc-line);border-radius:16px;min-width:0}
+html.theme-light .ap-c{box-shadow:0 1px 2px rgba(0,0,0,.03),0 10px 28px rgba(0,0,0,.035)}
+.ap-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.ap-kpi{padding:14px 14px 12px;text-align:left;cursor:pointer;color:var(--dc-fg)}
+.ap-kpi:hover{border-color:var(--dc-line2)}
+.ap-kpi-h{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:14px}
+.ap-ic{width:34px;height:34px;border-radius:10px;border:1px solid var(--dc-line);background:var(--dc-card2);display:grid;place-items:center}
+.ap-ic svg{width:17px;height:17px}
+.ap-kpi-h span{font-size:11.5px;color:var(--dc-dim);display:inline-flex;gap:3px;align-items:center}
+.ap-kpi-h span svg{width:12px;height:12px}
+.ap-kpi b{display:block;font-size:26px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums;line-height:1.1}
+.ap-kpi small{display:block;color:var(--dc-dim);font-size:12px;margin-top:3px}
+.ap-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;align-items:start}
+.ap-col{background:var(--dc-card2);border:1px solid var(--dc-line);border-radius:16px;padding:10px;min-width:0}
+.ap-col-h{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 2px 10px}
+.ap-pill{display:inline-flex;gap:7px;align-items:center;font-size:12px;font-weight:600;padding:4px 10px;border-radius:99px;background:rgba(var(--green-rgb),var(--a));color:var(--dc-fg)}
+.ap-pill i{font-style:normal;font-weight:500;color:var(--dc-dim);font-variant-numeric:tabular-nums}
+.ap-card{appearance:none;display:block;width:100%;text-align:left;background:var(--dc-card);border:1px solid var(--dc-line);border-radius:12px;padding:11px 12px;margin-bottom:8px;cursor:pointer;color:var(--dc-fg)}
+.ap-card:hover{border-color:var(--dc-line2)}
+html.theme-light .ap-card{box-shadow:0 1px 2px rgba(0,0,0,.04)}
+.ap-card-top{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-bottom:8px;font-size:11px;color:var(--dc-dim)}
+.ap-card b{display:block;font-size:13.5px;font-weight:600;line-height:1.3}
+.ap-card small{display:block;color:var(--dc-dim);font-size:11.5px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ap-card-m{display:flex;justify-content:space-between;gap:8px;align-items:center;margin-top:10px;font-size:11px;color:var(--dc-dim)}
+.ap-tag{display:inline-flex;gap:4px;align-items:center;font-size:10.5px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;border:1px solid var(--dc-line2);border-radius:6px;padding:2px 6px;color:var(--dc-fg);white-space:nowrap}
+.ap-tag svg{width:11px;height:11px}
+.ap-tag.good svg{color:var(--st-done)} .ap-tag.warn svg{color:var(--st-prog)} .ap-tag.crit svg{color:#EF4444}
+.ap-none{color:var(--dc-faint);font-size:12px;padding:10px 4px;text-align:center}
+.ap-back{margin:0 0 12px}
+.ap-split{display:grid;grid-template-columns:290px minmax(0,1fr) 330px;gap:12px;align-items:start}
+.ap-list{padding:12px;display:flex;flex-direction:column;gap:8px;max-height:calc(100vh - 230px);overflow:auto}
+.ap-list h4{margin:2px 2px 2px;font-size:15px;font-weight:600}
+.ap-list h4 small{color:var(--dc-dim);font-weight:400;font-size:12px;margin-left:6px}
+.ap-q{display:flex;align-items:center;gap:7px;border:1px solid var(--dc-line);background:var(--dc-card2);border-radius:10px;padding:0 10px;height:34px;color:var(--dc-dim)}
+.ap-q svg{width:14px;height:14px}
+.ap-q input{border:0;outline:0;background:transparent;color:var(--dc-fg);font:13px Inter,system-ui,sans-serif;width:100%;min-width:0}
+.ap-chips{display:flex;gap:6px}
+.ap-chips button{appearance:none;border:1px solid var(--dc-line);background:transparent;color:var(--dc-dim);border-radius:99px;padding:3px 10px;font-size:11.5px;cursor:pointer}
+.ap-chips button.on{background:var(--dc-card2);color:var(--dc-fg);border-color:var(--dc-line2)}
+.ap-row{appearance:none;text-align:left;width:100%;border:1px solid var(--dc-line);background:var(--dc-card);color:var(--dc-fg);border-radius:14px;padding:12px;cursor:pointer}
+.ap-row:hover{border-color:var(--dc-line2)}
+.ap-row.sel{background:var(--dc-fg);color:var(--term-bg);border-color:var(--dc-fg)}
+.ap-row.sel small,.ap-row.sel .ap-track-l{color:inherit;opacity:.7}
+.ap-row-h{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.ap-row b{font-size:13.5px;font-weight:600;line-height:1.3;display:block}
+.ap-row small{display:block;font-size:11.5px;color:var(--dc-dim);margin-top:2px}
+.ap-row .ap-tag{border-color:currentColor;opacity:.9}
+.ap-trk{display:flex;gap:3px;margin-top:11px}
+.ap-trk i{flex:1;height:5px;border-radius:3px;background:var(--dc-line2)}
+.ap-trk i.f{background:currentColor;opacity:.85}
+.ap-trk i.c{background:rgb(var(--green-rgb));opacity:1}
+.ap-mid{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ap-side{display:flex;flex-direction:column;gap:12px;min-width:0}
+.ap-p{padding:16px}
+.ap-p h4{margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:var(--dc-dim)}
+.ap-hd{display:flex;justify-content:space-between;gap:10px;align-items:flex-start;flex-wrap:wrap}
+.ap-hd h3{margin:0;font-size:24px;font-weight:600;letter-spacing:-.02em;line-height:1.2}
+.ap-hd small{display:block;color:var(--dc-dim);font-size:12.5px;margin-top:4px}
+.ap-msg{white-space:pre-wrap;word-break:break-word;font-size:13.5px;line-height:1.6;margin:0}
+.ap-chipset{display:flex;gap:6px;flex-wrap:wrap;margin-top:12px}
+.ap-chipset span{font-size:11px;color:var(--dc-dim);border:1px solid var(--dc-line);border-radius:99px;padding:3px 9px}
+.ap-route{position:relative;display:grid;grid-template-columns:repeat(5,1fr);margin:8px 0 4px}
+.ap-route::before{content:"";position:absolute;left:10%;right:10%;top:11px;height:2px;background:var(--dc-line2)}
+.ap-route-f{position:absolute;left:10%;top:11px;height:2px;background:rgb(var(--green-rgb))}
+.ap-wp{position:relative;text-align:center;font-size:11px;color:var(--dc-dim);padding-top:30px}
+.ap-wp::before{content:"";position:absolute;left:50%;top:5px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:var(--dc-card);border:2px solid var(--dc-line2);box-sizing:border-box}
+.ap-wp.f::before{background:rgb(var(--green-rgb));border-color:rgb(var(--green-rgb))}
+.ap-wp.c{color:var(--dc-fg);font-weight:600}
+.ap-wp.c::before{box-shadow:0 0 0 4px rgba(var(--green-rgb),.22)}
+.ap-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px;padding-top:14px;border-top:1px solid var(--dc-line)}
+.ap-stats small{display:block;color:var(--dc-dim);font-size:11px}
+.ap-stats b{font-size:14px;font-weight:600}
+.ap-tl{list-style:none;margin:0;padding:0;position:relative}
+.ap-tl li{position:relative;padding:0 0 14px 34px;min-height:26px}
+.ap-tl li::before{content:"";position:absolute;left:11px;top:24px;bottom:0;width:1px;background:var(--dc-line)}
+.ap-tl li:last-child{padding-bottom:0}.ap-tl li:last-child::before{display:none}
+.ap-tl .dot{position:absolute;left:0;top:0;width:24px;height:24px;border-radius:50%;border:1px solid var(--dc-line2);background:var(--dc-card2);display:grid;place-items:center}
+.ap-tl .dot svg{width:12px;height:12px}
+.ap-tl .dot.agent{border-color:rgba(var(--green-rgb),.6)}
+.ap-tl b{font-size:13px;font-weight:600}
+.ap-tl p{margin:2px 0 0;font-size:12.5px;color:var(--dc-dim);line-height:1.5;word-break:break-word}
+.ap-tl time{display:block;font-size:11px;color:var(--dc-faint);margin-top:2px}
+.ap-who{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--dc-dim);border:1px solid var(--dc-line);border-radius:5px;padding:1px 5px;margin-left:6px;font-weight:500}
+.ap-ck{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:9px}
+.ap-ck li{display:flex;gap:9px;align-items:flex-start;font-size:13px;line-height:1.4}
+.ap-ck .b{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--dc-line2);flex-shrink:0;margin-top:1px;display:grid;place-items:center;box-sizing:border-box}
+.ap-ck .b svg{width:11px;height:11px;display:none}
+.ap-ck li.y .b{background:var(--st-done);border-color:var(--st-done);color:#fff}
+.ap-ck li.y .b svg{display:block}
+.ap-ck small{display:block;color:var(--dc-dim);font-size:11.5px}
+.ap-ck label{display:flex;gap:9px;cursor:pointer;align-items:flex-start}
+.ap-ck input[type=checkbox]{width:18px;height:18px;margin:1px 0 0;accent-color:var(--st-done);flex-shrink:0}
+.ap-prog{display:flex;justify-content:space-between;align-items:center;margin:-4px 0 10px;font-size:12px;color:var(--dc-dim)}
+.ap-prog i{flex:1;height:4px;border-radius:2px;background:var(--dc-line2);margin-left:10px;overflow:hidden}
+.ap-prog i b{display:block;height:100%;background:var(--st-done);border-radius:2px}
+.ap-kind{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px}
+.ap-kind button{appearance:none;border:1px solid var(--dc-line);background:transparent;color:var(--dc-dim);border-radius:99px;padding:3px 10px;font-size:11.5px;cursor:pointer}
+.ap-kind button.on{background:var(--dc-card2);color:var(--dc-fg);border-color:var(--dc-line2)}
+.ap-draft{border:1px solid var(--dc-line);border-radius:12px;padding:10px 12px;background:var(--dc-card2)}
+.ap-draft dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:0 0 8px;font-size:12px}
+.ap-draft dt{color:var(--dc-dim)} .ap-draft dd{margin:0;word-break:break-all}
+.ap-draft .sub{font-weight:600;font-size:13px;margin-bottom:6px}
+.ap-draft input,.ap-draft textarea{width:100%;box-sizing:border-box;border:1px solid var(--dc-line2);border-radius:8px;background:var(--dc-card);color:var(--dc-fg);font:13px/1.5 Inter,system-ui,sans-serif;padding:8px 10px}
+.ap-draft textarea{min-height:190px;resize:vertical;margin-top:6px}
+.ap-sendrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ap-sendrow .ap-btn{flex:0 1 auto}
+.ap-sendrow .big{flex:1 1 100%;justify-content:center;padding:11px;border-radius:12px;font-size:13.5px;background:var(--st-done);border-color:var(--st-done);color:#fff;font-weight:600}
+.ap-sendrow .big:disabled{background:var(--dc-card2);border-color:var(--dc-line);color:var(--dc-dim);opacity:1}
+.ap-ask{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:10px 12px;border-radius:12px;background:var(--dc-card2);border:1px solid var(--dc-line2);margin-top:10px;font-size:12.5px}
+.ap-ask span{flex:1 1 180px}
+.ap-kv{display:grid;grid-template-columns:auto 1fr;gap:8px 12px;font-size:12.5px;margin:0}
+.ap-kv dt{color:var(--dc-dim)} .ap-kv dd{margin:0;word-break:break-word;text-align:right}
+.ap-empty{padding:34px 16px;text-align:center;color:var(--dc-dim);line-height:1.6}
+.ap-foot{color:var(--dc-dim);font-size:11.5px;line-height:1.6;margin-top:16px}
+@container (max-width:1060px){
+  .ap-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ap-board{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .ap-split{grid-template-columns:270px minmax(0,1fr)}
+  .ap-side{grid-column:2}
+}
+@container (max-width:700px){
+  .ap-split{grid-template-columns:minmax(0,1fr)}
+  .ap-side{grid-column:auto}
+  .ap-split.has-sel .ap-list{display:none}
+  .ap-split:not(.has-sel) .ap-mid,.ap-split:not(.has-sel) .ap-side{display:none}
+  .ap-list{max-height:none}
+  .ap-board{grid-template-columns:minmax(0,1fr)}
+}
+@media (min-width:701px){ .ap-back-m{display:none} }
+
 /* Notifications */
 .nt-sec{margin-bottom:22px}
 .nt-sec h4{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -13585,7 +13732,8 @@ const PR_SERVICES = {
   'readiness-decomposition': 'Readiness Decomposition', 'market-and-supply-readiness': 'Market and Supply Readiness',
   'project-mapping': 'Project Mapping', 'continuity-and-communications': 'Continuity and Communications Plans',
   'talent-management': 'Talent Management', 'brand-and-voice': 'Brand and Voice',
-  'full-build': 'Full Business Build', 'teaching-and-training': 'Teaching and Training', general: 'Not sure yet',
+  'full-build': 'Full Business Build', 'teaching-and-training': 'Teaching and Training',
+  contract: 'A contract or scope of work', project: 'A project to run', exam: 'Entrance exam', network: 'Joining the network', other: 'Something else', general: 'Not sure yet',
 };
 const prSvc = k => PR_SERVICES[k] || k || 'Not sure yet';
 const prHours = iso => Math.max(0, (Date.now() - new Date(iso).getTime()) / 36e5);
@@ -14947,12 +15095,345 @@ function setTermView(view) {
 }
 
 
+// ── AGENTS — the agent portal (Decomposition › Agents) ───────────────────────────────────────────────────────────────────────
+// Three agents read the Prospects table and propose the next message for each person: a reach-out agent (no reply yet), a
+// follow-up agent (gone quiet) and a sales-cycle agent (the next step, or a check-in on a scope). They are fixed rules and
+// templates, not a language model. They draft; the Executive Operator reads, approves and sends (Automation Boundary:
+// AI proposes, humans decide). A draft never quotes a price, scopes work or promises an outcome. Sending opens the mail app
+// (or Messages) with the message ready; nothing leaves this app by itself. Alerts (migration 0043) push a notice to the
+// devices that turned them on.
+const AP = { view: 'home', sel: null, detail: null, q: '', only: 'all', ok: {}, ed: {}, editing: false, pending: null, skip: {}, kind: {}, err: null, src: {}, ai: {}, aiBusy: null,
+             alerts: { state: 'checking', devices: 0, busy: false } };
+const AP_FROM = 'bixxville@proton.me';
+const AP_VAPID = 'BHrquMRmX8sd_V2xaK-9RUUN3TiSEmD-xtdKVhqHngEloIOjMUsjP8ADDmuUKl1zIwtvVMUoNW0ToXqvJvuqZeU';
+const AP_KINDS = {
+  reach:  { name: 'Reach-out agent',   short: 'Reach out',  ico: '<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>' },
+  follow: { name: 'Follow-up agent',   short: 'Follow up',  ico: '<path d="M4 12a8 8 0 0 1 14-5.3L20 9"/><path d="M20 4v5h-5"/><path d="M20 12a8 8 0 0 1-14 5.3L4 15"/><path d="M4 20v-5h5"/>' },
+  cycle:  { name: 'Sales-cycle agent', short: 'Next step',  ico: '<path d="M4 18h3l3-9 4 8 3-5h3"/>' },
+};
+const AP_STAGES = ['new', 'contacted', 'conversation', 'scoped', 'engaged'];
+const NF_ICO = { agents: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="8" width="14" height="11" rx="3"/><path d="M12 8V5M9.5 13h.01M14.5 13h.01M9 16.5h6"/><circle cx="12" cy="4" r="1"/></svg>' };
+try { AP.skip = JSON.parse(localStorage.getItem('bx-ap-skip') || '{}'); } catch (e) { AP.skip = {}; }
+const apSvg = d => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
+const apOnPanel = () => document.getElementById('terminal-shell')?.dataset.view === 'tracker' && DC.tab === 'agents';
+const apFirst = n => (String(n || '').trim().split(/\s+/)[0]) || 'there';
+const apDays = h => Math.max(1, Math.round(h / 24));
+const apCheck = '<path d="m5 12.5 4.2 4.2L19 7"/>';
+
+// What each agent would say. Plain templates: no prices, no scope, no promises.
+function apDraft(kind, p, h) {
+  const first = apFirst(p.name), general = !p.interest || p.interest === 'general';
+  const svc = general ? 'your request' : prSvc(p.interest);
+  const on = general ? 'your request' : 'your request for ' + prSvc(p.interest);
+  const sign = '\n\nThank you,\nBixxville\nLand of Geb, LLC\n' + AP_FROM;
+  const d = apDays(h);
+  if (kind === 'reach') return {
+    subject: general ? 'Your request to Land of Geb' : 'Your request to Land of Geb: ' + prSvc(p.interest),
+    body: `Hi ${first},\n\nThank you for reaching out about ${svc}${p.organization ? ' for ' + p.organization : ''}. We have it.\n\nTo point you the right way, it helps to know three things: what you are trying to get done, by when, and who else is involved. Reply with whatever you have, even rough notes.\n\nWe will come back with the first steps and the order that matters, before anyone talks about a number.${sign}`,
+    sms: `Hi ${first}, this is Bixxville (Land of Geb). Thanks for ${on}. What is the best time to talk? Reply STOP to opt out.` };
+  if (kind === 'cycle' && p.stage === 'scoped') return {
+    subject: 'Checking in: ' + (general ? 'your project' : prSvc(p.interest)),
+    body: `Hi ${first},\n\nChecking in on the scope for ${svc}. Do you have questions, or changes you want made before you decide? We would rather adjust it now than after work starts.${sign}`,
+    sms: `Hi ${first}, Bixxville here. Any questions on the scope for ${svc}? Happy to adjust it. Reply STOP to opt out.` };
+  if (kind === 'cycle') return {
+    subject: 'A few numbers to size ' + (general ? 'your project' : prSvc(p.interest)),
+    body: `Hi ${first},\n\nTo size ${svc} properly we need a few numbers: the main tasks involved, roughly how many people and hours each one takes, and the date it has to be done by. Rough is fine. We use them to check what we can deliver before we commit to anything.${sign}`,
+    sms: `Hi ${first}, Bixxville here. To size ${svc} we need the main tasks, rough hours, and your deadline. Rough is fine. Reply STOP to opt out.` };
+  return {   // follow
+    subject: 'Following up: ' + (general ? 'your request' : prSvc(p.interest)),
+    body: p.stage === 'contacted'
+      ? `Hi ${first},\n\nWe wrote ${d} day${d === 1 ? '' : 's'} ago about ${svc} and have not heard back, so this is one follow-up. If the timing has changed or you no longer need it, tell us and we will close it out. If it is still on, reply with what you are trying to get done and by when.${sign}`
+      : `Hi ${first},\n\nPicking our conversation back up. Where does ${svc} stand on your side? If something is blocking it, tell us and we will work around it.${sign}`,
+    sms: `Hi ${first}, Bixxville following up on ${on}. Still interested? Reply STOP to opt out.` };
+}
+
+const apLast = p => p.last_contact_at || p.stage_changed_at || p.created_at;
+// Which agent has something to say about a person right now (or null).
+function apProposal(p) {
+  if (p.stage === 'closed' || p.stage === 'engaged') return null;
+  const last = apLast(p), hl = prHours(last);
+  let kind = null, title = '', state = ['dim', ''], h = hl;
+  if (p.stage === 'new') { kind = 'reach'; h = prHours(p.created_at); state = prState(h); title = `${p.name} asked ${prAgo(p.created_at)} and has had no reply.`; }
+  else if (p.stage === 'contacted' && hl > 72) { kind = 'follow'; state = ['warn', 'Quiet ' + apDays(hl) + ' days']; title = `No answer from ${p.name} for ${apDays(hl)} days since we wrote.`; }
+  else if (p.stage === 'conversation' && hl > 120) { kind = 'follow'; state = ['warn', 'Quiet ' + apDays(hl) + ' days']; title = `The conversation with ${p.name} went quiet ${apDays(hl)} days ago.`; }
+  else if (p.stage === 'conversation' && hl > 48) { kind = 'cycle'; state = ['dim', 'Next step']; title = `Next step with ${p.name}: ask for the numbers to size the job.`; }
+  else if (p.stage === 'scoped' && hl > 96) { kind = 'cycle'; state = ['warn', 'Waiting ' + apDays(hl) + ' days']; title = `${p.name} has had the scope for ${apDays(hl)} days. Check in.`; }
+  if (!kind) return null;
+  const key = `${p.id}-${kind}-${String(last).replace(/\D/g, '').slice(0, 14)}`;
+  if (AP.skip[key]) return null;
+  return { key, kind, p, h, state, title, last };
+}
+const apProposals = d => (d.prospects || []).map(apProposal).filter(Boolean).sort((a, b) => b.h - a.h);
+const apOpenList = d => (d.prospects || []).filter(p => p.stage !== 'closed' && p.stage !== 'engaged');
+const apDefaultKind = p => ({ new: 'reach', contacted: 'follow', conversation: 'cycle', scoped: 'cycle' })[p.stage] || 'follow';
+const apKindOf = (p, prop) => AP.kind[p.id] || prop?.kind || apDefaultKind(p);
+// The message for a person: the agent's draft, with any edits the Executive Operator made.
+function apMessage(p) {
+  const prop = apProposal(p), kind = apKindOf(p, prop), written = apDraft(kind, p, prHours(apLast(p)));
+  const ai = AP.src[p.id] === 'claude' ? AP.ai[p.id + '-' + kind] : null;
+  const base = ai || written, key = p.id + '-' + kind + (AP.src[p.id] === 'claude' ? '-ai' : ''), ed = AP.ed[key] || {};
+  return { prop, kind, key, claude: AP.src[p.id] === 'claude', ai, subject: ed.subject ?? base.subject, body: ed.body ?? base.body, sms: base.sms || written.sms,
+           edited: !!(ed.subject || ed.body), flags: ai?.flags || [] };
+}
+// Ask Claude (the agent-draft function, on the project's existing Anthropic key) to write the message for this person.
+async function apClaude() {
+  const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p || AP.aiBusy) return;
+  const kind = apKindOf(p, apProposal(p)), id = p.id + '-' + kind;
+  AP.src[p.id] = 'claude'; AP.aiBusy = id; AP.editing = false; AP.pending = null; apDraw();
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/agent-draft`, { method: 'POST',
+      headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'x-bixx-session': opSessionToken || '' },
+      body: JSON.stringify({ id: p.id, kind }) });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok || data.error || !data.body) throw new Error(data.error || 'No draft came back.');
+    AP.ai[id] = { subject: data.subject, body: data.body, sms: data.sms, flags: data.flags || [], at: new Date().toISOString() };
+    delete AP.ok[id + '-ai']; delete AP.ed[id + '-ai'];   // new words, so any earlier approval or edit no longer applies
+  } catch (e) { toast(e.message || String(e)); if (!AP.ai[id]) AP.src[p.id] = 'written'; }
+  AP.aiBusy = null; apDraw();
+}
+function apSource(src) { if (!AP.sel) return; if (src === 'claude') return apClaude(); AP.src[AP.sel] = 'written'; AP.editing = false; AP.pending = null; apDraw(); }
+
+async function renderAgentsPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('agents') + '<div class="dc dc-body"><div class="dc-loading">Reading your requests…</div></div>';
+  dcLoadMaps();
+  let err = null;
+  try { await prLoad(); } catch (e) { err = e.message || String(e); }
+  if (!apOnPanel()) return;
+  AP.err = err;
+  if (AP.sel && !(PR.data?.prospects || []).some(p => p.id === AP.sel)) { AP.sel = null; AP.detail = null; }
+  apDraw();
+  apAlertsRefresh();
+}
+
+// ── alerts on this device ──
+const apCanPush = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+async function apAlertsRefresh() {
+  const A = AP.alerts;
+  if (!apCanPush()) { A.state = /iPhone|iPad/.test(navigator.userAgent) ? 'ios' : 'unsupported'; if (apOnPanel()) apAlertsPaint(); return; }
+  if (Notification.permission === 'denied') { A.state = 'denied'; if (apOnPanel()) apAlertsPaint(); return; }
+  try {
+    const reg = await navigator.serviceWorker.ready, sub = await reg.pushManager.getSubscription();
+    const { data, error } = await sb.rpc('push_status', { p_endpoint: sub ? sub.endpoint : null });
+    if (error) throw error;
+    A.devices = data.devices; A.state = sub && data.this_device ? 'on' : 'off';
+  } catch (e) { A.state = 'off'; }
+  if (apOnPanel()) apAlertsPaint();
+}
+const apAlertsHtml = () => {
+  const A = AP.alerts, bell = apSvg('<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/>');
+  if (A.state === 'on') return `<button class="ap-btn" onclick="apAlertsToggle()" title="Alerts reach ${A.devices} device${A.devices === 1 ? '' : 's'}. Click to turn off on this one.">${bell}<span class="ap-on">Alerts on</span></button>`;
+  if (A.state === 'ios') return `<button class="ap-btn" onclick="toast('On iPhone, open the Share menu, choose Add to Home Screen, then open Bixxville from the new icon and turn alerts on there.')">${bell}Alerts: install first</button>`;
+  if (A.state === 'unsupported') return `<button class="ap-btn" disabled title="This browser cannot receive alerts.">${bell}Alerts unavailable</button>`;
+  if (A.state === 'denied') return `<button class="ap-btn" onclick="toast('Alerts are blocked for this site. Allow notifications in your browser settings, then try again.')">${bell}Alerts blocked</button>`;
+  return `<button class="ap-btn" onclick="apAlertsToggle()" ${A.state === 'checking' || A.busy ? 'disabled' : ''}>${bell}Turn on alerts</button>`;
+};
+const apAlertsPaint = () => { const el = document.getElementById('ap-alerts'); if (el) el.innerHTML = apAlertsHtml(); };
+const apB64 = s => { const p = '='.repeat((4 - s.length % 4) % 4), b = (s + p).replace(/-/g, '+').replace(/_/g, '/'), r = atob(b); return Uint8Array.from([...r].map(c => c.charCodeAt(0))); };
+async function apAlertsToggle() {
+  const A = AP.alerts; if (A.busy) return; A.busy = true; apAlertsPaint();
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let sub = await reg.pushManager.getSubscription();
+    if (A.state === 'on' && sub) {
+      await sb.rpc('push_unsubscribe', { p_endpoint: sub.endpoint }); await sub.unsubscribe(); toast('Alerts are off on this device.');
+    } else {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { toast('Alerts need permission to show notifications.'); A.busy = false; apAlertsRefresh(); return; }
+      sub = sub || await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: apB64(AP_VAPID) });
+      const j = sub.toJSON();
+      const { error } = await sb.rpc('push_subscribe', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_label: (/iPhone|iPad/.test(navigator.userAgent) ? 'iPhone' : /Mac/.test(navigator.userAgent) ? 'Mac' : /Android/.test(navigator.userAgent) ? 'Android' : 'Computer') });
+      if (error) throw error;
+      toast('Alerts are on. You will get a notice when a request arrives.');
+    }
+  } catch (e) { toast(e.message || String(e)); }
+  A.busy = false; apAlertsRefresh();
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data?.type === 'open-agents' && typeof isExec === 'function' && isExec()) { DC.tab = 'agents'; AP.view = 'home'; setTermView('tracker'); } });
+
+// ── drawing ──
+function apDraw() {
+  const panel = document.getElementById('term-panel');
+  if (!panel || !apOnPanel()) return;
+  const keep = panel.scrollTop, d = PR.data;
+  const head = dcHeadHtml('agents');
+  if (AP.err || !d) { panel.innerHTML = head + `<div class="dc dc-body"><div class="ap"><div class="ap-c ap-empty">Could not read your requests: ${esc(AP.err || 'no data')}</div></div></div>`; return; }
+  panel.innerHTML = head + `<div class="dc dc-body"><div class="ap">${AP.view === 'list' ? apListView(d) : apHome(d)}</div></div>`;
+  panel.scrollTop = keep;
+}
+
+function apHome(d) {
+  const open = apOpenList(d), props = apProposals(d), by = new Map(props.map(i => [i.p.id, i]));
+  const today = new Date().toDateString(), sent = (d.prospects || []).filter(p => p.last_contact_at && new Date(p.last_contact_at).toDateString() === today).length;
+  const w = d.waiting;
+  const kpi = (icon, label, big, sub) => `<button class="ap-c ap-kpi" onclick="apGo('list')"><div class="ap-kpi-h"><div class="ap-ic">${apSvg(icon)}</div><span>View details ${apSvg('<path d="m9 6 6 6-6 6"/>')}</span></div><b>${big}</b><small>${esc(label)}${sub ? ' · ' + esc(sub) : ''}</small></button>`;
+  const col = (st, i) => {
+    const people = open.filter(p => p.stage === st).sort((a, b) => prHours(apLast(b)) - prHours(apLast(a)));
+    return `<div class="ap-col"><div class="ap-col-h"><span class="ap-pill" style="--a:${[.08, .14, .21, .3][i]}">${esc(PR_NAME[st])} <i>${people.length}</i></span></div>
+      ${people.map(p => apCard(p, by.get(p.id))).join('') || '<div class="ap-none">No one here</div>'}</div>`;
+  };
+  return `<div class="ap-top"><div><h3>Agent portal</h3><p>Three agents read your requests and draft the next message for each person. Open a prospect to see what they did and what is needed before you send.</p></div>
+      <div class="ap-top-r"><span id="ap-alerts">${apAlertsHtml()}</span><button class="ap-btn dark" onclick="apGo('list')">View potential prospects ${apSvg('<path d="m9 6 6 6-6 6"/>')}</button></div></div>
+    <div class="ap-note"><b>Agents draft. You decide and send.</b> They never quote a price, scope work, sign anything or promise an outcome. Sending opens your mail app with the message ready, from ${esc(AP_FROM)}.</div>
+    <div class="ap-kpis">
+      ${kpi('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.4-3.2 2.7-5 5.5-5s5.1 1.800 5.500 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.200c2.600-.4 4.500 1.200 4.800 4.300"/>', 'Potential prospects', open.length, '')}
+      ${kpi('<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>', 'Need a message', props.length, props.length ? 'agents have drafts' : 'all clear')}
+      ${kpi('<circle cx="12" cy="12" r="8.500"/><path d="M12 7.500V12l3 2"/>', 'Longest wait', w ? prFmt(w.hours) : '0', w ? w.name : 'everyone answered')}
+      ${kpi('<circle cx="12" cy="12" r="8.500"/><path d="m8.500 12.200 2.400 2.400 4.600-5"/>', 'Contacted today', sent, '')}
+    </div>
+    <div class="ap-board">${['new', 'contacted', 'conversation', 'scoped'].map(col).join('')}</div>
+    <div class="ap-foot">Closed requests and clients are not shown. Alerts send a notice to the devices where you turned them on; the notice names the person and the service, never the message.</div>`;
+}
+
+function apCard(p, prop) {
+  const [st, lab] = p.stage === 'new' ? prState(prHours(p.created_at)) : ['dim', ''];
+  const tag = prop ? `<span class="ap-tag ${prop.state[0]}">${prop.state[0] === 'dim' ? '' : apSvg(vzIcon[prop.state[0]])}${esc(prop.state[1] || AP_KINDS[prop.kind].short)}</span>` : (lab ? `<span class="ap-tag ${st}">${apSvg(vzIcon[st])}${esc(lab)}</span>` : '');
+  return `<button class="ap-card" onclick="apOpen('${p.id}')"><div class="ap-card-top"><span>${esc(prSvc(p.interest))}</span>${tag}</div>
+    <b>${esc(p.name)}</b><small>${esc(p.organization || p.email)}</small>
+    <div class="ap-card-m"><span>${p.stage === 'new' ? 'Asked ' : 'Last contact '}${esc(prAgo(p.stage === 'new' ? p.created_at : apLast(p)))}</span>${prop ? `<span class="ap-tag">${apSvg(AP_KINDS[prop.kind].ico)}Draft ready</span>` : ''}</div></button>`;
+}
+
+function apGo(view) { AP.view = view; if (view === 'list' && !AP.sel && window.innerWidth > 700) { const f = apListed()[0]; if (f) { apOpen(f.id); return; } } apDraw(); }
+const apListed = () => {
+  const d = PR.data; if (!d) return [];
+  const need = new Set(apProposals(d).map(i => i.p.id)), q = AP.q.trim().toLowerCase();
+  return apOpenList(d).filter(p => (AP.only === 'all' || need.has(p.id)) && (!q || `${p.name} ${p.organization || ''} ${prSvc(p.interest)} ${p.email}`.toLowerCase().includes(q)))
+    .sort((a, b) => (need.has(b.id) - need.has(a.id)) || prHours(apLast(b)) - prHours(apLast(a)));
+};
+
+async function apOpen(id) {
+  AP.view = 'list'; AP.sel = id; AP.detail = null; AP.editing = false; AP.pending = null;
+  apDraw();
+  try { const { data, error } = await sb.rpc('prospect_get', { p_id: id }); if (error) throw error; if (AP.sel === id) { AP.detail = data; apDraw(); } }
+  catch (e) { toast(e.message || String(e)); }
+}
+function apListView(d) {
+  const rows = apListed(), props = new Map(apProposals(d).map(i => [i.p.id, i]));
+  const sel = (d.prospects || []).find(p => p.id === AP.sel);
+  const row = p => {
+    const i = AP_STAGES.indexOf(p.stage), prop = props.get(p.id), on = p.id === AP.sel;
+    return `<button class="ap-row ${on ? 'sel' : ''}" onclick="apOpen('${p.id}')"><div class="ap-row-h"><div><b>${esc(p.name)}</b><small>${esc(prSvc(p.interest))}${p.organization ? ' · ' + esc(p.organization) : ''}</small></div>
+      ${prop ? `<span class="ap-tag">${apSvg(AP_KINDS[prop.kind].ico)}${esc(AP_KINDS[prop.kind].short)}</span>` : `<span class="ap-tag">${esc(PR_NAME[p.stage])}</span>`}</div>
+      <div class="ap-trk" aria-label="Stage: ${esc(PR_NAME[p.stage])}">${AP_STAGES.map((s, k) => `<i class="${k < i ? 'f' : k === i ? 'c' : ''}"></i>`).join('')}</div></button>`;
+  };
+  const list = `<div class="ap-c ap-list"><h4>Potential prospects<small>${rows.length}</small></h4>
+    <label class="ap-q">${apSvg('<circle cx="11" cy="11" r="6.500"/><path d="m20 20-4.200-4.200"/>')}<input placeholder="Search name, service…" value="${esc(AP.q)}" oninput="AP.q=this.value;apDrawKeepFocus()"></label>
+    <div class="ap-chips"><button class="${AP.only === 'all' ? 'on' : ''}" onclick="AP.only='all';apDraw()">Everyone</button><button class="${AP.only === 'need' ? 'on' : ''}" onclick="AP.only='need';apDraw()">Needs a message</button></div>
+    ${rows.map(row).join('') || '<div class="ap-none">No one matches.</div>'}</div>`;
+  return `<div class="ap-top"><div><button class="ap-btn ap-back" onclick="AP.view='home';apDraw()">${apSvg('<path d="m15 6-6 6 6 6"/>')}Agent portal</button></div>
+      <div class="ap-top-r"><span id="ap-alerts">${apAlertsHtml()}</span></div></div>
+    <div class="ap-split ${sel ? 'has-sel' : ''}">${list}${sel ? apDetail(sel) : `<div class="ap-c ap-empty" style="grid-column:2/-1">Choose a prospect to see what the agents did and what is needed to send.</div>`}</div>`;
+}
+function apDrawKeepFocus() {
+  const had = document.activeElement?.tagName === 'INPUT', pos = document.activeElement?.selectionStart;
+  apDraw();
+  if (had) { const el = document.querySelector('.ap-q input'); if (el) { el.focus(); try { el.setSelectionRange(pos, pos); } catch (e) { /* not needed */ } } }
+}
+
+function apDetail(p) {
+  const m = apMessage(p), prop = m.prop, K = AP_KINDS[m.kind];
+  const notes = AP.detail?.prospect?.id === p.id ? (AP.detail.notes || []) : null;
+  const i = AP_STAGES.indexOf(p.stage), pct = i <= 0 ? 0 : i / (AP_STAGES.length - 1) * 80;
+  const route = `<div class="ap-route"><div class="ap-route-f" style="width:${pct}%"></div>${AP_STAGES.map((s, k) => `<div class="ap-wp ${k < i ? 'f' : ''} ${k === i ? 'f c' : ''}">${esc(PR_NAME[s])}</div>`).join('')}</div>`;
+  const hrs = p.stage === 'new' ? prHours(p.created_at) : prHours(apLast(p));
+  const stats = `<div class="ap-stats"><div><small>${p.stage === 'new' ? 'Waiting for a first reply' : 'Since last contact'}</small><b>${esc(prFmt(hrs))}</b></div><div><small>Asked</small><b>${esc(prWhen(p.created_at))}</b></div><div><small>Estimate</small><b>${p.estimate_logs != null ? esc(p.estimate_logs) + ' LOGs' : 'Not set'}</b></div></div>`;
+  // what the agents and the Executive Operator have done, newest first
+  const ev = [];
+  if (prop) ev.push({ t: apLast(p), who: 'agent', ico: K.ico, h: `${AP_KINDS[prop.kind].name} flagged this`, b: prop.title });
+  ev.push({ t: new Date().toISOString(), who: m.claude ? 'claude' : 'agent', ico: '<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>', h: m.claude ? 'Wrote an email draft with Claude' : 'Wrote an email draft', b: m.subject, now: true });
+  if (p.phone) ev.push({ t: new Date().toISOString(), who: m.claude ? 'claude' : 'agent', ico: '<path d="M5 5h14v10H10l-5 4z"/>', h: m.claude ? 'Wrote a text draft with Claude' : 'Wrote a text draft', b: 'A short message for ' + p.phone, now: true });
+  for (const n of notes || []) ev.push({ t: n.created_at, who: n.kind === 'form' ? 'them' : 'you', ico: n.kind === 'form' ? '<path d="M4 4h16v12H8l-4 4z"/>' : n.kind === 'contact' ? '<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>' : n.kind === 'stage' ? '<path d="M5 12h14M13 6l6 6-6 6"/>' : '<path d="M4 20h4L19 9l-4-4L4 16z"/>',
+    h: n.kind === 'form' ? 'They wrote' : n.kind === 'contact' ? 'You contacted them' : n.kind === 'stage' ? 'Stage changed' : 'Your note', b: n.body });
+  ev.sort((a, b) => (b.now ? 1 : 0) - (a.now ? 1 : 0) || new Date(b.t) - new Date(a.t));
+  const WHO = { agent: 'Agent', claude: 'Claude', you: 'You', them: 'Them' };
+  const tl = `<ul class="ap-tl">${ev.map(e => `<li><span class="dot ${e.who === 'claude' ? 'agent' : e.who}">${apSvg(e.ico)}</span><b>${esc(e.h)}</b><span class="ap-who">${WHO[e.who]}</span><p>${esc(e.b.length > 220 ? e.b.slice(0, 220) + '…' : e.b)}</p>${e.now ? '' : `<time>${esc(prWhen(e.t))}</time>`}</li>`).join('')}</ul>${notes ? '' : '<div class="ap-none">Reading the history…</div>'}`;
+  // what is needed before it can be sent
+  const approved = !!AP.ok[m.key], sentOk = AP.detail?.prospect && p.last_contact_at && prHours(p.last_contact_at) < 0.2 && AP.sentKey === m.key;
+  const req = [
+    { y: !!p.email, t: 'Email address on file', s: p.email },
+    { y: !!p.consent_at, t: 'They agreed to be contacted', s: p.consent_at ? 'Ticked the box on ' + prWhen(p.consent_at) : 'No consent on record' },
+    ...(p.phone ? [{ y: true, t: 'Phone number on file', s: p.phone + ' (for a text)' }] : []),
+    { y: !m.claude || !!m.ai, t: m.claude ? 'Claude wrote the draft' : `${K.name} wrote the draft`, s: m.claude ? (m.ai ? (m.flags.length ? 'Look twice: ' + m.flags.join('; ') : 'AI can get things wrong. Read it closely.') : 'Not written yet') : (m.edited ? 'You have edited it' : 'Plain template, no prices or promises') },
+  ];
+  const busy = AP.aiBusy === p.id + '-' + m.kind;
+  const ready = req.every(r => r.y) && approved && !(m.claude && (busy || !m.ai)), done = req.filter(r => r.y).length + (approved ? 1 : 0), total = req.length + 1;
+  const ck = `<ul class="ap-ck">${req.map(r => `<li class="${r.y ? 'y' : ''}"><span class="b">${apSvg(apCheck)}</span><div>${esc(r.t)}<small>${esc(r.s)}</small></div></li>`).join('')}
+    <li class="${approved ? 'y' : ''}"><label><input type="checkbox" ${approved ? 'checked' : ''} onchange="apApprove(this.checked)"><div>I have read it and approve sending it<small>Nothing is sent until you press the button</small></div></label></li></ul>`;
+  const srcSwitch = `<div class="ap-kind"><button class="${m.claude ? '' : 'on'}" onclick="apSource('written')">${apSvg('<path d="M4 20h4L19 9l-4-4L4 16z"/>')}Written</button><button class="${m.claude ? 'on' : ''}" onclick="apSource('claude')">${apSvg('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.500 2.500M15.500 15.500 18 18M18 6l-2.500 2.500M8.500 15.500 6 18"/>')}Claude</button></div>`;
+  const kinds = `<div class="ap-kind">${Object.entries(AP_KINDS).map(([k, v]) => `<button class="${k === m.kind ? 'on' : ''}" onclick="apKind('${k}')">${esc(v.short)}</button>`).join('')}</div>`;
+  const draft = busy ? `<div class="ap-draft"><div class="ap-none">Claude is writing…</div></div>` : AP.editing
+    ? `<div class="ap-draft"><input value="${esc(m.subject)}" oninput="apEdit('subject',this.value)" aria-label="Subject"><textarea oninput="apEdit('body',this.value)" aria-label="Message">${esc(m.body)}</textarea></div>`
+    : `<div class="ap-draft"><dl><dt>From</dt><dd>${esc(AP_FROM)}</dd><dt>To</dt><dd>${esc(p.email)}</dd></dl><div class="sub">${esc(m.subject)}</div><div class="ap-msg">${esc(m.body)}</div></div>`;
+  const ask = AP.pending && AP.pending.key === m.key
+    ? `<div class="ap-ask"><span>${AP.pending.via === 'sms' ? 'Messages' : 'Your mail app'} should have opened with the message. Did you send it?</span><button class="ap-btn dark" onclick="apLog()">Yes, log it</button><button class="ap-btn" onclick="AP.pending=null;apDraw()">Not yet</button></div>` : '';
+  return `<div class="ap-mid">
+      <div class="ap-c ap-p"><div class="ap-hd"><div><h3>${esc(p.name)}</h3><small>${esc(prSvc(p.interest))}${p.organization ? ' · ' + esc(p.organization) : ''}</small></div><span class="ap-pill" style="--a:.21">${esc(PR_NAME[p.stage])}</span></div>
+        <button class="ap-btn ap-back-m" style="margin-top:10px" onclick="AP.sel=null;apDraw()">${apSvg('<path d="m15 6-6 6 6 6"/>')}All prospects</button></div>
+      ${p.message ? `<div class="ap-c ap-p"><h4>Their request</h4><p class="ap-msg">${esc(p.message)}</p><div class="ap-chipset">${p.source ? `<span>via ${esc(p.source)}</span>` : ''}<span>${esc(prWhen(p.created_at))}</span></div></div>` : ''}
+      <div class="ap-c ap-p"><h4>Where they are</h4>${route}${stats}</div>
+      <div class="ap-c ap-p"><h4>What the agents have done</h4>${tl}</div>
+    </div>
+    <div class="ap-side">
+      <div class="ap-c ap-p"><h4>Needed to send</h4><div class="ap-prog"><span>${done} of ${total}</span><i><b style="width:${done / total * 100}%"></b></i></div>${ck}</div>
+      <div class="ap-c ap-p"><h4>Message</h4>${srcSwitch}${kinds}${m.claude && m.flags.length ? `<div class="ap-note" style="margin:0 0 10px"><b>Look twice.</b> This draft ${esc(m.flags.join('; '))}.</div>` : ''}${draft}
+        <div class="ap-sendrow"><button class="ap-btn big" ${ready ? '' : 'disabled'} onclick="apSend('email')">${apSvg('<path d="M4 6h16v12H4z"/><path d="m4 7 8 6 8-6"/>')}${ready ? 'Send email' : 'Approve to send'}</button>
+          ${p.phone ? `<button class="ap-btn" ${ready ? '' : 'disabled'} onclick="apSend('sms')">Text</button>` : ''}
+          ${m.claude ? `<button class="ap-btn" ${busy ? 'disabled' : ''} onclick="apClaude()">Write again</button>` : ''}<button class="ap-btn" onclick="apCopy()">Copy</button><button class="ap-btn" onclick="AP.editing=!AP.editing;apDraw()">${AP.editing ? 'Done editing' : 'Edit'}</button>
+          ${prop ? `<button class="ap-btn" onclick="apSkip('${prop.key}')">Dismiss</button>` : ''}</div>${ask}</div>
+      <div class="ap-c ap-p"><h4>Contact</h4><dl class="ap-kv"><dt>Email</dt><dd>${esc(p.email)}</dd><dt>Phone</dt><dd>${esc(p.phone || '—')}</dd><dt>Organization</dt><dd>${esc(p.organization || '—')}</dd><dt>Source</dt><dd>${esc(p.source || '—')}</dd></dl>
+        <div class="ap-sendrow"><button class="ap-btn" onclick="prOpen('${p.id}')">Open full request</button></div></div>
+    </div>`;
+}
+
+// ── actions ──
+function apKind(k) { if (!AP.sel) return; AP.kind[AP.sel] = k; AP.pending = null; AP.editing = false; apDraw(); }
+function apApprove(on) { const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p) return; const m = apMessage(p); if (on) AP.ok[m.key] = true; else delete AP.ok[m.key]; apDraw(); }
+function apEdit(field, v) {
+  const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p) return;
+  const m = apMessage(p); (AP.ed[m.key] = AP.ed[m.key] || {})[field] = v; delete AP.ok[m.key];   // changing the words cancels the approval
+}
+function apCopy() { const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p) return; const m = apMessage(p); copyText(m.subject + '\n\n' + m.body, 'Message'); }
+function apSkip(key) {
+  AP.skip[key] = Date.now();
+  try { localStorage.setItem('bx-ap-skip', JSON.stringify(AP.skip)); } catch (e) { /* the dismissal then lasts until the page reloads */ }
+  apDraw();
+}
+function apSend(via) {
+  const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p) return;
+  const m = apMessage(p);
+  if (!AP.ok[m.key]) { toast('Tick that you have read and approve it first.'); return; }
+  AP.pending = { key: m.key, via };
+  if (via === 'sms') {
+    const sep = /Mac|iPhone|iPad/.test(navigator.userAgent) ? '&' : '?';
+    location.href = 'sms:' + String(p.phone).replace(/[^\d+]/g, '') + sep + 'body=' + encodeURIComponent(m.sms);
+  } else {
+    location.href = 'mailto:' + encodeURIComponent(p.email).replace(/%40/g, '@') + '?subject=' + encodeURIComponent(m.subject) + '&body=' + encodeURIComponent(m.body);
+  }
+  apDraw();
+}
+async function apLog() {
+  const p = (PR.data?.prospects || []).find(x => x.id === AP.sel); if (!p || !AP.pending) return;
+  const m = apMessage(p), via = AP.pending.via;
+  const body = via === 'sms' ? 'Texted: ' + m.sms : 'Emailed from ' + AP_FROM + (m.claude ? ' (drafted with Claude): ' : ': ') + m.subject;
+  try {
+    const { error } = await sb.rpc('prospect_add_note', { p_id: p.id, p_body: body, p_kind: 'contact' });
+    if (error) throw error;
+    AP.pending = null; delete AP.ok[m.key]; delete AP.ed[m.key]; AP.kind[p.id] = null;
+    toast('Logged on ' + p.name + '.');
+    await prLoad();
+    const r = await sb.rpc('prospect_get', { p_id: p.id }); if (!r.error) AP.detail = r.data;
+    apDraw();
+  } catch (e) { toast(e.message || String(e)); }
+}
+
 // ── DECOMPOSITION — one screen per job: its numbers, its map, its plan and its proof queue ──
 // Overview is drawn here. Steps, Maps and Places are the existing screens, shown under the same
 // header and tabs (see the wrappers below), so everything they do still works from one place.
 var DC = { tab: 'overview', mapId: null, maps: null, filter: 'All' };
-const DC_TABS = [['blitz', 'Blitz'], ['overview', 'Overview'], ['jobs', 'Jobs'], ['steps', 'Steps'], ['proof', 'Proof'], ['map', 'Maps'], ['places', 'Places']];
+const DC_TABS = [['blitz', 'Blitz'], ['overview', 'Overview'], ['jobs', 'Jobs'], ['steps', 'Steps'], ['proof', 'Proof'], ['map', 'Maps'], ['places', 'Places'], ['agents', 'Agents']];
 const DC_ICO = {
+  agents: NF_ICO.agents,
   jobs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
   proof: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.4 7.5 9 4.3-1.6 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>',
   blitz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
@@ -15025,7 +15506,7 @@ function dcHeadHtml(tab) {
       </div>
     </div>
     <div class="dc-tabs">
-      <div class="dc-tabset">${DC_TABS.map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" onclick="dcGo('${k}')">${DC_ICO[k]}${l}</button>`).join('')}</div>
+      <div class="dc-tabset">${DC_TABS.filter(([k]) => k !== 'agents' || isExec()).map(([k, l]) => `<button class="${k === tab ? 'on' : ''}" onclick="dcGo('${k}')">${DC_ICO[k]}${l}</button>`).join('')}</div>
       <span class="dc-range">Cycle ${cycleNumberForDate(new Date())} · ${left} day${left === 1 ? '' : 's'} left</span>
     </div>
   </div>`;
@@ -15052,6 +15533,8 @@ function dcGo(tab) {
   setTermView('tracker');
 }
 function renderDecomposition() {
+  if (DC.tab === 'agents' && !isExec()) DC.tab = 'overview';
+  if (DC.tab === 'agents') return renderAgentsPanel();
   if (DC.tab === 'blitz') return renderBlitzPanel();
   if (DC.tab === 'jobs') return renderJobsPanel();
   if (DC.tab === 'proof') return renderProofPanel();

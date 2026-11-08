@@ -3625,6 +3625,136 @@ html.theme-light #os-theme .t-moon{display:block}
 .pp-secret.pin{border-color:#FF2D95;background:color-mix(in srgb,#FF2D95 7%,transparent)}
 .pp-secret .pp-copy{position:absolute;right:12px;top:12px}
 
+/* Prospects, and the small tiles (vz-) it is drawn with. Colors: the Terminal's own tokens (--term-*), the accent (--green-rgb)
+   and the app's status colors (done / in progress / red). Stage order is shown as one hue getting stronger, never as different hues. */
+.vz-box{container-type:inline-size}
+.vz-grid{display:grid;grid-template-columns:1fr;gap:12px;margin-bottom:16px}
+@container (min-width:480px){ .vz-grid{grid-template-columns:repeat(2,1fr)} .vz.wide,.vz.tail{grid-column:span 2}
+  .vz.k-wait{order:1} .vz.k-reply{order:2} .vz.k-cycle{order:3} .vz.k-pipe{order:4} .vz.k-out{order:5} .vz.k-rank{order:6} }
+@container (min-width:760px){ .vz-grid{grid-template-columns:repeat(3,1fr)} .vz.tail{grid-column:auto} .vz.k-wait,.vz.k-reply,.vz.k-cycle,.vz.k-pipe,.vz.k-out,.vz.k-rank{order:0} }
+.vz{--good:var(--st-done);--warn:var(--st-prog);--crit:#EF4444;position:relative;display:flex;flex-direction:column;gap:9px;min-height:150px;padding:14px 16px 12px;
+  --vz-bg:rgba(10,10,10,.055);--vz-edge:rgba(10,10,10,.08);--vz-track:rgba(10,10,10,.13);--vz-ring:#EDEDEA;   /* light theme: a faint tint, so a tile is always a touch darker than whatever is behind it, even over the page's soft gradient */
+  border-radius:22px;border:1px solid var(--vz-edge);background:var(--vz-bg)}
+html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255,255,.08);--vz-track:rgba(255,255,255,.12);--vz-ring:#151515}   /* dark theme: a faint light tint close to the page, not solid black */
+.vz-t{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--term-dim)}
+.vz-h{display:flex;justify-content:space-between;align-items:flex-end;gap:10px}
+.vz-big{font-family:var(--sans);font-size:30px;font-weight:600;line-height:1;font-variant-numeric:tabular-nums;color:var(--term-fg)}
+.vz-big small{font-size:12px;font-weight:500;color:var(--term-dim);margin-left:5px}
+.vz-tag{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--term-fg);white-space:nowrap}
+.vz-tag .pp-ico{width:13px;height:13px}
+.vz-tag.good .pp-ico{color:var(--good)} .vz-tag.warn .pp-ico{color:var(--warn)} .vz-tag.crit .pp-ico{color:var(--crit)}
+.vz-tag.dim{color:var(--term-dim);font-weight:500}
+.vz-cap{margin-top:auto;font-size:10.5px;color:var(--term-dim);letter-spacing:.03em}
+.vz-note{font-size:12px;color:var(--term-dim);line-height:1.5}
+.vz-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* range: where a value sits between bands */
+.vz-range{position:relative;display:flex;gap:2px;height:12px;margin-top:6px}
+.vz-range .b{display:block;border-radius:6px;opacity:.32}
+.vz-range .b.on{opacity:1}
+.vz-range .b.good{background:var(--good)} .vz-range .b.warn{background:var(--warn)} .vz-range .b.crit{background:var(--crit)}
+.vz-range .knob{position:absolute;top:50%;width:14px;height:14px;margin:-7px 0 0 -7px;border-radius:50%;background:var(--term-fg);border:2px solid var(--vz-ring);box-sizing:border-box}
+.vz-axis{position:relative;height:12px;font-size:10px;color:var(--term-dim)}
+.vz-axis span{position:absolute;top:0;transform:translateX(-50%);white-space:nowrap}
+.vz-axis span:first-child{transform:none}
+
+/* thin bars, one per day */
+.vz-bars{display:flex;align-items:flex-end;gap:2px;height:56px}
+.vz-bar{flex:1;min-width:3px;height:100%;display:flex;align-items:flex-end}
+.vz-bar i{display:block;width:100%;border-radius:4px 4px 0 0;background:rgba(var(--green-rgb),.55);min-height:3px}
+.vz-bar.today i{background:rgb(var(--green-rgb))}
+.vz-bar.zero i{background:var(--vz-track)}
+.vz-bar.future i{background:var(--vz-track);opacity:.6}
+.vz-bar:hover i{background:rgb(var(--green-rgb))}
+
+/* the pipeline: one bar cut into stages, 2px apart */
+.vz-seg{display:flex;gap:2px;height:16px;border-radius:8px;overflow:hidden;background:var(--vz-track)}
+.vz-seg button{appearance:none;border:none;padding:0;min-width:8px;cursor:pointer;background:rgba(var(--green-rgb),var(--s))}
+.vz-seg.f button:not(.on){opacity:.3}
+.vz-leg{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:11px}
+.vz-leg button{appearance:none;display:inline-flex;align-items:center;gap:6px;border:none;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:11px;padding:2px 0;cursor:pointer}
+.vz-leg button i{width:9px;height:9px;border-radius:3px;background:rgba(var(--green-rgb),var(--s))}
+.vz-leg button.closed i{background:var(--term-dim)}
+.vz-leg button b{font-weight:600}
+.vz-leg button.on{text-decoration:underline;text-underline-offset:3px}
+
+/* arc and ring */
+.vz-gauge{display:flex;align-items:center;gap:12px}
+.vz-arc,.vz-ring{flex-shrink:0}
+.vz-arc{width:132px;height:auto}
+.vz-ring{width:84px;height:84px}
+.vz-arc path,.vz-ring circle{fill:none;stroke-width:8;stroke-linecap:round}
+.vz-ring circle{stroke-width:9}
+.vz .trk{stroke:var(--vz-track)}
+.vz .val.good{stroke:var(--good)} .vz .val.warn{stroke:var(--warn)} .vz .val.crit{stroke:var(--crit)}
+.vz .val.acc{stroke:rgb(var(--green-rgb))} .vz .val.soft{stroke:rgba(var(--green-rgb),.35)} .vz .val.dim{stroke:var(--term-dim)}
+.vz-arc line{stroke:var(--term-dim);stroke-width:2}
+
+/* ranked bars */
+.vz-toggle{display:inline-flex;border:1px solid var(--vz-track);border-radius:999px;padding:2px;letter-spacing:0;text-transform:none}
+.vz-toggle button{appearance:none;border:none;background:transparent;color:var(--term-dim);font-family:var(--mono);font-size:10.5px;padding:3px 10px;border-radius:999px;cursor:pointer}
+.vz-toggle button.on{background:var(--term-fg);color:var(--term-bg)}
+.vz-rows{display:flex;flex-direction:column;gap:7px}
+.vz-row{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr) 24px;gap:10px;align-items:center;font-size:11.5px;color:var(--term-fg)}
+.vz-row .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.vz-row .tr{height:8px;background:var(--vz-track);border-radius:0 4px 4px 0}
+.vz-row .tr i{display:block;height:100%;border-radius:0 4px 4px 0;background:rgb(var(--green-rgb))}
+.vz-row b{text-align:right;font-weight:600;font-variant-numeric:tabular-nums}
+#vz-tip{position:fixed;z-index:300;pointer-events:none;background:var(--term-fg);color:var(--term-bg);font:500 11px/1.3 var(--mono);padding:5px 9px;border-radius:8px;opacity:0;transition:opacity .12s;white-space:nowrap}
+#vz-tip.on{opacity:1}
+
+/* the list and the side panel */
+.rq-stage{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--term-line);border-radius:999px;padding:3px 11px 3px 9px;font-size:11.5px;white-space:nowrap;color:var(--term-fg)}
+.rq-stage i{width:9px;height:9px;border-radius:3px;background:rgba(var(--green-rgb),var(--s,.3))}
+.rq-stage.closed i{background:var(--term-dim)}
+.rq-row{cursor:pointer}
+.rq-row td:first-child b{display:block;font-size:13px;font-weight:600}
+.rq-row td:first-child small{display:block;color:var(--term-dim);font-size:11px;margin-top:1px}
+.rq-last{display:flex;align-items:center;gap:7px;white-space:nowrap}
+.rq-last .pp-ico{width:13px;height:13px}
+.rq-last .pp-ico.good{color:var(--st-done)} .rq-last .pp-ico.warn{color:var(--st-prog)} .rq-last .pp-ico.crit{color:#EF4444}
+.rq-empty{padding:34px 18px;text-align:center;color:var(--term-dim);font-size:12.5px;line-height:1.7}
+.rq-empty b{display:block;color:var(--term-fg);font-size:14px;margin-bottom:4px}
+.rq-sec{padding:16px 20px;border-top:1px solid var(--term-line)}
+.rq-sec h4{font-size:10.5px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--term-dim);margin-bottom:10px;display:flex;justify-content:space-between;gap:8px}
+.rq-id{padding:16px 20px 4px}
+.rq-id h3{font-size:20px;font-weight:600;line-height:1.2}
+.rq-id small{display:block;color:var(--term-dim);font-size:12px;margin:3px 0 10px}
+.rq-trk{display:flex;align-items:flex-start;padding:2px 0 0}
+.rq-trk .st{flex:1;display:flex;flex-direction:column;align-items:center;gap:7px;position:relative;font-size:10px;line-height:1.25;color:var(--term-dim);text-align:center}
+.rq-trk .st::before{content:"";position:absolute;top:8px;left:-50%;right:50%;height:3px;background:var(--term-line)}
+.rq-trk .st:first-child::before{display:none}
+.rq-trk .st.done::before,.rq-trk .st.cur::before{background:rgb(var(--green-rgb))}
+.rq-trk .st i{position:relative;z-index:1;width:19px;height:19px;border-radius:50%;box-sizing:border-box;background:var(--term-bg);border:3px solid var(--term-line)}
+.rq-trk .st.done i{background:rgb(var(--green-rgb));border-color:rgb(var(--green-rgb))}
+.rq-trk .st.cur i{border-color:rgb(var(--green-rgb));box-shadow:0 0 0 4px rgba(var(--green-rgb),.2)}
+.rq-trk .st.cur{color:var(--term-fg);font-weight:600}
+.rq-trk.closed .st::before,.rq-trk.closed .st.done i,.rq-trk.closed .st.cur i{background:var(--term-line);border-color:var(--term-line);box-shadow:none}
+.rq-closed{margin-top:10px;font-size:12px;color:var(--term-dim);border-left:3px solid var(--term-dim);padding-left:10px;line-height:1.5}
+.rq-kv{display:grid;grid-template-columns:92px 1fr;gap:6px 12px;font-size:12.5px;align-items:baseline}
+.rq-kv dt{color:var(--term-dim);font-size:11px;letter-spacing:.06em;text-transform:uppercase}
+.rq-kv dd{margin:0;overflow-wrap:anywhere}
+.rq-msg{margin-top:10px;border-left:3px solid var(--term-line);padding:2px 0 2px 12px;font-size:12.5px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere}
+.rq-moves{display:flex;flex-wrap:wrap;gap:6px}
+.rq-moves .pp-btn{padding:7px 11px;font-size:12px}
+.rq-g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.rq-gate{margin-top:12px;display:flex;flex-direction:column;gap:12px}
+.rq-gate .bar{position:relative;height:12px;border-radius:6px;background:var(--term-line)}
+.rq-gate .bar i{display:block;height:100%;border-radius:6px;background:var(--st-done)}
+.rq-gate .bar i.over{background:#EF4444}
+.rq-gate .bar b{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--term-fg)}
+.rq-gate .lbl{display:flex;justify-content:space-between;gap:10px;font-size:11.5px;margin-bottom:6px;color:var(--term-fg)}
+.rq-gate .lbl span:last-child{color:var(--term-dim)}
+.rq-log{list-style:none;display:flex;flex-direction:column;gap:12px;margin:0;padding:0}
+.rq-log li{font-size:12.5px;line-height:1.55;overflow-wrap:anywhere}
+.rq-log small{display:block;color:var(--term-dim);font-size:10.5px;letter-spacing:.04em;margin-bottom:1px}
+.rq-code{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--term-line);border-radius:12px;padding:10px 12px;margin-top:8px}
+.rq-code b{font-size:20px;letter-spacing:.14em}
+.rq-danger{color:var(--red)}
+@media (max-width:560px){ .rq-g2{grid-template-columns:1fr} .rq-kv{grid-template-columns:1fr} }
+.rq-in{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:10px;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:14px;padding:10px 12px;outline:none}
+.rq-in:focus{border-color:var(--term-fg);box-shadow:0 0 0 4px rgba(var(--green-rgb),.1)}
+
 /* Notifications */
 .nt-sec{margin-bottom:22px}
 .nt-sec h4{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}
@@ -13237,9 +13367,11 @@ async function loadPeople(force) {
 }
 
 async function renderClientsPanel() {
+  if (CL.tab === 'prospects') { if (isExec()) return renderProspectsPanel(); CL.tab = 'members'; }
   const panel = document.getElementById('term-panel');
   if (!panel.querySelector('.cl-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
   try { await loadPeople(); } catch (e) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the network — ${esc(e.message)}</div>`; return; }
+  if (isExec() && PR.open == null) prLoad().then(() => { if (CL.tab !== 'prospects' && document.getElementById('term-panel')?.querySelector('.cl-wrap')) renderClientsPanel(); }).catch(() => { PR.open = 0; });   // the count on the Prospects tab
   const isM = CL.tab === 'members';
   const filters = isM
     ? [['all', 'All'], ['working', 'Working now'], ['new', 'New']]
@@ -13278,6 +13410,7 @@ async function renderClientsPanel() {
     <div class="pp-tabs">
       <button class="${isM ? 'on' : ''}" onclick="CL.tab='members';CL.page=1;renderClientsPanel()">${ico(ICON.users)}Members <em>${CL.members.length}</em></button>
       <button class="${!isM ? 'on' : ''}" onclick="CL.tab='clients';CL.page=1;renderClientsPanel()">${ico(ICON.brief)}Clients <em>${CL.clients.length}</em></button>
+      ${isExec() ? `<button onclick="CL.tab='prospects';CL.page=1;renderClientsPanel()">${ico(ICON.inbox)}Prospects <em>${PR.open ?? '·'}</em></button>` : ''}
       <span class="pp-tabs-gap"></span>
       ${filters.map(([k, n]) => `<button class="pp-chip f-${k} ${CL.filter === k ? 'on' : ''}" onclick="CL.filter='${k}';CL.page=1;renderClientsPanel()"><i></i>${n} <em>${fcount(k)}</em></button>`).join('')}
     </div>
@@ -13438,6 +13571,353 @@ async function saveWallet(kind, id) {
 function openNetworkTools() { openGenesisConsole(); }
 
 // ── Add a member or a client — a drawer, not a page change ──
+// ── Prospects — people who asked to work with us ─────────────────────
+// Phase 1 of acquisition. The request form on the public site feeds this list (migration 0042). Nothing here sends an
+// email, and no AI is involved: it is a list, a few tiles and a side panel for the Executive Operator, reading through
+// the prospect_* functions. The tiles (vz*) are small and reusable: each one carries real numbers, and the list under
+// them is the same data as a table.
+const PR = { data: null, err: null, stage: 'all', q: '', by: 'interest', id: null, detail: null, gate: { W: '', M: '' }, open: null };
+const PR_STAGES = [['new', 'New'], ['contacted', 'Contacted'], ['conversation', 'In conversation'], ['scoped', 'Scoped'], ['engaged', 'Engaged']];
+const PR_NAME = { new: 'New', contacted: 'Contacted', conversation: 'In conversation', scoped: 'Scoped', engaged: 'Engaged', closed: 'Closed' };
+const PR_SHADE = { new: .3, contacted: .48, conversation: .66, scoped: .84, engaged: 1 };   // one hue, stronger as a request moves on
+const PR_TARGET_H = 24;                                                                       // first-reply target in hours: a default, change it here
+const PR_SERVICES = {
+  'readiness-decomposition': 'Readiness Decomposition', 'market-and-supply-readiness': 'Market and Supply Readiness',
+  'project-mapping': 'Project Mapping', 'continuity-and-communications': 'Continuity and Communications Plans',
+  'talent-management': 'Talent Management', 'brand-and-voice': 'Brand and Voice', general: 'Not sure yet',
+};
+const prSvc = k => PR_SERVICES[k] || k || 'Not sure yet';
+const prHours = iso => Math.max(0, (Date.now() - new Date(iso).getTime()) / 36e5);
+const prState = h => h <= PR_TARGET_H ? ['good', 'On time'] : h <= 3 * PR_TARGET_H ? ['warn', 'Late'] : ['crit', 'Overdue'];
+const prParts = h => h < 1 ? [Math.max(1, Math.round(h * 60)), 'min'] : h < 48 ? [Math.round(h * 10) / 10, 'h'] : [Math.round(h / 24 * 10) / 10, 'days'];
+const prFmt = h => h == null ? '—' : prParts(h).join(' ');
+const prDay = iso => new Date(iso + 'T12:00:00').toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+const prWhen = iso => new Date(iso).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
+const prAgo = iso => { const h = prHours(iso); return h < 1 ? 'just now' : h < 48 ? Math.round(h) + ' h ago' : Math.round(h / 24) + ' days ago'; };
+const prRank = { new: 0, contacted: 1, conversation: 2, scoped: 3, engaged: 4, closed: 5 };
+ICON.inbox = '<path d="M4 13 6 5h12l2 8v6H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>';
+
+const vzIcon = { good: '<path d="m5 12 5 5 9-10"/>', warn: '<circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/>', crit: '<path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17.2v.1"/>' };
+const vzTag = (state, label) => `<span class="vz-tag ${state}">${state === 'dim' ? '' : ico(vzIcon[state])}${esc(label)}</span>`;
+const vzTile = (title, head, body, cap, cls = '') => `<div class="vz ${cls}"><div class="vz-t"><span>${title}</span></div>${head ? `<div class="vz-h">${head}</div>` : ''}${body}${cap ? `<div class="vz-cap">${cap}</div>` : ''}</div>`;
+const vzBig = (v, unit) => `<div class="vz-big">${v}<small>${esc(unit)}</small></div>`;
+
+// Hover or tap a mark to read its value (marks with data-vz).
+(() => {
+  let tip = null, t0 = 0;
+  const show = el => {
+    if (!tip) { tip = document.createElement('div'); tip.id = 'vz-tip'; document.body.appendChild(tip); }
+    tip.textContent = el.dataset.vz; tip.classList.add('on');
+    const r = el.getBoundingClientRect();
+    tip.style.left = Math.max(8, Math.min(innerWidth - tip.offsetWidth - 8, r.left + r.width / 2 - tip.offsetWidth / 2)) + 'px';
+    tip.style.top = Math.max(8, r.top - tip.offsetHeight - 8) + 'px';
+  };
+  const hide = () => tip?.classList.remove('on');
+  document.addEventListener('mouseover', e => { const el = e.target.closest?.('[data-vz]'); if (el) show(el); });
+  document.addEventListener('mouseout', e => { if (e.target.closest?.('[data-vz]')) hide(); });
+  document.addEventListener('click', e => { const el = e.target.closest?.('[data-vz]'); if (el) { show(el); clearTimeout(t0); t0 = setTimeout(hide, 1800); } });
+  document.addEventListener('scroll', hide, true);
+})();
+
+// Longest wait for a first reply: where it sits between "on time", "late" and "overdue".
+function vzWaiting(w) {
+  if (!w) return vzTile('Longest wait', vzBig(0, 'waiting') + vzTag('good', 'All answered'), '<div class="vz-note">Everyone who asked has had a first reply.</div>', '', 'k-wait');
+  const h = w.hours, [s, lab] = prState(h), [v, u] = prParts(h), pct = Math.min(h, 96) / 96 * 100;
+  const band = h <= 24 ? 'good' : h <= 72 ? 'warn' : 'crit';
+  return vzTile('Longest wait', vzBig(v, u) + vzTag(s, lab),
+    `<div class="vz-range" role="img" aria-label="${esc(w.name)} has waited ${esc(prFmt(h))} for a first reply. The target is ${PR_TARGET_H} hours.">
+       <i class="b good ${band === 'good' ? 'on' : ''}" style="flex:25"></i><i class="b warn ${band === 'warn' ? 'on' : ''}" style="flex:50"></i><i class="b crit ${band === 'crit' ? 'on' : ''}" style="flex:25"></i>
+       <b class="knob" style="left:${pct}%" data-vz="${esc(w.name)}: ${esc(prFmt(h))} without a reply"></b></div>
+     <div class="vz-axis"><span style="left:0">0</span><span style="left:25%">${PR_TARGET_H} h</span><span style="left:75%">${3 * PR_TARGET_H} h</span></div>`,
+    `<button class="pp-link" onclick="prOpen('${w.id}')">${esc(w.name)}</button> has waited longest`, 'k-wait');
+}
+
+// New requests per day across this Cycle's 28 days.
+function vzCycle(d) {
+  const days = d.daily || [];
+  if (days.length < 28) return vzTile('This Cycle', vzBig(0, 'requests'), '<div class="vz-note">No Cycle dates yet.</div>', '', 'wide k-cycle');
+  const total = days.reduce((a, x) => a + x.n, 0), max = Math.max(1, ...days.map(x => x.n)), idx = days.findIndex(x => x.day === d.today);
+  const dayNo = idx >= 0 ? idx + 1 : d.today > days[27].day ? 28 : 0, delta = total - (d.prev_cycle_total || 0);
+  const bars = days.map(x => {
+    const fut = x.day > d.today, cls = fut ? 'future' : x.n === 0 ? 'zero' : x.day === d.today ? 'today' : '';
+    return `<span class="vz-bar ${cls}" data-vz="${prDay(x.day)}: ${fut ? 'not yet' : x.n + (x.n === 1 ? ' request' : ' requests')}"><i style="height:${fut || !x.n ? 3 : Math.max(8, Math.round(x.n / max * 100))}%"></i></span>`;
+  }).join('');
+  const tick = i => `<span style="${i === 27 ? 'right:0;transform:none' : 'left:' + i / 27 * 100 + '%'}">${prDay(days[i].day)}</span>`;
+  return vzTile('This Cycle', vzBig(total, total === 1 ? 'request' : 'requests') + vzTag('dim', `Cycle ${d.cycle} · day ${dayNo} of 28`),
+    `<div class="vz-bars" role="img" aria-label="${total} requests in Cycle ${d.cycle} so far, by day. The table below lists them.">${bars}</div>
+     <div class="vz-axis">${tick(0)}${tick(9)}${tick(18)}${tick(27)}</div>`,
+    `${delta === 0 ? 'Same as' : delta > 0 ? '▲ ' + delta + ' more than' : '▼ ' + -delta + ' fewer than'} last Cycle (${d.prev_cycle_total || 0})`, 'wide k-cycle');
+}
+
+// The pipeline: one bar cut into stages. Click a stage to filter the list.
+function vzPipeline(d) {
+  const c = d.by_stage || {}, n = k => c[k] || 0, open = n('new') + n('contacted') + n('conversation') + n('scoped');
+  const segs = PR_STAGES.filter(([k]) => n(k)).map(([k, name]) =>
+    `<button style="flex:${n(k)};--s:${PR_SHADE[k]}" class="${PR.stage === k ? 'on' : ''}" onclick="prFilter('${k}')" data-vz="${name}: ${n(k)}" aria-label="${name}: ${n(k)}"></button>`).join('');
+  const leg = PR_STAGES.map(([k, name]) => `<button style="--s:${PR_SHADE[k]}" class="${PR.stage === k ? 'on' : ''}" onclick="prFilter('${k}')"><i></i>${name} <b>${n(k)}</b></button>`).join('')
+    + `<button class="closed ${PR.stage === 'closed' ? 'on' : ''}" onclick="prFilter('closed')"><i></i>Closed <b>${n('closed')}</b></button>`;
+  return vzTile('Pipeline', vzBig(open, 'open') + vzTag('dim', `${n('engaged')} became clients`),
+    `${segs ? `<div class="vz-seg ${PR.stage !== 'all' ? 'f' : ''}" role="img" aria-label="Requests by stage">${segs}</div>` : '<div class="vz-note">No requests yet. When someone sends the form, it starts here.</div>'}
+     <div class="vz-leg">${leg}</div>`, '', 'wide k-pipe');
+}
+
+// Median time to a first reply, against the target.
+function vzReply(d) {
+  const h = d.median_first_reply_hours;
+  if (h == null) return vzTile('First reply', vzBig('—', '') + vzTag('dim', 'No replies yet'), '<div class="vz-note">Once you log a first contact, the typical wait shows here.</div>', '', 'k-reply');
+  const [s, lab] = prState(h), [v, u] = prParts(h), f = Math.min(h / (2 * PR_TARGET_H), 1);
+  return vzTile('First reply', vzBig(v, u) + vzTag(s, lab),
+    `<div class="vz-gauge"><svg class="vz-arc" viewBox="0 0 120 66" role="img" aria-label="Typical first reply ${esc(prFmt(h))}. Target ${PR_TARGET_H} hours.">
+       <path class="trk" d="M10 58A50 50 0 0 1 110 58" pathLength="100"/>
+       <path class="val ${s}" d="M10 58A50 50 0 0 1 110 58" pathLength="100" stroke-dasharray="${(f * 100).toFixed(1)} 100"/>
+       <line x1="60" y1="2" x2="60" y2="14"/></svg>
+       <div class="vz-note">Typical wait for a first reply, last 90 days. The tick is the ${PR_TARGET_H} h target.</div></div>`, '', 'k-reply');
+}
+
+// Of the requests from the last 90 days, how many became clients.
+function vzOutcome(d) {
+  const f = d.funnel90 || { total: 0, engaged: 0, closed: 0 }, open = Math.max(0, f.total - f.engaged - f.closed);
+  if (!f.total) return vzTile('Last 90 days', vzBig(0, 'requests') + vzTag('dim', 'Nothing yet'), '<div class="vz-note">Requests from the last 90 days and what became of them.</div>', '', 'tail k-out');
+  const parts = [['acc', f.engaged, 'Clients'], ['soft', open, 'Still open'], ['dim', f.closed, 'Closed']];
+  let off = 0;
+  const arcs = parts.filter(p => p[1]).map(([cls, n, name]) => {
+    const len = n / f.total * 100, seg = Math.max(0, len - 3), a = `<circle class="val ${cls}" cx="42" cy="42" r="32" pathLength="100" stroke-dasharray="${seg.toFixed(2)} 100" stroke-dashoffset="${(-off).toFixed(2)}" transform="rotate(-90 42 42)" data-vz="${name}: ${n}"/>`;
+    off += len; return a;
+  }).join('');
+  return vzTile('Last 90 days', vzBig(f.engaged, `of ${f.total} became clients`) + '',
+    `<div class="vz-gauge"><svg class="vz-ring" viewBox="0 0 84 84" role="img" aria-label="${f.engaged} clients, ${open} open, ${f.closed} closed, of ${f.total} requests"><circle class="trk" cx="42" cy="42" r="32"/>${arcs}</svg>
+       <div class="vz-leg" style="flex-direction:column;gap:5px">${parts.map(([cls, n, name]) => `<span style="display:flex;gap:7px;align-items:center;font-size:11.5px"><i style="width:9px;height:9px;border-radius:3px;background:${cls === 'acc' ? 'rgb(var(--green-rgb))' : cls === 'soft' ? 'rgba(var(--green-rgb),.35)' : 'var(--term-dim)'}"></i>${name} <b>${n}</b></span>`).join('')}</div></div>`, '', 'tail k-out');
+}
+
+// What people asked about, and where they came from: ranked bars.
+function vzRanked(d) {
+  const rows = (PR.by === 'interest' ? d.interests : d.sources) || [], max = Math.max(1, ...rows.map(r => r.n));
+  const label = r => PR.by === 'interest' ? prSvc(r.name) : r.name === 'direct' ? 'Direct (no link)' : r.name;
+  const tog = `<span class="vz-toggle"><button class="${PR.by === 'interest' ? 'on' : ''}" onclick="PR.by='interest';renderProspectsPanel()">Service</button><button class="${PR.by === 'source' ? 'on' : ''}" onclick="PR.by='source';renderProspectsPanel()">Source</button></span>`;
+  const body = rows.length ? `<div class="vz-rows">${rows.map(r => `<div class="vz-row" data-vz="${esc(label(r))}: ${r.n}"><span class="n">${esc(label(r))}</span><span class="tr"><i style="width:${Math.max(4, Math.round(r.n / max * 100))}%"></i></span><b>${r.n}</b></div>`).join('')}</div>`
+    : '<div class="vz-note">Nothing in the last 90 days.</div>';
+  return `<div class="vz wide k-rank"><div class="vz-t"><span>${PR.by === 'interest' ? 'Asked about' : 'Came from'}, 90 days</span>${tog}</div>${body}</div>`;
+}
+
+// ── the panel ──
+async function prLoad() {
+  const { data, error } = await sb.rpc('prospect_overview');
+  if (error) throw error;
+  PR.data = data;
+  PR.open = (data.prospects || []).filter(p => p.stage !== 'closed' && p.stage !== 'engaged').length;
+  return data;
+}
+const prOnPanel = () => CL.tab === 'prospects' && document.getElementById('terminal-shell')?.getAttribute('data-view') === 'clients';
+
+function clTabsHtml(active) {
+  const nm = CL.members?.length ?? '', nc = CL.clients?.length ?? '';
+  const t = (k, icon, name, n) => `<button class="${active === k ? 'on' : ''}" onclick="CL.tab='${k}';CL.page=1;renderClientsPanel()">${ico(icon)}${name} <em>${n}</em></button>`;
+  return t('members', ICON.users, 'Members', nm) + t('clients', ICON.brief, 'Clients', nc) + (isExec() ? t('prospects', ICON.inbox, 'Prospects', PR.open ?? '·') : '');
+}
+
+async function renderProspectsPanel() {
+  const panel = document.getElementById('term-panel');
+  if (!panel.querySelector('.cl-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  try { await prLoad(); PR.err = null; } catch (e) { PR.err = e.message || String(e); }
+  try { await loadPeople(); } catch (e) { /* the member count is optional here */ }
+  if (!prOnPanel()) return;
+  const d = PR.data;
+  const head = `<div class="pp-head">
+      <div><h2>Clients</h2><p>Everyone on the network, and the people who have asked to work with us.</p></div>
+      <div class="pp-head-acts">
+        <button class="pp-btn" onclick="prCopyLink()">${ico(ICON.copy)}Copy request link</button>
+        <button class="pp-btn" onclick="prRefresh()">${ico(ICON.search)}Refresh</button>
+      </div></div>
+    <div class="pp-tabs">${clTabsHtml('prospects')}</div>`;
+  if (PR.err || !d) {
+    const unset = /prospect_overview|schema cache|could not find/i.test(PR.err || '');
+    panel.innerHTML = `<div class="cl-wrap">${head}<div class="pp-card"><div class="rq-empty"><b>${unset ? 'The Prospects tool is not switched on yet' : 'Couldn’t load the requests'}</b>${unset ? 'Its database update (migration 0042) has not been applied to this database.' : esc(PR.err || '')}</div></div></div>`;
+    return;
+  }
+  const q = PR.q.trim().toLowerCase();
+  let rows = (d.prospects || []).filter(p => (PR.stage === 'all' ? p.stage !== 'closed' : p.stage === PR.stage) &&
+    (!q || [p.name, p.organization, p.email, p.message, p.source, prSvc(p.interest)].some(v => (v || '').toLowerCase().includes(q))));
+  rows.sort((a, b) => prRank[a.stage] - prRank[b.stage] || (a.stage === 'new' ? new Date(a.created_at) - new Date(b.created_at) : new Date(b.stage_changed_at) - new Date(a.stage_changed_at)));
+  const cnt = k => k === 'all' ? (d.prospects || []).filter(p => p.stage !== 'closed').length : (d.prospects || []).filter(p => p.stage === k).length;
+  const chips = [['all', 'Open + engaged'], ...PR_STAGES, ['closed', 'Closed']].map(([k, n]) =>
+    `<button class="pp-chip ${PR.stage === k ? 'on' : ''}" onclick="prFilter('${k}')">${n} <em>${cnt(k)}</em></button>`).join('');
+  panel.innerHTML = `<div class="cl-wrap">${head}
+    <div class="vz-box"><div class="vz-grid">${vzWaiting(d.waiting)}${vzCycle(d)}${vzReply(d)}${vzPipeline(d)}${vzOutcome(d)}${vzRanked(d)}</div></div>
+    <div class="pp-card">
+      <div class="pp-card-top">
+        <label class="pp-search">${ico(ICON.search)}<input id="rq-q" placeholder="Search requests" value="${esc(PR.q)}" oninput="PR.q=this.value;prSearchSoon()"></label>
+        <span class="pp-muted">Showing <b>${rows.length}</b></span>
+      </div>
+      <div class="pp-tabs slim" style="padding:0 14px">${chips}</div>
+      <div class="pp-table-wrap"><table class="pp-table">
+        <tr><th>Request</th><th>Wants</th><th>Stage</th><th>Last touch</th><th class="hide-md">Came from</th><th></th></tr>
+        ${rows.map(prRow).join('') || `<tr><td colspan="6"><div class="rq-empty"><b>${(d.prospects || []).length ? 'No requests match' : 'No requests yet'}</b>${(d.prospects || []).length ? 'Clear the search or pick another stage.' : 'Send people the request link. Their request lands here, and you get a notice.'}</div></td></tr>`}
+      </table></div></div></div>`;
+  const qi = document.getElementById('rq-q');
+  if (qi && PR._typing) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
+  PR._typing = false;
+}
+let prSearchTimer = null;
+function prSearchSoon() { clearTimeout(prSearchTimer); PR._typing = true; prSearchTimer = setTimeout(renderProspectsPanel, 200); }
+function prFilter(k) { PR.stage = PR.stage === k ? 'all' : k; renderProspectsPanel(); }
+async function prRefresh() { try { await prLoad(); } catch (e) { toast('Couldn’t refresh — ' + e.message); } renderProspectsPanel(); if (PR.id && document.getElementById('pp-drawer')?.classList.contains('on')) prOpen(PR.id, true); }
+
+function prRow(p) {
+  const wait = p.stage === 'new' ? prState(prHours(p.created_at)) : null;
+  const last = p.stage === 'new'
+    ? `<span class="rq-last">${ico(vzIcon[wait[0]], wait[0])}Waiting ${esc(prFmt(prHours(p.created_at)))}</span>`
+    : `<span class="rq-last">${esc(prAgo(p.last_contact_at || p.stage_changed_at))}</span>`;
+  return `<tr class="rq-row" onclick="prOpen('${p.id}')"><td><b>${esc(p.name)}</b><small>${esc(p.organization || p.email)}</small></td>
+    <td>${esc(prSvc(p.interest))}</td>
+    <td><span class="rq-stage ${p.stage}" style="--s:${PR_SHADE[p.stage] || .3}"><i></i>${PR_NAME[p.stage]}</span></td>
+    <td>${last}</td><td class="hide-md">${esc(p.source || 'direct')}</td><td>›</td></tr>`;
+}
+
+function prCopyLink() {
+  const who = prompt('Who is this link for? Type a short name to track where requests come from (for example: referral-maria). Leave it empty for the plain link.', '');
+  if (who === null) return;
+  const slug = who.trim().toLowerCase().replace(/[^a-z0-9_-]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40);
+  copyText('https://landofgeb.net/request.html' + (slug ? '?src=' + encodeURIComponent(slug) : ''), 'Request link');
+}
+
+// ── one request, in the side panel ──
+function prEnsureDrawer() {
+  let d = document.getElementById('pp-drawer');
+  if (!d) {
+    const scrim = document.createElement('div');
+    scrim.id = 'pp-scrim'; scrim.onclick = closeAddPerson;
+    d = document.createElement('aside'); d.id = 'pp-drawer';
+    document.body.append(scrim, d);
+  }
+  d.setAttribute('aria-label', 'Request');
+  return d;
+}
+async function prOpen(id, quiet) {
+  if (!isExec()) return;
+  PR.id = id;
+  if (!quiet) { PR.detail = null; PR.gate = { W: '', M: '' }; PR.fresh = null; }
+  const d = prEnsureDrawer();
+  if (!quiet) { prDraw(); requestAnimationFrame(() => { d.classList.add('on'); document.getElementById('pp-scrim').classList.add('on'); }); }
+  try {
+    const { data, error } = await sb.rpc('prospect_get', { p_id: id });
+    if (error) throw error;
+    PR.detail = data;
+  } catch (e) { PR.detail = { error: e.message || String(e) }; }
+  if (PR.id === id) prDraw();
+}
+function prTracker(p) {
+  const at = PR_STAGES.findIndex(([k]) => k === p.stage), closed = p.stage === 'closed';
+  return `<div class="rq-trk ${closed ? 'closed' : ''}">${PR_STAGES.map(([k, n], i) => `<div class="st ${closed ? '' : i < at ? 'done' : i === at ? 'cur' : ''}"><i></i>${n}</div>`).join('')}</div>
+    ${closed ? `<div class="rq-closed">Closed${p.closed_reason ? ': ' + esc(p.closed_reason) : '.'}</div>` : ''}`;
+}
+function prDraw() {
+  const d = document.getElementById('pp-drawer');
+  if (!d) return;
+  const top = `<div class="pp-dr-top"><b>Request</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>`;
+  if (!PR.detail) { d.innerHTML = top + '<div class="rq-empty">Loading…</div>'; return; }
+  if (PR.detail.error) { d.innerHTML = top + `<div class="rq-empty"><b>Couldn’t open this request</b>${esc(PR.detail.error)}</div>`; return; }
+  const p = PR.detail.prospect, notes = PR.detail.notes || [], isClient = p.stage === 'engaged', isClosed = p.stage === 'closed';
+  const moves = PR_STAGES.filter(([k]) => k !== 'engaged' && k !== p.stage).map(([k, n]) => `<button class="pp-btn" onclick="prMove('${k}')">${n}</button>`).join('')
+    + (isClosed ? '' : `<button class="pp-btn rq-danger" onclick="prClose()">Close</button>`);
+  const gate = PR.gate;
+  d.innerHTML = top + `
+    <div class="rq-id"><h3>${esc(p.name)}</h3><small>${esc(p.organization || 'No organization given')} · asked ${esc(prAgo(p.created_at))}</small>
+      <span class="rq-stage ${p.stage}" style="--s:${PR_SHADE[p.stage] || .3}"><i></i>${PR_NAME[p.stage]}</span></div>
+    <div class="rq-sec">${prTracker(p)}</div>
+    ${PR.fresh ? `<div class="rq-sec"><h4>Client created</h4><div class="vz-note">${esc(p.name)} is now a client. Their sign-in code:</div>
+      <div class="rq-code"><b>${esc(PR.fresh)}</b><button class="pp-copy" onclick="copyText('${esc(PR.fresh)}','Sign-in code')">${ico(ICON.copy)}Copy</button></div></div>` : ''}
+    <div class="rq-sec"><h4>Contact</h4><dl class="rq-kv">
+      <dt>Email</dt><dd>${esc(p.email)} <button class="pp-copy" onclick="copyText('${esc(p.email)}','Email')">${ico(ICON.copy)}Copy</button></dd>
+      ${p.phone ? `<dt>Phone</dt><dd>${esc(p.phone)}</dd>` : ''}
+      <dt>Wants</dt><dd>${esc(prSvc(p.interest))}</dd>
+      <dt>Came from</dt><dd>${esc(p.source || 'direct')}</dd>
+      <dt>Agreed</dt><dd>${esc(prWhen(p.consent_at))}: “${esc(PR.detail.prospect.consent_text || 'agreed to be contacted')}”</dd>
+    </dl>${p.message ? `<div class="rq-msg">${esc(p.message)}</div>` : ''}</div>
+    ${isClient ? '' : `<div class="rq-sec"><h4>Move it along</h4><div class="rq-moves">${moves}</div></div>`}
+    ${isClient || isClosed ? '' : `<div class="rq-sec"><h4>Can the network take it?</h4>
+      <div class="vz-note">Two refusal gates from the canon: the work is over capacity (W × M), or the critical path alone is longer than one member’s window.</div>
+      <div class="rq-g2" style="margin-top:12px">
+        <label class="pp-field"><span>Size of the work, LOGs (E)</span><input class="rq-in" id="rq-e" type="number" min="0" step="any" value="${p.estimate_logs ?? ''}" oninput="prGate()"></label>
+        <label class="pp-field"><span>Critical path, LOGs</span><input class="rq-in" id="rq-cp" type="number" min="0" step="any" value="${p.critical_path_logs ?? ''}" oninput="prGate()"></label>
+        <label class="pp-field"><span>LOGs each member has before the deadline (W)</span><input class="rq-in" id="rq-w" type="number" min="0" step="any" value="${gate.W}" oninput="prGate()"></label>
+        <label class="pp-field"><span>Members who could take it (M)</span><input class="rq-in" id="rq-m" type="number" min="0" step="1" value="${gate.M}" oninput="prGate()"></label>
+        <label class="pp-field"><span>Needed by</span><input class="rq-in" id="rq-by" type="date" value="${p.needed_by || ''}"></label>
+        <div style="display:flex;align-items:flex-end;gap:8px">${(CL.members || []).length ? `<button class="pp-btn" type="button" onclick="prUseMembers()">Use ${(CL.members || []).filter(m => m.active !== false).length} active</button>` : ''}<button class="pp-btn solid" type="button" onclick="prSaveEstimate()">Save</button></div>
+      </div>
+      <div class="rq-gate" id="rq-gate"></div></div>`}
+    <div class="rq-sec"><h4>Notes</h4>
+      <form class="pp-form flat" onsubmit="event.preventDefault()"><textarea id="rq-note" rows="3" placeholder="What was said, what comes next"></textarea>
+      <div class="rq-moves"><button class="pp-btn" onclick="prNote('note')">Add note</button><button class="pp-btn" onclick="prNote('contact')">Log a contact</button></div></form>
+      <ul class="rq-log" style="margin-top:14px">${notes.map(n => `<li><small>${esc(prWhen(n.created_at))} · ${({ form: 'Form', note: 'Note', contact: 'Contact', stage: 'Stage' })[n.kind] || n.kind}${n.author && n.author !== 'visitor' ? ' · ' + esc(n.author) : ''}</small>${esc(n.body)}</li>`).join('')}</ul></div>
+    <div class="rq-sec" style="display:flex;flex-wrap:wrap;gap:8px">
+      ${isClient || isClosed ? '' : `<button class="pp-btn solid" onclick="prConvert()">Make a client</button>`}
+      <button class="pp-btn rq-danger" onclick="prErase()">Erase this request</button></div>`;
+  prGate();
+}
+
+// The capacity check, live as the numbers are typed. Nothing is stored except E, the critical path and the date.
+function prUseMembers() { const n = (CL.members || []).filter(m => m.active !== false).length; document.getElementById('rq-m').value = n; prGate(); }
+function prGate() {
+  const out = document.getElementById('rq-gate');
+  if (!out) return;
+  const v = id => { const x = parseFloat(document.getElementById(id)?.value); return Number.isFinite(x) ? x : 0; };
+  const E = v('rq-e'), cp = v('rq-cp'), W = v('rq-w'), M = v('rq-m');
+  PR.gate = { W: W || '', M: M || '' };
+  if (!(E > 0 && W > 0 && M > 0)) { out.innerHTML = '<div class="vz-note">Enter the size, the LOGs each member has, and how many members could take it. Both gates are tested as you type.</div>'; return; }
+  const cap = CANON.capacity(W, M), slack = CANON.slack(cap, E), over = E > cap, long = cp > W, refuse = CANON.refusalGate({ E, cap, criticalPathLOGs: cp, W });
+  const sc = Math.max(E, cap, 1) * 1.08, bar = (val, mark, bad) => `<div class="bar"><i class="${bad ? 'over' : ''}" style="width:${Math.min(100, val / sc * 100)}%"></i><b style="left:${mark / sc * 100}%"></b></div>`;
+  const sc2 = Math.max(cp, W, 1) * 1.08, bar2 = `<div class="bar"><i class="${long ? 'over' : ''}" style="width:${Math.min(100, cp / sc2 * 100)}%"></i><b style="left:${W / sc2 * 100}%"></b></div>`;
+  out.innerHTML = `<div class="vz-h" style="margin-bottom:2px">${vzBig(refuse ? 'No' : 'Yes', refuse ? 'the network does not quote' : 'within both gates')}${vzTag(refuse ? 'crit' : 'good', refuse ? 'Refuse' : 'Take it')}</div>
+    <div><div class="lbl"><span>Work against capacity</span><span>${E} of ${cap} LOGs</span></div>${bar(E, cap, over)}
+      <div class="vz-note" style="margin-top:6px">${over ? `Over capacity by ${-slack} LOGs.` : `Slack ${slack} LOGs (${Math.round(CANON.slackRatio(slack, cap) * 100)}%).`}</div></div>
+    <div><div class="lbl"><span>Critical path against one member’s window</span><span>${cp} of ${W} LOGs</span></div>${bar2}
+      <div class="vz-note" style="margin-top:6px">${long ? `The critical path is ${cp - W} LOGs longer than one member’s window.` : cp ? 'The critical path fits one member’s window.' : 'Enter the critical path to test this gate.'}</div></div>`;
+}
+async function prSaveEstimate() {
+  const v = id => { const s = document.getElementById(id)?.value; return s === '' || s == null ? null : Number(s); };
+  try {
+    const { data, error } = await sb.rpc('prospect_set_estimate', { p_id: PR.id, p_estimate: v('rq-e'), p_critical: v('rq-cp'), p_needed_by: document.getElementById('rq-by')?.value || null });
+    if (error) throw error;
+    PR.detail = data; toast('Saved.');
+  } catch (e) { toast('Couldn’t save — ' + (e.message || e)); }
+}
+async function prAct(fn, ok) {
+  try { const r = await fn(); if (ok) toast(ok); await prLoad(); renderProspectsPanel(); return r; }
+  catch (e) { toast((e.message || String(e))); }
+}
+async function prMove(stage) {
+  const r = await prAct(async () => { const { data, error } = await sb.rpc('prospect_set_stage', { p_id: PR.id, p_stage: stage, p_note: null }); if (error) throw error; return data; }, 'Moved to ' + PR_NAME[stage] + '.');
+  if (r) { PR.detail = r; prDraw(); }
+}
+async function prClose() {
+  const why = prompt('Why is this closed? (optional: not a fit, no reply, chose someone else…)', '');
+  if (why === null) return;
+  const r = await prAct(async () => { const { data, error } = await sb.rpc('prospect_set_stage', { p_id: PR.id, p_stage: 'closed', p_note: why.trim() || null }); if (error) throw error; return data; }, 'Closed.');
+  if (r) { PR.detail = r; prDraw(); }
+}
+async function prNote(kind) {
+  const body = document.getElementById('rq-note')?.value.trim();
+  if (!body) { toast('Write something first.'); return; }
+  const r = await prAct(async () => { const { data, error } = await sb.rpc('prospect_add_note', { p_id: PR.id, p_body: body, p_kind: kind }); if (error) throw error; return data; }, kind === 'contact' ? 'Contact logged.' : 'Note added.');
+  if (r) { PR.detail = r; prDraw(); }
+}
+async function prConvert() {
+  const p = PR.detail?.prospect; if (!p) return;
+  const title = prompt('This makes ' + p.name + ' a client. Open a project for them too? Name it, or clear the box to skip.', prSvc(p.interest) + ' — ' + (p.organization || p.name));
+  if (title === null) return;
+  const r = await prAct(async () => { const { data, error } = await sb.rpc('prospect_convert', { p_id: PR.id, p_project_title: title.trim() || null }); if (error) throw error; return data; }, 'Client created.');
+  if (!r) return;
+  PR.fresh = r.code;
+  try { await loadPeople(true); } catch (e) { /* the Clients tab reloads when opened */ }
+  prOpen(PR.id, true);
+}
+async function prErase() {
+  const p = PR.detail?.prospect; if (!p) return;
+  if (!confirm('Erase ' + p.name + '’s request and all its notes? This cannot be undone.')) return;
+  const ok = await prAct(async () => { const { error } = await sb.rpc('prospect_delete', { p_id: PR.id }); if (error) throw error; return true; }, 'Erased.');
+  if (ok) { PR.id = null; closeAddPerson(); }
+}
+
 function openAddPerson(kind) {
   if (!isExec()) return;
   let d = document.getElementById('pp-drawer');

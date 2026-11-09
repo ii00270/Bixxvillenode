@@ -13633,6 +13633,7 @@ function clMemberMenu(btn, id) {
   if (m.email) items.push({ label: 'Copy email', run: () => copyText(m.email, 'Email') });
   if (isExec() || id === operator.id) items.push({ label: m.wallet_address ? 'Change wallet' : 'Add wallet', run: () => openWalletDrawer('member', id) });
   if (isExec() && !m.is_genesis) items.unshift({ label: 'Send invite link + QR', run: () => openInviteLink(id) });
+  if (isExec() && !m.is_genesis) items.push({ label: 'Show a new sign-in PIN', run: () => openMemberPin(id) });
   openRowMenu(btn, items);
 }
 
@@ -13658,6 +13659,69 @@ function clClientMenu(btn, id) {
   if (isExec()) items.push({ label: c.wallet_address ? 'Change wallet' : 'Add wallet', run: () => openWalletDrawer('client', id) });
   if (!items.length) items.push({ label: 'Nothing to copy yet', run: () => {} });
   openRowMenu(btn, items);
+}
+
+// ── A member's sign-in PIN. It is stored only as a hash, so an existing PIN can never be read back.
+// Executive Operator: issue a fresh one and show it once. The old PIN stops working the moment this runs,
+// so the drawer asks first, and the audit event records who did it (never the PIN itself).
+function ppDrawerEl() {
+  let d = document.getElementById('pp-drawer');
+  if (!d) {
+    const scrim = document.createElement('div');
+    scrim.id = 'pp-scrim';
+    scrim.onclick = closeAddPerson;
+    d = document.createElement('aside');
+    d.id = 'pp-drawer';
+    document.body.append(scrim, d);
+  }
+  return d;
+}
+function openMemberPin(id) {
+  const m = CL.members.find(x => x.id === id);
+  if (!m) return;
+  const d = ppDrawerEl();
+  d.setAttribute('aria-label', 'Sign-in PIN');
+  d.innerHTML = `
+    <div class="pp-dr-top"><b>Sign-in PIN</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>
+    <div class="pp-secret"><small>${esc(m.peer_name)} · Member ID</small><b>${esc(m.member_id || '—')}</b>${m.member_id ? `<button class="pp-copy" onclick="copyText('${esc(m.member_id)}','Member ID')">${ico(ICON.copy)}Copy</button>` : ''}</div>
+    <p class="pp-dr-lead">A PIN is kept only as a scrambled hash, so ${esc(m.peer_name)}’s current one can’t be looked up — by anyone, you included. What you can do is issue a new one and see it once.</p>
+    <p class="pp-muted">Their current PIN stops working as soon as you do. Use this if they haven’t signed in yet or have lost it.</p>
+    <div class="pp-form-msg" id="mp-msg"></div>
+    <button class="pp-btn solid big" id="mp-go" onclick="resetMemberPin('${esc(id)}')">${ico(ICON.check)}Issue a new PIN for ${esc(m.peer_name)}</button>
+    <button class="pp-btn big" onclick="closeAddPerson()">Cancel</button>`;
+  requestAnimationFrame(() => { d.classList.add('on'); document.getElementById('pp-scrim').classList.add('on'); });
+}
+async function resetMemberPin(id) {
+  const m = CL.members.find(x => x.id === id);
+  const msg = document.getElementById('mp-msg'), go = document.getElementById('mp-go');
+  if (!m || !go) return;
+  go.disabled = true; msg.textContent = '';
+  try {
+    const { data: pin, error } = await sb.rpc('reset_operator_pin', { p_operator_id: id });
+    if (error) throw error;
+    fireAndForget(sb.rpc('emit_event', {
+      p_type: 'SYSTEM', p_title: `${m.peer_name}'s login PIN was reset`,
+      p_payload: `Reset by ${operator?.peer_name || 'Genesis'} from the Members list.`,
+      p_source_entity: 'PIN Reset', p_source_id: id,
+      p_recipients: [m.peer_name], p_critical: true,
+    }));
+    const welcome = `Welcome to Bixxville, ${m.peer_name}.\nYour member ID: ${m.member_id || ''}\nYour PIN: ${pin}\nSign in at ${location.origin}${location.pathname.replace(/[^/]*$/, '')}terminal.html`;
+    window._apWelcome = welcome;
+    document.getElementById('pp-drawer').innerHTML = `
+      <div class="pp-dr-top"><b>Sign-in PIN</b><button class="pf-x" onclick="closeAddPerson()" aria-label="Close">✕</button></div>
+      <div class="pp-done">
+        <div class="pp-done-badge">${ico(ICON.check)}</div>
+        <h3>New PIN for ${esc(m.peer_name)}</h3>
+        <div class="pp-secret"><small>Member ID</small><b>${esc(m.member_id || '—')}</b>${m.member_id ? `<button class="pp-copy" onclick="copyText('${esc(m.member_id)}','Member ID')">${ico(ICON.copy)}Copy</button>` : ''}</div>
+        <div class="pp-secret pin"><small>PIN — shown once</small><b>${esc(String(pin))}</b><button class="pp-copy" onclick="copyText('${esc(String(pin))}','PIN')">${ico(ICON.copy)}Copy</button></div>
+        <p class="pp-muted">Copy it now. It isn’t stored anywhere it can be read back.</p>
+        <button class="pp-btn big" onclick="copyText(window._apWelcome,'Welcome message')">${ico(ICON.copy)}Copy a welcome message</button>
+        <button class="pp-btn big" onclick="closeAddPerson()">Done</button>
+      </div>`;
+  } catch (e) {
+    msg.textContent = e.message || String(e);
+    go.disabled = false;
+  }
 }
 
 // ── Put a wallet on file — a member's (theirs or Genesis's doing) or a client's.

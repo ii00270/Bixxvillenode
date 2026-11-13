@@ -4009,7 +4009,11 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
   .ca-q{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:12px;background:transparent;color:var(--term-fg);padding:12px 14px;font:inherit;font-size:16px;margin-bottom:10px}
 }
 
-.cac-prov{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0} .cac-prov button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer} .cac-prov button.on{background:var(--term-fg);color:var(--term-bg)}
+.cac{padding-top:12px} .cac-auto{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:8px 0}
+.cac-btn{appearance:none;display:flex;flex-direction:column;gap:3px;align-items:flex-start;text-align:left;border:1px solid var(--term-line);background:transparent;color:inherit;border-radius:12px;padding:12px;font:inherit;cursor:pointer} .cac-btn b{font-size:14px} .cac-btn small{font-size:11px;opacity:.65} .cac-btn:disabled{opacity:.45;cursor:default} .cac-btn:not(:disabled):hover{border-color:currentColor}
+.cac-apple{border:1px solid var(--term-line);border-radius:12px;padding:12px;margin:6px 0 10px}
+@media (max-width:520px){.cac-auto{grid-template-columns:1fr} .cac-row{flex-wrap:wrap} .cac-row>span{flex:1 1 calc(100% - 30px)} .cac-row>.pp-btn{flex:1}}
+.cac-prov{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0} .cac-prov button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer} .cac-prov button.on{border-color:currentColor;font-weight:600;background:color-mix(in srgb,currentColor 14%,transparent)}   /* readable in whichever colours the dialog uses */
 .cac-steps{margin:8px 0 12px;padding-left:20px;font-size:12.5px;line-height:1.6;color:var(--term-dim)} .cac-colors{display:flex;gap:8px;margin:4px 0 10px} .cac-colors button{appearance:none;width:24px;height:24px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer} .cac-colors button.on{outline:2px solid var(--term-fg);outline-offset:2px}
 .cac-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--term-line)} .cac-row i{width:12px;height:12px;border-radius:4px;background:var(--c);flex:none} .cac-row span{flex:1;min-width:0} .cac-row b{display:block;font-size:13px} .cac-row small{display:block;font-size:11.5px;color:var(--term-dim)}
 .cac-feed{display:flex;gap:6px;flex-wrap:wrap} .cac-feed input{flex:1 1 220px;min-width:0;background:var(--surface);border:1px solid var(--term-line);border-radius:9px;color:var(--term-fg);padding:8px 10px;font-family:var(--mono);font-size:11px} .cac-how{font-size:12px;line-height:1.6;color:var(--term-dim);padding-left:18px;margin:10px 0 0}
@@ -6392,6 +6396,7 @@ async function offTick() {
 async function offOnSignedIn() {
   if (!operator) return;
   const m = await offGet('meta', 'sync:' + operator.id); OFF.lastSync = m?.at || 0;
+  try { setTimeout(caOAuthReturn, 900); } catch (e) {}
   await offCount(); offStatus();
   if (!window._offTimer) {
     window._offTimer = setInterval(offTick, 60000);
@@ -15017,26 +15022,27 @@ const caNoonUTC = iso => { const d = new Date(iso); return new Date(d.getUTCFull
 async function caLoadExternal(from, to) {
   const l = await sb.rpc('calendar_link_list');
   if (l.error) { CA.ext = []; CA.extEvents = []; return; }          // the database change is not applied: nothing to show, nothing broken
-  CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count }));
-  if (!CA.ext.length) { CA.extEvents = []; return; }
+  CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count, source: x.source || 'link', acct: x.account_email || '' }));
+  const ac = await sb.rpc('calendar_account_list'); CA.acc = ac.error ? [] : (ac.data || []);
+  if (!CA.ext.length) { CA.extEvents = []; if (CA.acc.length && !CA._syncing) { CA._syncing = true; caSyncExternal(false).finally(() => { CA._syncing = false; }); } return; }
   const e = await sb.rpc('calendar_link_events', { p_from: from.toISOString(), p_to: to.toISOString() });
   CA.extEvents = (e.data || []).map(x => { const all = x.all_day, s = all ? caNoonUTC(x.starts_at) : new Date(x.starts_at);
     return { uid: x.link_id + '|' + x.uid, cal: x.link_id, title: x.title, where: x.location, notes: x.notes, start: s, end: all ? (x.ends_at ? caNoonUTC(x.ends_at) : addDays(s, 1)) : (x.ends_at ? new Date(x.ends_at) : null), allDay: all }; });
-  if (CA.ext.some(c => !c.last || Date.now() - Date.parse(c.last) > 30 * 60e3) && !CA._syncing) { CA._syncing = true; caSyncExternal(false).finally(() => { CA._syncing = false; }); }
+  if ((CA.ext.some(c => !c.last || Date.now() - Date.parse(c.last) > 30 * 60e3) || CA.acc.some(a => !a.last_synced_at || Date.now() - Date.parse(a.last_synced_at) > 30 * 60e3)) && !CA._syncing) { CA._syncing = true; caSyncExternal(false).finally(() => { CA._syncing = false; }); }
 }
 async function caSyncExternal(manual) {
-  if (!opSessionToken || !CA.ext.length) return;
+  if (!opSessionToken || !(CA.ext.length || CA.acc.length)) return;
   try {
     const res = await fetch(`${SB_URL}/functions/v1/calendar-sync`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'x-bixx-session': opSessionToken }, body: '{}' });
     const d = await res.json().catch(() => ({}));
     if (!res.ok) throw new Error(d.error || 'Could not sync your calendars.');
-    const bad = (d.links || []).filter(x => !x.ok);
+    const bad = [...(d.links || []), ...(d.accounts || [])].filter(x => !x.ok);
     if (manual) toast(bad.length ? `${bad.length} calendar${bad.length === 1 ? '' : 's'} could not be read: ${bad[0].error}` : 'Calendars synced.');
     if (document.querySelector('.ca-wrap')) { CA.loaded = null; renderCalendarPanel(); }
   } catch (e) { if (manual) toast(e.message || String(e)); }
 }
 // With the offline copy's 4-hour refresh: ask the server to re-read the member's connected calendars.
-async function caLoadExternalQuiet() { const l = await sb.rpc('calendar_link_list'); if (!l.error && (l.data || []).length) { CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count })); await caSyncExternal(false); } }
+async function caLoadExternalQuiet() { const l = await sb.rpc('calendar_link_list'); const ac = await sb.rpc('calendar_account_list'); CA.acc = ac.error ? [] : (ac.data || []); if (!l.error && ((l.data || []).length || CA.acc.length)) { CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count })); await caSyncExternal(false); } }
 function caShowExternal(uid) {
   const e = (CA.extEvents || []).find(x => x.uid === uid); if (!e) return;
   const cal = CA.ext.find(c => c.id === e.cal);
@@ -15049,29 +15055,81 @@ function caShowExternal(uid) {
       <div class="form-block"><div class="form-lbl">From</div><div>${esc(cal?.name || 'A connected calendar')} <span class="pp-muted">· read only. Change it in that calendar.</span></div></div></div>`;
   });
 }
-const CAC = { provider: 'google', color: CA_COLORS[0], token: null };
-function caConnectDialog() { CAC.msg = ''; openOverlay('Calendars', body => caConnectDraw(body)); caFeedToken(); }
+const CAC = { provider: 'google', color: CA_COLORS[0], token: null, prov: null, apple: false, busy: '', note: '' };
+CA.acc = [];
+function caConnectDialog() { CAC.msg = ''; CAC.apple = false; openOverlay('Calendars', body => caConnectDraw(body)); caFeedToken(); caProviders(); }
 function caConnectDraw(body) {
   body = body || document.getElementById('ov-body'); if (!body) return;
   const pv = CA_PROVIDERS[CAC.provider], feedUrl = CAC.token ? `${SB_URL}/functions/v1/calendar-feed?t=${CAC.token}` : '';
+  const P = CAC.prov || {}, auto = (k, label) => `<button class="cac-btn" ${P[k] ? '' : 'disabled'} onclick="caOAuthStart('${k}')"><b>${label}</b><small>${P[k] ? 'Sign in once. Read only.' : 'Not set up yet'}</small></button>`;
+  const accts = CA.acc.length ? `<div class="form-lbl" style="margin-top:14px">Connected accounts</div>${CA.acc.map(a => `<div class="cac-row"><i style="--c:${CA_COLORS[['google', 'microsoft', 'apple'].indexOf(a.provider) + 0]}"></i><span><b>${esc(a.provider === 'google' ? 'Google' : a.provider === 'microsoft' ? 'Microsoft' : 'Apple')} · ${esc(a.email)}</b><small>${a.last_error ? esc(a.last_error) + ' Connect it again below.' : `${a.calendars} calendar${a.calendars === 1 ? '' : 's'}${a.last_synced_at ? ' · synced ' + esc(agoText(a.last_synced_at)) : ''}`}</small></span><button class="pp-btn" onclick="caSyncExternal(true)">Sync now</button><button class="pp-btn" onclick="caAccountRemove('${esc(a.id)}')">Disconnect</button></div>`).join('')}` : '';
   body.innerHTML = `<div class="term-wf cac">
-    <div class="form-lbl">Bring your calendar in</div>
+    <div class="form-lbl">Connect automatically</div>
+    <p class="pp-muted">Sign in once and your calendar stays in step. The OS only reads your events; it never changes your calendar. You can disconnect at any time.</p>
+    <div class="cac-auto">${auto('google', 'Google')}${auto('microsoft', 'Microsoft')}<button class="cac-btn" ${P.apple === false ? 'disabled' : ''} onclick="CAC.apple=!CAC.apple;caConnectDraw()"><b>Apple (iCloud)</b><small>${P.apple === false ? 'Not set up yet' : 'App-specific password'}</small></button></div>
+    ${CAC.note ? `<div class="pp-form-msg" role="status">${esc(CAC.note)}</div>` : ''}
+    ${CAC.apple ? `<form class="pp-form flat cac-apple" onsubmit="event.preventDefault();caAppleConnect()">
+      <ol class="cac-steps"><li>Go to <b>appleid.apple.com</b> and sign in.</li><li>Open <b>Sign-In and Security → App-Specific Passwords</b> and make one called “Bixxville”.</li><li>Paste it below, with your Apple ID email. It looks like abcd-efgh-ijkl-mnop. Use this, not your Apple ID password.</li></ol>
+      <label><span>Apple ID email</span><input id="cac-aid" type="email" autocomplete="off" required></label>
+      <label><span>App-specific password</span><input id="cac-apw" type="password" autocomplete="off" required placeholder="abcd-efgh-ijkl-mnop"></label>
+      <button class="pp-btn solid big" type="submit" ${CAC.busy === 'apple' ? 'disabled' : ''}>${CAC.busy === 'apple' ? 'Connecting…' : 'Connect Apple calendars'}</button>
+      <p class="pp-muted">It can only read calendars. It is sealed before it is saved, and you can revoke it any time in your Apple ID settings.</p></form>` : ''}
+    <p class="pp-muted">Proton gives other apps no calendar access, so for Proton use a link, below.</p>
+    ${accts}
+    <div class="form-lbl" style="margin-top:20px">Or paste a calendar link</div>
+    <div class="form-lbl" style="margin-top:6px">Bring your calendar in</div>
     <div class="cac-prov">${Object.entries(CA_PROVIDERS).map(([k, v]) => `<button class="${CAC.provider === k ? 'on' : ''}" onclick="CAC.provider='${k}';caConnectDraw()">${esc(v[0])}</button>`).join('')}</div>
     <ol class="cac-steps">${pv[1].map(x => `<li>${esc(x)}</li>`).join('')}</ol>
     <form class="pp-form flat" onsubmit="event.preventDefault();caConnectSave()">
       <label><span>Name</span><input id="cac-name" maxlength="80" value="${esc(CAC.name || pv[0])}" required></label>
-      <label><span>Calendar link</span><input id="cac-url" autocomplete="off" spellcheck="false" placeholder="https://… or webcal://…" required></label>
+      <label><span>Calendar link <em>the web address your calendar app gives you to share this calendar</em></span><input id="cac-url" autocomplete="off" spellcheck="false" placeholder="https://… or webcal://…" required></label>
       <div class="cac-colors" role="radiogroup" aria-label="Colour">${CA_COLORS.map(c => `<button type="button" role="radio" aria-checked="${CAC.color === c}" class="${CAC.color === c ? 'on' : ''}" style="--c:${c}" onclick="CAC.color='${c}';caConnectDraw()"></button>`).join('')}</div>
       <div class="pp-form-msg" id="cac-msg">${esc(CAC.msg || '')}</div>
       <button class="pp-btn solid big" type="submit">Connect</button>
       <p class="pp-muted">Read only. The OS reads your calendar and shows its events here; it never changes it. The link is kept private and only you can use it. Anyone who has the link can read that calendar, so remove it here if you stop trusting it.</p>
     </form>
-    ${CA.ext.length ? `<div class="form-lbl" style="margin-top:18px">Connected</div>${CA.ext.map(c => `<div class="cac-row"><i style="--c:${esc(c.color)}"></i><span><b>${esc(c.name)}</b><small>${c.err ? esc(c.err) : c.last ? `${c.n} events · synced ${esc(agoText(c.last))}` : 'Not read yet'}</small></span>
+    ${CA.ext.some(c => c.source === 'link') ? `<div class="form-lbl" style="margin-top:18px">Pasted links</div>${CA.ext.filter(c => c.source === 'link').map(c => `<div class="cac-row"><i style="--c:${esc(c.color)}"></i><span><b>${esc(c.name)}</b><small>${c.err ? esc(c.err) : c.last ? `${c.n} events · synced ${esc(agoText(c.last))}` : 'Not read yet'}</small></span>
       <button class="pp-btn" onclick="caSyncExternal(true)">Sync now</button><button class="pp-btn" onclick="caRemoveLink('${esc(c.id)}')">Remove</button></div>`).join('')}` : ''}
     <div class="form-lbl" style="margin-top:20px">Show the OS in your calendar</div>
     <p class="pp-muted">Subscribe to this private address in your own calendar app and the OS calendar (shared events and your steps) appears there, refreshed every few hours by that app. Don’t share it: it is the key to your feed.</p>
     <div class="cac-feed"><input readonly value="${esc(feedUrl || 'Making your address…')}" onclick="this.select()" aria-label="Your feed address"><button class="pp-btn" ${feedUrl ? '' : 'disabled'} onclick="copyText('${esc(feedUrl)}','Feed address')">Copy</button><button class="pp-btn" onclick="caFeedReset()">Make a new one</button></div>
     <ul class="cac-how">${Object.values(CA_FEED_HOW).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+}
+async function caProviders() {
+  try { const r = await fetch(`${SB_URL}/functions/v1/calendar-oauth?action=providers`, { headers: { apikey: SB_KEY } }); CAC.prov = r.ok ? await r.json() : null; } catch (e) { CAC.prov = null; }
+  if (!CAC.prov) CAC.prov = { google: false, microsoft: false, apple: false };
+  caConnectDraw();
+}
+async function caOauthCall(body) {
+  const r = await fetch(`${SB_URL}/functions/v1/calendar-oauth`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'x-bixx-session': opSessionToken || '' }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({})); if (!r.ok) throw new Error(d.error || 'That did not work.'); return d;
+}
+// Google and Microsoft: go to their sign-in page; they send you back here when you have allowed (or not).
+async function caOAuthStart(provider) {
+  try { CAC.note = ''; const d = await caOauthCall({ action: 'start', provider }); location.href = d.url; }
+  catch (e) { CAC.note = e.message || String(e); caConnectDraw(); }
+}
+async function caAppleConnect() {
+  const v = id => document.getElementById(id)?.value || '';
+  CAC.busy = 'apple'; CAC.note = ''; caConnectDraw();
+  try { const d = await caOauthCall({ action: 'apple', user: v('cac-aid'), password: v('cac-apw') }); CAC.apple = false; CAC.note = `Apple connected. ${d.calendars} calendar${d.calendars === 1 ? '' : 's'} read.`; CA.loaded = null; await renderCalendarPanel(); }
+  catch (e) { CAC.note = e.message || String(e); }
+  CAC.busy = ''; caConnectDraw();
+}
+async function caAccountRemove(id) {
+  if (!confirm('Disconnect this account? Its calendars disappear from the OS; your own calendars are not touched.')) return;
+  try { await caOauthCall({ action: 'remove', id }); CAC.note = 'Disconnected.'; CA.loaded = null; await renderCalendarPanel(); }
+  catch (e) { CAC.note = e.message || String(e); }
+  caConnectDraw();
+}
+// Coming back from Google or Microsoft: the address carries ?calendar=… . Say what happened and open the calendar.
+function caOAuthReturn() {
+  const q = new URLSearchParams(location.search), r = q.get('calendar'); if (!r) return;
+  const say = { connected: 'Calendar connected. Reading it now…', cancelled: 'Sign-in cancelled. Nothing was connected.', expired: 'That sign-in took too long. Try again.', failed: 'Could not connect that account. Try again.', norefresh: 'Google did not allow lasting access. Remove the app at myaccount.google.com/permissions and connect again.', notset: 'That sign-in is not set up yet.' };
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}
+  toast(say[r] || 'Done.');
+  DC.tab = 'folders'; try { setTermView('calendar'); } catch (e) {}
+  if (r === 'connected') { CA.loaded = null; setTimeout(() => { renderCalendarPanel(); caSyncExternal(false); }, 400); }
 }
 async function caConnectSave() {
   const v = id => document.getElementById(id)?.value || '';

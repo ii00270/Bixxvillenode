@@ -3971,10 +3971,10 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .ca-ph-card b{font-size:15px;font-weight:500} .ca-ph-card small{color:var(--term-dim);font-size:12.5px} .ca-ph-card span{font-size:12.5px;color:var(--term-dim)} .ca-ph-card p{margin:6px 0 0;background:var(--term-bg);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5}
 @media (max-width:760px){ .ca-wrap{grid-template-columns:1fr} }
 /* Chat: list, conversation, person card; phone shows one at a time (ch-) */
-#term-panel.ch-fit{overflow:hidden;padding:10px 16px 0;display:flex;flex-direction:column}
+#term-panel.ch-fit{overflow:hidden;padding:8px 0 0;display:flex;flex-direction:column;overscroll-behavior:none;touch-action:pan-y}
 #term-panel.ch-fit>.ch-wrap{flex:1;min-height:0}
-@media (max-width:767px){ #term-panel.ch-fit{padding:6px 10px 0} }
-.ch-wrap{color:var(--term-fg);position:relative;display:grid;grid-template-columns:320px minmax(0,1fr);height:100%;min-height:0;border:1px solid var(--term-line);border-radius:18px;overflow:hidden;background:var(--term-bg)}
+@media (max-width:767px){ #term-panel.ch-fit{padding:0} }
+.ch-wrap{color:var(--term-fg);position:relative;display:grid;grid-template-columns:320px minmax(0,1fr);height:100%;min-height:0;border:0;border-top:1px solid var(--term-line);border-radius:0;overflow:hidden;background:var(--term-bg);overscroll-behavior:none}
 .ch-wrap[data-layout="wide"][data-info="1"]{grid-template-columns:320px minmax(0,1fr) 290px}
 .ch-wrap[data-layout="medium"]{grid-template-columns:290px minmax(0,1fr)}
 .ch-wrap[data-layout="phone"]{grid-template-columns:minmax(0,1fr)}
@@ -3987,9 +3987,9 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .ch-ic{appearance:none;border:0;background:transparent;color:var(--term-fg);width:40px;height:40px;border-radius:50%;display:grid;place-items:center;cursor:pointer;flex:none;margin:0}
 .ch-ic:hover{background:color-mix(in srgb,var(--term-fg) 8%,transparent)} .ch-ic svg{width:22px;height:22px}
 .ch-search{display:flex;align-items:center;gap:8px;margin:0 6px 8px;padding:0 12px;height:40px;border-radius:12px;background:color-mix(in srgb,var(--term-fg) 7%,transparent);color:var(--term-dim)}
-.ch-search svg{width:17px;height:17px;flex:none} .ch-search input{flex:1;min-width:0;border:0;background:transparent;color:var(--term-fg);font:inherit;font-size:15px;outline:0;padding:0}
+.ch-search svg{width:17px;height:17px;flex:none} .ch-search input{flex:1;min-width:0;font-family:inherit!important;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;height:auto!important;color:var(--term-fg);font:inherit;font-size:15px;outline:0;padding:0!important;margin:0!important}
 .ch-filter{display:flex;gap:6px;margin:0 6px 8px} .ch-filter button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-dim);border-radius:999px;padding:5px 13px;font:inherit;font-size:13px;cursor:pointer;margin:0} .ch-filter button.on{background:var(--term-fg);color:var(--term-bg);border-color:var(--term-fg)} .ch-filter em{font-style:normal;margin-left:3px}
-.ch-list{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding-bottom:10px}
+.ch-list{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding-bottom:10px}
 .ch-item{appearance:none;display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:transparent;color:var(--term-fg);font:inherit;padding:10px 8px;border-radius:14px;cursor:pointer;margin:0}
 .ch-item:hover{background:color-mix(in srgb,var(--term-fg) 5%,transparent)} .ch-item.on{background:color-mix(in srgb,var(--term-fg) 9%,transparent)}
 .ch-av{width:46px;height:46px;border-radius:50%;flex:none;display:grid;place-items:center;overflow:hidden;background:color-mix(in srgb,var(--term-fg) 12%,transparent);color:var(--term-fg);font-weight:600;font-size:15px} .ch-av img{width:100%;height:100%;object-fit:cover} .ch-av.lg{width:84px;height:84px;font-size:28px}
@@ -4005,7 +4005,7 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .ch-head .ch-av{width:40px;height:40px;font-size:14px} .ch-hn{flex:1;min-width:0} .ch-hn b{display:block;font-size:16px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis} .ch-hn small{display:block;font-size:12.5px;color:var(--term-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ch-back{display:none} .ch-wrap[data-layout="phone"] .ch-back{display:grid}
 .ch-wrap[data-layout="phone"] .ch-infobtn,.ch-wrap[data-layout="wide"][data-info="1"] .ch-infobtn{display:none}
-.ch-msgs{flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;padding:12px 16px 8px;display:flex;flex-direction:column;gap:3px;scroll-behavior:auto}
+.ch-msgs{flex:1;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:12px 16px 8px;display:flex;flex-direction:column;gap:3px;scroll-behavior:auto}
 .ch-day{align-self:center;font-size:12px;color:var(--term-dim);padding:12px 0 6px}
 .ch-grp{display:flex;flex-direction:column;align-items:flex-start;gap:2px;max-width:min(78%,560px);margin-bottom:8px} .ch-grp.mine{align-self:flex-end;align-items:flex-end}
 .ch-b{padding:9px 13px;border-radius:18px;background:color-mix(in srgb,var(--term-fg) 10%,var(--term-bg));font-size:15px;line-height:1.45;white-space:pre-wrap;overflow-wrap:anywhere}
@@ -14687,11 +14687,15 @@ function chatRenderList() {
   document.getElementById('ch-f-all')?.classList.toggle('on', !CH.unread); document.getElementById('ch-f-un')?.classList.toggle('on', CH.unread);
   const bn = document.getElementById('ch-un-n'); if (bn) bn.textContent = un || '';
   const rows = CH.convs.filter(c => (!q || (c.other_name || '').toLowerCase().includes(q) || (c.last_body || '').toLowerCase().includes(q)) && (!CH.unread || chUnread(c.conversation_id)));
+  const sig = JSON.stringify([rows.map(c => [c.conversation_id, c.other_name, c.last_body, c.last_voice_url, c.last_message_at, chUnread(c.conversation_id)]), CH.active, CH.unread, CH.q, CH.convs.length]);
+  if (el.dataset.sig === sig) return; el.dataset.sig = sig;
+  const keep = el.scrollTop;
   el.innerHTML = rows.map(c => { const u = chUnread(c.conversation_id);
     return `<button class="ch-item ${CH.active === c.conversation_id ? 'on' : ''} ${u ? 'unread' : ''}" onclick="chatOpenConversation('${esc(c.conversation_id)}')">
       ${chAv(c.other_name, c.other_avatar_url)}<span class="ch-it"><b>${esc(c.other_name)}</b><small>${c.last_voice_url && !c.last_body ? chSvg('mic') : ''}${esc(chPreview(c))}</small></span>
       <span class="ch-im"><time>${esc(chListTime(c.last_message_at))}</time>${u ? `<i aria-label="${u} unread">${u}</i>` : ''}</span></button>`; }).join('')
     || `<div class="ch-none">${CH.convs.length ? (CH.unread ? 'Nothing unread.' : 'No chats match.') : 'No chats yet.<br><button class="ch-link" onclick="chFind(true)">Start one</button>'}</div>`;
+  el.scrollTop = keep;
 }
 function chUnreadOnly(v) { CH.unread = v; chatRenderList(); }
 

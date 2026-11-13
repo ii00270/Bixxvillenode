@@ -16120,9 +16120,12 @@ const blSlug = t => String(t || 'contract').toLowerCase().replace(/[^a-z0-9]+/g,
 async function bfImport(input) {
   const f = input.files?.[0]; input.value = '';
   if (!f) return;
+  return bfImportText(f.name, await f.text());
+}
+async function bfImportText(name, text) {
   BF.msg = null;
-  const r = await BXF.open(await f.text());
-  if (!r.ok) BF.msg = { kind: 'bad', head: `${f.name} could not be opened`, lines: r.problems };
+  const r = await BXF.open(text);
+  if (!r.ok) BF.msg = { kind: 'bad', head: `${name} could not be opened`, lines: r.problems };
   else {
     return vtRequire(async () => { await bfImportApply(r); });
   }
@@ -16285,10 +16288,22 @@ async function bwSaveGo(download) {
 // ── The device code: first use asks for one, later uses unlock with it. Wrong codes follow the lockout (LK). ──
 const VS = { key: null, rec: null, dev: null, lk: null, ask: false, after: null, msg: '', hideTimer: null };
 async function vtLoad() {
-  try { VS.rec = (await blGet('keys', 'vault')) || null; VS.dev = (await blGet('keys', 'dev')) || null; VS.lk = (await blGet('keys', 'lock')) || LK.fresh(); } catch (e) { VS.lk = VS.lk || LK.fresh(); }
+  try { VS.rec = (await blGet('keys', 'vault')) || null; VS.dev = window.bixxDesktop?.deviceKey ? null : ((await blGet('keys', 'dev')) || null); VS.lk = (await blGet('keys', 'lock')) || LK.fresh(); } catch (e) { VS.lk = VS.lk || LK.fresh(); }
 }
 const vtStatus = () => VS.key ? 'open' : VS.rec ? 'locked' : 'none';
-async function vtDev() { if (!VS.dev) { VS.dev = await VT.newDeviceKey(); await blPut('keys', 'dev', VS.dev); } return VS.dev; }
+// In the desktop app the device key comes from the computer's own key store (macOS Keychain / Windows DPAPI), so a copied profile
+// folder is not enough to open a vault. In a browser it is a key the browser holds and will not hand to the page.
+async function vtDev() {
+  if (window.bixxDesktop?.deviceKey) {
+    if (VS.dev && VS.dev.desktop) return VS.dev;
+    const r = await window.bixxDesktop.deviceKey();
+    if (!r || !r.key) throw new Error(r?.error || 'The computer\'s key store did not release this device\'s key.');
+    VS.dev = await crypto.subtle.importKey('raw', Uint8Array.from(atob(r.key), c => c.charCodeAt(0)), 'AES-GCM', false, ['encrypt', 'decrypt']);
+    VS.dev.desktop = true; return VS.dev;
+  }
+  if (!VS.dev) { VS.dev = await VT.newDeviceKey(); await blPut('keys', 'dev', VS.dev); }
+  return VS.dev;
+}
 function vtRequire(fn) { if (VS.key) return fn(); VS.after = fn; VS.ask = true; VS.msg = ''; bfRedraw(); }
 function vtCancel() { VS.ask = false; VS.after = null; VS.msg = ''; bfRedraw(); }
 function vtLockNow(silent) {
@@ -16410,6 +16425,20 @@ function bsStrip() {
     <button class="bf-btn" onclick="bixxSync(true)" ${BS.busy ? 'disabled' : ''}>Sync now</button>${BS.note ? `<small>${esc(BS.note)}</small>` : ''}</div>`;
 }
 
+// The desktop app hands over a .bixx file the user double-clicked or chose from its File menu. Nothing is run: it is read as data and
+// goes through the same checks as a file opened from the screen. Before sign-in it waits.
+window._bixxPending = window._bixxPending || null;
+async function bixxDesktopOpen(name, text) {
+  if (!operator) { window._bixxPending = { name, text }; try { toast('Sign in to open ' + name + '.'); } catch (e) {} return; }
+  window._bixxPending = null;
+  DC.tab = 'folders';
+  try { setTermView('tracker'); } catch (e) {}
+  await renderFoldersPanel().catch(() => {});
+  await bfImportText(name, String(text));
+}
+if (window.bixxDesktop?.onOpen) window.bixxDesktop.onOpen((name, text) => { bixxDesktopOpen(name, text); });
+if (window.bixxDesktop?.onLock) window.bixxDesktop.onLock(() => { try { vtLockNow(); } catch (e) {} });
+
 const BF = { sel: 1, view: 'folders', ops: null, opsAt: 0, local: null, msg: null, src: null };
 const bfMoney = c => (c / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 const BF_STATUS = {
@@ -16435,6 +16464,7 @@ const bfName = id => { const o = (BF.ops || []).find(x => x.id === id); return o
 
 async function renderFoldersPanel() {
   bsLoad();
+  if (window._bixxPending && operator) { const p = window._bixxPending; window._bixxPending = null; setTimeout(() => bixxDesktopOpen(p.name, p.text), 0); }
   const panel = document.getElementById('term-panel');
   panel.classList.add('dc-on');
   if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('folders') + '<div class="dc dc-body"><div class="dc-loading">Opening the folders…</div></div>';

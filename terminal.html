@@ -3986,23 +3986,23 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 @media (max-width:760px){
   #term-panel.ca-fit{padding:8px 12px 0}
   .ca-wrap.ca-phone{display:flex;flex-direction:column;height:100%;position:relative}
-  .ca-ph-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;padding:2px 0 8px}
-  .ca-pill{appearance:none;display:inline-flex;align-items:center;gap:2px;border:1px solid var(--term-line);background:color-mix(in srgb,var(--term-fg) 7%,var(--term-bg));color:var(--term-fg);border-radius:999px;padding:4px;font:inherit;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
-  button.ca-pill{padding:10px 16px} .ca-pill button{appearance:none;border:0;background:transparent;color:var(--term-fg);width:44px;height:38px;display:grid;place-items:center;cursor:pointer;border-radius:999px;font:inherit} .ca-pill svg{width:21px;height:21px} .ca-pill span{padding-right:4px}
-  .ca-ph-title{margin:2px 4px 6px;font-size:34px;font-weight:700;letter-spacing:-.02em;flex:none} .ca-ph-title.accent{color:var(--neon)}
+  .ca-ph-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;padding:0 0 4px}
+  .ca-pill{appearance:none;display:inline-flex;align-items:center;gap:0;border:1px solid var(--term-line);background:color-mix(in srgb,var(--term-fg) 7%,var(--term-bg));color:var(--term-fg);border-radius:999px;padding:2px;font:inherit;font-size:14px;margin:0}
+  button.ca-pill{padding:7px 14px;gap:2px} .ca-pill button{appearance:none;border:0;background:transparent;color:var(--term-fg);width:40px;height:32px;margin:0;display:grid;place-items:center;cursor:pointer;border-radius:999px;font:inherit} .ca-pill svg{width:19px;height:19px} .ca-pill span{padding-right:2px}
+  .ca-ph-title{margin:0 4px 4px;font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1.1;flex:none} .ca-ph-title.accent{color:var(--neon)}
   .ca-ph-body{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
   .ca-month-h span{text-align:center;padding:6px 0} .ca-mc>b{align-self:center;font-size:17px;font-weight:500;width:32px;min-width:32px;height:32px;display:grid;place-items:center;border-radius:50%} .ca-mc{padding:3px 2px;align-items:stretch} .ca-mc.out>b{opacity:.45}
   .ca-mchip{font-size:10px;padding:1px 4px;border-radius:5px;line-height:1.4} .ca-more{text-align:center}
   .ca-dots{display:flex;gap:3px;justify-content:center;margin-top:3px} .ca-dots i{width:6px;height:6px;border-radius:50%;background:var(--c)} .ca-bar3{height:5px;border-radius:3px;background:var(--c);margin:2px 3px 0}
   .ca-month.m-compact .ca-mc,.ca-month.m-stacked .ca-mc{align-items:stretch} .ca-mc.sel>b{background:var(--term-fg);color:var(--term-bg)}
-  .ca-month.m-list{flex:none} .ca-month.m-list .ca-month-g{flex:none;grid-template-rows:repeat(6,46px);grid-auto-rows:46px} .ca-ml{padding:8px 4px 120px;overflow:auto;max-height:36vh;overscroll-behavior:contain}
+  .ca-month.m-list{flex:none} .ca-month.m-list .ca-month-g{flex:none;grid-template-rows:repeat(6,46px);grid-auto-rows:46px} .ca-ml{padding:8px 4px 8px;overflow:auto;max-height:36vh;overscroll-behavior:contain}
   .ca-ml-row{appearance:none;display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid var(--term-line);background:transparent;color:var(--term-fg);font:inherit;font-size:16px;padding:11px 4px} .ca-ml-row i{width:14px;height:14px;border-radius:50%;border:2px solid var(--c)} .ca-ml-row em{font-style:normal;color:var(--term-dim);font-size:14px}
   .ca-ph-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;flex:none;border-bottom:1px solid var(--term-line);padding-bottom:6px} .ca-ph-strip button{appearance:none;border:0;background:transparent;color:var(--term-fg);font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;cursor:pointer}
   .ca-ph-strip span{font-size:11px;color:var(--term-dim)} .ca-ph-strip b{font-size:19px;font-weight:500;min-width:38px;height:38px;display:grid;place-items:center;border-radius:50%} .ca-ph-strip button.today b{color:var(--neon)} .ca-ph-strip button.on b{background:var(--neon);color:#0A0A0A}
   .ca-ph-date{flex:none;text-align:center;font-weight:600;font-size:15px;padding:10px 0 6px}
-  .ca-phone .ca-grid-wrap{padding-bottom:96px} .ca-phone .ca-dh,.ca-phone .ca-corner{display:none} .ca-phone .ca-grid{min-width:0!important}
-  .ca-phone .ca-agenda,.ca-phone .ca-year{padding-bottom:110px} .ca-year{grid-template-columns:repeat(3,1fr);gap:18px 14px}
-  .ca-dock{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:5} .ca-dock>*{pointer-events:auto}
+  .ca-phone .ca-grid-wrap{padding-bottom:8px} .ca-phone .ca-dh,.ca-phone .ca-corner{display:none} .ca-phone .ca-grid{min-width:0!important}
+  .ca-phone .ca-agenda,.ca-phone .ca-year{padding-bottom:8px} .ca-year{grid-template-columns:repeat(3,1fr);gap:18px 14px}
+  .ca-dock{flex:none;display:flex;justify-content:space-between;align-items:center;padding:6px 0 8px;border-top:1px solid var(--term-line)}
   .ca-sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:8} .ca-sheet{position:absolute;left:0;right:0;bottom:0;z-index:9;max-height:78%;overflow:auto;background:var(--term-bg);border:1px solid var(--term-line);border-radius:24px 24px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
   .ca-sheet h3{margin:0 36px 12px 2px;font-size:17px} .ca-sheet-x{position:absolute;right:12px;top:12px;appearance:none;border:0;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--term-fg) 8%,transparent);color:var(--term-fg);cursor:pointer}
   .ca-opt{appearance:none;display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;background:transparent;color:var(--term-fg);font:inherit;font-size:16px;padding:13px 4px;border-bottom:1px solid var(--term-line);cursor:pointer} .ca-opt svg{width:22px;height:22px;color:var(--term-dim)} .ca-opt span{flex:1} .ca-opt.on svg:last-child{color:var(--term-fg)}

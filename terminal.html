@@ -3884,6 +3884,125 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .bs-strip{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--dc-dim);margin:0 0 12px;padding:8px 12px;border:1px solid var(--dc-line);border-radius:12px;background:var(--dc-card)} .bs-strip b{color:var(--dc-fg);font-weight:600} .bs-strip small{flex-basis:100%;color:var(--dc-dim)} .bs-strip .bf-btn{margin-left:auto;padding:5px 11px}
 .bw-nav{display:flex;justify-content:space-between;margin-top:14px}
 @media (max-width:640px){ .bw-l1{grid-template-columns:42px minmax(0,1fr) 56px 28px} .bw-l1 select{grid-column:2/4} .bw-l2{margin-left:0;grid-template-columns:1fr} }
+/* Section bar (Dashboard tabs, Decomposition | Analog toggle) */
+#sec-bar{flex:none;display:flex;padding:14px 20px 0;position:relative;z-index:2}
+@media (min-width:768px){ #sec-bar{padding:20px 48px 0} }
+@media (max-width:767px){ #sec-bar{padding-top:calc(58px + env(safe-area-inset-top,0px)); overflow-x:auto;-webkit-overflow-scrolling:touch} #terminal-shell.has-secbar #term-home{padding-top:14px} }
+.sec-tabs{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--term-line);border-radius:14px;background:color-mix(in srgb,var(--term-fg) 3%,transparent);max-width:100%}
+.sec-tabs button{appearance:none;display:inline-flex;align-items:center;gap:7px;border:0;background:transparent;color:var(--term-dim);font:inherit;font-size:13px;padding:8px 13px;border-radius:10px;cursor:pointer;white-space:nowrap}
+.sec-tabs button svg{width:16px;height:16px;flex:none}
+.sec-tabs button:hover{color:var(--term-fg)}
+.sec-tabs button.on{background:var(--term-fg);color:var(--term-bg)}
+.sec-tabs button:focus-visible{outline:2px solid var(--term-fg);outline-offset:2px}
+.sec-tabs .term-sb-count{font-style:normal;font-size:11px}
+.sec-tabs .term-sb-count:empty{display:none}
+.sec-tabs button.on .term-sb-count.hot{background:#FF2D95;color:#fff}
+.lg-wrap.compact .pp-head{display:none} .lg-wrap.compact .lg-sum{grid-template-columns:repeat(3,1fr)} .lg-all{margin-top:10px;width:100%;justify-content:center}
+/* Profile, grouped list (pf2-) */
+#pf .pf2{padding:0 0 28px}
+.pf2-bar{position:sticky;top:0;z-index:4;display:grid;grid-template-columns:42px 1fr 42px;align-items:center;gap:8px;padding:16px 18px 10px;background:var(--term-bg)}
+.pf2-bar b{text-align:center;font-size:15px;font-weight:600;letter-spacing:0;text-transform:none}
+.pf2-ic{appearance:none;width:40px;height:40px;border-radius:50%;border:0;background:color-mix(in srgb,var(--term-fg) 7%,transparent);color:var(--term-fg);display:grid;place-items:center;cursor:pointer}
+.pf2-ic svg{width:19px;height:19px}
+.pf2-search{padding:0 18px 10px} .pf2-search input{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:12px;background:transparent;color:var(--term-fg);padding:11px 14px;font:inherit;font-size:14px}
+.pf2-home,.pf2-detail{padding:4px 18px 0;display:flex;flex-direction:column;gap:14px} .pf2-detail{display:block} .pf2-detail[hidden],.pf2-home[hidden]{display:none}
+.pf2-user{appearance:none;display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:1px solid var(--term-line);border-radius:18px;background:color-mix(in srgb,var(--term-fg) 3%,transparent);color:var(--term-fg);padding:14px 16px;cursor:pointer;font:inherit}
+.pf2-av{width:46px;height:46px;border-radius:50%;overflow:hidden;flex:none;display:grid;place-items:center} .pf2-av img{width:100%;height:100%;object-fit:cover}
+.pf2-who{flex:1;min-width:0} .pf2-who b{display:block;font-size:16px;font-weight:600} .pf2-who small{display:block;color:var(--term-dim);font-size:13px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf2-chev{width:18px;height:18px;color:var(--term-dim);flex:none}
+.pf2-banner{display:flex;align-items:center;gap:14px;border-radius:20px;padding:18px;background:#1c1c1e;color:#fff;position:relative;overflow:hidden}
+.pf2-spark{width:44px;height:44px;flex:none;color:var(--neon,#FF2D95);display:grid;place-items:center} .pf2-spark svg{width:34px;height:34px}
+.pf2-banner div{flex:1;min-width:0} .pf2-banner b{display:block;font-size:16px;font-weight:600} .pf2-banner p{margin:4px 0 0;font-size:12.5px;line-height:1.5;color:rgba(255,255,255,.72)}
+.pf2-banner button{appearance:none;flex:none;border:1px solid rgba(255,255,255,.28);background:rgba(255,255,255,.1);color:#fff;border-radius:999px;padding:8px 16px;font:inherit;font-size:13px;cursor:pointer}
+.pf2-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px} .pf2-stats div{border:1px solid var(--term-line);border-radius:14px;padding:10px 6px;text-align:center}
+.pf2-stats b{display:block;font-size:18px;font-weight:700;font-variant-numeric:tabular-nums} .pf2-stats span{font-size:11px;color:var(--term-dim)}
+.pf2-group{border:1px solid var(--term-line);border-radius:18px;background:color-mix(in srgb,var(--term-fg) 3%,transparent);overflow:hidden}
+.pf2-row{appearance:none;display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--term-line);background:transparent;color:var(--term-fg);padding:14px 16px;cursor:pointer;font:inherit}
+.pf2-row:last-child{border-bottom:0} .pf2-row:hover{background:color-mix(in srgb,var(--term-fg) 5%,transparent)} .pf2-row[hidden]{display:none}
+.pf2-row>svg:first-child{width:21px;height:21px;color:var(--term-dim);flex:none}
+.pf2-row span{flex:1;min-width:0} .pf2-row b{display:block;font-size:15px;font-weight:500} .pf2-row small{display:block;font-size:12px;color:var(--term-dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pf2-row.danger b{color:#EF4444} .pf2-row.danger>svg:first-child{color:#EF4444}
+.pf2-none{text-align:center;color:var(--term-dim);padding:30px 0;font-size:14px}
+.pf2-langs{display:grid;grid-template-columns:repeat(2,1fr);gap:8px} .pf2-langs button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);border-radius:12px;padding:12px;font:inherit;cursor:pointer} .pf2-langs button.on{background:var(--term-fg);color:var(--term-bg)}
+#pf-ledger-host .lg-wrap{padding:0}
+/* Calendar: Day / Week / Month / Agenda, mini month, calendar list, phone schedule (ca-) */
+.ca-chip{--cc:var(--c,#FF2D95)} .ca-ev{left:auto;right:auto;border-left-color:var(--c,#FF2D95);background:color-mix(in srgb,var(--c,#FF2D95) 15%,var(--term-bg));overflow:hidden}
+.ca-ev:hover{background:color-mix(in srgb,var(--c,#FF2D95) 26%,var(--term-bg))} .ca-dh{appearance:none;font:inherit;color:inherit;cursor:pointer}
+.ca-wrap{grid-template-columns:268px minmax(0,1fr)}
+.ca-create{width:100%;justify-content:center;margin-bottom:12px}
+.ca-mini{margin:0 0 12px} .ca-mini-h{display:flex;align-items:center;gap:4px;margin-bottom:6px} .ca-mini-h b{flex:1;font-size:13px;font-weight:600}
+.ca-mini-g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center} .ca-mini-g .dow{font-style:normal;font-size:10px;color:var(--term-dim);padding:3px 0}
+.ca-mini-g button{appearance:none;position:relative;border:0;background:transparent;color:var(--term-fg);font:inherit;font-size:11.5px;height:28px;border-radius:50%;cursor:pointer}
+.ca-mini-g button.out{color:var(--term-dim);opacity:.55} .ca-mini-g button:hover{background:var(--term-line)} .ca-mini-g button.view{background:color-mix(in srgb,var(--term-fg) 9%,transparent)}
+.ca-mini-g button.today{background:var(--neon);color:#0A0A0A;font-weight:700} .ca-mini-g button.busy::after{content:'';position:absolute;left:50%;bottom:2px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:currentColor;opacity:.6}
+.ca-cals{margin:6px 0 10px;padding-top:10px;border-top:1px solid var(--term-line)} .ca-cals h5{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;color:var(--term-dim);margin:0 0 6px;font-weight:500}
+.ca-cal{display:flex;align-items:center;gap:9px;padding:4px 2px;font-size:12.5px;cursor:pointer} .ca-cal input{position:absolute;opacity:0;pointer-events:none}
+.ca-cal i{width:15px;height:15px;border-radius:4px;border:2px solid var(--c);flex:none;box-sizing:border-box} .ca-cal input:checked+i{background:var(--c)} .ca-cal input:focus-visible+i{outline:2px solid var(--term-fg);outline-offset:2px}
+.ca-link{appearance:none;border:0;background:none;color:var(--term-dim);font:inherit;font-size:12px;padding:6px 2px;cursor:pointer;text-align:left} .ca-link:hover{color:var(--term-fg)}
+.ca-sidework{border-top:1px solid var(--term-line);padding-top:8px}
+.ca-month{display:flex;flex-direction:column;min-width:0} .ca-month-h{display:grid;grid-template-columns:repeat(7,1fr);border-bottom:1px solid var(--term-line)} .ca-month-h span{font-size:11px;color:var(--term-dim);padding:8px;text-align:right}
+.ca-month-g{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));grid-auto-rows:minmax(112px,1fr)}
+.ca-mc{border-right:1px solid var(--term-line);border-bottom:1px solid var(--term-line);padding:4px;display:flex;flex-direction:column;gap:2px;min-width:0;cursor:pointer} .ca-mc:nth-child(7n){border-right:0} .ca-mc.out{background:color-mix(in srgb,var(--term-fg) 3%,transparent)} .ca-mc.out>b{opacity:.5}
+.ca-mc>b{align-self:flex-end;font-size:12px;font-weight:500;min-width:24px;height:24px;display:grid;place-items:center;border-radius:50%;cursor:pointer} .ca-mc.today>b{background:var(--neon);color:#0A0A0A}
+.ca-mchip{appearance:none;display:flex;gap:5px;align-items:center;text-align:left;width:100%;border:0;border-radius:6px;font:inherit;font-size:11px;padding:2px 6px;cursor:pointer;color:var(--term-fg);background:color-mix(in srgb,var(--c) 15%,var(--term-bg));border-left:3px solid var(--c);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.ca-mchip.all{background:color-mix(in srgb,var(--c) 28%,var(--term-bg))} .ca-mchip em{font-style:normal;color:var(--term-dim);flex:none} .ca-more{appearance:none;border:0;background:none;color:var(--term-dim);font:inherit;font-size:11px;text-align:left;padding:1px 4px;cursor:pointer}
+.ca-agenda{padding:6px 14px 20px;overflow:auto;max-height:calc(100vh - 230px)} .ca-agenda section{display:grid;grid-template-columns:150px 1fr;gap:4px 14px;padding:12px 0;border-bottom:1px solid var(--term-line)}
+.ca-agenda h5{margin:0;display:flex;align-items:center;gap:10px;font-weight:500;font-size:13px;align-self:start} .ca-agenda h5 b{font-size:22px;font-weight:500;min-width:36px;height:36px;display:grid;place-items:center;border-radius:50%} .ca-agenda h5.today b{background:var(--neon);color:#0A0A0A} .ca-agenda h5 span{color:var(--term-dim);font-size:12px}
+.ca-agenda section>.ca-arow{grid-column:2} .ca-arow{appearance:none;display:grid;grid-template-columns:10px 130px 1fr;gap:10px;align-items:start;width:100%;text-align:left;border:0;background:transparent;color:var(--term-fg);font:inherit;padding:6px 8px;border-radius:10px;cursor:pointer}
+.ca-arow:hover{background:var(--term-line)} .ca-arow i{width:10px;height:10px;border-radius:50%;background:var(--c);margin-top:4px} .ca-arow em{font-style:normal;font-size:12px;color:var(--term-dim)} .ca-arow b{font-size:13px;font-weight:500} .ca-arow small{display:block;font-size:11.5px;color:var(--term-dim)}
+.ca-ph-top{display:flex;align-items:center;gap:6px;margin-bottom:10px} .ca-ph-top h2{flex:1;font-size:17px;font-weight:600;margin:0}
+.ca-ph-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;padding-bottom:12px;border-bottom:1px solid var(--term-line)}
+.ca-ph-strip button{appearance:none;display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 0 10px;border:0;border-radius:16px;background:transparent;color:var(--term-fg);font:inherit;cursor:pointer;position:relative} .ca-ph-strip span{font-size:11px;color:var(--term-dim)} .ca-ph-strip b{font-size:16px;font-weight:500}
+.ca-ph-strip button.on{background:color-mix(in srgb,var(--term-fg) 9%,transparent);box-shadow:inset 0 0 0 1px var(--term-line)} .ca-ph-strip button.today b{color:var(--neon)} .ca-ph-strip button i{position:absolute;bottom:4px;width:4px;height:4px;border-radius:50%;background:var(--term-dim)}
+.ca-ph-all{display:flex;flex-direction:column;gap:4px;margin:12px 0 0} .ca-ph-day{margin-top:12px;display:flex;flex-direction:column;gap:10px}
+.ca-ph-row{display:grid;grid-template-columns:62px 1fr;gap:8px;align-items:start} .ca-ph-row>em{font-style:normal;font-size:12px;color:var(--term-dim);padding-top:14px;text-align:right}
+.ca-ph-card{appearance:none;text-align:left;border:0;border-left:4px solid var(--c);border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--term-fg) 5%,var(--term-bg));color:var(--term-fg);font:inherit;cursor:pointer;display:grid;gap:3px}
+.ca-ph-card b{font-size:15px;font-weight:500} .ca-ph-card small{color:var(--term-dim);font-size:12.5px} .ca-ph-card span{font-size:12.5px;color:var(--term-dim)} .ca-ph-card p{margin:6px 0 0;background:var(--term-bg);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5}
+@media (max-width:760px){ .ca-wrap{grid-template-columns:1fr} }
+/* Calendar as an app: one fixed screen, one scroll area (ca-fit) */
+#term-panel.ca-fit{overflow:hidden;padding:10px 16px 0;display:flex;flex-direction:column}
+#term-panel.ca-fit>.ca-wrap{flex:1;min-height:0;height:100%;position:relative}
+#term-panel.ca-fit .ca-side{max-height:none;height:100%;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+#term-panel.ca-fit .ca-sidework{flex:1;min-height:0;overflow:auto;overscroll-behavior:contain}
+#term-panel.ca-fit .ca-main{height:100%;min-height:0}
+#term-panel.ca-fit .ca-grid-wrap{flex:1;min-height:0;max-height:none;overscroll-behavior:contain;scroll-behavior:auto}
+#term-panel.ca-fit .ca-agenda{flex:1;min-height:0;max-height:none;overscroll-behavior:contain}
+#term-panel.ca-fit .ca-month{flex:1;min-height:0} #term-panel.ca-fit .ca-month-g{flex:1;min-height:0;grid-template-rows:repeat(6,minmax(0,1fr));grid-auto-rows:minmax(0,1fr);overflow:hidden}
+.ca-mc{overflow:hidden;min-height:0} .ca-mc .ca-mchip{flex:none}
+.ca-year{display:grid;grid-template-columns:repeat(4,1fr);gap:14px 18px;padding:14px 16px;overflow:auto;flex:1;min-height:0;align-content:start}
+.ca-ym{appearance:none;border:0;background:transparent;color:var(--term-fg);font:inherit;text-align:left;cursor:pointer;padding:6px;border-radius:12px} .ca-ym:hover{background:color-mix(in srgb,var(--term-fg) 5%,transparent)} .ca-ym b{display:block;font-size:15px;font-weight:600;margin-bottom:6px} .ca-ym.now b{color:var(--neon)}
+.ca-ym-g{display:grid;grid-template-columns:repeat(7,1fr);gap:1px;font-size:9.5px;text-align:center} .ca-ym-g i{font-style:normal;padding:2px 0;border-radius:50%} .ca-ym-g i.today{background:var(--neon);color:#0A0A0A;font-weight:700}
+@media (max-width:760px){
+  #term-panel.ca-fit{padding:8px 12px 0}
+  .ca-wrap.ca-phone{display:flex;flex-direction:column;height:100%;position:relative}
+  .ca-ph-top{display:flex;justify-content:space-between;align-items:center;gap:10px;flex:none;padding:2px 0 8px}
+  .ca-pill{appearance:none;display:inline-flex;align-items:center;gap:2px;border:1px solid var(--term-line);background:color-mix(in srgb,var(--term-fg) 7%,var(--term-bg));color:var(--term-fg);border-radius:999px;padding:4px;font:inherit;font-size:15px;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+  button.ca-pill{padding:10px 16px} .ca-pill button{appearance:none;border:0;background:transparent;color:var(--term-fg);width:44px;height:38px;display:grid;place-items:center;cursor:pointer;border-radius:999px;font:inherit} .ca-pill svg{width:21px;height:21px} .ca-pill span{padding-right:4px}
+  .ca-ph-title{margin:2px 4px 6px;font-size:34px;font-weight:700;letter-spacing:-.02em;flex:none} .ca-ph-title.accent{color:var(--neon)}
+  .ca-ph-body{flex:1;min-height:0;display:flex;flex-direction:column;position:relative}
+  .ca-month-h span{text-align:center;padding:6px 0} .ca-mc>b{align-self:center;font-size:17px;font-weight:500;width:32px;min-width:32px;height:32px;display:grid;place-items:center;border-radius:50%} .ca-mc{padding:3px 2px;align-items:stretch} .ca-mc.out>b{opacity:.45}
+  .ca-mchip{font-size:10px;padding:1px 4px;border-radius:5px;line-height:1.4} .ca-more{text-align:center}
+  .ca-dots{display:flex;gap:3px;justify-content:center;margin-top:3px} .ca-dots i{width:6px;height:6px;border-radius:50%;background:var(--c)} .ca-bar3{height:5px;border-radius:3px;background:var(--c);margin:2px 3px 0}
+  .ca-month.m-compact .ca-mc,.ca-month.m-stacked .ca-mc{align-items:stretch} .ca-mc.sel>b{background:var(--term-fg);color:var(--term-bg)}
+  .ca-month.m-list{flex:none} .ca-month.m-list .ca-month-g{flex:none;grid-template-rows:repeat(6,46px);grid-auto-rows:46px} .ca-ml{padding:8px 4px 120px;overflow:auto;max-height:36vh;overscroll-behavior:contain}
+  .ca-ml-row{appearance:none;display:grid;grid-template-columns:14px 1fr auto;gap:10px;align-items:center;width:100%;text-align:left;border:0;border-bottom:1px solid var(--term-line);background:transparent;color:var(--term-fg);font:inherit;font-size:16px;padding:11px 4px} .ca-ml-row i{width:14px;height:14px;border-radius:50%;border:2px solid var(--c)} .ca-ml-row em{font-style:normal;color:var(--term-dim);font-size:14px}
+  .ca-ph-strip{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;flex:none;border-bottom:1px solid var(--term-line);padding-bottom:6px} .ca-ph-strip button{appearance:none;border:0;background:transparent;color:var(--term-fg);font:inherit;display:flex;flex-direction:column;align-items:center;gap:4px;padding:4px 0;cursor:pointer}
+  .ca-ph-strip span{font-size:11px;color:var(--term-dim)} .ca-ph-strip b{font-size:19px;font-weight:500;min-width:38px;height:38px;display:grid;place-items:center;border-radius:50%} .ca-ph-strip button.today b{color:var(--neon)} .ca-ph-strip button.on b{background:var(--neon);color:#0A0A0A}
+  .ca-ph-date{flex:none;text-align:center;font-weight:600;font-size:15px;padding:10px 0 6px}
+  .ca-phone .ca-grid-wrap{padding-bottom:96px} .ca-phone .ca-dh,.ca-phone .ca-corner{display:none} .ca-phone .ca-grid{min-width:0!important}
+  .ca-phone .ca-agenda,.ca-phone .ca-year{padding-bottom:110px} .ca-year{grid-template-columns:repeat(3,1fr);gap:18px 14px}
+  .ca-dock{position:absolute;left:0;right:0;bottom:calc(10px + env(safe-area-inset-bottom,0px));display:flex;justify-content:space-between;align-items:center;pointer-events:none;z-index:5} .ca-dock>*{pointer-events:auto}
+  .ca-sheet-bg{position:absolute;inset:0;background:rgba(0,0,0,.45);z-index:8} .ca-sheet{position:absolute;left:0;right:0;bottom:0;z-index:9;max-height:78%;overflow:auto;background:var(--term-bg);border:1px solid var(--term-line);border-radius:24px 24px 0 0;padding:18px 16px calc(20px + env(safe-area-inset-bottom,0px));overscroll-behavior:contain}
+  .ca-sheet h3{margin:0 36px 12px 2px;font-size:17px} .ca-sheet-x{position:absolute;right:12px;top:12px;appearance:none;border:0;width:34px;height:34px;border-radius:50%;background:color-mix(in srgb,var(--term-fg) 8%,transparent);color:var(--term-fg);cursor:pointer}
+  .ca-opt{appearance:none;display:flex;align-items:center;gap:14px;width:100%;text-align:left;border:0;background:transparent;color:var(--term-fg);font:inherit;font-size:16px;padding:13px 4px;border-bottom:1px solid var(--term-line);cursor:pointer} .ca-opt svg{width:22px;height:22px;color:var(--term-dim)} .ca-opt span{flex:1} .ca-opt.on svg:last-child{color:var(--term-fg)}
+  .ca-q{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:12px;background:transparent;color:var(--term-fg);padding:12px 14px;font:inherit;font-size:16px;margin-bottom:10px}
+}
+
+.cac-prov{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0} .cac-prov button{appearance:none;border:1px solid var(--term-line);background:transparent;color:var(--term-fg);border-radius:999px;padding:6px 12px;font:inherit;font-size:12.5px;cursor:pointer} .cac-prov button.on{background:var(--term-fg);color:var(--term-bg)}
+.cac-steps{margin:8px 0 12px;padding-left:20px;font-size:12.5px;line-height:1.6;color:var(--term-dim)} .cac-colors{display:flex;gap:8px;margin:4px 0 10px} .cac-colors button{appearance:none;width:24px;height:24px;border-radius:50%;border:2px solid transparent;background:var(--c);cursor:pointer} .cac-colors button.on{outline:2px solid var(--term-fg);outline-offset:2px}
+.cac-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--term-line)} .cac-row i{width:12px;height:12px;border-radius:4px;background:var(--c);flex:none} .cac-row span{flex:1;min-width:0} .cac-row b{display:block;font-size:13px} .cac-row small{display:block;font-size:11.5px;color:var(--term-dim)}
+.cac-feed{display:flex;gap:6px;flex-wrap:wrap} .cac-feed input{flex:1 1 220px;min-width:0;background:var(--surface);border:1px solid var(--term-line);border-radius:9px;color:var(--term-fg);padding:8px 10px;font-family:var(--mono);font-size:11px} .cac-how{font-size:12px;line-height:1.6;color:var(--term-dim);padding-left:18px;margin:10px 0 0}
+
 /* Agent portal (Decomposition > Agents): KPI cards, a board by stage, and a list with the full story of each prospect (ap-).
    Colors: the Decomposition tokens (--dc-*) and the accent (--green-rgb). Stage order is one hue getting stronger. */
 .ap{container-type:inline-size;padding:2px 0 40px}
@@ -4925,16 +5044,16 @@ html.theme-light{
 @keyframes orbpulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.08);opacity:.78}}
 @media (prefers-reduced-motion:reduce){.ag-orb.busy{animation:none}}
 
-/* Menu: just the owl and a small label, floating in the top-left corner with no tile behind them.
+/* Menu: just the Bixxville wordmark and a small label, floating in the top-left corner with no tile behind them.
    Off-white in the dark theme, near-black in the warm grey theme so it always reads. */
-#term-fab{--owl:url(data:image/png;base64,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);
+#term-fab{--wordmark:url(data:image/png;base64,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);
   left:10px;top:calc(6px + env(safe-area-inset-top,0px));width:auto;min-width:48px;height:auto;min-height:52px;padding:4px 8px;
   flex-direction:column;gap:5px;justify-content:flex-start;border:0;border-radius:12px;
   background:transparent;box-shadow:none;color:#EDEBE6}
 #term-fab:active{transform:scale(.94)}
 #term-fab .fab-lbl{font-family:var(--g-sans);font-size:8.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;line-height:1;color:#EDEBE6;opacity:.8}
-#term-fab .fab-owl{display:block;width:30px;height:34px;background:#EDEBE6;
-  -webkit-mask:var(--owl) center/contain no-repeat;mask:var(--owl) center/contain no-repeat;filter:drop-shadow(0 1px 3px rgba(0,0,0,.45))}
+#term-fab .fab-owl{display:block;width:86px;height:31px;background:#EDEBE6;   /* the Bixxville wordmark, drawn in the theme's ink */
+  -webkit-mask:var(--wordmark) center/contain no-repeat;mask:var(--wordmark) center/contain no-repeat;filter:drop-shadow(0 1px 3px rgba(0,0,0,.45))}
 html.theme-light #term-fab .fab-lbl{color:#17171A;opacity:.75}
 html.theme-light #term-fab .fab-owl{background:#17171A;filter:drop-shadow(0 1px 2px rgba(255,255,255,.7))}
 
@@ -5249,36 +5368,16 @@ html.theme-light .bz-leaf.lit b{color:#fff}
         <span>Decomposition</span>
       </button>
     </div>
-    <div class="term-sb-group folded" data-group="clients">
-      <div class="term-sb-row">
+    <div class="term-sb-group">
       <button class="term-sb-item" data-view="clients" onclick="setTermView('clients')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg>
         <span>Clients</span>
-      </button>
-      <button class="term-sb-fold" onclick="toggleSbGroup('clients')" aria-label="Expand Clients">+</button>
-      </div>
-      <div class="term-sb-sub" id="term-sb-clients-sub">
-        <button class="term-sb-subitem" data-sub="notifications" onclick="setTermView('notifications')">Notifications <span class="term-sb-count" id="sb-notif-count"></span></button>
-        <button class="term-sb-subitem" data-sub="chat" onclick="setTermView('chat')">Chat <span class="term-sb-count" id="sb-chat-count"></span></button>
-        <button class="term-sb-subitem" data-sub="calendar" onclick="setTermView('calendar')">Calendar</button>
-      </div>
-    </div>
-    <div class="term-sb-group">
-      <button class="term-sb-item" data-view="analog" onclick="setTermView('analog')">
-        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 12.5a4 4 0 0 1 8 0"/><circle cx="12" cy="12.5" r="1.2"/><path d="M12 14v6"/></svg>
-        <span>Analog</span>
       </button>
     </div>
     <div class="term-sb-group">
       <button class="term-sb-item" data-view="cycle" onclick="setTermView('cycle')">
         <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="M12 7v5l3 2"/><path d="M12 1.5v2M12 20.5v2"/></svg>
         <span>Cycle</span>
-      </button>
-    </div>
-    <div class="term-sb-group">
-      <button class="term-sb-item" data-view="ledger" onclick="setTermView('ledger')">
-        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3h11l3 3v15H5z"/><path d="M9 9h7M9 13h7M9 17h4"/></svg>
-        <span>Ledger</span>
       </button>
     </div>
     <div class="term-sb-group" id="sb-tkr-grp" style="display:none">
@@ -5296,6 +5395,7 @@ html.theme-light .bz-leaf.lit b{color:#fff}
   <button id="term-fab" onclick="toggleTermSidebar()" title="Menu" aria-label="Menu"><span class="fab-lbl">Menu</span><i class="fab-owl" aria-hidden="true"></i></button>
   <div id="term-main">
     <button id="os-theme" class="t-theme" type="button" onclick="toggleTheme()" aria-label="Switch theme" title="Switch theme"><svg class="t-sun" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.6v2.4M12 19v2.4M4.6 12H2.2M21.8 12h-2.4M6.5 6.5 4.8 4.8M19.2 19.2l-1.7-1.7M17.5 6.5l1.7-1.7M4.8 19.2l1.7-1.7"/></svg><svg class="t-moon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.2 14.4A8.4 8.4 0 0 1 9.6 3.8a8.6 8.6 0 1 0 10.6 10.6z"/></svg></button>
+    <div id="sec-bar" hidden></div>
     <div id="term-home"></div>
     <div id="term-panel" hidden></div>
     <section id="agent" aria-label="BIX AI">
@@ -6257,6 +6357,7 @@ async function offSnapshot(manual) {
     OFF.lastSync = Date.now(); await offSet('meta', 'sync:' + me, { at: OFF.lastSync });
     OFF.online = true;
     try { bixxSync(false); } catch (e) {}
+    try { caLoadExternalQuiet(); } catch (e) {}
     if (manual) toast('Offline copy updated.');
     return true;
   } catch (e) {
@@ -14402,9 +14503,11 @@ async function refreshNotifCount() {
     NT.attention = att;
     const unread = NT.events.filter(e => e.status !== 'acknowledged').length;
     const n = unread + att.filter(a => a.kind === 'verify' || a.kind === 'start').length;
+    SEC.n = n;
     const el = document.getElementById('sb-notif-count');
     if (el) { el.textContent = n || ''; el.classList.toggle('hot', n > 0); }
     const chat = NT.events.filter(e => e.type === 'MESSAGE' && e.status !== 'acknowledged').length;
+    SEC.c = chat;
     const ce = document.getElementById('sb-chat-count');
     if (ce) { ce.textContent = chat || ''; ce.classList.toggle('hot', chat > 0); }
   } catch (e) { /* signed out or offline — the count just stays */ }
@@ -14586,109 +14689,401 @@ async function chatSend() {
 }
 
 // ── Calendar ─────────────────────────────────────────────────────────
-const CA = { start: null, side: 'todo', view: 'week', events: [], due: [], cps: [], open: [], team: [] };
+// ── Calendar: Day, Week, Month and Agenda, a mini-month, a list of calendars to show or hide, and a phone "schedule" (week strip + hour rail).
+// It reads the same things as before (shared events, steps due, open-to-claim steps, checkpoints, Cycle days) and now also any calendar the
+// member has connected (CA.ext, see the calendar-links section). Moving around redraws from what is already loaded; it only asks the database
+// again when the days on screen are outside what was fetched.
+const CA = { start: null, anchor: null, mini: null, side: 'todo', view: null, mode: 'details', sheet: null, sc: {}, reset: true, q: '', events: [], cps: [], open: [], team: [], leaves: [], hidden: new Set(), loaded: null, ext: [], extEvents: [], seq: 0 };
+try { CA.hidden = new Set(JSON.parse(localStorage.getItem('bixx-ca-hidden') || '[]')); CA.view = localStorage.getItem('bixx-ca-view') || null; CA.mode = localStorage.getItem('bixx-ca-mode') || 'details'; } catch (e) {}
 const dayStart = d => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x; };
 const mondayOf = d => { const x = dayStart(d); x.setDate(x.getDate() - ((x.getDay() + 6) % 7)); return x; };
 const sameDay = (a, b) => dayStart(a).getTime() === dayStart(b).getTime();
+const addDays = (d, n) => { const x = new Date(d); x.setDate(x.getDate() + n); return x; };
 const CA_H0 = 0, CA_H1 = 24, CA_ROW = 48;
+const CA_CALS = [['event', 'Events', '#FF2D95'], ['step', 'Steps due', '#3B82F6'], ['open', 'Open to claim', '#10B981'], ['cp', 'Checkpoints', '#E8B923'], ['cycle', 'Cycle', '#8B5CF6']];
+const caColor = k => (CA_CALS.find(c => c[0] === k) || (CA.ext.find(e => 'ext:' + e.id === k) && [0, 0, CA.ext.find(e => 'ext:' + e.id === k).color]) || [0, 0, '#64748B'])[2];
+const caIsPhone = () => (document.getElementById('term-panel')?.clientWidth || innerWidth) < 760;
 
-async function renderCalendarPanel() {
-  const seq = CA.seq = (CA.seq || 0) + 1;   // an older load that finishes late must not overwrite a newer one
-  if (!CA.start) CA.start = mondayOf(new Date());
+// What the screen is showing: the days, and the span the data must cover.
+function caDays() {
+  const a = dayStart(CA.anchor);
+  if (CA.view === 'day') return [a];
+  if (CA.view === 'year') { const f = new Date(a.getFullYear(), 0, 1), n = Math.round((new Date(a.getFullYear(), 11, 31) - f) / 864e5) + 1; return Array.from({ length: n }, (_, i) => addDays(f, i)); }
+  if (CA.view === 'month') { const f = mondayOf(new Date(a.getFullYear(), a.getMonth(), 1)); return Array.from({ length: 42 }, (_, i) => addDays(f, i)); }
+  if (CA.view === 'agenda') return Array.from({ length: 30 }, (_, i) => addDays(a, i));
+  const m = mondayOf(a); return Array.from({ length: 7 }, (_, i) => addDays(m, i));
+}
+function caCovered(days) { return CA.loaded && CA.loaded.from <= days[0] && CA.loaded.to >= addDays(days[days.length - 1], 1); }
+
+async function renderCalendarPanel(arg) {
+  const force = arg !== 'nav';
+  const seq = ++CA.seq;
+  if (!CA.anchor) CA.anchor = dayStart(new Date());
+  if (!CA.view) CA.view = caIsPhone() ? 'month' : 'week';
+  if (CA.start) { CA.anchor = dayStart(CA.start); CA.start = null; }   // older code sets CA.start to jump to a week
   const panel = document.getElementById('term-panel');
-  if (!panel.querySelector('.ca-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
-  const from = new Date(CA.start), to = new Date(CA.start); to.setDate(to.getDate() + 7);
-  const [ev, leaves, branches, maps, open, team] = await Promise.all([
-    sb.rpc('calendar_list', { p_from: from.toISOString(), p_to: to.toISOString() }),
-    sb.from('work_leaves').select('id,map_id,branch_id,leaf_code,task,target_date,status,assigned_to,logs,tier,is_key,claim_open,claim_closes_at'),
-    sb.from('work_branches').select('id,map_id,code,title,due_date').not('due_date', 'is', null),
-    sb.from('work_maps').select('id,goal'),
-    sb.rpc('list_open_steps'),
-    sb.rpc('my_team'),
-  ]);
+  const had = !!panel.querySelector('.ca-wrap');
+  if (!had && !CA.loaded) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
+  const days = caDays();
+  if (had || CA.loaded) caDraw();                            // what is already loaded goes on screen at once, in the same place
+  if (force || !caCovered(days)) {
+    const from = addDays(days[0], -14), to = addDays(days[days.length - 1], 46);
+    const [ev, leaves, branches, maps, open, team] = await Promise.all([
+      sb.rpc('calendar_list', { p_from: from.toISOString(), p_to: to.toISOString() }),
+      sb.from('work_leaves').select('id,map_id,branch_id,leaf_code,task,target_date,status,assigned_to,logs,tier,is_key,claim_open,claim_closes_at'),
+      sb.from('work_branches').select('id,map_id,code,title,due_date').not('due_date', 'is', null),
+      sb.from('work_maps').select('id,goal'),
+      sb.rpc('list_open_steps'),
+      sb.rpc('my_team'),
+    ]);
+    if (seq !== CA.seq) return;                              // a newer load is on its way
+    if (ev.error) { if (!had) panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the calendar — ${esc(ev.error.message)}</div>`; return; }
+    const goal = Object.fromEntries((maps.data || []).map(m => [m.id, m.goal]));
+    CA.events = ev.data || []; CA.open = open.data || []; CA.team = team.data || [];
+    CA.leaves = (leaves.data || []).map(l => ({ ...l, goal: goal[l.map_id] }));
+    CA.cps = (branches.data || []).map(b => ({ ...b, goal: goal[b.map_id] }));
+    CA.loaded = { from, to };
+    if (typeof caLoadExternal === 'function') await caLoadExternal(from, to).catch(() => {});
+    if (seq !== CA.seq) return;
+    caDraw();
+  }
+}
 
-  if (seq !== CA.seq) return;
-  CA.open = open.data || []; CA.team = team.data || [];
-  if (ev.error) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the calendar — ${esc(ev.error.message)}</div>`; return; }
-  const goal = Object.fromEntries((maps.data || []).map(m => [m.id, m.goal]));
-  CA.events = ev.data || [];
-  CA.leaves = (leaves.data || []).map(l => ({ ...l, goal: goal[l.map_id] }));
-  CA.cps = (branches.data || []).map(b => ({ ...b, goal: goal[b.map_id] }));
-  const days = Array.from({ length: 7 }, (_, i) => { const d = new Date(CA.start); d.setDate(d.getDate() + i); return d; });
-  const today = new Date();
-  const cyc = getActiveCycle();
-  const cycEnd = new Date(cyc.end); cycEnd.setDate(cycEnd.getDate() - 1);
-  const openIds = new Set(CA.open.map(o => o.id));
-  const allDay = d => [
-    ...CA.open.filter(o => sameDay(new Date(o.closes_at), d)).map(o => ({ cls: 'open', t: `${o.leaf_code} claims ${o.closed ? 'closed' : 'close'}`, s: o.task, act: `caOpenWork('${esc(o.id)}')` })),
-    ...CA.leaves.filter(l => l.target_date && sameDay(new Date(l.target_date + 'T12:00:00'), d)).map(l => ({ cls: openIds.has(l.id) ? 'step open' : 'step', t: `${l.leaf_code} due`, s: l.task, act: openIds.has(l.id) ? `caOpenWork('${esc(l.id)}')` : null })),
-    ...CA.cps.filter(b => sameDay(new Date(b.due_date + 'T12:00:00'), d)).map(b => ({ cls: 'cp', t: `${b.code} due`, s: b.title })),
-    ...(sameDay(cycEnd, d) ? [{ cls: 'cycle', t: `C${cyc.num} settles`, s: 'Last day of the cycle' }] : []),
-    ...(sameDay(cyc.end, d) ? [{ cls: 'cycle', t: `C${cyc.num + 1} begins`, s: 'A new 28-day cycle' }] : []),
-  ];
-  const timed = d => CA.events.filter(e => sameDay(new Date(e.starts_at), d));
-  const fmtH = h => (h % 12 || 12) + (h < 12 ? ' AM' : ' PM');
-  const md = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  const label = days[0].getMonth() === days[6].getMonth()
-    ? `${md(days[0])} – ${days[6].getDate()}, ${days[6].getFullYear()}`
-    : `${md(days[0])} – ${md(days[6])}, ${days[6].getFullYear()}`;
-  // The side list: my open steps (by due date) and the week's events.
-  const mine = CA.leaves.filter(l => l.assigned_to === operator.id && l.status !== 'delivered').sort((a, b) => (a.target_date || '9999').localeCompare(b.target_date || '9999'));
-  const weekEnd = new Date(today); weekEnd.setDate(weekEnd.getDate() + 7);
-  const groups = [
-    ['This week', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') <= weekEnd)],
-    ['Later', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') > weekEnd)],
-    ['No due date', mine.filter(l => !l.target_date)],
-  ].filter(g => g[1].length);
-  panel.innerHTML = `<div class="ca-wrap">
+// Everything that can appear, as one list, whichever calendar it belongs to.
+function caItems() {
+  const out = [], openIds = new Set(CA.open.map(o => o.id)), noon = iso => new Date(iso + 'T12:00:00');
+  CA.events.forEach(e => { const s = new Date(e.starts_at); out.push({ cal: 'event', id: e.id, t: e.title, s: e.notes || '', start: s, end: e.ends_at ? new Date(e.ends_at) : new Date(s.getTime() + 3600e3), allDay: false, act: `caShowEvent('${esc(e.id)}')` }); });
+  CA.open.forEach(o => out.push({ cal: 'open', t: `${o.leaf_code} claims ${o.closed ? 'closed' : 'close'}`, s: o.task, start: new Date(o.closes_at), allDay: true, act: `caOpenWork('${esc(o.id)}')` }));
+  CA.leaves.filter(l => l.target_date).forEach(l => out.push({ cal: 'step', t: `${l.leaf_code} due`, s: l.task, start: noon(l.target_date), allDay: true, st: l.status, act: openIds.has(l.id) ? `caOpenWork('${esc(l.id)}')` : `caOpenStep('${esc(l.map_id)}','${esc(l.id)}')` }));
+  CA.cps.forEach(b => out.push({ cal: 'cp', t: `${b.code} due`, s: b.title, start: noon(b.due_date), allDay: true }));
+  const first = caDays()[0], last = caDays().slice(-1)[0];
+  for (let n = cycleNumberForDate(addDays(first, -30)); n <= cycleNumberForDate(addDays(last, 30)) + 1; n++) {
+    const st = cycleStartDate(n);
+    out.push({ cal: 'cycle', t: `C${n} begins`, s: 'A new 28-day cycle', start: st, allDay: true });
+    out.push({ cal: 'cycle', t: `C${n - 1} settles`, s: 'Last day of the cycle', start: addDays(st, -1), allDay: true });
+  }
+  (CA.extEvents || []).forEach(e => out.push({ cal: 'ext:' + e.cal, t: e.title, s: e.where || e.notes || '', start: new Date(e.start), end: e.end ? new Date(e.end) : null, allDay: !!e.allDay, ext: true, act: `caShowExternal('${esc(e.uid)}')` }));
+  return out.filter(i => !CA.hidden.has(i.cal));
+}
+function caOn(item, d) {
+  if (item.allDay && item.end && item.end > item.start) { const e = addDays(dayStart(item.end), -1); return dayStart(d) >= dayStart(item.start) && dayStart(d) <= e; }
+  return sameDay(item.start, d);
+}
+const caFmtH = h => (h % 12 || 12) + (h < 12 ? ' AM' : ' PM');
+const caTime = d => d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
+const caMD = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+function caTitle(days) {
+  const a = CA.anchor;
+  if (CA.view === 'day') return a.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  if (CA.view === 'year') return String(a.getFullYear());
+  if (CA.view === 'month') return a.toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+  if (CA.view === 'agenda') return `${caMD(days[0])} – ${caMD(days[29])}, ${days[29].getFullYear()}`;
+  return days[0].getMonth() === days[6].getMonth() ? `${caMD(days[0])} – ${days[6].getDate()}, ${days[6].getFullYear()}` : `${caMD(days[0])} – ${caMD(days[6])}, ${days[6].getFullYear()}`;
+}
+
+// Timed events that overlap share the column side by side, like Gmail and Proton.
+function caLayout(timed) {
+  const ev = timed.map(i => ({ i, s: i.start.getTime(), e: Math.max((i.end || new Date(i.start.getTime() + 3600e3)).getTime(), i.start.getTime() + 1800e3) })).sort((a, b) => a.s - b.s || b.e - a.e);
+  const groups = []; let cur = null;
+  ev.forEach(x => { if (cur && x.s < cur.end) { cur.items.push(x); cur.end = Math.max(cur.end, x.e); } else { cur = { items: [x], end: x.e }; groups.push(cur); } });
+  groups.forEach(g => { const cols = []; g.items.forEach(x => { let c = cols.findIndex(end => end <= x.s); if (c < 0) { c = cols.length; cols.push(0); } cols[c] = x.e; x.col = c; }); g.items.forEach(x => { x.cols = cols.length; }); });
+  return ev;
+}
+
+// One screen, one scroll area. The header and the buttons stay where they are; only the time grid, the month list or the agenda scrolls,
+// and its position is kept when you move to the next day, week or month. A new view opens where it makes sense (now, or 7 AM).
+function caDraw() {
+  const panel = document.getElementById('term-panel');
+  if (!panel) return;
+  panel.classList.add('ca-fit');
+  const phone = caIsPhone(), key = CA.view + (phone ? 'p' : 'd'), old = panel.querySelector('.ca-scroll');
+  if (old) CA.sc[key] = old.scrollTop;
+  const days = caDays(), items = caItems();
+  CA.mini = CA.mini || new Date(CA.anchor.getFullYear(), CA.anchor.getMonth(), 1);
+  panel.innerHTML = phone ? caPhoneShell(days, items) : caDeskShell(days, items);
+  const sc = panel.querySelector('.ca-scroll');
+  if (sc && sc.classList.contains('ca-grid-wrap')) {
+    if (CA.reset || CA.sc[key] == null) { const h = new Date().getHours(); sc.scrollTop = (days.some(d => sameDay(d, new Date())) ? Math.max(0, Math.min(h - 2, 17)) : 7) * CA_ROW; }
+    else sc.scrollTop = CA.sc[key];
+  } else if (sc && CA.sc[key] != null && !CA.reset) sc.scrollTop = CA.sc[key];
+  CA.reset = false;
+  if (!CA._keys) { CA._keys = true; addEventListener('keydown', caKey); addEventListener('resize', () => { if (document.querySelector('.ca-wrap') && CA._phone !== caIsPhone()) { CA._phone = caIsPhone(); CA.reset = true; caDraw(); } }); }
+  CA._phone = phone;
+}
+const caIc = {
+  chev: '<path d="m15 6-6 6 6 6"/>', search: '<circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/>', plus: '<path d="M12 5v14M5 12h14"/>', cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  inbox: '<path d="M4 13l2-7h12l2 7v5H4z"/><path d="M4 13h5l1 2h4l1-2h5"/>', mode: '<rect x="4" y="4" width="16" height="7" rx="2"/><rect x="4" y="13" width="16" height="7" rx="2"/>',
+  check: '<path d="m5 12.5 4.5 4.5L19 7.5"/>', compact: '<rect x="3" y="9" width="18" height="6" rx="3"/>', stacked: '<rect x="4" y="3.5" width="16" height="7" rx="3.5"/><rect x="4" y="13.5" width="16" height="7" rx="3.5"/>',
+  details: '<rect x="4" y="4" width="16" height="7" rx="2"/><path d="M7 7.5h10M4 15h16M4 19h16"/>', list: '<rect x="5" y="4" width="14" height="8" rx="2"/><path d="M5 16h14M5 20h14"/>',
+};
+const caSvg = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${caIc[k]}</svg>`;
+
+// Desktop: left rail (mini month, calendars, to-do) and the main view.
+function caDeskShell(days, items) {
+  const views = [['day', 'Day'], ['week', 'Week'], ['month', 'Month'], ['year', 'Year'], ['agenda', 'Agenda'], ...(CA.team.length ? [['team', 'Team']] : [])];
+  const body = CA.view === 'month' ? caMonthHtml(days, items, 'details') : CA.view === 'year' ? caYearHtml() : CA.view === 'agenda' ? caAgendaHtml(days, items) : CA.view === 'team' ? caTeamGridHtml(caDays()) : caGridHtml(days, items);
+  return `<div class="ca-wrap">
     <aside class="ca-side">
-      <div class="ca-today"><b>Today</b><span>${today.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span></div>
-      <div class="pp-tabs slim"><button class="pp-chip ${CA.side === 'todo' ? 'on' : ''}" onclick="CA.side='todo';renderCalendarPanel()">To-do <em>${mine.length}</em></button>
-        <button class="pp-chip ${CA.side === 'open' ? 'on' : ''}" onclick="CA.side='open';renderCalendarPanel()">Open <em>${CA.open.length}</em></button>
-        <button class="pp-chip ${CA.side === 'team' ? 'on' : ''}" onclick="CA.side='team';renderCalendarPanel()">Team <em>${CA.team.length}</em></button>
-        <button class="pp-chip ${CA.side === 'events' ? 'on' : ''}" onclick="CA.side='events';renderCalendarPanel()">Events <em>${CA.events.length}</em></button></div>
-      ${CA.side === 'open' ? caOpenSideHtml() : CA.side === 'team' ? caTeamSideHtml() : ''}
-      ${CA.side === 'open' || CA.side === 'team' ? '' : CA.side === 'todo'
-        ? (groups.map(([n, ls]) => `<div class="ca-grp"><h5>${n}</h5>${ls.map(l => `<button class="ca-todo ${l.status === 'in progress' ? 'prog' : ''}" onclick="caOpenStep('${esc(l.map_id)}','${esc(l.id)}')">
-            <i></i><span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.goal || '')}${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span></button>`).join('')}</div>`).join('')
-           || '<div class="pp-empty">Nothing granted to you is open.</div>')
-        : (CA.events.map(e => `<button class="ca-todo ev" onclick="caShowEvent('${esc(e.id)}')"><i></i><span><b>${esc(e.title)}</b><small>${esc(new Date(e.starts_at).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit' }))} · ${esc(e.created_by || '')}</small></span></button>`).join('')
-           || '<div class="pp-empty">No events this week.</div>')}
+      <button class="pp-btn solid ca-create" onclick="caAddEvent()">${ico(ICON.plus)}Create</button>
+      ${caMiniHtml(items)}
+      <div class="ca-cals"><h5>Calendars</h5>${caCalsHtml()}<button class="ca-link" onclick="caConnectDialog()">+ Connect a calendar</button></div>
+      <div class="ca-sidework">${caSideHtml()}</div>
     </aside>
     <section class="ca-main">
       <div class="ca-bar">
-        <div class="ca-nav"><button class="pp-icbtn" onclick="CA.start.setDate(CA.start.getDate()-7);renderCalendarPanel()" aria-label="Previous week">‹</button>
-          <button class="pp-btn" onclick="CA.start=mondayOf(new Date());renderCalendarPanel()">Today</button>
-          <button class="pp-icbtn" onclick="CA.start.setDate(CA.start.getDate()+7);renderCalendarPanel()" aria-label="Next week">›</button>
-          <h2>${esc(label)}</h2></div>
-        <div class="pp-tabs slim ca-view"><button class="pp-chip ${CA.view !== 'team' ? 'on' : ''}" onclick="CA.view='week';renderCalendarPanel()">Week</button><button class="pp-chip ${CA.view === 'team' ? 'on' : ''}" onclick="CA.view='team';renderCalendarPanel()">Team</button></div>
-        <div class="ca-legend"><span class="ev">Event</span><span class="step">Step due</span><span class="open">Open to claim</span><span class="cp">Checkpoint</span><span class="cycle">Cycle</span></div>
-        <button class="pp-btn solid" onclick="caAddEvent()">${ico(ICON.plus)}Add event</button>
+        <div class="ca-nav"><button class="pp-btn" onclick="caToday()">Today</button>
+          <button class="pp-icbtn" onclick="caGo(-1)" aria-label="Previous">‹</button><button class="pp-icbtn" onclick="caGo(1)" aria-label="Next">›</button>
+          <h2>${esc(caTitle(days))}</h2></div>
+        <div class="pp-tabs slim ca-view" role="group" aria-label="View">${views.map(([k, l]) => `<button class="pp-chip ${CA.view === k ? 'on' : ''}" aria-pressed="${CA.view === k}" onclick="caSetView('${k}')">${l}</button>`).join('')}</div>
       </div>
-      ${CA.view === 'team' ? caTeamGridHtml(days) : `<div class="ca-grid-wrap"><div class="ca-grid">
-        <div class="ca-corner">UTC−4</div>
-        ${days.map(d => `<div class="ca-dh ${sameDay(d, today) ? 'today' : ''}"><b>${d.getDate()}</b><span>${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</span></div>`).join('')}
-        <div class="ca-allday-l">All day</div>
-        ${days.map(d => `<div class="ca-allday">${allDay(d).map(a => a.act
-          ? `<button class="ca-chip ${a.cls}" title="${esc(a.s)}" onclick="${a.act}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></button>`
-          : `<div class="ca-chip ${a.cls}" title="${esc(a.s)}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></div>`).join('')}</div>`).join('')}
-        <div class="ca-hours">${Array.from({ length: CA_H1 - CA_H0 }, (_, i) => `<div style="height:${CA_ROW}px">${fmtH(CA_H0 + i)}</div>`).join('')}</div>
-        ${days.map(d => `<div class="ca-col ${sameDay(d, today) ? 'today' : ''}" style="height:${(CA_H1 - CA_H0) * CA_ROW}px" ondblclick="caAddEvent('${d.toISOString()}', event)">
-          ${Array.from({ length: CA_H1 - CA_H0 }, () => `<div class="ca-slot" style="height:${CA_ROW}px"></div>`).join('')}
-          ${timed(d).map(e => {
-            const s = new Date(e.starts_at), en = e.ends_at ? new Date(e.ends_at) : new Date(s.getTime() + 3600e3);
-            const top = Math.max(0, (s.getHours() + s.getMinutes() / 60 - CA_H0) * CA_ROW);
-            const h = Math.max(26, ((en - s) / 3600e3) * CA_ROW - 4);
-            return `<button class="ca-ev" style="top:${top + 2}px;height:${h}px" onclick="caShowEvent('${esc(e.id)}')"><b>${esc(e.title)}</b><span>${esc(s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' }))}${e.ends_at ? ' – ' + esc(en.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })) : ''}</span></button>`;
-          }).join('')}
-          ${sameDay(d, today) ? `<i class="ca-now" style="top:${(today.getHours() + today.getMinutes() / 60 - CA_H0) * CA_ROW}px"></i>` : ''}
-        </div>`).join('')}
-      </div></div>`}
+      ${body}
     </section></div>`;
-  const gw = panel.querySelector('.ca-grid-wrap');
-  // Open on the working day (7 AM), or an hour before now if that's later.
-  if (gw && !CA._scrolled) { gw.scrollTop = Math.max(7, Math.min(today.getHours() - 1, 17)) * CA_ROW; CA._scrolled = true; }
 }
+const caCalsHtml = () => CA_CALS.concat(CA.ext.map(e => ['ext:' + e.id, e.name, e.color])).map(([k, n, c]) => `<label class="ca-cal"><input type="checkbox" ${CA.hidden.has(k) ? '' : 'checked'} onchange="caToggleCal('${esc(k)}')"><i style="--c:${c}"></i><span>${esc(n)}</span></label>`).join('');
+
+// Phone: pills on top (back one level, display, search, new), the view, and two floating pills at the bottom (Today; calendars and to-do).
+function caPhoneShell(days, items) {
+  const a = CA.anchor, v = CA.view === 'week' || CA.view === 'agenda' || CA.view === 'team' ? 'month' : CA.view;
+  const parent = v === 'year' ? '' : v === 'month' ? String(a.getFullYear()) : a.toLocaleDateString('en-US', { month: 'long' });
+  const body = v === 'year' ? caYearHtml() : v === 'month' ? `<h1 class="ca-ph-title">${esc(a.toLocaleDateString('en-US', { month: 'long' }))}</h1>${caMonthHtml(days.length === 42 ? days : (CA.view = 'month', caDays()), items, CA.mode)}`
+    : caPhoneDay(items);
+  return `<div class="ca-wrap ca-phone"><div class="ca-ph-top">
+      ${parent ? `<button class="ca-pill" onclick="caBack()" aria-label="Back to ${esc(parent)}">${caSvg('chev')}<span>${esc(parent)}</span></button>` : '<span></span>'}
+      <div class="ca-pill">${v === 'month' ? `<button onclick="caSheet('mode')" aria-label="Display options">${caSvg('mode')}</button>` : ''}<button onclick="caSheet('search')" aria-label="Search">${caSvg('search')}</button><button onclick="caAddEvent('${a.toISOString()}')" aria-label="New event">${caSvg('plus')}</button></div></div>
+    ${v === 'year' ? `<h1 class="ca-ph-title accent">${a.getFullYear()}</h1>` : ''}
+    <div class="ca-ph-body">${body}</div>
+    <div class="ca-dock"><button class="ca-pill" onclick="caToday()">Today</button><div class="ca-pill"><button onclick="caSheet('cals')" aria-label="Calendars">${caSvg('cal')}</button><button onclick="caSheet('inbox')" aria-label="To-do and open steps">${caSvg('inbox')}</button></div></div>
+    ${caSheetHtml(items)}</div>`;
+}
+// Day on the phone: the week as a strip you tap, then the day's hours with a line for now.
+function caPhoneDay(items) {
+  const a = CA.anchor, m = mondayOf(a), week = Array.from({ length: 7 }, (_, i) => addDays(m, i)), today = new Date();
+  return `<div class="ca-ph-strip">${week.map(d => `<button class="${sameDay(d, a) ? 'on' : ''} ${sameDay(d, today) ? 'today' : ''}" onclick="caPick('${d.toISOString()}')" aria-pressed="${sameDay(d, a)}" aria-label="${d.toDateString()}"><span>${d.toLocaleDateString('en-US', { weekday: 'narrow' })}</span><b>${d.getDate()}</b></button>`).join('')}</div>
+    <div class="ca-ph-date">${esc(a.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' }))}</div>${caGridHtml([a], items)}`;
+}
+function caSheetHtml(items) {
+  if (!CA.sheet) return '';
+  let inner = '';
+  if (CA.sheet === 'mode') inner = `<h3>Month display</h3>${[['compact', 'Compact'], ['stacked', 'Stacked'], ['details', 'Details'], ['list', 'List']].map(([k, l]) => `<button class="ca-opt ${CA.mode === k ? 'on' : ''}" onclick="caMode('${k}')">${caSvg(k)}<span>${l}</span>${CA.mode === k ? caSvg('check') : ''}</button>`).join('')}`;
+  else if (CA.sheet === 'cals') inner = `<h3>Calendars</h3><div class="ca-cals">${caCalsHtml()}</div><button class="ca-opt" onclick="caSheet(null);caConnectDialog()">${caSvg('plus')}<span>Connect a calendar</span></button>`;
+  else if (CA.sheet === 'inbox') inner = `<h3>To-do and open steps</h3><div class="ca-sidework">${caSideHtml()}</div>`;
+  else if (CA.sheet === 'search') inner = `<h3>Search</h3><input id="ca-q" class="ca-q" placeholder="Event, step or note" value="${esc(CA.q)}" oninput="caSearch(this.value)" autocomplete="off" aria-label="Search the calendar"><div id="ca-qr">${caSearchHtml(items)}</div>`;
+  return `<div class="ca-sheet-bg" onclick="caSheet(null)"></div><div class="ca-sheet" role="dialog" aria-label="${esc(CA.sheet)}"><button class="ca-sheet-x" onclick="caSheet(null)" aria-label="Close">✕</button>${inner}</div>`;
+}
+function caSearchHtml(items) {
+  const q = CA.q.trim().toLowerCase(); if (!q) return '<p class="pp-muted">Type to search what is loaded around this date.</p>';
+  const hit = items.filter(i => `${i.t} ${i.s}`.toLowerCase().includes(q)).sort((x, y) => x.start - y.start).slice(0, 30);
+  return hit.length ? hit.map(i => `<button class="ca-arow" style="--c:${caColor(i.cal)}" onclick="caOpenDay('${i.start.toISOString()}')"><i></i><em>${esc(i.start.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }))}${i.allDay ? '' : ' · ' + esc(caTime(i.start))}</em><span><b>${esc(i.t)}</b><small>${esc(i.s)}</small></span></button>`).join('') : '<p class="pp-muted">Nothing matches.</p>';
+}
+function caSearch(q) { CA.q = q; const r = document.getElementById('ca-qr'); if (r) r.innerHTML = caSearchHtml(caItems()); }
+function caSheet(k) { CA.sheet = k; if (k !== 'search') CA.q = ''; caDraw(); if (k === 'search') document.getElementById('ca-q')?.focus(); }
+function caMode(m) { CA.mode = m; CA.sheet = null; try { localStorage.setItem('bixx-ca-mode', m); } catch (e) {} caDraw(); }
+
+function caKey(e) {
+  if (!document.querySelector('.ca-wrap') || /INPUT|TEXTAREA|SELECT/.test(e.target.tagName) || e.metaKey || e.ctrlKey || e.altKey || document.getElementById('overlay')?.classList.contains('open')) return;
+  const k = e.key.toLowerCase();
+  if (k === 't') caToday(); else if (k === 'arrowleft' || k === 'k') caGo(-1); else if (k === 'arrowright' || k === 'j') caGo(1);
+  else if (k === 'd') caSetView('day'); else if (k === 'w') caSetView('week'); else if (k === 'm') caSetView('month'); else if (k === 'a') caSetView('agenda'); else if (k === 'y') caSetView('year'); else if (k === 'c') caAddEvent(); else if (k === 'escape' && CA.sheet) caSheet(null);
+  else return;
+  e.preventDefault();
+}
+
+// Mini month
+function caMiniHtml(items) {
+  const m = CA.mini, first = mondayOf(new Date(m.getFullYear(), m.getMonth(), 1)), today = new Date();
+  const busy = new Set(items.map(i => dayStart(i.start).toDateString()));
+  return `<div class="ca-mini"><div class="ca-mini-h"><b>${m.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}</b>
+      <button class="pp-icbtn" onclick="caMiniGo(-1)" aria-label="Previous month">‹</button><button class="pp-icbtn" onclick="caMiniGo(1)" aria-label="Next month">›</button></div>
+    <div class="ca-mini-g">${['M', 'T', 'W', 'T', 'F', 'S', 'S'].map(x => `<i class="dow">${x}</i>`).join('')}${Array.from({ length: 42 }, (_, i) => {
+      const d = addDays(first, i), inM = d.getMonth() === m.getMonth(), inView = caDays().some(x => sameDay(x, d));
+      return `<button class="${inM ? '' : 'out'} ${sameDay(d, today) ? 'today' : ''} ${inView ? 'view' : ''} ${busy.has(d.toDateString()) ? 'busy' : ''}" onclick="caPick('${d.toISOString()}')" aria-label="${d.toDateString()}">${d.getDate()}</button>`; }).join('')}</div></div>`;
+}
+
+// Day and Week: an hour grid, all-day items on top, a line for now.
+function caGridHtml(days, items) {
+  const today = new Date(), n = days.length;
+  const timedOf = d => items.filter(i => !i.allDay && sameDay(i.start, d));
+  return `<div class="ca-grid-wrap ca-scroll"><div class="ca-grid" style="grid-template-columns:54px repeat(${n},minmax(0,1fr));min-width:${n > 1 ? 780 : 0}px">
+    <div class="ca-corner">UTC−4</div>
+    ${days.map(d => `<button class="ca-dh ${sameDay(d, today) ? 'today' : ''}" onclick="caOpenDay('${d.toISOString()}')"><b>${d.getDate()}</b><span>${d.toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase()}</span></button>`).join('')}
+    <div class="ca-allday-l">All day</div>
+    ${days.map(d => `<div class="ca-allday">${items.filter(i => i.allDay && caOn(i, d)).map(a => a.act
+      ? `<button class="ca-chip" style="--c:${caColor(a.cal)}" title="${esc(a.s)}" onclick="${a.act}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></button>`
+      : `<div class="ca-chip" style="--c:${caColor(a.cal)}" title="${esc(a.s)}"><b>${esc(a.t)}</b><span>${esc(a.s)}</span></div>`).join('')}</div>`).join('')}
+    <div class="ca-hours">${Array.from({ length: CA_H1 - CA_H0 }, (_, i) => `<div style="height:${CA_ROW}px">${caFmtH(CA_H0 + i)}</div>`).join('')}</div>
+    ${days.map(d => `<div class="ca-col ${sameDay(d, today) ? 'today' : ''}" style="height:${(CA_H1 - CA_H0) * CA_ROW}px" onclick="if(event.target===this||event.target.classList.contains('ca-slot'))caAddEvent('${d.toISOString()}', event)">
+      ${Array.from({ length: CA_H1 - CA_H0 }, () => `<div class="ca-slot" style="height:${CA_ROW}px"></div>`).join('')}
+      ${caLayout(timedOf(d)).map(x => { const i = x.i, s = i.start, top = Math.max(0, (s.getHours() + s.getMinutes() / 60 - CA_H0) * CA_ROW), h = Math.max(26, ((x.e - x.s) / 3600e3) * CA_ROW - 4);
+        return `<button class="ca-ev" style="--c:${caColor(i.cal)};top:${top + 2}px;height:${h}px;left:calc(${x.col} * 100% / ${x.cols} + 2px);width:calc(100% / ${x.cols} - 4px)" onclick="${i.act || ''}" title="${esc(i.t)}"><b>${esc(i.t)}</b><span>${esc(caTime(s))}${i.end ? ' – ' + esc(caTime(i.end)) : ''}</span></button>`; }).join('')}
+      ${sameDay(d, today) ? `<i class="ca-now" style="top:${(today.getHours() + today.getMinutes() / 60 - CA_H0) * CA_ROW}px"></i>` : ''}
+    </div>`).join('')}
+  </div></div>`;
+}
+
+// Month: six weeks that fill the screen, so nothing scrolls. Modes (phone): details, stacked bars, compact dots, or a small grid with the chosen day's list underneath.
+function caMonthHtml(days, items, mode) {
+  const today = new Date(), m = CA.anchor.getMonth(), phone = caIsPhone(), sel = CA.anchor, dows = phone ? ['M', 'T', 'W', 'T', 'F', 'S', 'S'] : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const per = d => items.filter(i => caOn(i, d)).sort((a, b) => (b.allDay - a.allDay) || a.start - b.start);
+  const cell = d => {
+    const its = per(d), cls = `ca-mc ${d.getMonth() === m ? '' : 'out'} ${sameDay(d, today) ? 'today' : ''} ${mode === 'list' && sameDay(d, sel) ? 'sel' : ''}`;
+    const tap = phone ? `caCell('${d.toISOString()}')` : `caAddEvent('${d.toISOString()}')`;
+    let inner;
+    if (mode === 'compact') inner = `<span class="ca-dots">${its.slice(0, 3).map(i => `<i style="--c:${caColor(i.cal)}"></i>`).join('')}</span>`;
+    else if (mode === 'stacked') inner = its.slice(0, 3).map(i => `<span class="ca-bar3" style="--c:${caColor(i.cal)}"></span>`).join('');
+    else if (mode === 'list') inner = `<span class="ca-dots">${its.slice(0, 3).map(i => `<i style="--c:${caColor(i.cal)}"></i>`).join('')}</span>`;
+    else inner = its.slice(0, phone ? 3 : 3).map(i => `<button class="ca-mchip ${i.allDay ? 'all' : ''}" style="--c:${caColor(i.cal)}" onclick="event.stopPropagation();${i.act || ''}" title="${esc(i.t)}">${i.allDay || phone ? '' : `<em>${esc(caTime(i.start))}</em>`}${esc(i.t)}</button>`).join('') + (its.length > 3 ? `<button class="ca-more" onclick="event.stopPropagation();caOpenDay('${d.toISOString()}')">+${its.length - 3}</button>` : '');
+    return `<div class="${cls}" onclick="${tap}"><b ${phone ? '' : `onclick="event.stopPropagation();caOpenDay('${d.toISOString()}')"`}>${d.getDate()}</b>${inner}</div>`;
+  };
+  const list = mode === 'list' ? `<div class="ca-ml">${(() => { const its = per(sel); return its.length ? its.map(i => `<button class="ca-ml-row" style="--c:${caColor(i.cal)}" onclick="${i.act || ''}"><i></i><span>${esc(i.t)}</span><em>${i.allDay ? 'all-day' : esc(caTime(i.start))}</em></button>`).join('') : '<p class="pp-muted">Nothing on this day.</p>'; })()}</div>` : '';
+  return `<div class="ca-month m-${mode}"><div class="ca-month-h">${dows.map(x => `<span>${x}</span>`).join('')}</div><div class="ca-month-g ${mode === 'list' ? 'ca-scroll-none' : ''}">${days.map(cell).join('')}</div>${list}</div>`;
+}
+// Year: twelve small months. Tap one to open it.
+function caYearHtml() {
+  const y = CA.anchor.getFullYear(), today = new Date();
+  return `<div class="ca-year ca-scroll">${Array.from({ length: 12 }, (_, mo) => {
+    const first = new Date(y, mo, 1), pad = (first.getDay() + 6) % 7, n = new Date(y, mo + 1, 0).getDate();
+    return `<button class="ca-ym ${today.getFullYear() === y && today.getMonth() === mo ? 'now' : ''}" onclick="caOpenMonth(${y},${mo})" aria-label="${first.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}"><b>${first.toLocaleDateString('en-US', { month: 'short' })}</b>
+      <span class="ca-ym-g">${Array.from({ length: pad }, () => '<i></i>').join('')}${Array.from({ length: n }, (_, d) => `<i class="${sameDay(new Date(y, mo, d + 1), today) ? 'today' : ''}">${d + 1}</i>`).join('')}</span></button>`; }).join('')}</div>`;
+}
+
+// Agenda: what is coming, day by day (the next 30 days).
+function caAgendaHtml(days, items) {
+  const rows = days.map(d => ({ d, its: items.filter(i => caOn(i, d)).sort((a, b) => (b.allDay - a.allDay) || a.start - b.start) })).filter(x => x.its.length);
+  if (!rows.length) return '<div class="ca-agenda ca-scroll"><div class="pp-empty" style="padding:40px">Nothing in the next 30 days.</div></div>';
+  const today = new Date();
+  return `<div class="ca-agenda ca-scroll">${rows.map(({ d, its }) => `<section><h5 class="${sameDay(d, today) ? 'today' : ''}"><b>${d.getDate()}</b><span>${d.toLocaleDateString('en-US', { weekday: 'long', month: 'long' })}${sameDay(d, today) ? ' · Today' : ''}</span></h5>
+    ${its.map(i => `<button class="ca-arow" style="--c:${caColor(i.cal)}" onclick="${i.act || ''}"><i></i><em>${i.allDay ? 'All day' : esc(caTime(i.start)) + (i.end ? ' – ' + esc(caTime(i.end)) : '')}</em><span><b>${esc(i.t)}</b><small>${esc(i.s)}</small></span></button>`).join('')}</section>`).join('')}</div>`;
+}
+
+// Phone: a month line, a week strip you tap, and that day as cards down an hour rail (the "Schedule" layout).
+// The side list that was always there: my open steps, open-to-claim, team, events.
+function caSideHtml() {
+  const mine = CA.leaves.filter(l => l.assigned_to === operator.id && l.status !== 'delivered').sort((a, b) => (a.target_date || '9999').localeCompare(b.target_date || '9999'));
+  const weekEnd = addDays(new Date(), 7);
+  const groups = [['This week', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') <= weekEnd)], ['Later', mine.filter(l => l.target_date && new Date(l.target_date + 'T12:00:00') > weekEnd)], ['No due date', mine.filter(l => !l.target_date)]].filter(g => g[1].length);
+  return `<div class="pp-tabs slim"><button class="pp-chip ${CA.side === 'todo' ? 'on' : ''}" onclick="CA.side='todo';caDraw()">To-do <em>${mine.length}</em></button>
+      <button class="pp-chip ${CA.side === 'open' ? 'on' : ''}" onclick="CA.side='open';caDraw()">Open <em>${CA.open.length}</em></button>
+      <button class="pp-chip ${CA.side === 'team' ? 'on' : ''}" onclick="CA.side='team';caDraw()">Team <em>${CA.team.length}</em></button></div>
+    ${CA.side === 'open' ? caOpenSideHtml() : CA.side === 'team' ? caTeamSideHtml()
+      : (groups.map(([n, ls]) => `<div class="ca-grp"><h5>${n}</h5>${ls.map(l => `<button class="ca-todo ${l.status === 'in progress' ? 'prog' : ''}" onclick="caOpenStep('${esc(l.map_id)}','${esc(l.id)}')"><i></i><span><b>${esc(l.leaf_code)} — ${esc(l.task)}</b><small>${esc(l.goal || '')}${l.target_date ? ' · due ' + esc(fmtDate(l.target_date)) : ''}</small></span></button>`).join('')}</div>`).join('') || '<div class="pp-empty">Nothing granted to you is open.</div>')}`;
+}
+
+// Moving around
+function caGo(n) {
+  const a = new Date(CA.anchor);
+  if (Math.abs(n) === 7) a.setDate(a.getDate() + n);
+  else if (CA.view === 'year') a.setFullYear(a.getFullYear() + n);
+  else if (CA.view === 'month') a.setMonth(a.getMonth() + n);
+  else if (CA.view === 'agenda') a.setDate(a.getDate() + 30 * n);
+  else if (CA.view === 'day') a.setDate(a.getDate() + n);
+  else a.setDate(a.getDate() + 7 * n);
+  CA.anchor = dayStart(a); CA.mini = new Date(a.getFullYear(), a.getMonth(), 1); renderCalendarPanel('nav');
+}
+function caToday() { CA.anchor = dayStart(new Date()); CA.mini = null; if (caIsPhone() && CA.view === 'year') CA.view = 'month'; CA.reset = true; renderCalendarPanel('nav'); }
+function caSetView(v) { CA.view = v; CA.reset = true; try { localStorage.setItem('bixx-ca-view', v); } catch (e) {} renderCalendarPanel('nav'); }
+// A tap goes where it says: a day opens that day, a month opens that month, back goes up one level.
+function caPick(iso) { CA.anchor = dayStart(new Date(iso)); CA.mini = new Date(CA.anchor.getFullYear(), CA.anchor.getMonth(), 1); renderCalendarPanel('nav'); }
+function caOpenDay(iso) { CA.sheet = null; CA.q = ''; CA.view = 'day'; CA.reset = true; caPick(iso); }
+function caOpenMonth(y, mo) { CA.anchor = new Date(y, mo, 1); CA.view = 'month'; CA.reset = true; CA.mini = new Date(y, mo, 1); renderCalendarPanel('nav'); }
+function caCell(iso) { if (CA.mode === 'list') caPick(iso); else caOpenDay(iso); }
+function caBack() { CA.reset = true; if (CA.view === 'day' || CA.view === 'week' || CA.view === 'agenda') CA.view = 'month'; else if (CA.view === 'month') CA.view = 'year'; renderCalendarPanel('nav'); }
+function caMiniGo(n) { CA.mini = new Date(CA.mini.getFullYear(), CA.mini.getMonth() + n, 1); const s = document.querySelector('.ca-mini'); if (s) s.outerHTML = caMiniHtml(caItems()); }
+function caToggleCal(k) { if (CA.hidden.has(k)) CA.hidden.delete(k); else CA.hidden.add(k); try { localStorage.setItem('bixx-ca-hidden', JSON.stringify([...CA.hidden])); } catch (e) {} caDraw(); }
+
+// ── Connected calendars (migration 0044 + the calendar-sync and calendar-feed functions). In: paste the link your calendar app gives you and its events show here.
+// Out: your own feed address, which you subscribe to in Google, Apple, Outlook or Proton so the OS calendar shows there. Read only both ways.
+const CA_PROVIDERS = {
+  google: ['Google Calendar', ['Open calendar.google.com on a computer.', 'Settings (the gear) → Settings for my calendars → pick the calendar.', 'Find “Integrate calendar” and copy the “Secret address in iCal format”.']],
+  apple: ['Apple (iCloud)', ['In the Calendar app on a Mac: right-click the calendar → Share Calendar.', 'Tick “Public Calendar”, then “Copy Link” (it starts with webcal://).', 'Anyone with that link can read the calendar, so use one calendar you are happy to share.']],
+  microsoft: ['Microsoft (Outlook)', ['Open Outlook on the web → Settings → Calendar → Shared calendars.', 'Under “Publish a calendar” choose the calendar and “Can view all details”, then Publish.', 'Copy the ICS link.']],
+  proton: ['Proton Calendar', ['Open Proton Calendar on the web → Settings → Calendars.', 'Pick the calendar and choose “Share via link”, then create the link.', 'Copy it.']],
+  other: ['Another calendar', ['Any calendar app that gives you an iCal (.ics) link works: copy that link.']],
+};
+const CA_FEED_HOW = { google: 'Google: Other calendars (+) → From URL → paste. Google decides how often it refreshes (often every several hours).', apple: 'Apple: File → New Calendar Subscription → paste → choose how often to refresh.',
+  microsoft: 'Outlook: Add calendar → Subscribe from web → paste.', proton: 'Proton: Settings → Add calendar → Add calendar from URL → paste.' };
+const CA_COLORS = ['#3B82F6', '#10B981', '#FF7A1A', '#8B5CF6', '#E8B923', '#EF4444'];
+const caNoonUTC = iso => { const d = new Date(iso); return new Date(d.getUTCFullYear(), d.getUTCMonth(), d.getUTCDate(), 12); };
+async function caLoadExternal(from, to) {
+  const l = await sb.rpc('calendar_link_list');
+  if (l.error) { CA.ext = []; CA.extEvents = []; return; }          // the database change is not applied: nothing to show, nothing broken
+  CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count }));
+  if (!CA.ext.length) { CA.extEvents = []; return; }
+  const e = await sb.rpc('calendar_link_events', { p_from: from.toISOString(), p_to: to.toISOString() });
+  CA.extEvents = (e.data || []).map(x => { const all = x.all_day, s = all ? caNoonUTC(x.starts_at) : new Date(x.starts_at);
+    return { uid: x.link_id + '|' + x.uid, cal: x.link_id, title: x.title, where: x.location, notes: x.notes, start: s, end: all ? (x.ends_at ? caNoonUTC(x.ends_at) : addDays(s, 1)) : (x.ends_at ? new Date(x.ends_at) : null), allDay: all }; });
+  if (CA.ext.some(c => !c.last || Date.now() - Date.parse(c.last) > 30 * 60e3) && !CA._syncing) { CA._syncing = true; caSyncExternal(false).finally(() => { CA._syncing = false; }); }
+}
+async function caSyncExternal(manual) {
+  if (!opSessionToken || !CA.ext.length) return;
+  try {
+    const res = await fetch(`${SB_URL}/functions/v1/calendar-sync`, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: SB_KEY, Authorization: `Bearer ${SB_KEY}`, 'x-bixx-session': opSessionToken }, body: '{}' });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(d.error || 'Could not sync your calendars.');
+    const bad = (d.links || []).filter(x => !x.ok);
+    if (manual) toast(bad.length ? `${bad.length} calendar${bad.length === 1 ? '' : 's'} could not be read: ${bad[0].error}` : 'Calendars synced.');
+    if (document.querySelector('.ca-wrap')) { CA.loaded = null; renderCalendarPanel(); }
+  } catch (e) { if (manual) toast(e.message || String(e)); }
+}
+// With the offline copy's 4-hour refresh: ask the server to re-read the member's connected calendars.
+async function caLoadExternalQuiet() { const l = await sb.rpc('calendar_link_list'); if (!l.error && (l.data || []).length) { CA.ext = (l.data || []).map(x => ({ id: x.id, name: x.name, provider: x.provider, color: x.color, last: x.last_synced_at, err: x.last_error, n: x.event_count })); await caSyncExternal(false); } }
+function caShowExternal(uid) {
+  const e = (CA.extEvents || []).find(x => x.uid === uid); if (!e) return;
+  const cal = CA.ext.find(c => c.id === e.cal);
+  openOverlay(e.title, body => {
+    body.innerHTML = `<div class="term-wf">
+      <div class="form-block"><div class="form-lbl">When</div><div>${e.allDay ? esc(e.start.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })) + ' · all day'
+        : esc(e.start.toLocaleString('en-US', { weekday: 'long', month: 'long', day: 'numeric', hour: 'numeric', minute: '2-digit' })) + (e.end ? ' – ' + esc(caTime(e.end)) : '')}</div></div>
+      ${e.where ? `<div class="form-block"><div class="form-lbl">Where</div><div>${esc(e.where)}</div></div>` : ''}
+      ${e.notes ? `<div class="form-block"><div class="form-lbl">Notes</div><div style="white-space:pre-wrap">${esc(e.notes)}</div></div>` : ''}
+      <div class="form-block"><div class="form-lbl">From</div><div>${esc(cal?.name || 'A connected calendar')} <span class="pp-muted">· read only. Change it in that calendar.</span></div></div></div>`;
+  });
+}
+const CAC = { provider: 'google', color: CA_COLORS[0], token: null };
+function caConnectDialog() { CAC.msg = ''; openOverlay('Calendars', body => caConnectDraw(body)); caFeedToken(); }
+function caConnectDraw(body) {
+  body = body || document.getElementById('ov-body'); if (!body) return;
+  const pv = CA_PROVIDERS[CAC.provider], feedUrl = CAC.token ? `${SB_URL}/functions/v1/calendar-feed?t=${CAC.token}` : '';
+  body.innerHTML = `<div class="term-wf cac">
+    <div class="form-lbl">Bring your calendar in</div>
+    <div class="cac-prov">${Object.entries(CA_PROVIDERS).map(([k, v]) => `<button class="${CAC.provider === k ? 'on' : ''}" onclick="CAC.provider='${k}';caConnectDraw()">${esc(v[0])}</button>`).join('')}</div>
+    <ol class="cac-steps">${pv[1].map(x => `<li>${esc(x)}</li>`).join('')}</ol>
+    <form class="pp-form flat" onsubmit="event.preventDefault();caConnectSave()">
+      <label><span>Name</span><input id="cac-name" maxlength="80" value="${esc(CAC.name || pv[0])}" required></label>
+      <label><span>Calendar link</span><input id="cac-url" autocomplete="off" spellcheck="false" placeholder="https://… or webcal://…" required></label>
+      <div class="cac-colors" role="radiogroup" aria-label="Colour">${CA_COLORS.map(c => `<button type="button" role="radio" aria-checked="${CAC.color === c}" class="${CAC.color === c ? 'on' : ''}" style="--c:${c}" onclick="CAC.color='${c}';caConnectDraw()"></button>`).join('')}</div>
+      <div class="pp-form-msg" id="cac-msg">${esc(CAC.msg || '')}</div>
+      <button class="pp-btn solid big" type="submit">Connect</button>
+      <p class="pp-muted">Read only. The OS reads your calendar and shows its events here; it never changes it. The link is kept private and only you can use it. Anyone who has the link can read that calendar, so remove it here if you stop trusting it.</p>
+    </form>
+    ${CA.ext.length ? `<div class="form-lbl" style="margin-top:18px">Connected</div>${CA.ext.map(c => `<div class="cac-row"><i style="--c:${esc(c.color)}"></i><span><b>${esc(c.name)}</b><small>${c.err ? esc(c.err) : c.last ? `${c.n} events · synced ${esc(agoText(c.last))}` : 'Not read yet'}</small></span>
+      <button class="pp-btn" onclick="caSyncExternal(true)">Sync now</button><button class="pp-btn" onclick="caRemoveLink('${esc(c.id)}')">Remove</button></div>`).join('')}` : ''}
+    <div class="form-lbl" style="margin-top:20px">Show the OS in your calendar</div>
+    <p class="pp-muted">Subscribe to this private address in your own calendar app and the OS calendar (shared events and your steps) appears there, refreshed every few hours by that app. Don’t share it: it is the key to your feed.</p>
+    <div class="cac-feed"><input readonly value="${esc(feedUrl || 'Making your address…')}" onclick="this.select()" aria-label="Your feed address"><button class="pp-btn" ${feedUrl ? '' : 'disabled'} onclick="copyText('${esc(feedUrl)}','Feed address')">Copy</button><button class="pp-btn" onclick="caFeedReset()">Make a new one</button></div>
+    <ul class="cac-how">${Object.values(CA_FEED_HOW).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>`;
+}
+async function caConnectSave() {
+  const v = id => document.getElementById(id)?.value || '';
+  CAC.name = v('cac-name');
+  const { data, error } = await sb.rpc('calendar_link_add', { p_provider: CAC.provider, p_name: v('cac-name'), p_url: v('cac-url'), p_color: CAC.color });
+  if (error) { CAC.msg = error.message; return caConnectDraw(); }
+  CAC.name = ''; CAC.msg = '';
+  toast('Calendar connected. Reading it now…');
+  CA.loaded = null; await renderCalendarPanel(); await caSyncExternal(true); caConnectDraw();
+}
+async function caRemoveLink(id) {
+  if (!confirm('Remove this calendar from the OS? Its events disappear here; your calendar itself is not touched.')) return;
+  const { error } = await sb.rpc('calendar_link_remove', { p_id: id });
+  if (error) return toast(error.message);
+  CA.hidden.delete('ext:' + id); CA.loaded = null; await renderCalendarPanel(); caConnectDraw();
+}
+async function caFeedToken() { const { data } = await sb.rpc('calendar_feed_get'); CAC.token = data || null; caConnectDraw(); }
+async function caFeedReset() {
+  if (!confirm('Make a new feed address? The old one stops working, so any calendar app subscribed to it has to be given the new one.')) return;
+  const { data, error } = await sb.rpc('calendar_feed_reset'); if (error) return toast(error.message);
+  CAC.token = data; caConnectDraw(); toast('New address made.');
+}
+
 // ── The work auction, in the calendar ────────────────────────────────────
 // Genesis opens steps for claims (with a close time) or grants them directly.
 // Eligible members claim; Genesis sees the claims side by side and awards one.
@@ -14882,7 +15277,7 @@ function caAddEvent(dayIso, ev) {
     const col = ev.currentTarget.getBoundingClientRect();
     const h = Math.floor(CA_H0 + (ev.clientY - col.top) / CA_ROW);
     base.setHours(Math.max(CA_H0, Math.min(CA_H1 - 1, h)), 0, 0, 0);
-  } else { base.setMinutes(0, 0, 0); base.setHours(base.getHours() + 1); }
+  } else if (dayIso) { base.setHours(9, 0, 0, 0); } else { base.setMinutes(0, 0, 0); base.setHours(base.getHours() + 1); }
   const pad = n => String(n).padStart(2, '0');
   const dStr = `${base.getFullYear()}-${pad(base.getMonth() + 1)}-${pad(base.getDate())}`;
   const tStr = `${pad(base.getHours())}:00`, eStr = `${pad(Math.min(23, base.getHours() + 1))}:00`;
@@ -14910,7 +15305,7 @@ async function caSaveEvent() {
   if (error) { document.getElementById('ce-msg').textContent = error.message; return; }
   closeOverlay();
   toast('Added to the calendar.');
-  CA.start = mondayOf(start);
+  CA.anchor = dayStart(start); CA.mini = null;
   renderCalendarPanel();
 }
 
@@ -14960,6 +15355,130 @@ function closeProfilePanel() {
   document.getElementById('pf')?.classList.remove('on');
   document.getElementById('pf-scrim')?.classList.remove('on');
   document.getElementById('term-sb-me')?.classList.remove('on');
+}
+
+// ── Profile, as a grouped list (user card, tier banner, rows that open one section at a time). The sections themselves are the ones the
+// profile always had; this only rearranges them. A section is moved into the detail view when its row is opened and back when you return.
+const PF = { view: 'home' };
+const PF_ICO = {
+  person: '<circle cx="12" cy="8" r="3.6"/><path d="M4.5 20c.6-4 3.6-6 7.5-6s6.9 2 7.5 6"/>', wallet: '<rect x="3" y="6" width="18" height="13" rx="2.5"/><path d="M3 10h18M16 14.5h2"/>',
+  ledger: '<path d="M5 3h11l3 3v15H5z"/><path d="M9 9h7M9 13h7M9 17h5"/>', work: '<path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1.2 1.2L7 5M3.5 12l1.2 1.2L7 11M3.5 18l1.2 1.2L7 17"/>',
+  doc: '<path d="M6 3h9l4 4v14H6z"/><path d="M15 3v4h4"/>', tier: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>', pin: '<path d="M12 21s7-6.2 7-11.5a7 7 0 0 0-14 0C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.4"/>',
+  lock: '<rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/>', sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13 7 4 4"/>', shield: '<path d="M12 3 5 6v6c0 4.4 3 7.4 7 9 4-1.6 7-4.6 7-9V6z"/>', help: '<circle cx="12" cy="12" r="9"/><path d="M9.6 9.5a2.5 2.5 0 1 1 3.4 2.3c-.7.4-1 .9-1 1.7M12 17v.1"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>', globe: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.7 2.6 15.3 0 18M12 3c-2.6 2.7-2.6 15.3 0 18"/>', out: '<path d="M15 4h4v16h-4M10 8l-4 4 4 4M6 12h10"/>',
+  dl: '<path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v3h16v-3"/>', cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+};
+const pfIc = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${PF_ICO[k]}</svg>`;
+const PF_CHEV = '<svg class="pf2-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg>';
+function pfRestyle(op, k, next, logs, nVerified, nActive) {
+  const pf = document.getElementById('pf'); if (!pf) return;
+  const secOf = txt => [...pf.querySelectorAll(':scope > .pf-sec')].find(el => (el.querySelector('h4')?.textContent || '').trim().startsWith(txt));
+  const keep = pf.querySelector(':scope > .pf-sec > .pf-stamp')?.parentElement;
+  const sections = { ids: secOf('Your IDs'), signin: pf.querySelector('#pf-signin'), phone: pf.querySelector('#pf-details'), map: pf.querySelector('#pf-mapme'), wallets: pf.querySelector('#pf-wallets'),
+    tier: secOf('Tier'), steps: secOf('Your steps'), statements: pf.querySelector('#pf-statements') };
+  Object.values(sections).forEach(el => { if (el) el.dataset.orig = '1'; });
+  const stash = document.createElement('div'); stash.id = 'pf2-stash'; stash.hidden = true;
+  // everything the old layout drew goes into the stash; the new layout is built around it
+  [...pf.children].forEach(el => { if (el !== keep) stash.appendChild(el); });
+  const tierName = TIER_STEPS[k][0], dark = currentTheme() === 'dark';
+  const mail = op.contact_email || (op.email && !/@bixxville\.invite$/.test(op.email) ? op.email : '');
+  const row = (key, ico, label, sub, tags, extra = '') => `<button class="pf2-row" data-t="${esc((label + ' ' + sub + ' ' + tags).toLowerCase())}" onclick="${key}">${pfIc(ico)}<span><b>${esc(label)}</b><small>${esc(sub)}</small></span>${extra}${extra ? '' : PF_CHEV}</button>`;
+  const lang = (LANGS.find(l => l[0] === I18N.lang) || LANGS[0])[1];
+  const home = `
+    <button class="pf2-user" onclick="openMemberRecord(operator.id, null, { edit: true })" aria-label="Edit your details">
+      <span class="pf2-av">${avatarHtml(op.peer_name, op.avatar_url, 44)}</span>
+      <span class="pf2-who"><b>${esc(op.peer_name || 'Member')}</b><small>${esc(mail || (op.handle || '@' + (op.peer_name || '').replace(/\s/g, '').toUpperCase()))}</small></span>${PF_CHEV}</button>
+    <div class="pf2-banner">
+      <i class="pf2-spark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 6.6L21 11l-6.6 2.4L12 20l-2.4-6.6L3 11l6.6-2.4z"/></svg></i>
+      <div><b>${op.is_genesis ? 'Executive Operator' : esc(tierName) + ' tier'}</b><p>${op.is_genesis ? 'You run the network. Wallets, the Cycle and the treasury are in Wallets & tax.'
+        : next ? `${(next[1] - logs).toLocaleString()} more verified LOGs to reach ${esc(next[0])} ($${next[2]} per LOG).` : 'Top tier.'} Standing: ${esc(op.standing || 'active')}.</p></div>
+      <button onclick="pfOpen('tier')">View</button></div>
+    <div class="pf2-stats"><div><b>${logs.toLocaleString()}</b><span>LOGs</span></div><div><b>${nVerified}</b><span>Verified</span></div><div><b>${nActive}</b><span>Active</span></div><div><b>${op.streak || 0}</b><span>Streak</span></div></div>
+    <div class="pf2-group">
+      ${row("pfOpen('account')", 'person', 'Account & sign-in', 'IDs, PIN, wallet link, email, number', 'member id bix pin sign in google phone')}
+      ${row("pfOpen('wallets')", 'wallet', 'Wallets & tax', 'where you are paid, tax set-aside', 'wallet usdc treasury tax payout')}
+      ${row("pfOpen('ledger')", 'ledger', 'Ledger', 'your activity and payments', 'ledger activity payments blockchain transactions')}
+      ${row("pfOpen('steps')", 'work', 'Work & steps', 'steps granted to you', 'work steps tasks contracts')}
+      ${row("pfOpen('statements')", 'doc', 'Statements', 'checkpoint statements', 'statements pdf checkpoint')}
+      ${row("pfOpen('tier')", 'tier', 'Tier & standing', tierName + ' · $' + TIER_STEPS[k][2] + ' per LOG', 'tier standing logs')}
+    </div>
+    <div class="pf2-group">
+      ${row("pfOpen('map')", 'pin', 'Live map', 'show yourself to members, or not', 'map location privacy')}
+      ${row("pfOpen('device')", 'lock', 'Device & security', 'offline copy, sign-in, contract vault', 'security lock offline vault device code pin')}
+      ${row("setTheme(currentTheme() === 'light' ? 'dark' : 'light'); renderProfilePanel()", 'sun', 'Appearance', dark ? 'Dark' : 'Light', 'theme dark light', `<i class="pf-switch ${dark ? 'on' : ''}"></i>`)}
+      ${row("openMemberRecord(operator.id)", 'doc', 'Full record', 'ledger, execution log, cycle audit', 'record export')}
+      ${row("exportRecord(operator.id)", 'dl', 'Work record PDF', 'download your record', 'pdf export download')}
+      ${isInstalledApp() ? '' : row('installApp()', 'dl', 'Install the app', 'on this computer or phone', 'install pwa')}
+    </div>
+    <div class="pf2-group">
+      ${row("pfOpen('lang')", 'globe', 'Language', lang, 'language translate')}
+      ${row("window.open('https://landofgeb.net/privacy.html','_blank','noopener')", 'shield', 'Privacy policy', 'how requests and data are handled', 'privacy policy')}
+      ${row("location.href='mailto:bixxville@proton.me?subject=Bixxville%20help'", 'help', 'Help & support', 'bixxville@proton.me', 'help support contact')}
+      ${row("location.href='mailto:bixxville@proton.me?subject=Bixxville%20feedback'", 'chat', 'Feedback', 'tell us what to change', 'feedback')}
+    </div>
+    <div class="pf2-group"><button class="pf2-row danger" data-t="sign out log out" onclick="closeProfilePanel(); doLogout()">${pfIc('out')}<span><b>Sign out</b></span></button></div>
+    <div class="pf2-none" hidden>Nothing matches.</div>`;
+  const shell = document.createElement('div'); shell.className = 'pf2'; shell.id = 'pf2';
+  shell.innerHTML = `<div class="pf2-bar"><button class="pf2-ic" onclick="pfBack()" aria-label="Back">${'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m15 6-6 6 6 6"/></svg>'}</button><b id="pf2-title">Profile</b>
+      <button class="pf2-ic" onclick="pfSearch()" aria-label="Search the profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg></button></div>
+    <div class="pf2-search" hidden><input id="pf2-q" placeholder="Search your profile" autocomplete="off" oninput="pfFilter(this.value)" aria-label="Search your profile"></div>
+    <div class="pf2-home" id="pf2-home">${home}</div><div class="pf2-detail" id="pf2-detail" hidden></div>`;
+  pf.prepend(shell); pf.appendChild(stash);
+  stash._sections = sections;
+  const view = PF.view; PF.view = 'home';
+  if (view && view !== 'home') pfOpen(view);
+}
+const PF_TITLE = { account: 'Account & sign-in', wallets: 'Wallets & tax', ledger: 'Ledger', steps: 'Work & steps', statements: 'Statements', tier: 'Tier & standing', map: 'Live map', device: 'Device & security', lang: 'Language' };
+function pfParts(key) {
+  const sc = document.getElementById('pf2-stash')?._sections || {};
+  return key === 'account' ? [sc.ids, sc.signin, sc.phone] : ['wallets', 'steps', 'statements', 'tier', 'map'].includes(key) ? [sc[key]] : [];
+}
+function pfOpen(key) {
+  const d = document.getElementById('pf2-detail'), home = document.getElementById('pf2-home'), stash = document.getElementById('pf2-stash');
+  if (!d || !stash) return;
+  pfStashBack();
+  PF.view = key; d.innerHTML = ''; d.hidden = false; home.hidden = true;
+  document.getElementById('pf2-title').textContent = PF_TITLE[key] || 'Profile';
+  document.querySelector('#pf2 .pf2-search').hidden = true;
+  if (key === 'ledger') { d.innerHTML = '<div class="pf-sec"><div id="pf-ledger-host"></div></div>'; renderLedgerPanel(document.getElementById('pf-ledger-host'), true); }
+  else if (key === 'device') d.innerHTML = pfDeviceHtml();
+  else if (key === 'lang') d.innerHTML = `<div class="pf-sec"><div class="pf2-langs">${LANGS.map(l => `<button class="no-i18n ${l[0] === I18N.lang ? 'on' : ''}" onclick="setLang('${l[0]}');renderProfilePanel()">${l[1]}</button>`).join('')}</div></div>`;
+  else pfParts(key).filter(Boolean).forEach(el => d.appendChild(el));
+  document.getElementById('pf')?.scrollTo({ top: 0 });
+}
+function pfStashBack() {
+  const d = document.getElementById('pf2-detail'), stash = document.getElementById('pf2-stash'); if (!d || !stash) return;
+  [...d.querySelectorAll(':scope > .pf-sec[data-orig]')].forEach(el => stash.appendChild(el));
+}
+function pfBack() {
+  if (PF.view === 'home') return closeProfilePanel();
+  pfStashBack(); PF.view = 'home';
+  document.getElementById('pf2-detail').hidden = true; document.getElementById('pf2-home').hidden = false; document.getElementById('pf2-title').textContent = 'Profile';
+}
+function pfSearch() {
+  if (PF.view !== 'home') return;
+  const box = document.querySelector('#pf2 .pf2-search'); box.hidden = !box.hidden;
+  if (!box.hidden) document.getElementById('pf2-q').focus(); else { document.getElementById('pf2-q').value = ''; pfFilter(''); }
+}
+function pfFilter(q) {
+  q = q.trim().toLowerCase(); let any = false;
+  document.querySelectorAll('#pf2-home .pf2-row').forEach(r => { const hit = !q || r.dataset.t.includes(q); r.hidden = !hit; any = any || hit; });
+  document.querySelectorAll('#pf2-home .pf2-group').forEach(g => { g.hidden = ![...g.querySelectorAll('.pf2-row')].some(r => !r.hidden); });
+  document.querySelectorAll('#pf2-home .pf2-user,#pf2-home .pf2-banner,#pf2-home .pf2-stats').forEach(e => { e.hidden = !!q; });
+  document.querySelector('#pf2-home .pf2-none').hidden = any || !q;
+}
+function pfDeviceHtml() {
+  const off = typeof OFF !== 'undefined' ? OFF : {}, st = typeof vtStatus === 'function' ? vtStatus() : 'none';
+  const vault = st === 'open' ? 'Unlocked' : st === 'locked' ? 'Locked' : 'Not set up';
+  return `<div class="pf-sec"><h4>Offline copy <span>${esc(bsAgo(off.lastSync))}</span></h4>
+      <p class="pp-muted">This device keeps a copy of what you use and refreshes it every 4 hours while online. Check-ins, tag scans and readings made offline are sent when you are back online.</p>
+      <div class="pf-wal-acts"><button class="pf-btn" onclick="offSnapshot(true)">Refresh now</button></div></div>
+    <div class="pf-sec"><h4>Offline sign-in <span>no time limit</span></h4>
+      <p class="pp-muted">Your PIN or password works with no signal, for as long as you want. Four wrong tries lock this device for 1 hour. After that you get 2 tries, and each lock is 2 hours longer than the last. Access ends at the next sync if you are removed from the network.</p></div>
+    <div class="pf-sec"><h4>Contract vault <span>${vault}</span></h4>
+      <p class="pp-muted">Contract files saved on this device are sealed with your device code. They lock again after 5 minutes with the app hidden, and when you sign out.${window.bixxDesktop ? ' In the desktop app the key is kept in this computer’s key store.' : ''}</p>
+      <div class="pf-wal-acts">${st === 'open' ? '<button class="pf-btn solid" onclick="vtLockNow(true);pfOpen(\'device\')">Lock now</button>' : ''}<button class="pf-btn" onclick="changeMyPin()">Change my PIN</button></div></div>`;
 }
 
 function refreshProfilePanel() {
@@ -15166,6 +15685,7 @@ async function renderProfilePanel() {
     </div>`;
   fillProfileWallets(op);
   pfMapFill();
+  pfRestyle(op, k, next, logs, verified.length, active.length);
   loadAuthProviders().then(pr => {
     const g = document.getElementById('si-google'); if (!g) return;
     g.classList.toggle('on', !!pr.google);
@@ -15264,13 +15784,46 @@ function toggleTermSidebar(force) {
   if (fab) { const l = fab.querySelector('.fab-lbl'); if (l) l.textContent = open ? 'Close' : 'Menu'; fab.setAttribute('aria-label', open ? 'Close menu' : 'Menu'); }
 }
 
+// ── Section bar: the Dashboard holds Notifications, Calendar, Chat and Ledger as its own tabs; Decomposition holds Analog as a toggle.
+// The bar sits above the page, outside every panel, so the panels keep drawing themselves exactly as before.
+const SEC_DASH = ['terminal', 'notifications', 'calendar', 'chat', 'ledger'];
+const SEC_DECO = ['tracker', 'decomposed', 'places', 'analog'];
+const SEC = { n: 0, c: 0 };
+const SEC_ICO = {
+  home: '<path d="M4 11 12 4l8 7v8a1 1 0 0 1-1 1h-4v-6H9v6H5a1 1 0 0 1-1-1z"/>',
+  bell: '<path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/>',
+  cal: '<rect x="3.5" y="5" width="17" height="15" rx="2.5"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+  chat: '<path d="M4 5h16v11H9l-5 4z"/>',
+  ledger: '<path d="M5 3h11l3 3v15H5z"/><path d="M9 9h7M9 13h7M9 17h5"/>',
+  decomp: '<rect x="3" y="4" width="5" height="16" rx="1"/><rect x="9.5" y="4" width="5" height="10" rx="1"/><rect x="16" y="4" width="5" height="13" rx="1"/>',
+  analog: '<path d="M5 12.5a7 7 0 0 1 14 0"/><path d="M8 12.5a4 4 0 0 1 8 0"/><circle cx="12" cy="12.5" r="1.2"/><path d="M12 14v6"/>',
+};
+function secBar(view) {
+  const el = document.getElementById('sec-bar'), shell = document.getElementById('terminal-shell');
+  if (!el) return;
+  const ic = k => `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SEC_ICO[k]}</svg>`;
+  let html = '';
+  if (SEC_DASH.includes(view)) {
+    const tabs = [['terminal', 'Overview', 'home'], ['notifications', 'Notifications', 'bell'], ['calendar', 'Calendar', 'cal'], ['chat', 'Chat', 'chat'], ['ledger', 'Ledger', 'ledger']];
+    html = `<div class="sec-tabs" role="tablist" aria-label="Dashboard">${tabs.map(([k, l, i]) => `<button role="tab" aria-selected="${k === view}" class="${k === view ? 'on' : ''}" onclick="setTermView('${k}')">${ic(i)}<span>${l}</span>${
+      k === 'notifications' ? `<em class="term-sb-count ${SEC.n ? 'hot' : ''}" id="sb-notif-count">${SEC.n || ''}</em>` : k === 'chat' ? `<em class="term-sb-count ${SEC.c ? 'hot' : ''}" id="sb-chat-count">${SEC.c || ''}</em>` : ''}</button>`).join('')}</div>`;
+  } else if (SEC_DECO.includes(view)) {
+    const an = view === 'analog';
+    html = `<div class="sec-tabs sec-toggle" role="group" aria-label="Decomposition or Analog"><button class="${an ? '' : 'on'}" aria-pressed="${!an}" onclick="dcGo(DC.tab && !['analog'].includes(DC.tab) ? DC.tab : 'overview')">${ic('decomp')}<span>Decomposition</span></button>
+      <button class="${an ? 'on' : ''}" aria-pressed="${an}" onclick="setTermView('analog')">${ic('analog')}<span>Analog</span></button></div>`;
+  }
+  el.innerHTML = html; el.hidden = !html;
+  shell?.classList.toggle('has-secbar', !!html);
+}
+
 function setTermView(view) {
-  const navView = (view === 'decomposed' || view === 'places') ? 'tracker' : ['notifications', 'chat', 'calendar'].includes(view) ? 'clients' : view;
+  const navView = (view === 'decomposed' || view === 'places' || view === 'analog') ? 'tracker' : SEC_DASH.includes(view) ? 'terminal' : view;
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
   if (view !== 'chat') clearInterval(CH.timer);
   if (view !== 'trades') clearInterval(TKR.timer);
   document.getElementById('terminal-shell')?.setAttribute('data-view', view);
+  secBar(view);
   const home = document.getElementById('term-home');
   const panel = document.getElementById('term-panel');
   if (view === 'browser') view = 'decomposed'; // Browser was folded into Map
@@ -15283,6 +15836,7 @@ function setTermView(view) {
     home.style.display = 'none';
     panel.style.display = 'block';
     panel.classList.toggle('dc-on', ['tracker', 'decomposed', 'places'].includes(view));
+    panel.classList.toggle('ca-fit', view === 'calendar');
     if (view === 'tracker') renderDecomposition();
     else if (view === 'statements') renderStatementsTimeline();
     else if (view === 'decomposed') renderDecomposedPanel();
@@ -15294,7 +15848,7 @@ function setTermView(view) {
     else if (view === 'clients') renderClientsPanel();
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
-    else if (view === 'calendar') { CA._scrolled = false; renderCalendarPanel(); }
+    else if (view === 'calendar') { CA.reset = true; renderCalendarPanel(); }
   }
   toggleTermSidebar(false);
 }
@@ -18085,7 +18639,7 @@ function tkrTzInit() {
 // ── LEDGER: everything you've done in the network (Activity) and every payment on the blockchain
 // (Payment), in one list, newest first. Activity comes from the hours ledger and network notices;
 // Payment comes from escrow contracts and the Hedera mirror node for your wallets.
-const LG = { filter: 'all', rows: [] };
+const LG = { filter: 'all', rows: [], host: null, compact: false };
 const LG_TOKENS = {}; // token id → { symbol, decimals }
 async function lgToken(id) {
   if (!LG_TOKENS[id]) {
@@ -18114,13 +18668,15 @@ async function lgChainRows(evm, whose) {
   return rows;
 }
 
-async function renderLedgerPanel() {
-  const panel = document.getElementById('term-panel');
-  panel.innerHTML = `<div class="lg-wrap">
+// The Ledger shows in the Dashboard's Ledger tab and inside Profile. `host` is where it draws; `compact` shows the latest rows only.
+async function renderLedgerPanel(host, compact) {
+  const panel = host || document.getElementById('term-panel');
+  LG.host = panel; LG.compact = !!compact;
+  panel.innerHTML = `<div class="lg-wrap ${compact ? 'compact' : ''}">
     <div class="pp-head"><div><h2>Ledger</h2><p>Everything you’ve done in the network, and every payment on the blockchain. <span class="lg-tag act">Activity</span> is work, hours and records. <span class="lg-tag pay">Payment</span> is money that moved on chain. <span class="lg-tag tax">Tax</span> is money set aside into tax wallets.</p></div></div>
-    <div class="lg-sum" id="lg-sum"></div>
-    <div class="lg-filters" id="lg-filters"></div>
-    <div id="lg-list"><div class="term-panel-empty">Reading the ledger and the blockchain…</div></div>
+    <div class="lg-sum"></div>
+    <div class="lg-filters"></div>
+    <div class="lg-list"><div class="term-panel-empty">Reading the ledger and the blockchain…</div></div>
   </div>`;
   const rows = [];
   const [led, ev, escs] = await Promise.all([
@@ -18155,22 +18711,24 @@ function drawLedger() {
   const hours = act.reduce((n, r) => n + (r.hours || 0), 0);
   const sumBy = unit => pay.filter(r => r.unit === unit).reduce((n, r) => n + r.amount, 0);
   const fmt = (n, d = 2) => n.toLocaleString(undefined, { minimumFractionDigits: d, maximumFractionDigits: d });
-  document.getElementById('lg-sum').innerHTML = `
+  LG.host.querySelector('.lg-sum').innerHTML = `
     <div class="lg-card act"><small><span class="lg-tag act">Activity</span></small><b>${act.length}</b><span>${fmt(hours)} hours logged · ${operator.total_logs || 0} total LOGs</span></div>
     <div class="lg-card pay"><small><span class="lg-tag pay">Payment</span></small><b>${pay.length}</b><span>${['USDC', 'HBAR'].map(u => `${sumBy(u) >= 0 ? '+' : '−'}${fmt(Math.abs(sumBy(u)))} ${u}`).join(' · ')} net · ${esc(ESCROW_NET.name)}</span></div>
     <div class="lg-card tax"><small><span class="lg-tag tax">Tax</span></small><b>${tax.length}</b><span>${fmt(tax.filter(r => r.unit === 'USDC' && r.amount > 0).reduce((n, r) => n + r.amount, 0))} USDC set aside · in your tax wallets</span></div>`;
-  document.getElementById('lg-filters').innerHTML = [['all', 'All', rows.length], ['act', 'Activity', act.length], ['pay', 'Payments', pay.length], ['tax', 'Tax', tax.length]]
+  LG.host.querySelector('.lg-filters').innerHTML = [['all', 'All', rows.length], ['act', 'Activity', act.length], ['pay', 'Payments', pay.length], ['tax', 'Tax', tax.length]]
     .map(([k, l, n]) => `<button class="lg-f ${LG.filter === k ? 'on' : ''} ${k}" onclick="LG.filter='${k}';drawLedger()">${l} <span>${n}</span></button>`).join('');
   const shown = LG.filter === 'all' ? rows : LG.filter === 'tax' ? tax : LG.filter === 'pay' ? pay : act;
   const day = d => d.toLocaleDateString(undefined, { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
-  document.getElementById('lg-list').innerHTML = shown.length ? shown.map(r => `
+  const more = LG.compact && shown.length > 8 ? shown.length - 8 : 0;
+  LG.host.querySelector('.lg-list').innerHTML = (LG.compact ? shown.slice(0, 8) : shown).length ? (LG.compact ? shown.slice(0, 8) : shown).map(r => `
     <div class="lg-row ${r.tax ? 'tax' : r.kind}">
       <span class="lg-tag ${r.tax ? 'tax' : r.kind}">${r.tax ? 'Tax' : r.kind === 'pay' ? 'Payment' : 'Activity'}</span>
       <div class="lg-main"><b>${esc(r.title)}</b><small>${esc(r.detail || '')} · ${day(r.when)}</small></div>
       <div class="lg-amt">${r.amount != null ? `<b class="${r.amount >= 0 ? 'in' : 'out'}">${r.amount >= 0 ? '+' : '−'}${fmt(Math.abs(r.amount), r.unit === 'HBAR' ? 2 : 2)} ${esc(r.unit)}</b>` : r.hours != null ? `<b>${fmt(r.hours)} h</b>` : ''}
         ${r.link ? `<a href="${esc(r.link)}" target="_blank" rel="noopener">HashScan ↗</a>` : ''}</div>
     </div>`).join('')
-    : `<div class="term-panel-empty">${LG.filter === 'pay' ? (LG.wallets?.length ? 'No payments on chain yet for your wallets.' : 'Add a wallet to see your payments here.') : 'Nothing here yet.'}</div>`;
+    : `<div class="term-panel-empty">${LG.filter === 'pay' ? (LG.wallets?.length ? 'No payments on chain yet for your wallets.' : 'Add a wallet to see your payments here.') : 'Nothing here yet.'}</div>`
+  if (LG.compact) LG.host.querySelector('.lg-list').insertAdjacentHTML('beforeend', `<button class="pf-btn lg-all" onclick="closeProfilePanel();setTermView('ledger')">${more ? `${more} more · ` : ''}Open the full ledger</button>`);
 }
 
 async function renderAnalogPanel() {

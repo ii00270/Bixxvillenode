@@ -3755,6 +3755,135 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .rq-in{width:100%;box-sizing:border-box;border:1px solid var(--term-line);border-radius:10px;background:transparent;color:var(--term-fg);font-family:var(--mono);font-size:14px;padding:10px 12px;outline:none}
 .rq-in:focus{border-color:var(--term-fg);box-shadow:0 0 0 4px rgba(var(--green-rgb),.1)}
 
+/* BSize folders + leaderboard (Decomposition > Folders, Leaderboard): the Rank Tracker layout. Groups on the left, a ranked list in
+   the middle, one detail panel on the right. Colors: Decomposition tokens (--dc-*); status chips always carry an icon and words (bf-). */
+.bf{container-type:inline-size;padding:2px 0 40px}
+.bf button{font-family:inherit}
+.bf-cols{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+@container (min-width:900px){ .bf-cols{grid-template-columns:minmax(210px,.8fr) minmax(0,1.5fr) minmax(0,1.2fr)} .bf-detail{position:sticky;top:8px} }
+.bf-col{background:var(--dc-card);border:1px solid var(--dc-line);border-radius:14px;padding:12px;min-width:0}
+.bf-col h4{margin:2px 4px 10px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--dc-dim);font-weight:600;display:flex;justify-content:space-between;gap:8px}
+.bf-col h4 small{letter-spacing:0;text-transform:none;font-weight:400;color:var(--dc-faint)}
+.bf-grp{appearance:none;display:block;width:100%;text-align:left;border:1px solid transparent;background:transparent;color:var(--dc-fg);border-radius:12px;padding:10px 12px;margin-bottom:6px;cursor:pointer}
+.bf-grp:hover{background:var(--dc-card2)}
+.bf-grp.on{background:var(--dc-card2);border-color:var(--dc-line2)}
+.bf-grp b{display:block;font-size:14px;font-weight:600}
+.bf-grp>small{display:block;color:var(--dc-dim);font-size:12px;margin-top:2px}
+.bf-kpis{display:flex;gap:14px;flex-wrap:wrap;margin-top:8px}
+.bf-kpis i{font-style:normal;font-size:11px;color:var(--dc-dim);display:flex;flex-direction:column;gap:1px}
+.bf-kpis i b{font-size:15px;color:var(--dc-fg);font-weight:600;font-variant-numeric:tabular-nums}
+.bf-list{display:flex;flex-direction:column;gap:6px}
+.bf-row{appearance:none;display:grid;grid-template-columns:44px minmax(0,1fr) auto;grid-template-areas:"ic rt num" "ic seg chip";gap:2px 12px;align-items:center;width:100%;text-align:left;border:1px solid var(--dc-line);background:var(--dc-card);color:var(--dc-fg);border-radius:12px;padding:10px 12px;cursor:pointer}
+.bf-row:hover{background:var(--dc-card2)}
+.bf-row.on{background:var(--dc-card2);border-color:var(--dc-fg)}
+.bf-row .bf-folder{grid-area:ic}
+.bf-rt{grid-area:rt;min-width:0}
+.bf-rt b{display:block;font-size:14px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bf-rt b em{font-style:normal;font-weight:400;color:var(--dc-dim);font-size:12px}
+.bf-rt small{display:block;color:var(--dc-dim);font-size:12px;margin-top:1px}
+.bf-num{grid-area:num;text-align:right}
+.bf-num b{display:block;font-size:20px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+.bf-num small{font-size:10.5px;color:var(--dc-dim)}
+.bf-seg{grid-area:seg;display:flex;gap:2px;height:6px}
+.bf-seg i{border-radius:3px;background:var(--dc-line2)}
+.bf-seg i.ok{background:var(--st-done)} .bf-seg i.act{background:var(--st-prog)}
+.bf-row>.bf-chip{grid-area:chip;justify-self:end}
+.bf-chip{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;font-weight:500;padding:3px 9px 3px 7px;border-radius:999px;border:1px solid var(--dc-line2);color:var(--dc-dim);white-space:nowrap}
+.bf-chip svg{width:13px;height:13px}
+.bf-chip.ok{color:var(--st-done);border-color:color-mix(in srgb,var(--st-done) 40%,transparent);background:color-mix(in srgb,var(--st-done) 12%,transparent)}
+.bf-chip.act{color:var(--st-prog);border-color:color-mix(in srgb,var(--st-prog) 40%,transparent);background:color-mix(in srgb,var(--st-prog) 12%,transparent)}
+.bf-chip.wt{color:var(--dc-faint)}
+/* folder drawing */
+.bf-folder{width:44px;height:36px}
+.bf-folder.lg{width:72px;height:58px} .bf-folder.xl{width:96px;height:78px}
+.bf-folder .bk{fill:var(--dc-line2)} .bf-folder .fr{fill:var(--dc-faint);opacity:.55} .bf-folder .pg{fill:var(--dc-fg);opacity:.9}
+.bf-folder.ok .fr{fill:var(--st-done)} .bf-folder.act .fr{fill:var(--st-prog)} .bf-folder.ok .fr,.bf-folder.act .fr{opacity:.85}
+/* detail */
+.bf-dh{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.bf-dh h3{margin:0 0 5px;font-size:20px;font-weight:600;letter-spacing:-.01em}
+.bf-seg2{margin-left:auto;display:flex;border:1px solid var(--dc-line2);border-radius:9px;overflow:hidden}
+.bf-seg2 button{appearance:none;border:0;background:transparent;color:var(--dc-dim);font-size:12px;padding:6px 12px;cursor:pointer}
+.bf-seg2 button.on{background:var(--dc-fg);color:var(--term-bg)}
+.bf-head-n{display:flex;align-items:baseline;gap:8px;margin:16px 0 8px}
+.bf-head-n b{font-size:44px;font-weight:700;letter-spacing:-.02em;line-height:1;font-variant-numeric:tabular-nums}
+.bf-head-n span{font-size:14px;color:var(--dc-dim)} .bf-head-n em{font-style:normal;margin-left:auto;font-size:12px;color:var(--dc-dim)}
+.bf-logbar{display:flex;gap:4px;height:12px;margin-bottom:14px}
+.bf-logbar i{flex:1;border-radius:4px;border:1px solid var(--dc-line2)}
+.bf-logbar i.in{background:color-mix(in srgb,var(--st-prog) 30%,transparent);border-color:color-mix(in srgb,var(--st-prog) 55%,transparent)}
+.bf-logbar i.ok{background:var(--st-done);border-color:var(--st-done)}
+.bf-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.bf-tile{border:1px solid var(--dc-line);background:var(--dc-card2);border-radius:12px;padding:10px 12px;min-width:0}
+.bf-tile small{display:block;color:var(--dc-dim);font-size:11px;line-height:1.4}
+.bf-tile>small:first-child{text-transform:uppercase;letter-spacing:.07em;font-size:10px;margin-bottom:3px}
+.bf-tile b{display:block;font-size:15px;font-weight:600;line-height:1.35;overflow-wrap:anywhere}
+.bf-bad{color:var(--st-prog)!important}
+.bf-stamps{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:12px 0}
+.bf-stamps span{text-align:center;font-size:11px;padding:6px 2px;border:1px dashed var(--dc-line2);border-radius:8px;color:var(--dc-faint)}
+.bf-stamps span.on{border-style:solid;color:var(--st-done);border-color:color-mix(in srgb,var(--st-done) 50%,transparent);background:color-mix(in srgb,var(--st-done) 10%,transparent)}
+.bf-detail h5{margin:16px 2px 8px;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dc-dim);font-weight:600}
+.bf-steps{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.bf-steps li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:2px 10px;align-items:center;border:1px solid var(--dc-line);border-radius:10px;padding:8px 10px}
+.bf-steps li b{font-size:12px;font-family:var(--mono)} .bf-steps li span{font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bf-steps li em{grid-column:2;font-style:normal;font-size:11px;color:var(--dc-dim)} .bf-steps li .bf-chip{grid-column:3;grid-row:1/3}
+.bf-tbl{width:100%;border-collapse:collapse;font-size:12.5px;margin-top:14px}
+.bf-tbl caption{text-align:left;font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--dc-dim);padding:0 2px 6px}
+.bf-tbl th,.bf-tbl td{text-align:left;padding:7px 6px;border-top:1px solid var(--dc-line);vertical-align:top} .bf-tbl th{color:var(--dc-dim);font-weight:500;width:34%}
+.bf-note{border:1px solid color-mix(in srgb,var(--st-prog) 45%,transparent);background:color-mix(in srgb,var(--st-prog) 8%,transparent);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:12.5px}
+.bf-note ul{margin:6px 0 0;padding-left:18px} .bf-note li.error::marker{content:"✕ "} .bf-note li.warn::marker{content:"! "}
+.bf-fine{margin:12px 2px 0;font-size:11.5px;line-height:1.5;color:var(--dc-dim)}
+.bf-empty{text-align:center;padding:56px 16px;color:var(--dc-dim)} .bf-empty h3{color:var(--dc-fg);margin:14px 0 6px;font-size:18px}
+/* leaderboard rows */
+.bf-row.rk{grid-template-columns:30px minmax(0,1fr) auto auto;grid-template-areas:none;gap:6px 14px}
+.bf-row.rk .rk-n{grid-area:auto;grid-column:1;grid-row:1/3;font-size:18px;font-weight:700;color:var(--dc-dim);font-variant-numeric:tabular-nums;text-align:center}
+.bf-row.rk .bf-rt{grid-area:auto;grid-column:2;grid-row:1}
+.bf-row.rk .bf-num{grid-area:auto;grid-row:1}
+.bf-row.rk .rk-streak{grid-column:2/4;grid-row:2;display:flex;gap:2px;height:6px}
+.bf-row.rk>.bf-chip{grid-area:auto;grid-column:4;grid-row:2;justify-self:end}
+.rk-streak i{width:12px;border-radius:3px;background:var(--dc-line2)} .rk-streak i.on{background:var(--st-prog)}
+.rk-av{width:48px;height:48px;border-radius:50%;background:var(--dc-fg);color:var(--term-bg);display:grid;place-items:center;font-size:20px;font-weight:700}
+.bf-row em{font-style:normal;font-size:10.5px;padding:1px 6px;border-radius:999px;border:1px solid var(--dc-line2);color:var(--dc-dim);margin-left:4px}
+/* New contract (guided upload) and local files (bw-) */
+.bf-btn{white-space:nowrap;appearance:none;display:inline-flex;align-items:center;gap:6px;border:1px solid var(--dc-line2);background:transparent;color:var(--dc-fg);border-radius:9px;padding:7px 13px;font-size:12.5px;cursor:pointer;font-family:inherit}
+.bf-btn:hover{background:var(--dc-card2)} .bf-btn.solid{background:var(--dc-fg);color:var(--term-bg);border-color:var(--dc-fg)} .bf-btn:disabled{opacity:.4;cursor:default}
+.bf-tools{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.bf-note.ok{border-color:color-mix(in srgb,var(--st-done) 45%,transparent);background:color-mix(in srgb,var(--st-done) 8%,transparent)}
+.bf-note.bad{border-color:color-mix(in srgb,#EF4444 50%,transparent);background:color-mix(in srgb,#EF4444 8%,transparent)}
+.bw-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.bw-steps{list-style:none;display:flex;gap:6px;margin:0;padding:0;flex-wrap:wrap}
+.bw-steps li{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--dc-dim);padding:5px 12px 5px 6px;border:1px solid var(--dc-line);border-radius:999px}
+.bw-steps li span{width:20px;height:20px;border-radius:50%;display:grid;place-items:center;font-size:11px;border:1px solid var(--dc-line2)}
+.bw-steps li.on{color:var(--dc-fg);border-color:var(--dc-fg)} .bw-steps li.on span{background:var(--dc-fg);color:var(--term-bg)} .bw-steps li.done span{color:var(--st-done);border-color:var(--st-done)}
+.bw-card,.bw-edit,.bw-side{background:var(--dc-card);border:1px solid var(--dc-line);border-radius:14px;padding:16px;min-width:0}
+.bw-card{max-width:760px} .bw h3{margin:0 0 12px;font-size:18px;font-weight:600} .bw h4{margin:0 0 6px;font-size:14px} .bw h4 small{color:var(--dc-dim);font-weight:400;margin-left:6px}
+.bw-l{display:block;font-size:12px;color:var(--dc-dim);margin:14px 0 6px} .bw-l small{color:var(--dc-faint);margin-left:6px}
+.bw-in{width:100%;box-sizing:border-box;background:var(--dc-card2);border:1px solid var(--dc-line2);border-radius:9px;color:var(--dc-fg);padding:8px 10px;font-size:13px;font-family:inherit}
+.bw-in:focus{outline:2px solid var(--dc-fg);outline-offset:1px}
+.bw-pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.bw-pick button{appearance:none;display:flex;align-items:center;gap:10px;text-align:left;border:1px solid var(--dc-line);background:var(--dc-card2);color:var(--dc-fg);border-radius:12px;padding:10px;cursor:pointer;font-family:inherit}
+.bw-pick button.on{border-color:var(--dc-fg);background:var(--dc-card)} .bw-pick b{font-size:13px;font-weight:600}
+.bw-att{display:flex;align-items:center;gap:10px;border:1px solid var(--dc-line);border-radius:9px;padding:7px 10px;margin-bottom:6px;font-size:13px} .bw-att small{color:var(--dc-dim)}
+.bw-x{appearance:none;border:0;background:transparent;color:var(--dc-dim);cursor:pointer;font-size:14px;padding:4px 6px;margin-left:auto}
+.bw-file{display:inline-block;border:1px dashed var(--dc-line2);border-radius:9px;padding:8px 14px;font-size:12.5px;cursor:pointer;color:var(--dc-dim)}
+.bw-chk{display:flex;gap:8px;align-items:flex-start;font-size:12.5px;color:var(--dc-dim);margin-top:14px;line-height:1.5}
+.bw-cols{display:grid;grid-template-columns:1fr;gap:12px;align-items:start}
+@container (min-width:900px){ .bw-cols{grid-template-columns:minmax(0,1.7fr) minmax(0,1fr)} .bw-side{position:sticky;top:8px} }
+.bw-br{border:1px solid var(--dc-line);border-radius:12px;padding:10px;margin-bottom:10px;background:var(--dc-card2)}
+.bw-brh{display:flex;gap:8px;align-items:center;margin-bottom:8px} .bw-brh span{width:26px;height:26px;border-radius:7px;background:var(--dc-fg);color:var(--term-bg);display:grid;place-items:center;font-weight:700;font-size:12px;flex:none}
+.bw-step{margin-bottom:10px;padding-bottom:10px;border-bottom:1px dashed var(--dc-line)}
+.bw-l1{display:grid;grid-template-columns:46px minmax(0,1fr) 64px 112px 28px;gap:6px;align-items:center}
+.bw-l2{display:grid;grid-template-columns:150px minmax(0,1fr) auto;gap:6px;align-items:center;margin:6px 0 0 52px}
+.bw-code{font-family:var(--mono);font-size:12px} .bw-k{font-size:12px;color:var(--dc-dim);display:flex;gap:5px;align-items:center}
+.bw-l1 .bw-x{margin:0}
+.bw-tot{display:flex;gap:18px;margin-bottom:12px} .bw-tot span{display:flex;flex-direction:column} .bw-tot b{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums} .bw-tot small{font-size:11px;color:var(--dc-dim)}
+.bw-fold .bf-num{grid-area:auto}
+.bw-fold{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;padding:6px 0;border-top:1px solid var(--dc-line)} .bw-fold small{display:block;color:var(--dc-dim);font-size:11.5px} .bw-price{font-size:12.5px;color:var(--dc-dim);min-width:70px;text-align:right}
+.bw-side .bf-btn{width:100%;justify-content:center;margin-top:8px}
+.bw-rev{display:flex;flex-direction:column;gap:10px} .bw-revf{display:flex;gap:14px;border:1px solid var(--dc-line);border-radius:12px;padding:12px;background:var(--dc-card2)} .bw-revf ul{margin:0;padding-left:16px;font-size:12.5px;line-height:1.7} .bw-revf em{font-style:normal;color:var(--dc-dim);margin-left:6px;font-size:11.5px}
+.vt p{margin:6px 0;font-size:12.5px;color:var(--dc-dim)} .vt p.bad{color:var(--st-prog)} .vt-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px} .vt-row .bw-in{flex:1 1 150px;width:auto}
+.bf-assign{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:8px;align-items:center} .bf-assign>small:first-child{flex-basis:100%} .bf-assign select{flex:1 1 160px;width:auto} .bf-assign>small:last-child{flex-basis:100%}
+.bs-strip{display:flex;gap:6px 18px;flex-wrap:wrap;align-items:center;font-size:12.5px;color:var(--dc-dim);margin:0 0 12px;padding:8px 12px;border:1px solid var(--dc-line);border-radius:12px;background:var(--dc-card)} .bs-strip b{color:var(--dc-fg);font-weight:600} .bs-strip small{flex-basis:100%;color:var(--dc-dim)} .bs-strip .bf-btn{margin-left:auto;padding:5px 11px}
+.bw-nav{display:flex;justify-content:space-between;margin-top:14px}
+@media (max-width:640px){ .bw-l1{grid-template-columns:42px minmax(0,1fr) 56px 28px} .bw-l1 select{grid-column:2/4} .bw-l2{margin-left:0;grid-template-columns:1fr} }
 /* Agent portal (Decomposition > Agents): KPI cards, a board by stage, and a list with the full story of each prospect (ap-).
    Colors: the Decomposition tokens (--dc-*) and the accent (--green-rgb). Stage order is one hue getting stronger. */
 .ap{container-type:inline-size;padding:2px 0 40px}
@@ -5868,7 +5997,7 @@ let overlayCurrent = null;
 // sent, in order, when the connection returns; the database then applies its own
 // rules to each one. Everything else says it needs a connection.
 const OFF_SYNC_MS = 4 * 3600e3;
-const OFF_LOGIN_HOURS = 72;          // offline sign-in works this long after the last online sign-in
+const OFF_LOGIN_HOURS = Infinity;    // no time cap on offline sign-in (operator's decision, 14 Nov 2026; spec/LOCAL_FIRST.md §6). The lockout below and revoking at sync are what limit a lost device.
 const OFF_MAX_ENTRIES = 700;
 const OFF_MAX_BYTES = 2.5e6;
 const OFF_READ_EXTRA = new Set(['calendar_list', 'can_review_business', 'map_script_status', 'my_site_summary', 'my_team', 'network_clients', 'network_members',
@@ -6127,6 +6256,7 @@ async function offSnapshot(manual) {
     await Promise.all(all.slice(OFF_MAX_ENTRIES).map(([k]) => offDel('reads', k)));
     OFF.lastSync = Date.now(); await offSet('meta', 'sync:' + me, { at: OFF.lastSync });
     OFF.online = true;
+    try { bixxSync(false); } catch (e) {}
     if (manual) toast('Offline copy updated.');
     return true;
   } catch (e) {
@@ -6160,24 +6290,34 @@ async function offOnSignedIn() {
 }
 
 // ── signing in with no signal ──
-async function offHash(secret, salt) {
+async function offHash(secret, salt, iter = 200000) {
   const k = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), 'PBKDF2', false, ['deriveBits']);
-  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: 200000 }, k, 256);
+  const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, k, 256);
   return btoa(String.fromCharCode(...new Uint8Array(bits)));
 }
 async function offSaveLogin(kind, secret, op, email) {
   try {
     const salt = crypto.getRandomValues(new Uint8Array(16)), o = { ...op };
     delete o.pin_hash; delete o.access_key;
-    await offSet('meta', 'auth:' + op.id, { kind, email: email || null, salt: Array.from(salt), hash: await offHash(secret, salt), op: o, savedAt: Date.now() });
+    await offSet('meta', 'auth:' + op.id, { kind, email: email || null, salt: Array.from(salt), iter: 600000, hash: await offHash(secret, salt, 600000), op: o, savedAt: Date.now() });
   } catch (e) {}
 }
 async function offTryLogin(kind, secret, email) {
+  OFF.lockMsg = '';
   try {
+    const now = Date.now(), lockKey = 'lock:' + kind;
+    const lk = LK.touch((await offGet('meta', lockKey)) || LK.fresh(), now);
+    if (LK.locked(lk, now)) { await offSet('meta', lockKey, lk); OFF.lockMsg = `Too many wrong tries on this device. Locked for ${LK.words(LK.msLeft(lk, now))} more.`; return null; }
+    let known = false;
     for (const [k, rec] of await offEntries('meta')) {
       if (!k.startsWith('auth:') || rec.kind !== kind || (kind === 'genesis' && rec.email !== email)) continue;
       if (Date.now() - rec.savedAt > OFF_LOGIN_HOURS * 3600e3) continue;
-      if (await offHash(secret, new Uint8Array(rec.salt)) === rec.hash) { OFF.session = kind === 'pin' ? { kind, secret } : { kind }; return rec.op; }
+      known = true;
+      if (await offHash(secret, new Uint8Array(rec.salt), rec.iter || 200000) === rec.hash) { await offSet('meta', lockKey, LK.ok()); OFF.session = kind === 'pin' ? { kind, secret } : { kind }; return rec.op; }
+    }
+    if (known) {
+      const f = LK.fail(lk, now); await offSet('meta', lockKey, f);
+      OFF.lockMsg = LK.locked(f, now) ? `Wrong. This device is locked for ${LK.words(LK.msLeft(f, now))}.` : `Wrong. ${f.left} ${f.left === 1 ? 'try' : 'tries'} left before this device locks.`;
     }
   } catch (e) {}
   return null;
@@ -6338,7 +6478,7 @@ async function doLogin() {
     if (error && /fetch|network|timeout|load failed/i.test(error.message || '')) {
       const off = await offTryLogin('genesis', pw, email);
       if (!off) {
-        err.textContent = "You're offline, and this device has no offline sign-in for that account (or it has expired). Connect once to sign in.";
+        err.textContent = OFF.lockMsg || "You're offline, and this device has no offline sign-in for that account. Connect once to sign in.";
         err.classList.add('show'); return;
       }
       operator = { ...off, email }; OFF.online = false;
@@ -6432,7 +6572,7 @@ async function doPinLogin() {
     if (error && /fetch|network|timeout|load failed/i.test(error.message || '')) {
       const off = await offTryLogin('pin', pin);
       if (!off) {
-        err.textContent = "You're offline, and this device has no offline sign-in for that PIN (or it has expired). Connect once to sign in.";
+        err.textContent = OFF.lockMsg || "You're offline, and this device has no offline sign-in for that PIN. Connect once to sign in.";
         err.classList.add('show'); return;
       }
       operator = off; OFF.online = false;
@@ -6626,6 +6766,7 @@ async function submitPinRecovery() {
 // Single always-visible sign-out entry point in the top bar — works for
 // either session type, so it doesn't matter whether Admin was ever opened.
 function signOutFromTopbar() {
+  try { vtLockNow(true); } catch (e) {}
   if (relation) doRelLogout();
   else if (operator) doLogout();
 }
@@ -15495,9 +15636,11 @@ async function apLog() {
 // Overview is drawn here. Steps, Maps and Places are the existing screens, shown under the same
 // header and tabs (see the wrappers below), so everything they do still works from one place.
 var DC = { tab: 'overview', mapId: null, maps: null, filter: 'All' };
-const DC_TABS = [['blitz', 'Blitz'], ['overview', 'Overview'], ['jobs', 'Jobs'], ['steps', 'Steps'], ['proof', 'Proof'], ['map', 'Maps'], ['places', 'Places'], ['agents', 'Agents']];
+const DC_TABS = [['blitz', 'Blitz'], ['overview', 'Overview'], ['jobs', 'Jobs'], ['steps', 'Steps'], ['proof', 'Proof'], ['map', 'Maps'], ['folders', 'Folders'], ['ranks', 'Leaderboard'], ['places', 'Places'], ['agents', 'Agents']];
 const DC_ICO = {
   agents: NF_ICO.agents,
+  folders: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>',
+  ranks: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V11M10 20V5M16 20v-7M22 20H2"/></svg>',
   jobs: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>',
   proof: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3 4.5 6v6c0 4.5 3.2 7.4 7.5 9 4.3-1.6 7.5-4.5 7.5-9V6z"/><path d="m9 12 2.2 2.2L15.5 10"/></svg>',
   blitz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
@@ -15596,9 +15739,920 @@ function dcGo(tab) {
   if (tab === 'places') return setTermView('places');
   setTermView('tracker');
 }
+// ── BSIZE FOLDERS + LEADERBOARD (spec/LOCAL_FIRST.md §1, §3, §9) ──────────────
+// A contract as folders of 4 LOG. The rules are pure functions (no screen, no network) so they run the
+// same offline and can be tested on their own; the screens below only draw what they return.
+// <bixx-rules>
+const BX = (() => {
+  const BSIZE = 4;                                                   // SPEC 1: BSize = 4 LOG
+  const RATE = { apprentice: 3900, wrangler: 6500, architect: 8500, operator: 10000 };   // cents per LOG (SPEC 3)
+  const cmp = (a, b) => a.length - b.length || (a < b ? -1 : a > b ? 1 : 0);
+  const rateOf = l => (l.scoped_rate_cents != null ? l.scoped_rate_cents : RATE[l.tier]) || 0;
+  const laborOf = ls => ls.reduce((s, l) => s + l.logs * rateOf(l), 0);              // integer cents
+  const priceOf = labor => Math.floor((labor * 4 + 2) / 3);                           // ceil(labor ÷ 0.75), SPEC 2
+
+  // Order steps so each comes after everything it requires; ties by step code. A cycle is reported, never hidden.
+  function order(leaves) {
+    const by = new Map(leaves.map(l => [l.leaf_code, l]));
+    const need = new Map(), after = new Map();
+    for (const l of leaves) { need.set(l.leaf_code, 0); after.set(l.leaf_code, []); }
+    for (const l of leaves) for (const r of new Set(l.requires || [])) {
+      if (by.has(r) && r !== l.leaf_code) { need.set(l.leaf_code, need.get(l.leaf_code) + 1); after.get(r).push(l.leaf_code); }
+    }
+    const ready = [...need].filter(([, n]) => n === 0).map(([c]) => c).sort(cmp);
+    const done = [];
+    while (ready.length) {
+      const c = ready.shift();
+      done.push(by.get(c));
+      for (const n of after.get(c)) { need.set(n, need.get(n) - 1); if (need.get(n) === 0) { ready.push(n); ready.sort(cmp); } }
+    }
+    const seen = new Set(done.map(l => l.leaf_code));
+    return { ordered: done, cycle: leaves.filter(l => !seen.has(l.leaf_code)).map(l => l.leaf_code) };
+  }
+
+  // SPEC 1 (C5): group steps in order until the running total reaches or passes 4 LOG; the last block takes the
+  // remainder; the Outcome is never alone (merged into the block before it).
+  function group(ordered) {
+    const out = []; let cur = [], run = 0;
+    for (const l of ordered) { cur.push(l); run += l.logs; if (run >= BSIZE) { out.push(cur); cur = []; run = 0; } }
+    if (cur.length) out.push(cur);
+    if (out.length > 1) {
+      const last = out[out.length - 1];
+      if (last.length === 1 && last[0].kind === 'outcome') { out.pop(); out[out.length - 1].push(last[0]); }
+    }
+    return out;
+  }
+
+  // Everything the screens need about a contract: ordered blocks with LOG, labor, price (block prices add up to the
+  // contract price to the cent: the last block takes the rounding), status, owner and what each waits on.
+  function build(leaves) {
+    const { ordered, cycle } = order(leaves);
+    const groups = group(ordered);
+    const labor = laborOf(ordered), price = priceOf(labor);
+    const blockOf = new Map();
+    groups.forEach((g, i) => g.forEach(l => blockOf.set(l.leaf_code, i)));
+    const doneCodes = new Set(ordered.filter(l => l.status === 'delivered').map(l => l.leaf_code));
+    let allotted = 0;
+    const blocks = groups.map((ls, i) => {
+      const lab = laborOf(ls);
+      const share = i === groups.length - 1 ? price - allotted : Math.floor(lab * 4 / 3);
+      allotted += share;
+      const inCodes = new Set(ls.map(l => l.leaf_code));
+      const needs = [...new Set(ls.flatMap(l => (l.requires || []).filter(r => !inCodes.has(r) && blockOf.has(r)).map(r => blockOf.get(r) + 1)))].sort((a, b) => a - b);
+      const open = ls.every(l => (l.requires || []).every(r => inCodes.has(r) || doneCodes.has(r) || !blockOf.has(r)));
+      const nDone = ls.filter(l => l.status === 'delivered').length;
+      const status = nDone === ls.length ? 'complete' : (ls.some(l => l.status === 'in progress') || nDone > 0) ? 'active' : open ? 'ready' : 'waiting';
+      const owners = [...new Set(ls.map(l => l.assigned_to || l.claimed_by).filter(Boolean))];
+      const owner = !owners.length ? { kind: 'none' } : (owners.length === 1 && ls.every(l => l.assigned_to || l.claimed_by)) ? { kind: 'one', id: owners[0] } : { kind: 'mixed', ids: owners };
+      const tiers = ls.map(l => l.tier);
+      return {
+        index: i + 1, leaves: ls, logs: ls.reduce((s, l) => s + l.logs, 0), doneLogs: ls.filter(l => l.status === 'delivered').reduce((s, l) => s + l.logs, 0),
+        laborCents: lab, priceCents: share, reserveCents: share - lab, status, owner, needs, nDone,
+        topTier: ['apprentice', 'wrangler', 'architect', 'operator'].reduce((t, x) => tiers.includes(x) ? x : t, 'apprentice'),
+      };
+    });
+    return { blocks, ordered, cycle, laborCents: labor, priceCents: price, reserveCents: price - labor, logs: ordered.reduce((s, l) => s + l.logs, 0) };
+  }
+
+  // The scoping checks (spec §3). Errors stop a save; warnings are shown and left to the operator.
+  function check(leaves) {
+    const out = [], { cycle, blocks, priceCents } = build(leaves);
+    if (cycle.length) out.push({ level: 'error', code: 'cycle', msg: `Steps ${cycle.join(', ')} wait on each other, so none can start.` });
+    const codes = new Set(leaves.map(l => l.leaf_code));
+    if (codes.size !== leaves.length) out.push({ level: 'error', code: 'dup', msg: 'Two steps share the same code.' });
+    for (const l of leaves) for (const r of l.requires || []) if (!codes.has(r)) out.push({ level: 'error', code: 'dep', leaf: l.leaf_code, msg: `Step ${l.leaf_code} comes after ${r}, which is not in this contract.` });
+    for (const l of leaves) {
+      if (!String(l.task || '').trim()) out.push({ level: 'error', code: 'title', leaf: l.leaf_code, msg: `Step ${l.leaf_code} has no title.` });
+      if (!Number.isInteger(l.logs) || l.logs < 1 || l.logs > 32) out.push({ level: 'error', code: 'logs', leaf: l.leaf_code, msg: `Step ${l.leaf_code} needs a LOG size from 1 to 32.` });
+      if (!String(l.done_criterion || '').trim()) out.push({ level: 'error', code: 'proof', leaf: l.leaf_code, msg: `Step ${l.leaf_code} has no way to tell it is done.` });
+      if (l.is_key && !leaves.some(x => x !== l && (x.requires || []).includes(l.leaf_code))) out.push({ level: 'warn', code: 'key', leaf: l.leaf_code, msg: `Key ${l.leaf_code} is not used by any later step.` });
+    }
+    for (const b of blocks) if (b.owner.kind === 'mixed') out.push({ level: 'warn', code: 'owner', msg: `Folder ${b.index} has more than one owner. A folder belongs to one person.` });
+    if (blocks.reduce((s, b) => s + b.priceCents, 0) !== priceCents) out.push({ level: 'error', code: 'price', msg: 'Block prices do not add up to the contract price.' });
+    return out;
+  }
+  return { BSIZE, RATE, order, group, build, check, rateOf, laborOf, priceOf };
+})();
+// </bixx-rules>
+
+// ── THE .bixx FILE (spec/LOCAL_FIRST.md §2) ────────────────────────────────────
+// One contract = one JSON file: the scope (steps, branches), the folders computed from it, attachments by hash, a
+// chain of saves (each entry holds the hash of the one before it) and a signature over the last entry. Opening a
+// file only parses it as data. Nothing in it is ever run, and every field is checked for its type and size first.
+// What a signature proves today: the file is unchanged since the device that saved it signed it. Who that device
+// belongs to is only established when its public key is registered at sync (not built yet), so the screen says
+// "not yet registered".
+// <bixx-file>
+const BXF = (() => {
+  const FORMAT = 'bixx', VERSION = 1;
+  const CANON = 'VII';                                  // the Amendments in force when a file is saved (Amendment VII, ratified 2026-10-22)
+  const MAX_BYTES = 25e6, MAX_STEPS = 500, MAX_STR = 4000, TIERS = ['apprentice', 'wrangler', 'architect', 'operator'], KINDS = ['genesis', 'leaf', 'outcome', 'branch'];
+  const enc = new TextEncoder();
+  const subtle = () => globalThis.crypto.subtle;
+  const hex = buf => [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, '0')).join('');
+  const sha = async s => hex(await subtle().digest('SHA-256', enc.encode(s)));
+  // Canonical JSON: keys sorted, so the same data always hashes the same.
+  const canon = v => v === null || typeof v !== 'object' ? JSON.stringify(v)
+    : Array.isArray(v) ? '[' + v.map(canon).join(',') + ']'
+    : '{' + Object.keys(v).filter(k => v[k] !== undefined).sort().map(k => JSON.stringify(k) + ':' + canon(v[k])).join(',') + '}';
+  const newKey = () => subtle().generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, false, ['sign', 'verify']);   // private key never leaves the device
+  const pubJwk = kp => subtle().exportKey('jwk', kp.publicKey);
+  const signText = async (kp, text) => hex(await subtle().sign({ name: 'ECDSA', hash: 'SHA-256' }, kp.privateKey, enc.encode(text)));
+  async function sigOk(jwk, text, sigHex) {
+    try {
+      const k = await subtle().importKey('jwk', jwk, { name: 'ECDSA', namedCurve: 'P-256' }, false, ['verify']);
+      return await subtle().verify({ name: 'ECDSA', hash: 'SHA-256' }, k, Uint8Array.from(sigHex.match(/../g) || [], h => parseInt(h, 16)), enc.encode(text));
+    } catch (e) { return false; }
+  }
+
+  const isStr = (v, max = MAX_STR) => typeof v === 'string' && v.length <= max;
+  // Shape check for everything we are about to trust. Returns a list of problems (empty = fine).
+  function shape(f) {
+    const p = [];
+    if (!f || typeof f !== 'object' || Array.isArray(f)) return ['The file is not a contract file.'];
+    if (f.format !== FORMAT) p.push('The file is not a contract file.');
+    if (!Number.isInteger(f.version) || f.version < 1) p.push('The file has no format version.');
+    if (!f.manifest || !isStr(f.manifest.contract_id, 80) || !isStr(f.manifest.created_at, 40)) p.push('The file has no contract id.');
+    if (!f.contract || !isStr(f.contract.title, 300)) p.push('The contract has no title.');
+    if (!Array.isArray(f.steps) || f.steps.length > MAX_STEPS) p.push('The step list is missing or too long.');
+    else f.steps.forEach((s, i) => {
+      const w = `Step ${i + 1}`;
+      if (!s || typeof s !== 'object') return p.push(`${w} is not a step.`);
+      if (!isStr(s.leaf_code, 20) || !s.leaf_code) p.push(`${w} has no code.`);
+      if (!isStr(s.task, 500)) p.push(`${w} has a bad title.`);
+      if (!Number.isInteger(s.logs)) p.push(`${w} has a bad LOG size.`);
+      if (!TIERS.includes(s.tier)) p.push(`${w} has a bad tier.`);
+      if (!Array.isArray(s.requires) || s.requires.some(r => !isStr(r, 20))) p.push(`${w} has a bad dependency list.`);
+      if (!KINDS.includes(s.kind)) p.push(`${w} has a bad kind.`);
+      if (typeof s.is_key !== 'boolean') p.push(`${w} has a bad key flag.`);
+      if (!isStr(s.done_criterion || '', 1000)) p.push(`${w} has a bad proof line.`);
+      if (!isStr(s.branch || '', 20)) p.push(`${w} has a bad branch.`);
+      if (s.scoped_rate_cents != null && !(Number.isInteger(s.scoped_rate_cents) && s.scoped_rate_cents >= 0)) p.push(`${w} has a bad rate.`);
+    });
+    if (!Array.isArray(f.branches) || f.branches.some(b => !b || !isStr(b.code, 20) || !isStr(b.title, 300))) p.push('The branch list is bad.');
+    if (!Array.isArray(f.attachments) || f.attachments.some(a => !a || !isStr(a.name, 300) || !isStr(a.sha256, 64) || !Number.isInteger(a.size) || (a.data_b64 != null && typeof a.data_b64 !== 'string'))) p.push('The attachment list is bad.');
+    if (!Array.isArray(f.blocks) || !isStr(f.head, 64)) p.push('The folder list or save head is missing.');
+    if (!Array.isArray(f.chain) || !f.chain.length) p.push('The file has no save history.');
+    if (!f.signature || !f.signature.public_key || !isStr(f.signature.value, 400)) p.push('The file is not signed.');
+    return p;
+  }
+
+  const stepOut = s => ({ leaf_code: s.leaf_code, task: String(s.task || '').trim(), logs: s.logs, tier: s.tier, requires: [...(s.requires || [])], kind: s.kind || 'leaf',
+    is_key: !!s.is_key, done_criterion: String(s.done_criterion || '').trim(), branch: s.branch || '', target_date: s.target_date || null, scoped_rate_cents: s.scoped_rate_cents ?? null });
+  const asLeaf = s => ({ ...s, branch_id: s.branch, status: 'to-do' });            // the shape the rules expect
+  const blocksOf = steps => BX.build(steps.map(asLeaf)).blocks.map(b => ({ index: b.index, steps: b.leaves.map(l => l.leaf_code), logs: b.logs, price_cents: b.priceCents }));
+  const contentOf = async f => sha(canon({ canon: f.canon, manifest: { contract_id: f.manifest.contract_id }, contract: f.contract, branches: f.branches, steps: f.steps, blocks: f.blocks, attachments: f.attachments.map(a => ({ name: a.name, size: a.size, sha256: a.sha256 })) }));
+  const entryHash = e => sha(canon({ seq: e.seq, prev: e.prev, at: e.at, by: e.by, op: e.op, content: e.content }));
+
+  // Make (or save a new version of) a contract file. `draft` = { title, client, service, goal, steps, branches, attachments, needs_draft }.
+  async function pack(draft, { key, by, device, prev, now = new Date().toISOString(), id }) {
+    const steps = draft.steps.map(stepOut);
+    const f = {
+      format: FORMAT, version: VERSION, canon: CANON,
+      manifest: { contract_id: prev ? prev.manifest.contract_id : (id || globalThis.crypto.randomUUID()), created_at: prev ? prev.manifest.created_at : now, device_id: device || '', title: draft.title },
+      contract: { title: String(draft.title || '').trim(), client: String(draft.client || '').trim(), service: draft.service || '', goal: String(draft.goal || '').trim(), needs_draft: !!draft.needs_draft },
+      branches: (draft.branches || []).map(b => ({ code: b.code, title: b.title })),
+      steps, blocks: blocksOf(steps),
+      attachments: (draft.attachments || []).map(a => ({ name: a.name, type: a.type || '', size: a.size, sha256: a.sha256, data_b64: a.data_b64 })),
+      chain: prev ? [...prev.chain] : [],
+    };
+    const e = { seq: f.chain.length + 1, prev: f.chain.length ? f.chain[f.chain.length - 1].hash : '', at: now, by: by || '', op: prev ? 'save' : 'create', content: await contentOf(f) };
+    e.hash = await entryHash(e);
+    f.chain.push(e);
+    f.head = e.hash;
+    f.signature = { alg: 'ECDSA-P256-SHA256', public_key: await pubJwk(key), value: await signText(key, e.hash) };
+    return f;
+  }
+
+  // Open: parse, check shape, chain, signature, folders, attachments and canon. Never throws.
+  // Returns { ok, readOnly, problems (stop an open), notes (shown, never stop it), scope (errors from the scoping rules), file }.
+  async function open(text) {
+    const r = { ok: false, readOnly: false, problems: [], notes: [], scope: [], file: null };
+    if (typeof text !== 'string' || text.length > MAX_BYTES) { r.problems.push('The file is too large to open.'); return r; }
+    let f; try { f = JSON.parse(text); } catch (e) { r.problems.push('The file is not a readable contract file.'); return r; }
+    const sp = shape(f);
+    if (sp.length) { r.problems.push(...sp.slice(0, 8)); return r; }
+    if (f.version > VERSION) { r.problems.push('This file was saved by a newer version. Update the OS to open it.'); return r; }
+    // 1. the chain
+    let prevHash = '';
+    for (let i = 0; i < f.chain.length; i++) {
+      const e = f.chain[i];
+      if (!e || e.seq !== i + 1 || e.prev !== prevHash || !isStr(e.hash, 64) || await entryHash(e) !== e.hash) { r.problems.push(`The save history is broken at entry ${i + 1}. The file has been changed.`); return r; }
+      prevHash = e.hash;
+    }
+    if (f.head !== prevHash) { r.problems.push('The save history does not end where the file says. The file has been changed.'); return r; }
+    // 2. the content matches the last save, the signature matches the head
+    if (await contentOf(f) !== f.chain[f.chain.length - 1].content) { r.problems.push('The contents do not match the last save. The file has been changed.'); return r; }
+    if (!(await sigOk(f.signature.public_key, f.head, f.signature.value))) { r.problems.push('The signature does not match. The file has been changed.'); return r; }
+    // 3. the folders are recomputed, not trusted
+    if (canon(blocksOf(f.steps)) !== canon(f.blocks)) { r.problems.push('The folders in the file do not match its steps.'); return r; }
+    // 4. attachments carry their hash
+    for (const a of f.attachments) if (a.data_b64 != null) {
+      let bin; try { bin = Uint8Array.from(atob(a.data_b64), c => c.charCodeAt(0)); } catch (e) { r.problems.push(`Attachment ${a.name} is not readable.`); return r; }
+      if (hex(await subtle().digest('SHA-256', bin)) !== a.sha256) { r.problems.push(`Attachment ${a.name} does not match its fingerprint.`); return r; }
+    }
+    r.file = f; r.ok = true;
+    if (f.canon !== CANON) { r.readOnly = true; r.notes.push(`Saved under canon ${f.canon || '?'}; the current canon is ${CANON}. It opens read-only until it is re-checked.`); }
+    r.notes.push('Signed on one device. Whose device it is gets confirmed when it syncs.');
+    r.scope = BX.check(f.steps.map(asLeaf));
+    return r;
+  }
+  // The shape the database's existing "create a work map from a decomposition" function takes (the same one the upload pipeline
+  // uses): branches become checkpoints CP1, CP2…, steps become nodes. Nothing here is a new way into the database.
+  function toDecomposition(f) {
+    const cp = new Map(f.branches.map((b, i) => [b.code, 'CP' + (i + 1)]));
+    return {
+      goal: f.contract.title, prepared_for: f.contract.client || '', date: String(f.manifest.created_at || '').slice(0, 10),
+      checkpoints: f.branches.map((b, i) => ({ code: 'CP' + (i + 1), title: b.title, due_date: '', position: i })),
+      nodes: f.steps.map(s => ({ code: s.leaf_code, task: s.task, kind: s.kind === 'branch' ? 'leaf' : s.kind, tier: s.tier, logs: s.logs, requires: [...s.requires],
+        done_criterion: s.done_criterion, is_key: s.is_key, checkpoint: cp.get(s.branch) || s.branch })),
+    };
+  }
+  return { FORMAT, VERSION, CANON, canon, sha, newKey, pubJwk, pack, open, shape, blocksOf, asLeaf, toDecomposition };
+})();
+// </bixx-file>
+
+// ── DEVICE LOCK: the vault and the wrong-code lockout (spec/LOCAL_FIRST.md §6) ──────────────────────────────────
+// Contract files on a device are sealed with AES-GCM under a random data key. That key is itself wrapped twice: by a key
+// made from the device code (PBKDF2, 600,000 rounds) and by a key the browser holds for this device and will not hand to
+// the page. A copied file is useless without both. Honest limit: a browser cannot reach the operating system's key store,
+// so someone who copies the whole browser profile is left with the code as the main barrier; the desktop app (phase 2)
+// closes that. The lockout slows guessing inside the app only. It is not what protects copied data.
+// <bixx-vault>
+const VT = (() => {
+  const ITER = 600000, AAD = new TextEncoder().encode('bixx-vault-v1');
+  const enc = new TextEncoder(), dec = new TextDecoder();
+  const b64 = u => { let s = ''; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode(...u.subarray(i, i + 0x8000)); return btoa(s); };
+  const unb64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  const rnd = n => globalThis.crypto.getRandomValues(new Uint8Array(n));
+  const S = () => globalThis.crypto.subtle;
+  const newDeviceKey = () => S().generateKey({ name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);   // held by the browser, not readable by the page
+  async function codeKey(code, salt, iter) {
+    const base = await S().importKey('raw', enc.encode(code), 'PBKDF2', false, ['deriveKey']);
+    return S().deriveKey({ name: 'PBKDF2', hash: 'SHA-256', salt, iterations: iter }, base, { name: 'AES-GCM', length: 256 }, false, ['encrypt', 'decrypt']);
+  }
+  async function gcmEnc(key, data, aad) { const iv = rnd(12); return { iv: b64(iv), ct: b64(new Uint8Array(await S().encrypt({ name: 'AES-GCM', iv, additionalData: aad }, key, data))) }; }
+  const gcmDec = async (key, blob, aad) => new Uint8Array(await S().decrypt({ name: 'AES-GCM', iv: unb64(blob.iv), additionalData: aad }, key, unb64(blob.ct)));
+  const dekKey = dek => S().importKey('raw', dek, 'AES-GCM', false, ['encrypt', 'decrypt']);
+  async function wrap(code, devKey, dek, salt, iter) {
+    const inner = await gcmEnc(await codeKey(code, salt, iter), dek, AAD);
+    return { v: 1, iter, salt: b64(salt), wrap: await gcmEnc(devKey, enc.encode(JSON.stringify(inner)), AAD) };
+  }
+  // First use on a device: make the data key and the record to keep. Returns { record, key }.
+  async function create(code, devKey, iter = ITER) { const dek = rnd(32); return { record: await wrap(code, devKey, dek, rnd(16), iter), key: await dekKey(dek) }; }
+  // Unlock with the code. Returns { key, dek } or null for a wrong code, a wrong device or a changed record.
+  async function unlock(code, devKey, rec) {
+    try {
+      const inner = JSON.parse(dec.decode(await gcmDec(devKey, rec.wrap, AAD)));
+      const dek = await gcmDec(await codeKey(code, unb64(rec.salt), rec.iter), inner, AAD);
+      return { key: await dekKey(dek), dek };
+    } catch (e) { return null; }
+  }
+  async function rewrap(oldCode, newCode, devKey, rec) { const u = await unlock(oldCode, devKey, rec); return u ? wrap(newCode, devKey, u.dek, rnd(16), rec.iter) : null; }
+  // Seal / open one file's text. The contract id is bound in, so a sealed file cannot be swapped under another id.
+  const seal = (key, text, id) => gcmEnc(key, enc.encode(text), enc.encode('bixx-file:' + id));
+  async function open(key, blob, id) { try { return dec.decode(await gcmDec(key, blob, enc.encode('bixx-file:' + id))); } catch (e) { return null; } }
+  return { ITER, newDeviceKey, create, unlock, rewrap, seal, open };
+})();
+
+// The lockout (operator's rule): 4 wrong codes lock the device for 1 hour. After each lock it gets 2 tries; 2 wrong codes
+// lock it again, 2 hours longer each time (1 h, 3 h, 5 h, 7 h …). A right code clears it. `seen` is the latest time the device
+// has ever read, so winding the clock back does not shorten a lock.
+const LK = (() => {
+  const H = 3600e3, FIRST = 4, NEXT = 2;
+  const fresh = () => ({ round: 0, left: FIRST, until: 0, seen: 0 });
+  const waitMs = round => (1 + 2 * (round - 1)) * H;
+  const clock = (st, now) => Math.max(now, st.seen || 0);
+  const touch = (st, now) => ({ ...st, seen: clock(st, now) });
+  const locked = (st, now) => clock(st, now) < st.until;
+  const msLeft = (st, now) => Math.max(0, st.until - clock(st, now));
+  function fail(st, now) {
+    const t = clock(st, now), s = { ...st, seen: t };
+    if (t < s.until) return s;                                   // already locked: nothing more to count
+    s.left -= 1;
+    if (s.left <= 0) { s.round += 1; s.until = t + waitMs(s.round); s.left = NEXT; }
+    return s;
+  }
+  const ok = () => fresh();
+  const words = ms => { const m = Math.ceil(ms / 60000); return m >= 120 ? Math.round(m / 60) + ' hours' : m >= 60 ? '1 hour' : m + (m === 1 ? ' minute' : ' minutes'); };
+  return { fresh, waitMs, touch, locked, msLeft, fail, ok, words };
+})();
+// </bixx-vault>
+
+// ── Starting points for the eight services (spec §3, step 1). They only lay out folders to fill in: each phase becomes a
+// branch, each line a step, in order, with LOG left at 0 so the checks make you size it. Everything is editable.
+// <bixx-templates>
+const BXT = (() => {
+  const T = {
+    'readiness-decomposition': ['Readiness Decomposition', [['Understand', ['Gather the situation', 'Name the goal']], ['Break it down', ['Break the goal into steps', 'Rate each step']], ['Hand over', ['Review with the client', 'Hand over the decomposition']]]],
+    'market-and-supply-readiness': ['Market and Supply Readiness', [['Map', ['Map the market', 'Map supply and gaps']], ['Check', ['Check readiness against the gaps', 'Plan the fixes']], ['Hand over', ['Review with the client', 'Hand over the readiness report']]]],
+    'project-mapping': ['Project Mapping', [['Define', ['Define the project goal', 'List the branches']], ['Map', ['Map steps and dependencies', 'Set the checkpoints']], ['Hand over', ['Review the map with the client', 'Hand over the map']]]],
+    'continuity-and-communications': ['Continuity and Communications Plans', [['Continuity', ['List what must keep running', 'Write the continuity plan']], ['Communications', ['Write the communications plan', 'Test both with the team']], ['Hand over', ['Review with the client', 'Hand over both plans']]]],
+    'talent-management': ['Talent Management', [['Define', ['Define the roles', 'Set what good looks like']], ['Place', ['Find and screen people', 'Place and onboard']], ['Hand over', ['Set the review rhythm', 'Hand over the talent plan']]]],
+    'brand-and-voice': ['Brand and Voice', [['Learn', ['Learn the business and audience', 'Define the voice']], ['Write', ['Draft the core messages', 'Review and revise']], ['Hand over', ['Hand over the guide']]]],
+    'full-build': ['Full Business Build', [['Scope', ['Discover and scope', 'Structure the business']], ['Build', ['Build the website', 'Set up operations', 'Train the team']], ['Hand over', ['Launch', 'Hand over']]]],
+    'teaching-and-training': ['Teaching and Training', [['Assess', ['Assess what the team knows', 'Design the lessons']], ['Teach', ['Teach the lessons', 'Check what stuck']], ['Hand over', ['Hand over the materials']]]],
+  };
+  const letter = n => String.fromCharCode(65 + (n % 26)).repeat(1 + Math.floor(n / 26));
+  const keys = () => Object.keys(T);
+  const name = k => T[k] ? T[k][0] : '';
+  const code = (steps, branch) => { let n = steps.filter(s => s.branch === branch).length, c; do { c = branch + letter(n++); } while (steps.some(s => s.leaf_code === c)); return c; };
+  const blank = (steps, branch) => ({ leaf_code: code(steps, branch), task: '', logs: 0, tier: 'apprentice', requires: [], kind: 'leaf', is_key: false, done_criterion: '', branch });
+  function draft(k) {
+    const branches = [], steps = [];
+    if (!T[k]) return { branches: [{ code: '1', title: 'Phase 1' }], steps: [blank([], '1')] };
+    T[k][1].forEach(([title, lines], i) => {
+      const b = String(i + 1); branches.push({ code: b, title });
+      lines.forEach(t => { const s = blank(steps, b); s.task = t; s.requires = steps.length ? [steps[steps.length - 1].leaf_code] : []; steps.push(s); });
+    });
+    steps[0].kind = 'genesis'; steps[steps.length - 1].kind = 'outcome';
+    return { branches, steps };
+  }
+  return { keys, name, draft, blank, code };
+})();
+// </bixx-templates>
+
+// ── Contract files kept on this device (IndexedDB 'bixx-local'). Not encrypted yet: that is step 6 of the build order. ──
+const BL = { db: null, items: [], count: 0 };
+function blDb() {
+  if (BL.db) return BL.db;
+  BL.db = new Promise((res, rej) => {
+    if (!window.indexedDB) return rej(new Error('This browser cannot keep files on the device.'));
+    const r = indexedDB.open('bixx-local', 1);
+    r.onupgradeneeded = () => { r.result.createObjectStore('files'); r.result.createObjectStore('keys'); };
+    r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error);
+  });
+  BL.db.catch(() => {});
+  return BL.db;
+}
+const blReq = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+const blStore = async (n, mode) => (await blDb()).transaction(n, mode || 'readonly').objectStore(n);
+const blPut = async (n, k, v) => blReq((await blStore(n, 'readwrite')).put(v, k));
+const blGet = async (n, k) => { try { return await blReq((await blStore(n)).get(k)); } catch (e) { return undefined; } };
+const blDel = async (n, k) => blReq((await blStore(n, 'readwrite')).delete(k));
+async function blKey() {
+  let k = await blGet('keys', 'device');
+  if (!k) { k = { kp: await BXF.newKey(), deviceId: crypto.randomUUID() }; await blPut('keys', 'device', k); }
+  return k;
+}
+async function blRefresh() {
+  try {
+    const st = await blStore('files');
+    const [keys, vals] = await Promise.all([blReq(st.getAllKeys()), blReq((await blStore('files')).getAll())]);
+    BL.count = keys.length; BL.items = [];
+    if (!VS.key) return;
+    for (let i = 0; i < keys.length; i++) {
+      const text = vals[i].sealed ? await VT.open(VS.key, vals[i].sealed, keys[i]) : null;
+      BL.items.push({ id: keys[i], text, savedAt: vals[i].savedAt, sync: (await blGet('keys', 'sync:' + keys[i])) || null, hold: !!(await blGet('keys', 'hold:' + keys[i])), r: text == null ? { ok: false, problems: ['This file could not be unsealed.'] } : await BXF.open(text) });
+    }
+    BL.items.sort((a, b) => String(b.savedAt).localeCompare(String(a.savedAt)));
+  } catch (e) { BL.items = []; }
+}
+async function blSave(id, text) { await blPut('files', id, { sealed: await VT.seal(VS.key, text, id), savedAt: new Date().toISOString() }); }
+function blDownload(text, name) {
+  const url = URL.createObjectURL(new Blob([text], { type: 'application/json' }));
+  const a = document.createElement('a'); a.href = url; a.download = name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+}
+const blSlug = t => String(t || 'contract').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 48) || 'contract';
+
+// Open a .bixx file someone gave you: checked first, kept on this device only if it is sound.
+async function bfImport(input) {
+  const f = input.files?.[0]; input.value = '';
+  if (!f) return;
+  BF.msg = null;
+  const r = await BXF.open(await f.text());
+  if (!r.ok) BF.msg = { kind: 'bad', head: `${f.name} could not be opened`, lines: r.problems };
+  else {
+    return vtRequire(async () => { await bfImportApply(r); });
+  }
+  bfRedraw();
+}
+async function bfImportApply(r) {
+  {
+    try { await blSave(r.file.manifest.contract_id, JSON.stringify(r.file)); await blRefresh(); BF.local = r.file.manifest.contract_id; BF.sel = 1; }
+    catch (e) { BF.msg = { kind: 'bad', head: 'Could not keep it on this device', lines: [e.message || String(e)] }; bfRedraw(); return; }
+    BF.msg = { kind: r.scope.some(c => c.level === 'error') ? 'warn' : 'ok', head: `${r.file.contract.title} opened`, lines: [...r.notes, ...r.scope.slice(0, 4).map(c => c.msg)] };
+  }
+  bfRedraw();
+}
+async function bfOpenLocal(id) { BF.local = id; BF.sel = 1; BF.msg = null; await blRefresh(); bfRedraw(); }
+async function bfForget(id) {
+  if (!confirm('Remove this contract file from this device? A copy you downloaded is not affected.')) return;
+  await blDel('files', id); await blRefresh(); if (BF.local === id) BF.local = null; BF.msg = null; bfRedraw();
+}
+// Save the contract on screen as a .bixx file (a server contract is exported; a local one is downloaded as it is).
+async function bfExport() {
+  const src = bfSource();
+  if (src.local) return blDownload(JSON.stringify(src.file), blSlug(src.title) + '.bixx');
+  const br = new Map((src.branches || []).map(b => [String(b.branch_id || b.id), b.code]));
+  const d = { title: trackerState.map?.goal || 'Contract', client: trackerState.map?.prepared_for || '', service: '', goal: trackerState.map?.goal || '', attachments: [],
+    branches: (src.branches || []).map(b => ({ code: b.code, title: b.title || 'Branch' })),
+    steps: (src.leaves || []).map(l => ({ leaf_code: l.leaf_code, task: l.task || '', logs: l.logs, tier: l.tier, requires: l.requires || [], kind: l.kind || 'leaf', is_key: !!l.is_key, done_criterion: l.done_criterion || '', branch: br.get(String(l.branch_id)) || '', target_date: l.target_date || null, scoped_rate_cents: l.scoped_rate_cents ?? null })) };
+  try {
+    const k = await blKey();
+    const f = await BXF.pack(d, { key: k.kp, by: operator?.id || '', device: k.deviceId, id: trackerState.mapId });
+    blDownload(JSON.stringify(f), blSlug(d.title) + '.bixx');
+  } catch (e) { BF.msg = { kind: 'bad', head: 'Could not save the file', lines: [e.message || String(e)] }; bfRedraw(); }
+}
+
+// ── New contract: the guided upload (start, fill the folders, review and save) ──
+const BW = { open: false, screen: 1, d: null, prev: null, err: '' };
+const bwBlank = () => ({ service: '', title: '', client: '', steps: [], branches: [], attachments: [], needsDraft: false, picked: false });
+function bwNew() { BW.open = true; BW.screen = 1; BW.d = bwBlank(); BW.prev = null; BW.err = ''; bfRedraw(); }
+function bwCancel() { BW.open = false; bfRedraw(); }
+function bwEdit() {
+  const src = bfSource(); if (!src.local) return;
+  const f = src.file;
+  BW.open = true; BW.screen = src.readOnly ? 3 : 2; BW.prev = f; BW.err = '';
+  BW.d = { service: f.contract.service, title: f.contract.title, client: f.contract.client, needsDraft: f.contract.needs_draft, attachments: f.attachments.map(a => ({ ...a })), picked: true,
+    branches: f.branches.map(b => ({ ...b })), steps: f.steps.map(s => ({ ...s, requires: [...s.requires] })) };
+  bfRedraw();
+}
+function bwPick(k) {
+  const d = BW.d, t = BXT.draft(k);
+  d.service = k; d.picked = true; d.branches = t.branches; d.steps = t.steps;
+  if (!d.title.trim()) d.title = BXT.name(k);
+  bfRedraw();
+}
+function bwField(k, v) { BW.d[k] = v; }
+async function bwDoc(input) {
+  const f = input.files?.[0]; input.value = '';
+  if (!f) return;
+  if (f.size > 5e6) { BW.err = 'That file is over 5 MB. Keep the contract document under 5 MB, or attach it after saving.'; return bfRedraw(); }
+  const bytes = new Uint8Array(await f.arrayBuffer());
+  let bin = ''; for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  const sha = [...new Uint8Array(await crypto.subtle.digest('SHA-256', bytes))].map(b => b.toString(16).padStart(2, '0')).join('');
+  BW.d.attachments.push({ name: f.name, type: f.type || '', size: bytes.length, sha256: sha, data_b64: btoa(bin) });
+  BW.err = ''; bfRedraw();
+}
+function bwDropDoc(i) { BW.d.attachments.splice(i, 1); bfRedraw(); }
+function bwNext() {
+  const d = BW.d; BW.err = '';
+  if (BW.screen === 1) {
+    if (!d.title.trim()) { BW.err = 'Give the contract a name.'; return bfRedraw(); }
+    if (!d.picked) { BW.err = 'Pick a starting point, or start from nothing.'; return bfRedraw(); }
+    BW.screen = 2;
+  } else if (BW.screen === 2) BW.screen = 3;
+  bfRedraw();
+}
+function bwBack() { BW.err = ''; if (BW.screen > 1) BW.screen--; else BW.open = false; bfRedraw(); }
+function bwStep(i, k, v) { const s = BW.d.steps[i]; if (!s) return; s[k] = k === 'logs' ? (v === '' ? 0 : Math.max(0, Math.min(32, Math.floor(Number(v) || 0)))) : v; bwSide(); }
+function bwReq(i, v) { BW.d.steps[i].requires = String(v).split(/[,\s]+/).map(x => x.trim().toUpperCase()).filter(Boolean); bwSide(); }
+function bwAdd(branch) {
+  const d = BW.d, last = d.steps.filter(s => s.branch === branch).pop();
+  const s = BXT.blank(d.steps, branch); if (d.steps.length) s.requires = [(last || d.steps[d.steps.length - 1]).leaf_code];
+  const at = last ? d.steps.indexOf(last) + 1 : d.steps.length; d.steps.splice(at, 0, s); bfRedraw();
+}
+function bwDel(i) {
+  const d = BW.d, gone = d.steps[i].leaf_code; d.steps.splice(i, 1);
+  d.steps.forEach(s => { s.requires = s.requires.filter(r => r !== gone); }); bfRedraw();
+}
+function bwBranch() {
+  const d = BW.d, n = String(Math.max(0, ...d.branches.map(b => Number(b.code) || 0)) + 1);
+  d.branches.push({ code: n, title: 'Phase ' + n }); d.steps.push(BXT.blank(d.steps, n)); bfRedraw();
+}
+function bwBranchTitle(i, v) { BW.d.branches[i].title = v; }
+const bwLeaves = () => BW.d.steps.map(s => ({ ...BXF.asLeaf(s), logs: Number(s.logs) || 0 }));
+function bwSide() { const el = document.getElementById('bw-side'); if (el) el.innerHTML = bwSideHtml(); }
+function bwSideHtml() {
+  const L = bwLeaves(), m = BX.build(L), c = BX.check(L), bad = c.filter(x => x.level === 'error').length;
+  const rows = m.blocks.map(b => `<div class="bw-fold">${bfFolder(b.leaves.every(l => l.logs > 0), 'sm')}<span><b>Folder ${b.index}</b><small>${b.leaves.length} step${b.leaves.length === 1 ? '' : 's'}</small></span><span class="bf-num"><b>${b.logs}</b><small>LOG</small></span><span class="bw-price">${bfMoney(b.priceCents)}</span></div>`).join('');
+  return `<div class="bw-tot"><span><b>${m.logs}</b><small>LOG</small></span><span><b>${m.blocks.length}</b><small>folders</small></span><span><b>${bfMoney(m.priceCents)}</b><small>price</small></span></div>
+    <div class="bw-folds">${rows || '<p class="bf-fine">Folders appear as you add steps.</p>'}</div>
+    ${c.length ? `<div class="bf-note" role="status"><b>${bad ? bad + ' to fix before you can save' : 'Ready to save'}${c.length - bad ? ` · ${c.length - bad} to look at` : ''}</b><ul>${c.slice(0, 8).map(x => `<li class="${x.level}">${esc(x.msg)}</li>`).join('')}</ul></div>` : '<div class="bf-note ok" role="status"><b>Ready to save</b><ul><li>Every check passes.</li></ul></div>'}`;
+}
+function bwHtml() {
+  const d = BW.d, steps = ['Start', 'Fill the folders', 'Review and save'];
+  const bar = `<ol class="bw-steps" aria-label="Progress">${steps.map((t, i) => `<li class="${i + 1 === BW.screen ? 'on' : i + 1 < BW.screen ? 'done' : ''}"><span>${i + 1 < BW.screen ? '✓' : i + 1}</span>${t}</li>`).join('')}</ol>`;
+  const err = BW.err ? `<div class="bf-note" role="alert"><b>${esc(BW.err)}</b></div>` : '';
+  let body = '';
+  if (BW.screen === 1) {
+    body = `<div class="bw-card"><h3>What are we scoping?</h3>
+      <label class="bw-l">Contract name<input class="bw-in" value="${esc(d.title)}" oninput="bwField('title',this.value)" placeholder="e.g. Cruz Bay Holdings — site build"></label>
+      <label class="bw-l">Client<input class="bw-in" value="${esc(d.client)}" oninput="bwField('client',this.value)" placeholder="Business or person"></label>
+      <div class="bw-l">Starting point <small>Lays out folders for you to fill in. You can change everything.</small></div>
+      <div class="bw-pick">${BXT.keys().map(k => `<button class="${d.service === k ? 'on' : ''}" onclick="bwPick('${k}')" aria-pressed="${d.service === k}">${bfFolder(d.service === k, 'sm')}<b>${esc(BXT.name(k))}</b></button>`).join('')}
+        <button class="${d.picked && !d.service ? 'on' : ''}" onclick="bwPick('')" aria-pressed="${d.picked && !d.service}">${bfFolder(false, 'sm')}<b>Start from nothing</b></button></div>
+      <div class="bw-l">The contract document <small>Optional. Kept inside the file with a fingerprint.</small></div>
+      ${d.attachments.map((a, i) => `<div class="bw-att"><b>${esc(a.name)}</b><small>${Math.round(a.size / 1024)} KB</small><button class="bw-x" onclick="bwDropDoc(${i})" aria-label="Remove ${esc(a.name)}">✕</button></div>`).join('')}
+      <label class="bw-file">Add a document<input type="file" hidden onchange="bwDoc(this)"></label>
+      <label class="bw-chk"><input type="checkbox" ${d.needsDraft ? 'checked' : ''} onchange="bwField('needsDraft',this.checked)"> Ask Claude to draft the steps from this document the next time this device syncs. You still approve every step.</label>
+    </div>`;
+  } else if (BW.screen === 2) {
+    const groups = d.branches.map((b, bi) => {
+      const rows = d.steps.map((s, i) => ({ s, i })).filter(x => x.s.branch === b.code).map(({ s, i }) => `<div class="bw-step"><div class="bw-l1">
+        <span class="bw-code">${esc(s.leaf_code)}${s.kind === 'genesis' ? ' ◆' : s.kind === 'outcome' ? ' ●' : s.is_key ? ' ▲' : ''}</span>
+        <input class="bw-in" value="${esc(s.task)}" placeholder="What gets done" oninput="bwStep(${i},'task',this.value)" aria-label="Step ${esc(s.leaf_code)} title">
+        <input class="bw-in" type="number" min="0" max="32" value="${s.logs || ''}" placeholder="LOG" oninput="bwStep(${i},'logs',this.value)" aria-label="Step ${esc(s.leaf_code)} LOG">
+        <select class="bw-in" onchange="bwStep(${i},'tier',this.value)" aria-label="Step ${esc(s.leaf_code)} tier">${['apprentice', 'wrangler', 'architect', 'operator'].map(t => `<option value="${t}" ${s.tier === t ? 'selected' : ''}>${t[0].toUpperCase() + t.slice(1)}</option>`).join('')}</select>
+        <button class="bw-x" onclick="bwDel(${i})" aria-label="Remove step ${esc(s.leaf_code)}">✕</button></div>
+        <div class="bw-l2"><input class="bw-in" value="${esc(s.requires.join(', '))}" placeholder="After (codes)" oninput="bwReq(${i},this.value)" aria-label="Step ${esc(s.leaf_code)} comes after">
+        <input class="bw-in" value="${esc(s.done_criterion)}" placeholder="Done when…" oninput="bwStep(${i},'done_criterion',this.value)" aria-label="Step ${esc(s.leaf_code)} proof">
+        <label class="bw-k"><input type="checkbox" ${s.is_key ? 'checked' : ''} onchange="bwStep(${i},'is_key',this.checked);bfRedraw()"> Key</label></div></div>`).join('');
+      return `<section class="bw-br"><div class="bw-brh"><span>${esc(b.code)}</span><input class="bw-in" value="${esc(b.title)}" oninput="bwBranchTitle(${bi},this.value)" aria-label="Branch ${esc(b.code)} name"><button class="bf-btn" onclick="bwAdd('${esc(b.code)}')">+ Step</button></div>${rows}</section>`;
+    }).join('');
+    body = `<div class="bw-cols"><div class="bw-edit"><h3>Fill the folders</h3><p class="bf-fine">Each line is a step. Size it in LOG (1 LOG = 1 hour), set the lowest tier that can do it, say what it comes after, and how you tell it is done. Folders of 4 LOG form on the right as you go.</p>${groups}<button class="bf-btn" onclick="bwBranch()">+ Branch</button></div><aside class="bw-side" id="bw-side">${bwSideHtml()}</aside></div>`;
+  } else {
+    const L = bwLeaves(), m = BX.build(L), c = BX.check(L), bad = c.filter(x => x.level === 'error').length;
+    body = `<div class="bw-cols"><div class="bw-edit"><h3>Review: ${esc(d.title)}</h3><p class="bf-fine">${esc(d.client || 'No client named')} · ${d.attachments.length} document${d.attachments.length === 1 ? '' : 's'}${d.needsDraft ? ' · Claude drafts at next sync' : ''}</p>
+      <div class="bw-rev">${m.blocks.map(b => `<div class="bw-revf">${bfFolder(true, 'lg')}<div><h4>Folder ${b.index} <small>${b.logs} LOG · ${bfMoney(b.priceCents)}</small></h4><ul>${b.leaves.map(l => `<li><b>${esc(l.leaf_code)}</b> ${esc(l.task)} <em>${l.logs} LOG · ${esc(l.tier)}</em></li>`).join('')}</ul></div></div>`).join('')}</div></div>
+      <aside class="bw-side">${bwSideHtml()}
+        <button class="bf-btn solid" ${bad ? 'disabled' : ''} onclick="bwSave(false)">Save on this device</button>
+        <button class="bf-btn" ${bad ? 'disabled' : ''} onclick="bwSave(true)">Save and download .bixx</button>
+        <p class="bf-fine">Saved with your device's signature. Kept on this device, not encrypted yet.</p></aside></div>`;
+  }
+  const nav = BW.screen < 3 ? `<button class="bf-btn solid" onclick="bwNext()">${BW.screen === 1 ? 'Fill the folders' : 'Review'}</button>` : '';
+  return `<div class="bf bw">${vtPanelHtml()}<div class="bw-top">${bar}<button class="bf-btn" onclick="bwCancel()">Cancel</button></div>${err}${body}<div class="bw-nav"><button class="bf-btn" onclick="bwBack()">${BW.screen === 1 ? 'Close' : 'Back'}</button>${nav}</div></div>`;
+}
+async function bwSave(download) { return vtRequire(() => bwSaveGo(download)); }
+async function bwSaveGo(download) {
+  const d = BW.d, L = bwLeaves();
+  if (BX.check(L).some(c => c.level === 'error')) { BW.err = 'Fix the items marked first.'; return bfRedraw(); }
+  try {
+    const k = await blKey();
+    const f = await BXF.pack({ ...d, steps: d.steps.map(s => ({ ...s, logs: Number(s.logs) || 0 })), goal: d.title }, { key: k.kp, by: operator?.id || '', device: k.deviceId, prev: BW.prev || undefined });
+    const text = JSON.stringify(f);
+    await blSave(f.manifest.contract_id, text);
+    if (download) blDownload(text, blSlug(d.title) + '.bixx');
+    await blRefresh();
+    BW.open = false; BF.local = f.manifest.contract_id; BF.sel = 1;
+    BF.msg = { kind: 'ok', head: `${d.title} saved`, lines: [download ? 'Saved on this device and downloaded.' : 'Saved on this device.', 'It works with no internet.'] };
+  } catch (e) { BW.err = e.message || String(e); }
+  bfRedraw();
+}
+
+// ── The device code: first use asks for one, later uses unlock with it. Wrong codes follow the lockout (LK). ──
+const VS = { key: null, rec: null, dev: null, lk: null, ask: false, after: null, msg: '', hideTimer: null };
+async function vtLoad() {
+  try { VS.rec = (await blGet('keys', 'vault')) || null; VS.dev = (await blGet('keys', 'dev')) || null; VS.lk = (await blGet('keys', 'lock')) || LK.fresh(); } catch (e) { VS.lk = VS.lk || LK.fresh(); }
+}
+const vtStatus = () => VS.key ? 'open' : VS.rec ? 'locked' : 'none';
+async function vtDev() { if (!VS.dev) { VS.dev = await VT.newDeviceKey(); await blPut('keys', 'dev', VS.dev); } return VS.dev; }
+function vtRequire(fn) { if (VS.key) return fn(); VS.after = fn; VS.ask = true; VS.msg = ''; bfRedraw(); }
+function vtCancel() { VS.ask = false; VS.after = null; VS.msg = ''; bfRedraw(); }
+function vtLockNow(silent) {
+  clearTimeout(VS.hideTimer); VS.key = null; VS.ask = false; VS.after = null; BL.items = []; BF.local = null;
+  if (!silent) { BF.msg = { kind: 'ok', head: 'Locked', lines: ['Contracts on this device are sealed until you unlock them.'] }; blRefresh().then(bfRedraw); }
+}
+document.addEventListener('visibilitychange', () => { clearTimeout(VS.hideTimer); if (document.hidden && VS.key) VS.hideTimer = setTimeout(() => vtLockNow(true), 5 * 60e3); });
+const vtTries = lk => `${lk.left} ${lk.left === 1 ? 'try' : 'tries'}`;
+async function vtSubmit() {
+  const code = document.getElementById('vt-code')?.value || '', again = document.getElementById('vt-code2')?.value;
+  const st = vtStatus(), now = Date.now(); VS.msg = '';
+  try {
+    if (st === 'none') {
+      if (code.length < 6) VS.msg = 'Use at least 6 characters.';
+      else if (code !== again) VS.msg = 'The two codes are different.';
+      else { const { record, key } = await VT.create(code, await vtDev()); await blPut('keys', 'vault', record); VS.rec = record; VS.key = key; }
+    } else {
+      VS.lk = LK.touch(VS.lk, now);
+      if (LK.locked(VS.lk, now)) VS.msg = `Locked for ${LK.words(LK.msLeft(VS.lk, now))} more.`;
+      else {
+        const u = await VT.unlock(code, await vtDev(), VS.rec);
+        if (!u) { VS.lk = LK.fail(VS.lk, now); VS.msg = LK.locked(VS.lk, now) ? `Wrong code. This device is locked for ${LK.words(LK.msLeft(VS.lk, now))}.` : `Wrong code. ${vtTries(VS.lk)} left before this device locks.`; }
+        else { VS.lk = LK.ok(); VS.key = u.key; }
+      }
+      await blPut('keys', 'lock', VS.lk);
+    }
+  } catch (e) { VS.msg = e.message || String(e); }
+  if (VS.key) { VS.ask = false; VS.msg = ''; await blRefresh(); const f = VS.after; VS.after = null; if (f) return f(); }
+  bfRedraw();
+}
+function vtPanelHtml() {
+  if (!VS.ask) return '';
+  const st = vtStatus(), now = Date.now(), lk = VS.lk || LK.fresh(), locked = st === 'locked' && LK.locked(lk, now);
+  const sub = st === 'none' ? 'Contracts saved on this device are sealed with this code. Use at least 6 characters; longer is safer. If you forget it the sealed copies cannot be opened. Your downloaded .bixx files and the database are not affected.'
+    : locked ? `Too many wrong codes. Locked for ${LK.words(LK.msLeft(lk, now))} more.` : `${vtTries(lk)} left before this device locks.`;
+  return `<form class="bf-note vt" onsubmit="event.preventDefault();vtSubmit()" aria-label="Device code"><b>${st === 'none' ? 'Choose a device code' : 'Unlock the contracts on this device'}</b>
+    <p>${esc(sub)}</p>${VS.msg ? `<p class="bad" role="alert">${esc(VS.msg)}</p>` : ''}
+    <div class="vt-row"><input id="vt-code" class="bw-in" type="password" autocomplete="${st === 'none' ? 'new-password' : 'off'}" placeholder="Device code" aria-label="Device code" ${locked ? 'disabled' : ''}>
+    ${st === 'none' ? '<input id="vt-code2" class="bw-in" type="password" autocomplete="new-password" placeholder="Again" aria-label="Device code again">' : ''}
+    <button class="bf-btn solid" ${locked ? 'disabled' : ''}>${st === 'none' ? 'Set code' : 'Unlock'}</button><button type="button" class="bf-btn" onclick="vtCancel()">Not now</button></div></form>`;
+}
+const vtBar = () => !VS.key && BL.count && !VS.ask ? `<div class="bf-note vt" role="status"><b>${BL.count} contract${BL.count === 1 ? '' : 's'} on this device ${BL.count === 1 ? 'is' : 'are'} locked.</b> <button class="bf-btn" onclick="vtRequire(()=>bfRedraw())">Unlock</button></div>`
+  : '';
+
+// ── Sync (spec §5, step 7). Every 4 hours (with the offline copy), on "Sync now", and when you unlock: the Executive Operator's
+// finished contracts are sent through the same database function the upload pipeline uses; every member's device asks the server
+// whether that member still belongs. A contract is sent only when every check passes, only once, and never while on hold. ──
+const BS = { busy: false, last: 0, note: '' };
+const bsKey = id => 'sync:' + id, bsHold = id => 'hold:' + id;
+async function bsLoad() { try { BS.last = (await blGet('keys', 'syncmeta'))?.at || 0; } catch (e) {} }
+const bsState = it => it.hold ? 'hold' : !it.sync ? 'waiting' : it.sync.existing ? 'there' : it.sync.head === it.r.file.head ? 'sent' : 'changed';
+const BS_LABEL = { hold: 'On hold', waiting: 'Waiting to send', sent: 'Sent', there: 'Already in the database', changed: 'Changed since sent' };
+async function bsHoldToggle(id) {
+  const on = await blGet('keys', bsHold(id)); if (on) await blDel('keys', bsHold(id)); else await blPut('keys', bsHold(id), true);
+  await blRefresh(); bfRedraw();
+}
+async function bsSend(it) {
+  const f = it.r.file, c = BXF.toDecomposition(f);
+  try { normalizeContract(c); } catch (e) { return { ok: false, msg: `${f.contract.title}: ${e.message}` }; }
+  const { data: maps } = await sb.from('work_maps').select('id,goal');
+  const dup = (maps || []).find(m => normGoal(m.goal) === normGoal(c.goal));
+  if (dup) { await blPut('keys', bsKey(it.id), { mapId: dup.id, head: f.head, at: Date.now(), existing: true }); return { ok: false, there: true, msg: `${f.contract.title}: a contract with that name is already in the database.` }; }
+  const { data: map, error } = await sb.rpc('create_work_map_from_decomposition', { p_goal: c.goal, p_mapped_by: operator.id, p_nodes: c.nodes, p_checkpoints: c.checkpoints, p_source_html: null, p_source_filename: blSlug(c.goal) + '.bixx' });
+  if (error) return { ok: false, msg: `${f.contract.title}: ${error.message}` };
+  const mapId = map?.map?.id;
+  if (mapId) await sb.rpc('set_work_map_details', { p_map: mapId, p_prepared_for: c.prepared_for || null, p_contract_date: c.date || null, p_source_mime: 'application/json', p_source_raw: null });
+  await blPut('keys', bsKey(it.id), { mapId, head: f.head, at: Date.now() });
+  return { ok: true, mapId };
+}
+// The server is the only one who can say a member has left, so only an explicit "not active" answer acts. An error or no answer never does.
+async function bsRevokeCheck() {
+  try {
+    const { data, error } = await sb.rpc('get_operator_by_id', { p_id: operator.id });
+    if (error) return false;
+    const me = Array.isArray(data) ? data[0] : data;
+    if (me && me.active === false) { await bsRevoke(); return true; }
+  } catch (e) {}
+  return false;
+}
+async function bsRevoke() {
+  try { await offClearFor(operator.id); } catch (e) {}
+  try { await blReq((await blStore('files', 'readwrite')).clear()); await blReq((await blStore('keys', 'readwrite')).clear()); } catch (e) {}
+  VS.rec = null; VS.dev = null; BL.items = []; BL.count = 0; vtLockNow(true);
+  toast('Your access to the network has ended. This device\'s contract files and offline sign-in were removed.');
+  try { await doLogout(); } catch (e) {}
+}
+async function bixxSync(manual) {
+  if (BS.busy) return;
+  if (!operator || !sb) return;
+  if (navigator.onLine === false) { BS.note = 'No connection. It will sync when this device is back online.'; if (manual) toast(BS.note); return bfRedraw(); }
+  BS.busy = true; BS.note = ''; bfRedraw();
+  try {
+    if (await bsRevokeCheck()) return;
+    let sent = 0; const held = [];
+    if (!VS.key) { if (BL.count || (await blGet('keys', 'vault'))) { BS.note = 'Unlock this device to send its contracts.'; if (manual) { BS.busy = false; return vtRequire(() => bixxSync(true)); } } }
+    else {
+      await blRefresh();
+      if (isExec()) for (const it of BL.items) {
+        if (!it.r.ok || it.r.readOnly || bsState(it) !== 'waiting') { if (bsState(it) === 'changed') held.push(`${it.r.file.contract.title}: changed after it was sent. Further changes are made in the database.`); continue; }
+        if (it.r.scope.some(c => c.level === 'error')) { held.push(`${it.r.file.contract.title}: fix the items marked before it can be sent.`); continue; }
+        const r = await bsSend(it);
+        if (r.ok) sent++; else held.push(r.msg);
+      }
+      await blRefresh();
+    }
+    BS.last = Date.now(); await blPut('keys', 'syncmeta', { at: BS.last });
+    BS.note = [sent ? `${sent} contract${sent === 1 ? '' : 's'} sent.` : '', ...held].filter(Boolean).join(' ') || BS.note || 'Everything is up to date.';
+    if (manual) toast(sent ? `${sent} contract${sent === 1 ? '' : 's'} sent.` : 'Sync done.');
+    if (sent) { DC.maps = null; try { await dcLoadMaps(true); } catch (e) {} }
+  } catch (e) { BS.note = 'Sync could not finish: ' + (e.message || e); }
+  finally { BS.busy = false; bfRedraw(); }
+}
+const bsAgo = t => !t ? 'never' : (() => { const m = Math.round((Date.now() - t) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : m < 2880 ? Math.round(m / 60) + ' h ago' : Math.round(m / 1440) + ' days ago'; })();
+function bsStrip() {
+  const waiting = BL.items.filter(x => x.r.ok && !x.r.readOnly && bsState(x) === 'waiting').length;
+  const off = typeof OFF !== 'undefined' ? OFF : {};
+  return `<div class="bs-strip" role="status"><span><b>Offline copy</b> ${esc(bsAgo(off.lastSync))}</span><span><b>Contracts</b> ${BS.busy ? 'syncing…' : esc(bsAgo(BS.last))}</span>
+    ${isExec() ? `<span><b>${waiting}</b> waiting to send</span>` : ''}${off.queued ? `<span><b>${off.queued}</b> action${off.queued === 1 ? '' : 's'} waiting</span>` : ''}
+    <button class="bf-btn" onclick="bixxSync(true)" ${BS.busy ? 'disabled' : ''}>Sync now</button>${BS.note ? `<small>${esc(BS.note)}</small>` : ''}</div>`;
+}
+
+const BF = { sel: 1, view: 'folders', ops: null, opsAt: 0, local: null, msg: null, src: null };
+const bfMoney = c => (c / 100).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
+const BF_STATUS = {
+  complete: ['Complete', '<path d="m5 12.5 4.5 4.5L19 7.5"/>', 'ok'],
+  active:   ['In progress', '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>', 'act'],
+  ready:    ['Ready', '<circle cx="12" cy="12" r="8"/>', 'rdy'],
+  waiting:  ['Waiting', '<rect x="6" y="11" width="12" height="9" rx="2"/><path d="M9 11V8a3 3 0 0 1 6 0v3"/>', 'wt'],
+};
+const bfChip = s => { const [t, ic, k] = BF_STATUS[s]; return `<span class="bf-chip ${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${t}</span>`; };
+const bfTodoChip = () => `<span class="bf-chip rdy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="8"/></svg>To do</span>`;
+const bfFolder = (filled, cls = '') => `<svg class="bf-folder ${cls}" viewBox="0 0 64 52" aria-hidden="true">
+  <path class="bk" d="M4 9a4 4 0 0 1 4-4h14l5 5h29a4 4 0 0 1 4 4v28a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/>
+  ${filled ? '<rect class="pg" x="12" y="9" width="36" height="26" rx="2" transform="rotate(-4 30 22)"/><rect class="pg" x="16" y="7" width="36" height="26" rx="2" transform="rotate(3 34 20)"/>' : ''}
+  <path class="fr" d="M4 20a4 4 0 0 1 4-4h48a4 4 0 0 1 4 4v24a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/></svg>`;
+
+async function bfOps(force) {
+  if (!force && BF.ops && Date.now() - BF.opsAt < 60000) return BF.ops;
+  const { data } = await sb.rpc('list_operators');
+  BF.ops = data || []; BF.opsAt = Date.now();
+  return BF.ops;
+}
+const bfName = id => { const o = (BF.ops || []).find(x => x.id === id); return o ? o.peer_name : 'Someone'; };
+
+async function renderFoldersPanel() {
+  bsLoad();
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('folders') + '<div class="dc dc-body"><div class="dc-loading">Opening the folders…</div></div>';
+  await dcLoadMaps();
+  if (DC.maps.length) {
+    const want = DC.maps.some(m => m.id === (DC.mapId || trackerState?.mapId)) ? (DC.mapId || trackerState.mapId) : DC.maps[0].id;
+    DC.mapId = want;
+    if (trackerState?.mapId !== want || trackerState.source !== 'live') await loadWorkMap(want);
+  }
+  await vtLoad();
+  await Promise.all([bfOps().catch(() => {}), blRefresh()]);
+  if (document.getElementById('terminal-shell')?.dataset.view !== 'tracker' || DC.tab !== 'folders') return;
+  panel.innerHTML = dcHeadHtml('folders') + `<div class="dc dc-body">${bfHtml()}</div>`;
+}
+function bfRedraw() {
+  if (DC.tab !== 'folders' || document.getElementById('terminal-shell')?.dataset.view !== 'tracker') return;
+  const body = document.querySelector('#term-panel .dc-body');
+  if (body) body.innerHTML = bfHtml();
+}
+function bfSel(i) { BF.sel = i; bfRedraw(); document.querySelector('#term-panel .bf-detail')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+function bfView(v) { BF.view = v; bfRedraw(); }
+
+function bfSource() {
+  if (BF.local) {
+    const it = BL.items.find(x => x.id === BF.local);
+    if (it && it.r.ok) {
+      const f = it.r.file;
+      return { local: true, id: it.id, file: f, readOnly: it.r.readOnly, notes: it.r.notes, title: f.contract.title, client: f.contract.client,
+        leaves: f.steps.map(s => ({ ...BXF.asLeaf(s), id: s.leaf_code })), branches: f.branches.map(x => ({ branch_id: x.code, code: x.code, title: x.title })), scripts: {} };
+    }
+    BF.local = null;
+  }
+  const live = trackerState?.source === 'live';
+  return { local: false, live, title: trackerState?.map?.goal || '', leaves: live ? (trackerState.leaves || []) : [], branches: live ? (trackerState.branches || []) : [], scripts: trackerState?.scripts || {} };
+}
+function bfPickMap(id) { BF.local = null; BF.msg = null; BF.sel = 1; dcPickMap(id); }
+function bfHtml() {
+  if (BW.open) return bwHtml();
+  const maps = DC.maps || [], src = bfSource(); BF.src = src;
+  const hasServer = maps.length && src.live;
+  const tools = `<div class="bf-tools"><button class="bf-btn solid" onclick="bwNew()">+ New contract</button>
+    <label class="bf-btn">Open a .bixx file<input type="file" accept=".bixx,application/json" hidden onchange="bfImport(this)"></label>
+    ${VS.key ? '<button class="bf-btn" onclick="vtLockNow()">Lock now</button>' : ''}
+    ${src.local ? `<button class="bf-btn" onclick="bwEdit()">${src.readOnly ? 'Re-check' : 'Edit'}</button><button class="bf-btn" onclick="bfExport()">Download .bixx</button>${isExec() && bsState(BL.items.find(x => x.id === src.id) || {}) !== 'sent' ? `<button class="bf-btn" onclick="bsHoldToggle('${esc(src.id)}')">${(BL.items.find(x => x.id === src.id) || {}).hold ? 'Allow sending' : 'Hold back from sync'}</button>` : ''}<button class="bf-btn" onclick="bfForget('${esc(src.id)}')">Remove from this device</button>`
+      : hasServer ? `<button class="bf-btn" onclick="bfExport()">Export as .bixx</button>` : ''}</div>`;
+  const msg = BF.msg ? `<div class="bf-note ${BF.msg.kind}" role="status"><b>${esc(BF.msg.head)}</b><ul>${(BF.msg.lines || []).map(x => `<li>${esc(x)}</li>`).join('')}</ul></div>` : '';
+  if (!src.local && !hasServer) return `<div class="bf">${tools}${vtPanelHtml()}${vtBar()}${msg}<div class="bf-empty">${folderGlyphBig()}<h3>${BL.count && !VS.key ? 'Your contracts are locked' : 'No contracts to open yet'}</h3><p>${BL.count && !VS.key ? 'Unlock them with your device code to see them here.' : 'Start one with New contract, open a .bixx file, or wait for an uploaded contract to be decomposed. Each 4-LOG block appears here as a folder.'}</p></div></div>`;
+  const leaves = src.leaves;
+  const m = BX.build(leaves);
+  if (BF.sel > m.blocks.length || BF.sel < 1) BF.sel = 1;
+  const sel = m.blocks[BF.sel - 1];
+  const checks = BX.check(leaves);
+  const done = m.blocks.filter(b => b.status === 'complete').length;
+  const kp = `<span class="bf-kpis"><i><b>${done}/${m.blocks.length}</b>folders done</i><i><b>${m.logs}</b>LOG</i><i><b>${bfMoney(m.priceCents)}</b>price</i></span>`;
+  const localList = BL.items.filter(x => x.r.ok).map(x => {
+    const f = x.r.file, on = src.local && src.id === x.id;
+    return `<button class="bf-grp ${on ? 'on' : ''}" onclick="bfOpenLocal('${esc(x.id)}')" ${on ? 'aria-current="true"' : ''}><b>${esc(f.contract.title)}</b><small>${esc(f.contract.client || 'On this device')} · ${x.r.readOnly ? 'read-only' : esc(BS_LABEL[bsState(x)])}</small>${on ? kp : ''}</button>`;
+  }).join('');
+  const serverList = maps.map(x => {
+    const on = !src.local && x.id === trackerState?.mapId;
+    return `<button class="bf-grp ${on ? 'on' : ''}" onclick="bfPickMap('${esc(x.id)}')" ${on ? 'aria-current="true"' : ''}>
+      <b>${esc(x.goal || 'Untitled job')}</b><small>${esc(x.prepared_for || '')}</small>${on ? kp : ''}</button>`;
+  }).join('');
+  const left = (localList ? `<h4>On this device</h4>${localList}` : '') + (serverList ? `<h4 style="margin-top:14px">Contracts</h4>${serverList}` : '');
+  const rows = m.blocks.map(b => {
+    const segs = b.leaves.map(l => `<i class="${l.status === 'delivered' ? 'ok' : l.status === 'in progress' ? 'act' : ''}" style="flex:${Math.max(1, l.logs)}" title="${esc(l.leaf_code)} · ${l.logs} LOG"></i>`).join('');
+    return `<button class="bf-row ${b.index === BF.sel ? 'on' : ''}" onclick="bfSel(${b.index})" aria-pressed="${b.index === BF.sel}">
+      ${bfFolder(b.status !== 'waiting' || b.nDone, 'sm ' + BF_STATUS[b.status][2])}
+      <span class="bf-rt"><b>B${b.index} · ${esc(b.leaves[0].task || b.leaves[0].leaf_code)}${b.leaves.length > 1 ? ` <em>+${b.leaves.length - 1}</em>` : ''}</b>
+        <small>${b.owner.kind === 'one' ? esc(bfName(b.owner.id)) : b.owner.kind === 'mixed' ? 'More than one owner' : 'No owner yet'}</small></span>
+      <span class="bf-num"><b>${b.logs}</b><small>LOG</small></span>
+      <span class="bf-seg" aria-hidden="true">${segs}</span>
+      ${bfChip(b.status)}</button>`;
+  }).join('');
+  const warn = checks.length ? `<div class="bf-note" role="status"><b>${checks.filter(c => c.level === 'error').length} to fix · ${checks.filter(c => c.level === 'warn').length} to look at</b>
+      <ul>${checks.slice(0, 6).map(c => `<li class="${c.level}">${esc(c.msg)}</li>`).join('')}</ul></div>` : '';
+  return `<div class="bf">${tools}${vtPanelHtml()}${vtBar()}${msg}${bsStrip()}
+    <div class="bf-cols">
+      <section class="bf-col bf-l">${left}</section>
+      <section class="bf-col bf-m"><h4>Folders <small>${m.blocks.length} · ${m.logs} LOG</small></h4>${warn}<div class="bf-list">${rows}</div></section>
+      <section class="bf-col bf-detail">${sel ? bfDetail(sel, m) : ''}</section>
+    </div></div>`;
+}
+function folderGlyphBig() { return bfFolder(false, 'xl'); }
+
+// One folder, one person: the Executive Operator gives all of a folder's steps to the same member in one action.
+function bfAssignHtml(b) {
+  if (BF.src.local || !isExec()) return '';
+  const open = b.leaves.every(l => l.status === 'to-do');
+  const cur = b.owner.kind === 'one' ? b.owner.id : '';
+  const ops = (BF.ops || []).filter(o => o.active !== false && !o.is_genesis);
+  return `<div class="bf-tile bf-assign"><small>Give this folder to one person</small>
+    <select id="bf-owner" class="bw-in" ${open ? '' : 'disabled'} aria-label="Owner of folder ${b.index}"><option value="">No one</option>${ops.map(o => `<option value="${esc(o.id)}" ${o.id === cur ? 'selected' : ''}>${esc(o.peer_name)}</option>`).join('')}</select>
+    <button class="bf-btn" ${open ? '' : 'disabled'} onclick="bfAssign(${b.index})">Save owner</button>
+    <small>${open ? 'Every step in the folder goes to the same person.' : 'Work has started, so the owner can no longer change.'}</small></div>`;
+}
+async function bfAssign(index) {
+  const b = BX.build(BF.src.leaves).blocks[index - 1], who = document.getElementById('bf-owner')?.value || null;
+  if (!b) return;
+  try {
+    for (const l of b.leaves) { const { error } = await sb.rpc('assign_leaf', { p_leaf: l.id, p_member: who }); if (error) throw error; }
+    BF.msg = { kind: 'ok', head: who ? `Folder ${index} given to ${bfName(who)}` : `Folder ${index} released`, lines: ['All its steps have the same owner.'] };
+  } catch (e) { BF.msg = { kind: 'bad', head: 'Could not change the owner of every step', lines: [e.message || String(e), 'Check the folder: some steps may have changed.'] }; }
+  try { await loadWorkMap(trackerState.mapId); } catch (e) {}
+  bfRedraw();
+}
+function bfDetail(b, m) {
+  const ownerHtml = b.owner.kind === 'one' ? `<b>${esc(bfName(b.owner.id))}</b><small>Holds this folder. Only they can change it.</small>`
+    : b.owner.kind === 'mixed' ? `<b>${b.owner.ids.map(i => esc(bfName(i))).join(', ')}</b><small class="bf-bad">A folder belongs to one person. Reassign so one person holds all of it.</small>`
+    : `<b>No owner yet</b><small>The Executive Operator assigns it.</small>`;
+  const n = Math.max(BX.BSIZE, Math.ceil(b.logs));
+  const doneLogs = b.doneLogs;
+  const seg = Array.from({ length: n }, (_, i) => `<i class="${i < doneLogs ? 'ok' : i < b.logs ? 'in' : ''}"></i>`).join('');
+  const branches = [...new Set(b.leaves.map(l => (BF.src.branches || []).find(x => String(x.branch_id || x.id) === String(l.branch_id))).filter(Boolean).map(x => `${x.code} · ${x.title || 'Branch'}`))];
+  const keys = b.leaves.filter(l => l.is_key);
+  const sc = BF.src.scripts || {};
+  const proof = b.leaves.filter(l => String(l.done_criterion || '').trim()).length;
+  const scripted = b.leaves.filter(l => sc[l.id] === 'approved').length;
+  const tierName = t => t[0].toUpperCase() + t.slice(1);
+  const tabs = `<div class="bf-seg2" role="tablist"><button class="${BF.view === 'folders' ? 'on' : ''}" onclick="bfView('folders')">Picture</button><button class="${BF.view === 'table' ? 'on' : ''}" onclick="bfView('table')">Table</button></div>`;
+  const head = `<div class="bf-dh">${bfFolder(true, 'lg ' + BF_STATUS[b.status][2])}<div><h3>Folder ${b.index}</h3>${bfChip(b.status)}</div>${tabs}</div>`;
+  const leafRows = b.leaves.map(l => `<tr><td>${l.is_key ? '▲ ' : l.kind === 'outcome' ? '● ' : ''}${esc(l.leaf_code)}</td><td>${esc(l.task)}</td><td>${l.logs}</td><td>${esc(tierName(l.tier))}</td><td>${esc(l.status)}</td></tr>`).join('');
+  if (BF.view === 'table') {
+    return `${head}<table class="bf-tbl"><caption>Folder ${b.index}, as a table</caption><tbody>
+      <tr><th>Owner</th><td>${b.owner.kind === 'one' ? esc(bfName(b.owner.id)) : b.owner.kind === 'mixed' ? 'More than one (fix)' : 'None'}</td></tr>
+      <tr><th>LOG</th><td>${b.logs} (${doneLogs} delivered)</td></tr>
+      <tr><th>Price</th><td>${bfMoney(b.priceCents)} (labor ${bfMoney(b.laborCents)}, reserve ${bfMoney(b.reserveCents)})</td></tr>
+      <tr><th>Branch</th><td>${branches.map(esc).join('; ') || '—'}</td></tr>
+      <tr><th>Waits on</th><td>${b.needs.length ? b.needs.map(i => 'Folder ' + i).join(', ') : 'Nothing'}</td></tr>
+      <tr><th>Tier needed</th><td>${esc(tierName(b.topTier))}</td></tr>
+      <tr><th>Keys</th><td>${keys.length ? keys.map(k => esc(k.leaf_code)).join(', ') : 'None'}</td></tr>
+      <tr><th>Proof</th><td>${proof} of ${b.leaves.length} steps say how they are done; ${scripted} have an approved script</td></tr>
+      <tr><th>Stamps</th><td>Delivered: ${b.nDone} of ${b.leaves.length} steps. Audited, Authorized and Sealed are recorded in escrow.</td></tr></tbody></table>
+      <table class="bf-tbl"><caption>Steps</caption><thead><tr><th>Step</th><th>Task</th><th>LOG</th><th>Tier</th><th>Status</th></tr></thead><tbody>${leafRows}</tbody></table>`;
+  }
+  return `${head}
+    <div class="bf-head-n"><b>${b.logs}</b><span>LOG</span><em>${doneLogs} delivered</em></div>
+    <div class="bf-logbar" role="img" aria-label="${doneLogs} of ${b.logs} LOG delivered">${seg}</div>
+    <div class="bf-tiles">
+      <div class="bf-tile"><small>Owner</small>${ownerHtml}</div>
+      <div class="bf-tile"><small>Price</small><b>${bfMoney(b.priceCents)}</b><small>labor ${bfMoney(b.laborCents)} · reserve ${bfMoney(b.reserveCents)}</small></div>
+      <div class="bf-tile"><small>Branch</small><b>${branches.length ? branches.map(esc).join('<br>') : '—'}</b></div>
+      <div class="bf-tile"><small>Gate</small><b>${esc(tierName(b.topTier))} tier</b><small>${b.needs.length ? 'Opens after Folder ' + b.needs.join(', ') : 'Open now. Nothing before it.'}</small></div>
+      <div class="bf-tile"><small>Keys</small><b>${keys.length ? '▲ ' + keys.length : 'None'}</b><small>${keys.length ? keys.map(k => esc(k.leaf_code)).join(', ') : 'No Wisdom Key here'}</small></div>
+      <div class="bf-tile"><small>Proof</small><b>${proof}/${b.leaves.length}</b><small>${scripted} approved script${scripted === 1 ? '' : 's'}</small></div>
+    </div>
+    ${bfAssignHtml(b)}
+    <div class="bf-stamps" aria-label="Stamps"><span class="${b.status === 'complete' ? 'on' : ''}">${b.status === 'complete' ? '✓ ' : ''}Delivered</span><span>Audited</span><span>Authorized</span><span>Sealed</span></div>
+    <h5>Steps in this folder</h5>
+    <ul class="bf-steps">${b.leaves.map(l => `<li><b>${l.is_key ? '▲ ' : l.kind === 'outcome' ? '● ' : ''}${esc(l.leaf_code)}</b><span>${esc(l.task)}</span><em>${l.logs} LOG · ${esc(tierName(l.tier))}</em>${l.status === 'delivered' ? bfChip('complete') : l.status === 'in progress' ? bfChip('active') : bfTodoChip()}</li>`).join('')}</ul>`;
+}
+
+// ── Leaderboard — members ranked by Standing (SPEC 4). Shows what every signed-in member can already read in the
+// member list: standing, tier, LOGs, streak. Never Care data. The Executive Operator is not ranked.
+const RK = { group: 'all', sel: null };
+async function renderRanksPanel() {
+  const panel = document.getElementById('term-panel');
+  panel.classList.add('dc-on');
+  if (!panel.querySelector(':scope > .dc-body')) panel.innerHTML = dcHeadHtml('ranks') + '<div class="dc dc-body"><div class="dc-loading">Ranking the network…</div></div>';
+  await dcLoadMaps().catch(() => {});
+  await bfOps(true).catch(() => {});
+  if (document.getElementById('terminal-shell')?.dataset.view !== 'tracker' || DC.tab !== 'ranks') return;
+  panel.innerHTML = dcHeadHtml('ranks') + `<div class="dc dc-body">${rkHtml()}</div>`;
+}
+function rkRedraw() { if (DC.tab !== 'ranks') return; const b = document.querySelector('#term-panel .dc-body'); if (b) b.innerHTML = rkHtml(); }
+function rkGroup(g) { RK.group = g; RK.sel = null; rkRedraw(); }
+function rkSel(id) { RK.sel = id; rkRedraw(); document.querySelector('#term-panel .bf-detail')?.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); }
+const rkBand = s => { const k = String(s || 'active').toLowerCase(); return { sovereign: ['Sovereign', '<path d="m12 3 2.6 5.6 6.1.7-4.5 4.2 1.2 6L12 16.5 6.6 19.5l1.2-6L3.3 9.3l6.1-.7z"/>', 'ok'], active: ['Active', '<path d="m5 12.5 4.5 4.5L19 7.5"/>', 'ok'],
+  provisional: ['Provisional', '<circle cx="12" cy="12" r="8"/><path d="M12 4a8 8 0 0 1 0 16z" fill="currentColor"/>', 'act'], probation: ['Probation', '<path d="M12 4 3 20h18z"/><path d="M12 10v4M12 17.5v.1"/>', 'act'],
+  suspended: ['Suspended', '<circle cx="12" cy="12" r="8"/><path d="m7 7 10 10"/>', 'wt'] }[k] || [k, '<circle cx="12" cy="12" r="8"/>', 'rdy']; };
+const rkChip = s => { const [t, ic, k] = rkBand(s); return `<span class="bf-chip ${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ic}</svg>${t}</span>`; };
+
+function rkHtml() {
+  const all = (BF.ops || []).filter(o => o.active !== false && !o.is_genesis)
+    .map(o => ({ ...o, rep: Number(o.reputation_score || 0), logs: Number(o.total_logs || 0), tierName: tier(o.total_logs) }))
+    .sort((a, b) => b.rep - a.rep || b.logs - a.logs || String(a.peer_name).localeCompare(String(b.peer_name)));
+  all.forEach((o, i) => o.rank = i + 1);
+  if (!all.length) return `<div class="bf"><div class="bf-empty">${folderGlyphBig()}<h3>Nobody to rank yet</h3><p>Members appear here once they are on the network.</p></div></div>`;
+  const groups = ['all', 'Operator', 'Architect', 'Wrangler', 'Apprentice'];
+  const inG = g => g === 'all' ? all : all.filter(o => o.tierName === g);
+  const rows = inG(RK.group);
+  if (!RK.sel || !rows.some(o => o.id === RK.sel)) RK.sel = rows[0]?.id || null;
+  const me = operator?.id;
+  const left = groups.map(g => {
+    const ls = inG(g); if (!ls.length && g !== 'all') return '';
+    const avg = ls.length ? ls.reduce((s, o) => s + o.rep, 0) / ls.length : 0;
+    return `<button class="bf-grp ${RK.group === g ? 'on' : ''}" onclick="rkGroup('${g}')" ${RK.group === g ? 'aria-current="true"' : ''}><b>${g === 'all' ? 'All members' : g}</b>
+      <span class="bf-kpis"><i><b>${ls.length}</b>member${ls.length === 1 ? '' : 's'}</i><i><b>${avg.toFixed(3)}</b>avg standing</i><i><b>${ls.reduce((s, o) => s + o.logs, 0).toLocaleString('en-US')}</b>LOG</i></span></button>`;
+  }).join('');
+  const list = rows.map(o => `<button class="bf-row rk ${o.id === RK.sel ? 'on' : ''}" onclick="rkSel('${esc(o.id)}')" aria-pressed="${o.id === RK.sel}">
+      <span class="rk-n">${o.rank}</span>
+      <span class="bf-rt"><b>${esc(o.peer_name)}${o.id === me ? ' <em>you</em>' : ''}</b><small>${esc(o.tierName)}${o.region ? ' · ' + esc(o.region) : ''}</small></span>
+      <span class="bf-num"><b>${o.rep.toFixed(3)}</b><small>standing</small></span>
+      <span class="bf-num"><b>${o.logs.toLocaleString('en-US')}</b><small>LOG</small></span>
+      <span class="rk-streak" title="Streak ${o.streak || 0}" aria-hidden="true">${Array.from({ length: 8 }, (_, i) => `<i class="${i < Math.min(8, o.streak || 0) ? 'on' : ''}"></i>`).join('')}</span>
+      ${rkChip(o.standing)}</button>`).join('');
+  const s = all.find(o => o.id === RK.sel);
+  const detail = s ? `<div class="bf-dh"><span class="rk-av">${esc((s.peer_name || '?').trim()[0] || '?')}</span><div><h3>${esc(s.peer_name)}</h3>${rkChip(s.standing)}</div></div>
+    <div class="bf-head-n"><b>${s.rep.toFixed(3)}</b><span>standing</span><em>rank ${s.rank} of ${all.length}</em></div>
+    <div class="bf-logbar" role="img" aria-label="Standing ${s.rep.toFixed(3)} of a possible 0.900"><i class="ok" style="flex:${Math.round(s.rep / 0.9 * 100)}"></i><i style="flex:${Math.max(0, 100 - Math.round(s.rep / 0.9 * 100))};background:none"></i></div>
+    <div class="bf-tiles">
+      <div class="bf-tile"><small>Tier</small><b>${esc(s.tierName)}</b><small>$${BX.RATE[s.tierName.toLowerCase()] / 100} per LOG</small></div>
+      <div class="bf-tile"><small>LOG worked</small><b>${s.logs.toLocaleString('en-US')}</b></div>
+      <div class="bf-tile"><small>Streak</small><b>${s.streak || 0}</b></div>
+      <div class="bf-tile"><small>Region</small><b>${esc(s.region || '—')}</b></div>
+    </div>
+    <p class="bf-fine">Standing is out of 0.900 (SPEC 4). Sovereign from 0.765, Active from 0.585, Probation from 0.405. New members stay Provisional until 8 scored checkpoints.</p>` : '';
+  return `<div class="bf"><div class="bf-cols">
+    <section class="bf-col bf-l"><h4>Groups</h4>${left}</section>
+    <section class="bf-col bf-m"><h4>Leaderboard <small>${rows.length} ranked by standing</small></h4><div class="bf-list">${list}</div></section>
+    <section class="bf-col bf-detail">${detail}</section></div></div>`;
+}
+
 function renderDecomposition() {
   if (DC.tab === 'agents' && !isExec()) DC.tab = 'overview';
   if (DC.tab === 'agents') return renderAgentsPanel();
+  if (DC.tab === 'folders') return renderFoldersPanel();
+  if (DC.tab === 'ranks') return renderRanksPanel();
   if (DC.tab === 'blitz') return renderBlitzPanel();
   if (DC.tab === 'jobs') return renderJobsPanel();
   if (DC.tab === 'proof') return renderProofPanel();

@@ -3970,6 +3970,67 @@ html:not(.theme-light) .vz{--vz-bg:rgba(255,255,255,.045);--vz-edge:rgba(255,255
 .ca-ph-card{appearance:none;text-align:left;border:0;border-left:4px solid var(--c);border-radius:16px;padding:12px 14px;background:color-mix(in srgb,var(--term-fg) 5%,var(--term-bg));color:var(--term-fg);font:inherit;cursor:pointer;display:grid;gap:3px}
 .ca-ph-card b{font-size:15px;font-weight:500} .ca-ph-card small{color:var(--term-dim);font-size:12.5px} .ca-ph-card span{font-size:12.5px;color:var(--term-dim)} .ca-ph-card p{margin:6px 0 0;background:var(--term-bg);border-radius:12px;padding:10px 12px;font-size:13px;line-height:1.5}
 @media (max-width:760px){ .ca-wrap{grid-template-columns:1fr} }
+/* Leaderboards: Members, Clients and Prospects. A scoreboard on top, one card per row, tap a row for more (lb-) */
+.lb{color:var(--term-fg);font-family:var(--sans,inherit)}
+.lb-board{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:4px 0 16px}
+.lb-tile{background:var(--g-row,rgba(255,255,255,.055));border:1px solid var(--term-line);border-radius:18px;padding:14px 16px;min-width:0}
+.lb-tile b{display:block;font-size:clamp(26px,4vw,36px);line-height:1;font-weight:600;letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.lb-tile span{display:block;margin-top:7px;font-size:11.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim)}
+.lb-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.lb-pills{display:flex;gap:6px;flex-wrap:wrap;flex:1}
+.lb-pill{appearance:none;margin:0;border:0;border-radius:999px;background:var(--g-chip,rgba(255,255,255,.08));color:var(--term-dim);font:500 13px var(--sans,inherit);padding:8px 14px;min-height:36px;cursor:pointer;display:inline-flex;gap:7px;align-items:center}
+.lb-pill.on{background:var(--term-fg);color:var(--term-bg)}
+.lb-pill em{font-style:normal;opacity:.7;font-variant-numeric:tabular-nums}
+.lb-search{display:flex;align-items:center;gap:8px;background:var(--g-field,rgba(255,255,255,.07));border-radius:999px;padding:0 14px;height:38px;min-width:220px;color:var(--term-dim)}
+.lb-search svg{width:16px;height:16px;flex:none}
+.lb-search input{flex:1;min-width:0;border:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;height:auto!important;margin:0!important;padding:0!important;color:var(--term-fg);font:inherit!important;font-size:14px!important;outline:0}
+.lb-list{display:grid;gap:8px}
+.lb-row{--c:var(--t-app);position:relative;background:var(--g-row,rgba(255,255,255,.055));border:1px solid var(--term-line);border-radius:20px;overflow:hidden}
+.lb-row::before{content:'';position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--c)}
+.lb-row::after{content:'';position:absolute;inset:0;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 16%,transparent),transparent 40%);pointer-events:none}
+.lb-main{position:relative;z-index:1;display:grid;grid-template-columns:30px 44px minmax(0,1fr) auto 18px;gap:12px;align-items:center;padding:14px 16px 14px 18px;width:100%;text-align:left;background:none;border:0;margin:0;color:inherit;font:inherit;cursor:pointer}
+.lb-main:focus-visible{outline:2px solid var(--term-fg);outline-offset:-3px;border-radius:20px}
+.lb-rk{font-size:20px;font-weight:600;color:var(--term-dim);text-align:center;font-variant-numeric:tabular-nums}
+.lb-rk.r1{color:#E8B923}.lb-rk.r2{color:#C8C8C4}.lb-rk.r3{color:#CD7F32}
+.lb-av{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font-size:14px;font-weight:600;background:color-mix(in srgb,var(--c) 22%,var(--g-chip,#222));color:var(--term-fg);overflow:hidden}
+.lb-av img{width:100%;height:100%;object-fit:cover}
+.lb-nm{min-width:0}
+.lb-nm b{display:flex;align-items:center;gap:8px;font-size:16px;font-weight:600;letter-spacing:-.01em;flex-wrap:wrap}
+.lb-nm small{display:block;margin-top:2px;font-size:12.5px;color:var(--term-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lb-live{display:inline-flex;align-items:center;gap:5px;font-size:10.5px;font-weight:700;letter-spacing:.09em;color:#10B981;background:rgba(16,185,129,.14);padding:2px 8px;border-radius:999px}
+.lb-live i{width:6px;height:6px;border-radius:50%;background:#10B981;animation:lbPulse 1.6s ease-in-out infinite}
+@keyframes lbPulse{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.lb-live i{animation:none}}
+.lb-stats{display:flex;gap:20px}
+.lb-st{text-align:right;min-width:44px}
+.lb-st b{display:block;font-size:21px;line-height:1.05;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.lb-st small{display:block;margin-top:3px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim)}
+.lb-chev{width:16px;height:16px;color:var(--term-dim);transition:transform .2s}
+.lb-row.open .lb-chev{transform:rotate(90deg)}
+.lb-more{display:none;position:relative;z-index:1;padding:4px 18px 18px;border-top:1px solid var(--term-line)}
+.lb-row.open .lb-more{display:block}
+.lb-facts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:14px 0}
+.lb-fact{background:var(--g-row2,rgba(255,255,255,.045));border-radius:14px;padding:10px 12px;min-width:0}
+.lb-fact b{display:block;font-size:19px;font-weight:600;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.lb-fact small{display:block;margin-top:2px;font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:var(--term-dim)}
+.lb-sub{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--term-dim);margin:12px 0 7px}
+.lb-chips{display:flex;gap:6px;flex-wrap:wrap}
+.lb-chip{font-size:12.5px;padding:5px 11px;border-radius:999px;background:var(--g-chip,rgba(255,255,255,.08))}
+.lb-acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.lb-info{display:grid;gap:6px;font-size:13px;color:var(--term-dim)}
+.lb-info b{color:var(--term-fg);font-weight:500}
+.lb-empty{padding:34px 16px;text-align:center;color:var(--term-dim);font-size:14px;border:1px dashed var(--term-line);border-radius:20px}
+.lb-more-btn{margin:12px auto 0;display:block}
+@media (max-width:767px){
+  .lb-board{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lb-main{grid-template-columns:26px 40px minmax(0,1fr) 16px;gap:10px;padding:12px 12px 12px 16px}
+  .lb-av{width:40px;height:40px}
+  .lb-stats{grid-column:2 / -1;grid-row:2;gap:6px;justify-content:space-between;margin-top:2px}
+  .lb-st{text-align:left;min-width:0}
+  .lb-facts{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .lb-search{min-width:0;flex:1 1 100%}
+}
+
 /* Chat: list, conversation, person card; phone shows one at a time (ch-) */
 #term-panel.ch-fit{overflow:hidden;padding:8px 0 0;display:flex;flex-direction:column;overscroll-behavior:none;touch-action:pan-y}
 #term-panel.ch-fit>.ch-wrap{flex:1;min-height:0}
@@ -5405,9 +5466,21 @@ html.theme-light .bz-leaf.lit b{color:#fff}
       </button>
     </div>
     <div class="term-sb-group">
+      <button class="term-sb-item" data-view="members" onclick="setTermView('members')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 0 1 0 6.8M18.5 14.4c2 .8 3 2.800 3 5.600"/></svg>
+        <span>Members</span>
+      </button>
+    </div>
+    <div class="term-sb-group">
       <button class="term-sb-item" data-view="clients" onclick="setTermView('clients')">
-        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.5a3.5 3.5 0 0 1 0 7M21.5 20c0-2.8-1.6-4.9-4-5.7"/></svg>
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18"/></svg>
         <span>Clients</span>
+      </button>
+    </div>
+    <div class="term-sb-group" id="sb-pr-grp" style="display:none">
+      <button class="term-sb-item" data-view="prospects" onclick="setTermView('prospects')">
+        <svg class="term-sb-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h5l1.500 3h5L16 13h5"/><path d="M5 5h14l2 8v6H3v-6z"/></svg>
+        <span>Prospects</span>
       </button>
     </div>
     <div class="term-sb-group">
@@ -13127,7 +13200,9 @@ function routePrompt(text) {
     [/message|chat|dm|talk/, () => setTermView('chat')],
     [/calendar|schedule|meeting|event/, () => setTermView('calendar')],
     [/notif|alert|attention/, () => setTermView('notifications')],
-    [/member|client|people|add (a )?(member|client)|network/, () => setTermView('clients')],
+    [/client/, () => setTermView('clients')],
+    [/prospect|request|lead/, () => setTermView(isExec() ? 'prospects' : 'members')],
+    [/member|people|add (a )?(member|client)|network/, () => setTermView('members')],
     [/review|verify|proof/, () => { const a = (window._nextUp || []).find(x => x.kind === 'verify'); a ? a.run() : setTermView('notifications'); }],
     [/escrow|fund|pay|seal|audit/, () => { const a = (window._nextUp || []).find(x => x.kind === 'escrow'); a ? a.run() : toast('No escrow steps are waiting on you.'); }],
     [/ledger|payments?|activit/, () => setTermView('ledger')],
@@ -13792,74 +13867,108 @@ async function loadPeople(force) {
   }
 }
 
+// ── Leaderboards: Members, Clients and Prospects are three views, each with a scoreboard on top and one card per row ──
+const LB = { f: { members: 'all', clients: 'all' }, q: { members: '', clients: '' }, ops: null, opsBusy: false, limit: { members: 40, clients: 40, prospects: 40 } };
+const LB_COLOR = { apprentice: '--t-app', wrangler: '--t-wra', architect: '--t-arc', operator: '--t-ope', exec: '--st-ready' };
+const LB_CHEV = '<svg class="lb-chev" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="m6 3 5 5-5 5"/></svg>';
+const lbN = n => Number(n || 0).toLocaleString('en-US');
+const lbMoney = n => { n = Number(n || 0); return n >= 10000 ? '$' + (n / 1000).toFixed(n >= 100000 ? 0 : 1).replace(/\.0$/, '') + 'k' : '$' + n.toLocaleString('en-US', { maximumFractionDigits: 0 }); };
+const lbRk = i => `<span class="lb-rk${i < 3 ? ' r' + (i + 1) : ''}">${i + 1}</span>`;
+const lbTile = (n, label) => `<div class="lb-tile"><b>${n}</b><span>${esc(label)}</span></div>`;
+const lbSt = (n, label) => `<div class="lb-st"><b>${n}</b><small>${esc(label)}</small></div>`;
+const lbFact = (n, label) => `<div class="lb-fact"><b>${n}</b><small>${esc(label)}</small></div>`;
+function lbToggle(btn) {
+  const row = btn.closest('.lb-row'); const open = !row.classList.contains('open');
+  row.classList.toggle('open', open); btn.setAttribute('aria-expanded', open);
+  if (open && row.dataset.kind === 'member') lbSkills(row.dataset.id);
+  if (open && row.dataset.kind === 'client') { const c = (CL.clients || []).find(x => x.id === row.dataset.id); if (c?.wallet_address) clLoadFunds(c.wallet_address); }
+}
+// skills are not part of the people list, so they are read once, the first time a card is opened
+async function lbSkills(id) {
+  const box = document.querySelector(`.lb-skills[data-id="${CSS.escape(id)}"]`); if (!box) return;
+  if (!LB.ops && !LB.opsBusy) {
+    LB.opsBusy = true;
+    try { const { data } = await sb.rpc('list_operators'); LB.ops = data || []; } catch (e) { LB.ops = []; }
+    LB.opsBusy = false;
+  }
+  if (!LB.ops) return;
+  const op = LB.ops.find(o => o.id === id); const sk = Array.isArray(op?.skills) ? op.skills : [];
+  box.innerHTML = sk.length ? sk.map(x => `<span class="lb-chip">${esc(typeof x === 'string' ? x : x.name || x.skill || '')}</span>`).join('') : '<span class="pp-muted">No skills listed yet.</span>';
+}
+function lbMemberRow(m, i) {
+  const t = tier(m.total_logs), tc = m.is_genesis ? 'exec' : TIER_COLOR[t];
+  const seen = seenText(m.last_seen_at), live = seen === 'Online now' || m.steps_active > 0;
+  const sub = [m.region || m.handle || 'Member', live && m.steps_active ? `${m.steps_active} in progress` : (seen || '')].filter(Boolean).join(' · ');
+  return `<div class="lb-row" data-kind="member" data-id="${esc(m.id)}" style="--c:var(${LB_COLOR[tc]})">
+    <button class="lb-main" type="button" aria-expanded="false" onclick="lbToggle(this)">
+      ${lbRk(i)}<span class="lb-av">${m.avatar_url ? `<img src="${esc(m.avatar_url)}" alt="">` : esc(initials(m.peer_name))}</span>
+      <span class="lb-nm"><b>${esc(m.peer_name)}<span class="pp-tier ${tc}">${m.is_genesis ? 'Executive' : t}</span>${live ? '<span class="lb-live"><i></i>LIVE</span>' : ''}</b><small>${esc(sub)}</small></span>
+      <span class="lb-stats">${lbSt(lbN(m.total_logs), 'LOGs')}${lbSt(lbN(m.steps_verified), 'Verified')}${lbSt(lbN(m.steps_active), 'Now')}</span>${LB_CHEV}
+    </button>
+    <div class="lb-more">
+      <div class="lb-facts">${lbFact(lbN(m.total_logs), 'LOGs')}${lbFact(lbN(m.steps_granted), 'Steps granted')}${lbFact(lbN(m.steps_active), 'In progress')}${lbFact(lbN(m.steps_verified), 'Verified')}</div>
+      <div class="lb-sub">Skills</div><div class="lb-chips lb-skills" data-id="${esc(m.id)}"><span class="pp-muted">Loading…</span></div>
+      <div class="lb-sub">Details</div>
+      <div class="lb-info"><span>Member ID <b>${esc(m.member_id || '—')}</b> · ${esc(m.bix_id || 'no BIX ID')}</span><span>Member since <b>${esc(fmtDate(m.created_at))}</b></span><span>${m.email ? `<b>${esc(m.email)}</b>` : 'No email yet'}${m.phone ? ' · ' + esc(m.phone) : ''}</span></div>
+      <div class="lb-acts"><button class="pp-btn solid" onclick="openMemberRecord('${esc(m.id)}')">Full record</button>${m.id !== operator.id ? `<button class="pp-btn" onclick="openChatWith('${esc(m.id)}')">Message</button>` : ''}<button class="pp-btn" onclick="clMemberMenu(this,'${esc(m.id)}')">More</button></div>
+    </div></div>`;
+}
+function lbClientRow(c, i) {
+  const open = Math.max(0, (c.projects || 0) - (c.settled || 0)), live = open > 0;
+  const col = c.standing === 'suspended' ? '--st-todo' : c.settled ? '--st-done' : '--t-wra';
+  const sub = c.handle || ('Client since ' + fmtDate(c.created_at));
+  return `<div class="lb-row" data-kind="client" data-id="${esc(c.id)}" style="--c:var(${col})">
+    <button class="lb-main" type="button" aria-expanded="false" onclick="lbToggle(this)">
+      ${lbRk(i)}<span class="lb-av">${esc(initials(c.name))}</span>
+      <span class="lb-nm"><b>${esc(c.name)}<span class="pp-standing ${esc(c.standing)}">${esc(c.standing)}</span>${live ? '<span class="lb-live"><i></i>LIVE</span>' : ''}</b><small>${esc(sub)}</small></span>
+      <span class="lb-stats">${lbSt(lbN(c.projects), 'Projects')}${lbSt(lbN(c.settled), 'Settled')}${lbSt(lbMoney(c.settled_value), 'Value')}</span>${LB_CHEV}
+    </button>
+    <div class="lb-more">
+      <div class="lb-facts">${lbFact(lbN(c.projects), 'Projects')}${lbFact(lbN(open), 'Open now')}${lbFact(lbN(c.settled), 'Settled')}${lbFact('$' + Number(c.settled_value || 0).toLocaleString('en-US', { maximumFractionDigits: 0 }), 'Settled value')}</div>
+      <div class="lb-sub">Contact</div>${clContactHtml(c.email, c.phone)}
+      <div class="lb-sub">Wallet</div>${clFundsHtml(c.wallet_address, isExec() ? `openWalletDrawer('client','${esc(c.id)}')` : '')}
+      ${isExec() && c.code ? `<div class="lb-sub">Sign-in code</div><div class="pp-contact"><code class="pp-code">${esc(c.code)}</code><button class="pp-copy" onclick="copyText('${esc(c.code)}','Sign-in code')">${ico(ICON.copy)}Copy</button></div>` : ''}
+      <div class="lb-acts"><button class="pp-btn" onclick="clClientMenu(this,'${esc(c.id)}')">More</button></div>
+    </div></div>`;
+}
+const lbSearchBox = (id, ph, val, on) => `<label class="lb-search">${ico(ICON.search)}<input id="${id}" placeholder="${esc(ph)}" value="${esc(val)}" oninput="${on}"></label>`;
+
 async function renderClientsPanel() {
   if (CL.tab === 'prospects') { if (isExec()) return renderProspectsPanel(); CL.tab = 'members'; }
   const panel = document.getElementById('term-panel');
   if (!panel.querySelector('.cl-wrap')) panel.innerHTML = '<div class="term-panel-empty">Loading…</div>';
   try { await loadPeople(); } catch (e) { panel.innerHTML = `<div class="term-panel-empty">Couldn’t load the network — ${esc(e.message)}</div>`; return; }
-  if (isExec() && PR.open == null) prLoad().then(() => { if (CL.tab !== 'prospects' && document.getElementById('term-panel')?.querySelector('.cl-wrap')) renderClientsPanel(); }).catch(() => { PR.open = 0; });   // the count on the Prospects tab
-  const isM = CL.tab === 'members';
-  const filters = isM
-    ? [['all', 'All'], ['working', 'Working now'], ['new', 'New']]
-    : [['all', 'All'], ['projects', 'With projects'], ['settled', 'Settled']];
-  if (!filters.some(f => f[0] === CL.filter)) CL.filter = 'all';
-  const q = CL.q.trim().toLowerCase();
+  const isM = CL.tab === 'members', kind = isM ? 'members' : 'clients';
   const month = Date.now() - 30 * 864e5;
-  let rows = isM ? CL.members : CL.clients;
-  rows = rows.filter(r => {
-    if (isM && CL.filter === 'working' && !r.steps_active) return false;
-    if (isM && CL.filter === 'new' && new Date(r.created_at) < month) return false;
-    if (!isM && CL.filter === 'projects' && !r.projects) return false;
-    if (!isM && CL.filter === 'settled' && !r.settled) return false;
-    if (!q) return true;
-    return [r.peer_name, r.name, r.handle, r.email, r.member_id, r.bix_id, r.code, r.wallet_address].some(v => (v || '').toLowerCase().includes(q));
-  });
-  const pages = Math.max(1, Math.ceil(rows.length / CL_PAGE));
-  CL.page = Math.min(CL.page, pages);
-  const shown = rows.slice((CL.page - 1) * CL_PAGE, CL.page * CL_PAGE);
-  const fcount = k => {
-    const all = isM ? CL.members : CL.clients;
-    if (k === 'all') return all.length;
-    if (k === 'working') return all.filter(r => r.steps_active).length;
-    if (k === 'new') return all.filter(r => new Date(r.created_at) >= month).length;
-    if (k === 'projects') return all.filter(r => r.projects).length;
-    if (k === 'settled') return all.filter(r => r.settled).length;
-  };
-  panel.innerHTML = `<div class="cl-wrap">
+  const all = isM ? CL.members : CL.clients;
+  const filters = isM ? [['all', 'All'], ['working', 'Working now'], ['new', 'New']] : [['all', 'All'], ['projects', 'With projects'], ['settled', 'Settled']];
+  if (!filters.some(f => f[0] === LB.f[kind])) LB.f[kind] = 'all';
+  const f = LB.f[kind], q = LB.q[kind].trim().toLowerCase();
+  const pass = r => (f === 'all') || (f === 'working' && r.steps_active) || (f === 'new' && new Date(r.created_at) >= month) || (f === 'projects' && r.projects) || (f === 'settled' && r.settled);
+  const cnt = k => all.filter(r => k === 'all' || (k === 'working' && r.steps_active) || (k === 'new' && new Date(r.created_at) >= month) || (k === 'projects' && r.projects) || (k === 'settled' && r.settled)).length;
+  const ranked = [...all].sort(isM
+    ? (a, b) => (b.total_logs || 0) - (a.total_logs || 0) || (b.steps_verified || 0) - (a.steps_verified || 0)
+    : (a, b) => (b.settled_value || 0) - (a.settled_value || 0) || (b.projects || 0) - (a.projects || 0));
+  const rankOf = new Map(ranked.map((r, i) => [r.id, i]));             // a person keeps their rank while you search or filter
+  const rows = ranked.filter(r => pass(r) && (!q || [r.peer_name, r.name, r.handle, r.email, r.member_id, r.bix_id, r.code, r.wallet_address].some(v => (v || '').toLowerCase().includes(q))));
+  const shown = rows.slice(0, LB.limit[kind]);
+  const board = isM
+    ? lbTile(lbN(all.length), 'Members') + lbTile(lbN(all.filter(r => r.steps_active).length), 'Working now') + lbTile(lbN(all.reduce((n, r) => n + (r.steps_verified || 0), 0)), 'Steps verified') + lbTile(lbN(all.reduce((n, r) => n + (r.total_logs || 0), 0)), 'LOGs recorded')
+    : lbTile(lbN(all.length), 'Clients') + lbTile(lbN(all.filter(r => (r.projects || 0) > (r.settled || 0)).length), 'With open work') + lbTile(lbN(all.reduce((n, r) => n + (r.settled || 0), 0)), 'Projects settled') + lbTile(lbMoney(all.reduce((n, r) => n + Number(r.settled_value || 0), 0)), 'Settled value');
+  panel.innerHTML = `<div class="cl-wrap lb">
     <div class="pp-head">
-      <div><h2>Clients</h2><p>Everyone on the network — the members who do the work and the clients you do it for.</p></div>
-      <div class="pp-head-acts">
-        ${isExec() ? `<button class="pp-btn" onclick="openNetworkTools()">${ico(ICON.tools)}Network tools</button>
-        <button class="pp-btn solid" onclick="openAddPerson('${isM ? 'member' : 'client'}')">${ico(ICON.plus)}Add ${isM ? 'member' : 'client'}</button>` : ''}
-      </div>
+      <div><h2>${isM ? 'Members' : 'Clients'}</h2><p>${isM ? 'The people who do the work, ranked by what they have recorded.' : 'The people the work is for, ranked by what has settled.'}</p></div>
+      <div class="pp-head-acts">${isExec() ? `${isM ? `<button class="pp-btn" onclick="openNetworkTools()">${ico(ICON.tools)}Network tools</button>` : ''}<button class="pp-btn solid" onclick="openAddPerson('${isM ? 'member' : 'client'}')">${ico(ICON.plus)}Add ${isM ? 'member' : 'client'}</button>` : ''}</div>
     </div>
-    <div class="pp-tabs">
-      <button class="${isM ? 'on' : ''}" onclick="CL.tab='members';CL.page=1;renderClientsPanel()">${ico(ICON.users)}Members <em>${CL.members.length}</em></button>
-      <button class="${!isM ? 'on' : ''}" onclick="CL.tab='clients';CL.page=1;renderClientsPanel()">${ico(ICON.brief)}Clients <em>${CL.clients.length}</em></button>
-      ${isExec() ? `<button onclick="CL.tab='prospects';CL.page=1;renderClientsPanel()">${ico(ICON.inbox)}Prospects <em>${PR.open ?? '·'}</em></button>` : ''}
-      <span class="pp-tabs-gap"></span>
-      ${filters.map(([k, n]) => `<button class="pp-chip f-${k} ${CL.filter === k ? 'on' : ''}" onclick="CL.filter='${k}';CL.page=1;renderClientsPanel()"><i></i>${n} <em>${fcount(k)}</em></button>`).join('')}
-    </div>
-    <div class="pp-card">
-      <div class="pp-card-top">
-        <label class="pp-search">${ico(ICON.search)}<input id="cl-q" placeholder="Search ${isM ? 'members' : 'clients'}" value="${esc(CL.q)}" oninput="CL.q=this.value;CL.page=1;clSearchSoon()"></label>
-        <span class="pp-muted">Showing <b>${shown.length}</b> of <b>${rows.length}</b> ${isM ? 'members' : 'clients'}</span>
-      </div>
-      <div class="pp-table-wrap"><table class="pp-table">
-        ${isM ? `<tr><th>Member</th><th>Contact</th><th class="hide-md">IDs</th><th>Wallet</th><th>Tier</th><th class="hide-md">Work</th><th></th></tr>
-          ${shown.map(clMemberRow).join('') || '<tr><td colspan="7" class="pp-empty">No members match.</td></tr>'}`
-        : `<tr><th>Client</th><th>Contact</th>${isExec() ? '<th class="hide-md">Sign-in code</th>' : ''}<th>Wallet</th><th>Projects</th><th>Standing</th><th></th></tr>
-          ${shown.map(clClientRow).join('') || `<tr><td colspan="7" class="pp-empty">${CL.clients.length ? 'No clients match.' : 'No clients yet.' + (isExec() ? ' Add your first with “Add client”.' : '')}</td></tr>`}`}
-      </table></div>
-      ${pages > 1 ? `<div class="pp-pager">
-        <button ${CL.page === 1 ? 'disabled' : ''} onclick="CL.page--;renderClientsPanel()">‹</button>
-        ${Array.from({ length: pages }, (_, i) => `<button class="${i + 1 === CL.page ? 'on' : ''}" onclick="CL.page=${i + 1};renderClientsPanel()">${i + 1}</button>`).join('')}
-        <button ${CL.page === pages ? 'disabled' : ''} onclick="CL.page++;renderClientsPanel()">›</button></div>` : ''}
-    </div></div>`;
+    <div class="lb-board">${board}</div>
+    <div class="lb-tools"><div class="lb-pills">${filters.map(([k, n]) => `<button class="lb-pill ${f === k ? 'on' : ''}" onclick="LB.f.${kind}='${k}';renderClientsPanel()">${n} <em>${cnt(k)}</em></button>`).join('')}</div>
+      ${lbSearchBox('cl-q', 'Search ' + kind, LB.q[kind], `LB.q.${kind}=this.value;clSearchSoon()`)}</div>
+    <div class="lb-list">${shown.map(r => (isM ? lbMemberRow : lbClientRow)(r, rankOf.get(r.id))).join('') || `<div class="lb-empty">${all.length ? 'Nobody matches.' : (isM ? 'No members yet.' : 'No clients yet.') + (isExec() ? ' Add the first with “Add ' + (isM ? 'member' : 'client') + '”.' : '')}</div>`}</div>
+    ${rows.length > shown.length ? `<button class="pp-btn lb-more-btn" onclick="LB.limit.${kind}+=40;renderClientsPanel()">Show more (${rows.length - shown.length})</button>` : ''}
+  </div>`;
   const qi = document.getElementById('cl-q');
-  if (qi && document.activeElement?.id !== 'cl-q' && CL._typing) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
+  if (qi && CL._typing) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
   CL._typing = false;
-  shown.forEach(r => { if (r.wallet_address) clLoadFunds(r.wallet_address); });
 }
 let clSearchTimer = null;
 function clSearchSoon() { clearTimeout(clSearchTimer); CL._typing = true; clSearchTimer = setTimeout(renderClientsPanel, 180); }
@@ -14199,13 +14308,7 @@ async function prLoad() {
   PR.open = (data.prospects || []).filter(p => p.stage !== 'closed' && p.stage !== 'engaged').length;
   return data;
 }
-const prOnPanel = () => CL.tab === 'prospects' && document.getElementById('terminal-shell')?.getAttribute('data-view') === 'clients';
-
-function clTabsHtml(active) {
-  const nm = CL.members?.length ?? '', nc = CL.clients?.length ?? '';
-  const t = (k, icon, name, n) => `<button class="${active === k ? 'on' : ''}" onclick="CL.tab='${k}';CL.page=1;renderClientsPanel()">${ico(icon)}${name} <em>${n}</em></button>`;
-  return t('members', ICON.users, 'Members', nm) + t('clients', ICON.brief, 'Clients', nc) + (isExec() ? t('prospects', ICON.inbox, 'Prospects', PR.open ?? '·') : '');
-}
+const prOnPanel = () => CL.tab === 'prospects' && document.getElementById('terminal-shell')?.getAttribute('data-view') === 'prospects';
 
 async function renderProspectsPanel() {
   const panel = document.getElementById('term-panel');
@@ -14215,12 +14318,11 @@ async function renderProspectsPanel() {
   if (!prOnPanel()) return;
   const d = PR.data;
   const head = `<div class="pp-head">
-      <div><h2>Clients</h2><p>Everyone on the network, and the people who have asked to work with us.</p></div>
+      <div><h2>Prospects</h2><p>The people who have asked to work with us, in the order to answer them.</p></div>
       <div class="pp-head-acts">
         <button class="pp-btn" onclick="prCopyLink()">${ico(ICON.copy)}Copy request link</button>
         <button class="pp-btn" onclick="prRefresh()">${ico(ICON.search)}Refresh</button>
-      </div></div>
-    <div class="pp-tabs">${clTabsHtml('prospects')}</div>`;
+      </div></div>`;
   if (PR.err || !d) {
     const unset = /prospect_overview|schema cache|could not find/i.test(PR.err || '');
     panel.innerHTML = `<div class="cl-wrap">${head}<div class="pp-card"><div class="rq-empty"><b>${unset ? 'The Prospects tool is not switched on yet' : 'Couldn’t load the requests'}</b>${unset ? 'Its database update (migration 0042) has not been applied to this database.' : esc(PR.err || '')}</div></div></div>`;
@@ -14233,18 +14335,13 @@ async function renderProspectsPanel() {
   const cnt = k => k === 'all' ? (d.prospects || []).filter(p => p.stage !== 'closed').length : (d.prospects || []).filter(p => p.stage === k).length;
   const chips = [['all', 'Open + engaged'], ...PR_STAGES, ['closed', 'Closed']].map(([k, n]) =>
     `<button class="pp-chip ${PR.stage === k ? 'on' : ''}" onclick="prFilter('${k}')">${n} <em>${cnt(k)}</em></button>`).join('');
-  panel.innerHTML = `<div class="cl-wrap">${head}
+  panel.innerHTML = `<div class="cl-wrap lb">${head}
     <div class="vz-box"><div class="vz-grid">${vzWaiting(d.waiting)}${vzCycle(d)}${vzReply(d)}${vzPipeline(d)}${vzOutcome(d)}${vzRanked(d)}</div></div>
-    <div class="pp-card">
-      <div class="pp-card-top">
-        <label class="pp-search">${ico(ICON.search)}<input id="rq-q" placeholder="Search requests" value="${esc(PR.q)}" oninput="PR.q=this.value;prSearchSoon()"></label>
-        <span class="pp-muted">Showing <b>${rows.length}</b></span>
-      </div>
-      <div class="pp-tabs slim" style="padding:0 14px">${chips}</div>
-      <div class="pp-table-wrap"><table class="pp-table">
-        <tr><th>Request</th><th>Wants</th><th>Stage</th><th>Last touch</th><th class="hide-md">Came from</th><th></th></tr>
-        ${rows.map(prRow).join('') || `<tr><td colspan="6"><div class="rq-empty"><b>${(d.prospects || []).length ? 'No requests match' : 'No requests yet'}</b>${(d.prospects || []).length ? 'Clear the search or pick another stage.' : 'Send people the request link. Their request lands here, and you get a notice.'}</div></td></tr>`}
-      </table></div></div></div>`;
+    <div class="lb-tools" style="margin-top:14px"><div class="lb-pills">${chips.replace(/pp-chip/g, 'lb-pill')}</div>
+      ${lbSearchBox('rq-q', 'Search requests', PR.q, 'PR.q=this.value;prSearchSoon()')}</div>
+    <div class="lb-list">${rows.slice(0, LB.limit.prospects).map(lbProspectRow).join('') || `<div class="lb-empty">${(d.prospects || []).length ? 'No requests match. Clear the search or pick another stage.' : 'No requests yet. Send people the request link and their request lands here.'}</div>`}</div>
+    ${rows.length > LB.limit.prospects ? `<button class="pp-btn lb-more-btn" onclick="LB.limit.prospects+=40;renderProspectsPanel()">Show more (${rows.length - LB.limit.prospects})</button>` : ''}
+  </div>`;
   const qi = document.getElementById('rq-q');
   if (qi && PR._typing) { qi.focus(); qi.setSelectionRange(qi.value.length, qi.value.length); }
   PR._typing = false;
@@ -14263,6 +14360,17 @@ function prRow(p) {
     <td>${esc(prSvc(p.interest))}</td>
     <td><span class="rq-stage ${p.stage}" style="--s:${PR_SHADE[p.stage] || .3}"><i></i>${PR_NAME[p.stage]}</span></td>
     <td>${last}</td><td class="hide-md">${esc(p.source || 'direct')}</td><td>›</td></tr>`;
+}
+
+function lbProspectRow(p, i) {
+  const isNew = p.stage === 'new', h = prHours(p.created_at), wait = isNew ? prState(h) : null;
+  const col = isNew ? (wait[0] === 'good' ? '--st-done' : wait[0] === 'warn' ? '--st-prog' : '--st-ready') : p.stage === 'engaged' ? '--st-done' : '--t-wra';
+  return `<div class="lb-row" style="--c:var(${col})">
+    <button class="lb-main" type="button" onclick="prOpen('${p.id}')">
+      ${lbRk(i)}<span class="lb-av">${esc(initials(p.name))}</span>
+      <span class="lb-nm"><b>${esc(p.name)}<span class="rq-stage ${p.stage}" style="--s:${PR_SHADE[p.stage] || .3}"><i></i>${PR_NAME[p.stage]}</span>${isNew && wait[0] !== 'good' ? `<span class="lb-live" style="color:var(--st-ready);background:rgba(255,45,149,.14)">${wait[1].toUpperCase()}</span>` : ''}</b><small>${esc(prSvc(p.interest))} · ${esc(p.organization || p.email)}</small></span>
+      <span class="lb-stats">${lbSt(isNew ? esc(prFmt(h)) : esc(prAgo(p.last_contact_at || p.stage_changed_at)), isNew ? 'Waiting' : 'Last touch')}${lbSt(esc(p.source || 'direct'), 'From')}</span>${LB_CHEV.replace('lb-chev', 'lb-chev" style="transform:none')}
+    </button></div>`;
 }
 
 function prCopyLink() {
@@ -16023,6 +16131,7 @@ function secBar(view) {
 
 function setTermView(view) {
   const navView = (view === 'decomposed' || view === 'places' || view === 'analog') ? 'tracker' : SEC_DASH.includes(view) ? 'terminal' : view;
+  const prg = document.getElementById('sb-pr-grp'); if (prg) prg.style.display = isExec() ? '' : 'none';
   document.querySelectorAll('.term-sb-item').forEach(el => el.classList.toggle('active', el.dataset.view === navView));
   document.querySelectorAll('.term-sb-subitem[data-sub]').forEach(el => el.classList.toggle('on', el.dataset.sub === view));
   if (view !== 'chat') clearInterval(CH.timer);
@@ -16051,7 +16160,7 @@ function setTermView(view) {
     else if (view === 'ledger') renderLedgerPanel();
     else if (view === 'trades') renderTrackerPanel();
     else if (view === 'cycle') renderCyclePanel();
-    else if (view === 'clients') renderClientsPanel();
+    else if (view === 'members' || view === 'clients' || view === 'prospects') { CL.tab = view; renderClientsPanel(); }
     else if (view === 'notifications') renderNotificationsPanel();
     else if (view === 'chat') renderChatPanel();
     else if (view === 'calendar') { CA.reset = true; renderCalendarPanel(); }
